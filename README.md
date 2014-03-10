@@ -5,7 +5,7 @@ Cygnite Framework it's just a small footprint to give you the creative experienc
 
 We have just begun and have long way to go. We are still on development and soon we will bring you dynamic features of Cygnite to serve you better.
 
-[Note: We are continouesly upgrading the core to make better. In future release you will find several eye catching features in Cygnite Framework.
+We are continouesly upgrading the core features to make your job better. You will find several eye catching features in Cygnite Framework.
 
 1. Cygnite Framework redesigned and powered by Composer.
 2. Twig template engine.
@@ -16,4 +16,4 @@ We have just begun and have long way to go. We are still on development and soon
 7. Build Schema and Database Migration is very easy with Cygnite Cli.
 8. You also will find in future release powerful service container, dependency injection, facade patterns.
 
-Next version is ready to release and will be publish soon. Keep visiting. ]
+Next version is ready to release. Keep visiting for latest changes.
