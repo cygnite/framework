@@ -1,5 +1,5 @@
 {
-    "name": "cygnitesoft/framework",
+    "name": "cygnite/framework",
     "description": "The Cygnite PHP Framework.",
     "type": "package",
     "keywords": ["framework", "cygnite"],
