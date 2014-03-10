@@ -1,0 +1,90 @@
+<html>
+<head>
+
+    <title>Cygnite Framework - Simple Crud Operation</title>
+
+    {% block head %}
+        <link rel="stylesheet" href="{{ baseUrl }}assets/css/cygnite/style.css" />
+        <link rel="stylesheet" href="{{ baseUrl }}assets/bootstrap/css/bootstrap-theme.min.css" />
+        <link rel="stylesheet" href="{{ baseUrl }}assets/bootstrap/css/bootstrap.min.css" />
+        <link rel="stylesheet" href="{{ baseUrl }}assets/bootstrap/js/bootstrap.js" />
+    {% endblock %}
+
+
+</head>
+<body>
+
+<div class='container'>
+    {# dump(productLists) #}
+
+    <div style="float:right;margin-right:47px; margin-bottom: 10px;margin-top: 10px;padding-bottom:30px;">
+        {{ Assets_addLink('products', 'Back', buttonAttributes.primary) | raw }}
+    </div>
+
+
+
+    <div class="form" style="">
+        <h2>Showing  #{{ record.id }}</h2>
+
+        <div class="form-group">
+            <div class='form-label control-label'>Name</div>
+            <div class="col-sm-10">
+                <p class="form-control-static"><span>{{ record.product_type }} </span></p>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="form-label control-label">Product Name</div>
+            <div class="col-sm-10">
+                <p class="form-control-static"><span>{{ record.name }} </span></p>
+            </div>
+        </div>
+
+        <div class="form-group">
+            <div class="form-label control-label">Product Price</div>
+            <div class="col-sm-10">
+                <p class="form-control-static"><span>{{ record.price }} </span></p>
+            </div>
+        </div>
+    </div>
+
+
+<style type="text/css">
+    .form
+    {
+        margin-bottom: 38px;
+        padding:50px;
+    }
+    .form-group {
+        padding: 16px;
+    }
+    .form div.form-label
+    {
+        float: left;
+        width: 120px;
+        clear: both;
+        font-weight:bold;
+    }
+    .form .normal
+    {
+        width: 120px;
+        float: none;
+    }
+    .form .short
+    {
+        width: 50px;
+    }
+    .form input, .form select, .form textarea
+    {
+        margin-top: 2px;
+        margin-bottom: 2px;
+    }
+</style>
+
+
+</div>
+
+
+
+</body>
+</html>
