@@ -58,7 +58,7 @@ class Config
      * @return mixed
      * @throws InvalidArgumentException
      */
-    public static function getConfig($arrKey, $keyValue = false)
+    public static function get($arrKey, $keyValue = false)
     {
         $config = array();
 
@@ -109,12 +109,36 @@ class Config
     public static function load()
     {
         $config = array();
-        $config['global_config'] = include_once strtolower(APPPATH).DS.'configs'.DS.'application'.EXT;
-        $config['db_config'] = include_once strtolower(APPPATH).DS.'configs'.DS.'database'.EXT;
-        $config['session_config'] = include_once strtolower(APPPATH).DS.'configs'.DS.'session'.EXT;
-        $config['autoload_config'] = include_once strtolower(APPPATH).DS.'configs'.DS.'autoload'.EXT;
-        $config['routing_config'] = include_once strtolower(APPPATH).DS.'routerconfig'.EXT;
+	
+	if (file_exists(strtolower(APPPATH).DS.'configs'.DS.'application'.EXT)) {
+            $config['global_config'] = include_once strtolower(APPPATH).DS.'configs'.DS.'application'.EXT;
+        } else {
+           throw new Exception("File not exixts ".strtolower(APPPATH).DS.'configs'.DS.'application'.EXT);
+        }
 
+	if (file_exists(strtolower(APPPATH).DS.'configs'.DS.'database'.EXT)) {
+            $config['db_config'] = include_once strtolower(APPPATH).DS.'configs'.DS.'database'.EXT;
+	} else {
+           throw new Exception("File not exixts ".strtolower(APPPATH).DS.'configs'.DS.'database'.EXT);
+        }
+
+	if (file_exists(strtolower(APPPATH).DS.'configs'.DS.'session'.EXT)) {
+            $config['session_config'] = include_once strtolower(APPPATH).DS.'configs'.DS.'session'.EXT;
+	} else {
+           throw new Exception("File not exixts ".strtolower(APPPATH).DS.'configs'.DS.'session'.EXT);
+        }
+
+	if (file_exists(strtolower(APPPATH).DS.'configs'.DS.'autoload'.EXT)) {
+            $config['autoload_config'] = include_once strtolower(APPPATH).DS.'configs'.DS.'autoload'.EXT;
+	} else {
+           throw new Exception("File not exixts ".strtolower(APPPATH).DS.'configs'.DS.'autoload'.EXT);
+        }
+
+	if (file_exists(strtolower(APPPATH).DS.'routerconfig'.EXT)) {
+            $config['routing_config'] = include_once strtolower(APPPATH).DS.'routerconfig'.EXT;
+	} else {
+           throw new Exception("File not exixts ".strtolower(APPPATH).DS.'routerconfig'.EXT);
+        }
         return $config;
     }
 }

@@ -1,6 +1,7 @@
 <?php
 namespace Cygnite;
 
+use Cygnite\Reflection;
 use Cygnite\Helpers\Assets;
 
 if (!defined('CF_SYSTEM')) {
@@ -23,18 +24,19 @@ if (!defined('CF_SYSTEM')) {
  * @Package               :  Packages
  * @Sub Packages          :  Base
  * @Filename              :  CFView
- * @Description           :  This file is used to map all routing of the cygnite framework
+ * @Description           :  This file is used to render view page.
  * @Author                :  Sanjoy Dey
  * @Copyright             :  Copyright (c) 2013 - 2014,
- * @Link	          :  http://www.cygniteframework.com
- * @Since	          :  Version 1.0
+ * @Link	              :  http://www.cygniteframework.com
+ * @Since	              :  Version 1.0
  * @Filesource
+ * @Warning               :  Any changes in this library can cause abnormal behaviour of the framework
+ *
  *
  */
 
 class CView
 {
-    //private $layout = array();
     protected $layout;
 
     protected $controllerView;
@@ -47,7 +49,7 @@ class CView
 
     public $model;
 
-    private $views;
+    public $views;
 
     private static $name = array();
 
@@ -67,64 +69,43 @@ class CView
 
     public $twigLoader;
 
-    public $twig;
+    public $tpl;
 
     protected $twigDebug = false;
 
     protected $autoReload = false;
 
-    public function __construct()
+    public function __construct(Template $template)
     {
-        //var_dump($this->templateExtension);exit;
         $this->views = getcwd().DS.APPPATH.DS.$this->viewsFilePath.DS;
 
         if ($this->templateEngine !== false && $this->templateEngine == 'twig') {
 
-            \Twig_Autoloader::register();
-            $ns = $controller = null;
-            $ns = get_called_class();
-			//Application::load();
-            $controller = Inflector::instance()->getClassName($ns);
+            if ($template instanceof Template) {
+                $template->init($this, new Reflection);
 
-            $this->layout = Inflector::instance()->toDirectorySeparator($this->layout);
+                $ns = $controller = null;
+                $ns = get_called_class();
 
-            if ($this->layout == '') {
-                $this->layout = strtolower($controller);
-            }
+                $controller = Inflector::instance()->getClassNameFromNamespace($ns);
 
-            $this->twigLoader = new \Twig_Loader_Filesystem($this->views);
+                $this->layout = Inflector::instance()->toDirectorySeparator($this->layout);
 
-
-            $this->twig = new \Twig_Environment($this->twigLoader, array(
-                'cache' => getcwd().DS.APPPATH.DS.'temp'.DS.'twig'.DS.'tmp'.DS.'cache',
-                'auto_reload' => $this->autoReload,
-                'debug' => $this->twigDebug,
-            ));
-
-            $function = new \Twig_SimpleFunction('addLink',
-                function ($link, $name = null, $attributes = array()) {
-                    return Assets::addLink(str_replace('.', '/', $link), $name, $attributes);
+                if ($this->layout == '') {
+                    $this->layout = strtolower($controller);
                 }
-            );
 
-            $this->twig->addFunction($function);
+                $this->tpl = $template->setEnvironment();
 
-            if ($this->twigDebug === true) {
-                $this->addExtension();
+                if ($this->twigDebug === true) {
+                    $template->addExtension();
+                }
             }
         }
     }
 
-    public function addExtension($extension = null)
-    {
-        if ($extension == null) {
-            $this->twig->{__FUNCTION__}(new \Twig_Extension_Debug());
-        } else {
-            $this->twig->{__FUNCTION__}($extension);
-        }
-    }
 
-    
+
     /**
     * Magic Method for handling dynamic data access.
     */
@@ -158,7 +139,7 @@ class CView
     public function render($view, $ui_content = null)
     {
 
-        $controller = Inflector::instance()->getClassName(get_called_class());
+        $controller = Inflector::instance()->getClassNameFromNamespace(get_called_class());
 
         $controller =
             strtolower(str_replace('Controller' , '', $controller)
@@ -166,11 +147,11 @@ class CView
 
         $path= getcwd().DS.APPPATH.DS.'views'.DS.$controller.DS;
 
-        if (is_object($this->twig) &&
+        if (is_object($this->tpl) &&
             is_file($path.$view.$this->templateExtension
             )
         ) {
-            $this->template = $this->twig->loadTemplate(
+            $this->template = $this->tpl->loadTemplate(
                 $controller.DS.$view.$this->templateExtension
             );
 
@@ -303,8 +284,8 @@ class CView
 
     public function with($arrayResult)
     {
-       // var_dump($this->twig);exit;
-        if (is_object($this->twig) && is_object($this->template)) {
+       // var_dump($this->tpl);exit;
+        if (is_object($this->tpl) && is_object($this->template)) {
             return $this->template->display($arrayResult);
         }
 
@@ -334,8 +315,6 @@ class CView
         $output = ob_get_contents();
         ob_get_clean();
 
-        //$this->gzippedOutput();
-
         if (isset(self::$uiContent) && self::$uiContent == true) {
             self::$content =  $output;
         } else {
@@ -346,8 +325,6 @@ class CView
 
     public function __destruct()
     {
-        //ob_end_flush(); //ob_end_clean();
-        //ob_get_flush();
         unset($this->results);
     }
 }

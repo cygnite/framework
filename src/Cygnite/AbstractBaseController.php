@@ -2,6 +2,7 @@
 namespace Cygnite;
 
 use Cygnite\Application;
+use Cygnite\Template;
 
 /**
  *  Cygnite Framework
@@ -43,7 +44,7 @@ abstract class AbstractBaseController extends CView
      */
     public function __construct()
     {
-        parent::__construct();
+        parent::__construct(new Template);
     }
 
     //prevent clone.

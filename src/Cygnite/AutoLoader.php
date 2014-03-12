@@ -1,9 +1,7 @@
 <?php
 namespace Cygnite;
 
-use RecursiveDirectoryIterator;
-use RecursiveIteratorIterator;
-use Cygnite\Libraries\DirectoryFileExtensionFilter;
+use Cygnite\Libraries\FileExtensionFilter;
 
 if (!defined('CF_SYSTEM')) {
     exit('External script access not allowed');
@@ -143,26 +141,22 @@ class AutoLoader
 
     private function setDirectories($paths)
     {
-
         foreach ($paths as $key => $dir)
         {
             $path = str_replace(".", DS, $dir);
 
-            // create new RecursiveDirectoryIterator object
-            $iterator = new RecursiveDirectoryIterator($path);
-	    //$filteredDir = new DirectoryFileExtensionFilter(new RecursiveIteratorIterator($iterator));	
-
-
+	    //Iterate through all paths and filter with extension provided	
+	    $recursiveExtensionFilter = new FileExtensionFilter(new \RecursiveDirectoryIterator($path));
+	    	
             // loop through the directory listing
             // we need to create a RecursiveIteratorIterator instance
-            foreach (new RecursiveIteratorIterator($iterator) as $item) {
-
+            foreach ($recursiveExtensionFilter as $item) {
                $alias = str_replace('.php', '', $item->getPathName());
 
-               $alias = implode("\\", array_map("ucfirst", explode(DS, $alias)));
+               $alias = implode("\\", array_map("ucfirst", explode('\\', $alias)));
                $this->directories[$alias] = str_replace('\\', '/', $item->getPathName());
             }
-        } 
+        }
     }
 
 
