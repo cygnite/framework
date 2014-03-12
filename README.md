@@ -19,7 +19,7 @@ You will find several eye catching features in Cygnite Framework - v1.06.
 7. Cygnite has a great user guide which allows you to adapt as quick as possible. We are documenting latest changes.
 8. Generating crud is much simple than you think, just single line of code will generate you basic crud operations, Cygnite Framework cli build on symfony2 console component.
 9. Form Builder has rebuilt with elegant code and also make your job easier.
-10.Use dynamic finders and model events. Its inbuilt library allows you to secure your application.
+10.Use dynamic finders and model events. Its inbuilt library allows you to secure your application. 
 11.REST-full router allow you to call controller directly. Which leads you to write powerfull api.
 12.Build database schema and Migration is very easy with Cygnite Cli.
 13.Connect and use Multiple Databases on the go. Cygnite follows active records style resembles with Ruby and Rails style.
