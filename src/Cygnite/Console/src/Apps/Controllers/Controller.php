@@ -29,9 +29,9 @@ class %controllerName% extends AbstractBaseController
     * consider as bad url format.
     *
     * You can also pass parameters into the function as below-
-    * Your request to  "%controllerName%/form/2134" will pass to
+    * Your request to  "%controllerName%/index/2134" will pass to
     *
-    *      public function formAction($id = ")
+    *      public function indexAction($id = ")
     *      {
     *             echo "Cygnite : Your user Id is $id";
     *      }
@@ -42,10 +42,6 @@ class %controllerName% extends AbstractBaseController
     * That's it you are ready to start your awesome application with Cygnite Framework.
     *
     */
-
-    private $author = 'Sanjoy Dey';
-
-    private $country = 'India';
 
     //protected $layout = 'layout.users';
 
