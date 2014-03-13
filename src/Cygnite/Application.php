@@ -31,8 +31,8 @@ if (!defined('CF_SYSTEM')) {
  * @Description         :  Bootstrap file to auto load core libraries initially.
  * @Author              :  Sanjoy Dey
  * @Copyright           :  Copyright (c) 2013 - 2014,
- * @Link	            :  http://www.cygniteframework.com
- * @Since	            :  Version 1.0
+ * @Link	        :  http://www.cygniteframework.com
+ * @Since	        :  Version 1.0
  * @File Source
  *
  */
@@ -147,33 +147,38 @@ class Application extends AutoLoader
 
     }
 
-    /*
-     * Set up framework constants and boot up
-     * @bootstrap
-     */
-	public function initialize(Strapper $bootstrap)
-	{
-		$this->app = $bootstrap;
+   /*
+    * Set up framework constants and boot up
+    * @bootstrap
+    */
+    public function initialize(Strapper $bootstrap)
+    {
+        $this->app = $bootstrap;
 
         return $this;
-	}
-	
-	public function send(Router $router)
-	{
-        Url::instance($router);
-        //Set up configurations for your awesome application
-		Config::set('config_items', $this->config);echo $router->getBaseUrl() ;
-		//Set URL base path.
-		 Url::setBase((Config::get('global_config', 'base_path') == '') ?  $router->getBaseUrl()  : Config::get('global_config', 'base_path')) ;	
-        //initialize framework
-		$this->app->init();
-		$this->app->end($router);
+    }
 
-        /**-------------------------------------------------------
-        * Booting completed. Lets handle user request!!
-        * Lets Go !!
-        * -------------------------------------------------------
-        */
-		return new Dispatcher($router);
-	}
+    public function send(Router $router)
+    {
+       Url::instance($router);
+       //Set up configurations for your awesome application
+       Config::set('config_items', $this->config);echo $router->getBaseUrl() ;
+       //Set URL base path.
+       Url::setBase(
+       	(Config::get('global_config', 'base_path') == '') ?  
+       	    $router->getBaseUrl()  : 
+       	    Config::get('global_config', 'base_path')
+       	);
+       	
+       //initialize framework
+       $this->app->init();
+       $this->app->end($router);
+
+      /**-------------------------------------------------------
+       * Booting completed. Lets handle user request!!
+       * Lets Go !!
+       * -------------------------------------------------------
+       */
+        return new Dispatcher($router);
+    }
 }
