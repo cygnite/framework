@@ -57,6 +57,13 @@ class Router
      * @var object The function to be executed when no route has been matched
      */
     private $notFound;
+	
+	 /**
+     * @var base url 
+     */
+	public $currentUrl;
+	
+	public $data = array();
 
 
     /**
@@ -276,6 +283,10 @@ class Router
         $this->notFound = $fn;
     }
 
+	public function removeIndexDotPhpAndTrilingSlash($uri)
+	{
+			return  (strpos($uri,'index.php') !== false) ? preg_replace('/(\/+)/','/', str_replace('index.php', '', rtrim($uri))) : trim($uri);
+	}
 
     /**
      * Handle a a set of routes: if a match is found, execute the relating handling function
@@ -294,6 +305,9 @@ class Router
 
         // The current page URL
          $uri = $this->getCurrentUri();
+		 
+		 //remove index.php and extra slashs from url if exists to match with routing
+		 $uri = $this->removeIndexDotPhpAndTrilingSlash($this->getCurrentUri());
 
         // Variables in the URL
         //$urlvars = array();
@@ -334,19 +348,29 @@ class Router
         return $numHandled;
 
     }
+		
+	public function getBaseUrl()
+	{
+		// Current Request URI
+        $this->currentUrl = $_SERVER['REQUEST_URI'];
 
+        // Remove rewrite basepath (= allows one to run the router in a subfolder)
+        $basePath = implode('/', array_slice(explode('/', $_SERVER['SCRIPT_NAME']), 0, -1)) . '/';
+			
+		return $basePath;
+		
+	}
+	public $base;
     /**
      * Define the current relative URI
      * @return string
      */
     public function getCurrentUri()
-    {
-
-        // Current Request URI
-        $uri = $_SERVER['REQUEST_URI'];
-
-        // Remove rewrite basepath (= allows one to run the router in a subfolder)
-        $basePath = implode('/', array_slice(explode('/', $_SERVER['SCRIPT_NAME']), 0, -1)) . '/';
+    { 
+		$uri = $this->currentUrl;
+		$basePath = $this->getbaseUrl ();
+		
+		 $this->base = 	$basePath;
         $uri = substr($uri, strlen($basePath));
 
         // Don't take query params into account on the URL

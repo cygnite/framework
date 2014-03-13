@@ -61,20 +61,20 @@ class FileCache
 
     public function __construct()
     {
-        Config::getConfig('global_config', 'cache_name');
+        Config::get('global_config', 'cache_name');
 
         $cache_config = array(
-           'name' => Config::getConfig('global_config', 'cache_name'),
-           'path' => Config::getConfig('global_config', 'cache_directory'),
-           'extension' => Config::getConfig('global_config', 'cache_extension')
+           'name' => Config::get('global_config', 'cache_name'),
+           'path' => Config::get('global_config', 'cache_directory'),
+           'extension' => Config::get('global_config', 'cache_extension')
         );
 
         $this->initialize($cache_config);
 
-        if (Config::getConfig('global_config', 'cache_directory') == "none") {
+        if (Config::get('global_config', 'cache_directory') == "none") {
             throw new \Exception('You must define cache directory to use cache.');
         } else {
-            $this->_cachePath = APPPATH.Config::getConfig('global_config', 'cache_directory').'/';
+            $this->_cachePath = APPPATH.Config::get('global_config', 'cache_directory').'/';
         }
     }
 

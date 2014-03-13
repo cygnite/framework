@@ -45,7 +45,7 @@ class Logger
     private function getLogConfig()
     {
         if (empty($this->config)) {
-            $this->config =  Config::getConfig('error_config');
+            $this->config =  Config::get('error_config');
         }
 
         if ($this->config['log_path'] !="" || $this->config['log_path'] !== null) {

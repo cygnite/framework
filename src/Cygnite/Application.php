@@ -160,11 +160,11 @@ class Application extends AutoLoader
 	
 	public function send(Router $router)
 	{
+        Url::instance($router);
         //Set up configurations for your awesome application
-		Config::set('config_items', $this->config);
-		
+		Config::set('config_items', $this->config);echo $router->getBaseUrl() ;
 		//Set URL base path.
-		Url::setBase(Config::getConfig('global_config', 'base_path'));
+		 Url::setBase((Config::get('global_config', 'base_path') == '') ?  $router->getBaseUrl()  : Config::get('global_config', 'base_path')) ;	
         //initialize framework
 		$this->app->init();
 		$this->app->end($router);

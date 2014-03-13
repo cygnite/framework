@@ -103,7 +103,7 @@ class Mailer
 
     public function __construct()
     {
-        $this->emailConfig = Config::getConfig('global_config', 'email_configurations');
+        $this->emailConfig = Config::get('global_config', 'email_configurations');
         $this->setTransportType($this->emailConfig['protocol']);
     }
 
