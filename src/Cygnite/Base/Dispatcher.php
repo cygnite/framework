@@ -31,10 +31,10 @@ class Dispatcher
     {
         $this->router = $route;
         $this->default['controller'] = lcfirst(
-            Config::getConfig('global_config', 'default_controller')
+            Config::get('global_config', 'default_controller')
         );
         $this->default['action'] = lcfirst(
-            Config::getConfig('global_config', 'default_method')
+            Config::get('global_config', 'default_method')
         );
 
     }
@@ -111,7 +111,7 @@ class Dispatcher
             }
         } else {
 
-            $routeConfig = Config::getConfig('routing_config');
+            $routeConfig = Config::get('routing_config');
 
             $newUrl = str_replace('/index.php', '', rtrim($this->router->getCurrentUri()));
 
