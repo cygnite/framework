@@ -4,6 +4,7 @@ namespace Cygnite\Libraries;
 use Closure;
 use Exception;
 use Swift_Image;
+use Cygnite\Application;
 use Swift_Mailer as Email;
 use Cygnite\Helpers\Config;
 use Swift_Message as MailMessage;
@@ -14,7 +15,6 @@ use Swift_SendmailTransport as SendmailTransport;
 
 if ( ! defined('CF_SYSTEM')) exit('External script access not allowed');
 
-include '/../../../../swiftmailer/swiftmailer/lib/swift_required.php';
 /**
  *  Cygnite Framework
  *
@@ -35,10 +35,9 @@ include '/../../../../swiftmailer/swiftmailer/lib/swift_required.php';
  * @Description                     :  This library will be available with all features in next version.
  * @Author                          :  Cygnite Dev Team
  * @Copyright                       :  Copyright (c) 2013 - 2014,
- * @Link	                        :  http://www.cygniteframework.com
- * @Since	                        :  Version 1.0
+ * @Link                            :  http://www.cygniteframework.com
+ * @Since	:  Version 1.0
  * @Filesource                      :
- * @Warning                         :  Any changes in this library can cause abnormal behaviour of the framework
  *
  *  Mailer::instance(function($mailer) {
  *
@@ -75,35 +74,21 @@ include '/../../../../swiftmailer/swiftmailer/lib/swift_required.php';
 class Mailer
 {
 
+    // email configuration
     private $emailConfig = array();
 
     private $transportInstance;
 
-    public function post($request_data=NULL)
-    {
-        $transport = Swift_SmtpTransport::newInstance()
-            ->setHost('host')
-            ->setPort('port')
-            ->setUsername('username')
-            ->setPassword('password');
-
-        $mailer = Swift_Mailer::newInstance($transport);
-        $message = Swift_Message::newInstance()
-            ->setPriority($priority)
-            ->setSubject($subject)
-            ->setFrom(array($from_email => $from_name))
-            ->setTo(array($to_email => $to_name))
-            ->setReadReceiptTo(SYS_EMAIL)
-            ->setBody('Here is the message itself')
-            ->addPart('<q>Here is the message itself</q>', 'text/html');
-        ;
-        $result = $mailer->send($message);
-    }
-
 
     public function __construct()
     {
-        $this->emailConfig = Config::get('global_config', 'email_configurations');
+        $this->emailConfig = Config::get('global_config', 'emailConfiguration');
+        try {
+            Application::import('vendor'.DS.$this->emailConfig['swift_mailer_path']);
+        }catch (Exception $ex) {
+            throw new Exception($ex->getMessage());
+        }
+        
         $this->setTransportType($this->emailConfig['protocol']);
     }
 
@@ -119,10 +104,10 @@ class Mailer
     public function getInstance(Closure $callback = null)
     {
         if ($callback instanceof Closure) {
-            return $callback(new self);
+            return $callback(new Mailer);
         }
 
-        return new self;
+        return new Mailer;
     }
 
     private function setTransportType($type)
@@ -146,7 +131,7 @@ class Mailer
     private function setConfig($swift, $attributes)
     {
         foreach ($attributes as $key => $value) {
-            echo $method = 'set'.ucfirst($key); echo "<br>  ";
+            $method = 'set'.ucfirst($key);
             $swift->{$method}($value);
         }
 
@@ -154,8 +139,6 @@ class Mailer
 
     private function setSmtpTransport()
     {
-        var_dump($this->emailConfig['smtp']);
-
         $this->transportInstance = SmtpTransport::newInstance();
 
         $this->setConfig($this->transportInstance, $this->emailConfig['smtp']);
@@ -211,5 +194,27 @@ class Mailer
         return MailAttachment::fromPath($path);
 
     }
+    
+    /*
+    public function post($request_data=NULL)
+    {
+        $transport = Swift_SmtpTransport::newInstance()
+            ->setHost('host')
+            ->setPort('port')
+            ->setUsername('username')
+            ->setPassword('password');
+
+        $mailer = Swift_Mailer::newInstance($transport);
+        $message = Swift_Message::newInstance()
+            ->setPriority($priority)
+            ->setSubject($subject)
+            ->setFrom(array($from_email => $from_name))
+            ->setTo(array($to_email => $to_name))
+            ->setReadReceiptTo(SYS_EMAIL)
+            ->setBody('Here is the message itself')
+            ->addPart('<q>Here is the message itself</q>', 'text/html');
+        ;
+        $result = $mailer->send($message);
+    }*/
 
 }
