@@ -32,8 +32,8 @@ if ( ! defined('CF_SYSTEM')) exit('External script access not allowed');
  * @Package                         :  Packages
  * @Sub Packages                    :  Library
  * @Filename                        :  Email
- * @Description                     :  This library will be available with all features in next version.
- * @Author                          :  Cygnite Dev Team
+ * @Description                     :  Swiftmailer wrapper class to handle email functionalities
+ * @Author                          :  Sanjoy Dey
  * @Copyright                       :  Copyright (c) 2013 - 2014,
  * @Link                            :  http://www.cygniteframework.com
  * @Since                           :  Version 1.0.6
@@ -67,8 +67,6 @@ if ( ! defined('CF_SYSTEM')) exit('External script access not allowed');
  *      $mailer->send($mailMessage);
  * });
  *
- *
- *
  */
 
 class Mailer
@@ -89,11 +87,19 @@ class Mailer
             throw new Exception($ex->getMessage());
         }
         
+        //set transport type protocol
         $this->setTransportType($this->emailConfig['protocol']);
     }
 
-
-
+    /**
+     * Get the instance of the Mailer dynamically
+     * 
+     * @access public 
+     * @param $method string 
+     * @param arguments array
+     * @return object
+     * 
+     */
     public static function __callStatic($method, $arguments)
     {
         if ($method == 'instance') {
@@ -101,6 +107,14 @@ class Mailer
         }
     }
 
+    /**
+     * Get the instance of the Mailer by _callStatic
+     * 
+     * @access public 
+     * @param  Closure $callback
+     * @return object
+     * 
+     */
     public function getInstance(Closure $callback = null)
     {
         if ($callback instanceof Closure) {
@@ -110,6 +124,14 @@ class Mailer
         return new Mailer;
     }
 
+    /**
+     * Set Transport Type Mail/Smtp/Sendmail
+     * 
+     * @access public 
+     * @param  $type
+     * @return void
+     * 
+     */
     private function setTransportType($type)
     {
         $type = ucfirst($type);
@@ -128,6 +150,15 @@ class Mailer
 
     }
 
+    /**
+     * Set Email configurations dynamically to SwiftMailer
+     * 
+     * @access public 
+     * @param  $swift swift instance
+     * @param  $attributes attributes
+     * @return void
+     * 
+     */
     private function setConfig($swift, $attributes)
     {
         foreach ($attributes as $key => $value) {
@@ -136,26 +167,58 @@ class Mailer
         }
 
     }
-
+    
+    /**
+     * Set SMTP transport 
+     * 
+     * @access public 
+     * @param  null
+     * @return void
+     * 
+     */
     private function setSmtpTransport()
     {
         $this->transportInstance = SmtpTransport::newInstance();
 
         $this->setConfig($this->transportInstance, $this->emailConfig['smtp']);
     }
-
+    
+     /**
+     * Set SendMail transport 
+     * 
+     * @access public 
+     * @param  null
+     * @return void
+     * 
+     */
     private function setSendMailTransport()
     {
         SendmailTransport::newInstance();
 
     }
-
+    
+    /**
+     * Set Mail transport 
+     * 
+     * @access public 
+     * @param  null
+     * @return void
+     * 
+     */
     private function setMailTransport()
     {
 
         MailTransport::newInstance();
     }
 
+     /**
+     * Get Transport instance (object). By default it will return smtp instance
+     * 
+     * @access public 
+     * @param  $type string
+     * @return object
+     * 
+     */
     public function getTransportInstance($type = 'smtp')
     {
         if ($type == 'smtp') {
@@ -167,11 +230,27 @@ class Mailer
         }
     }
 
+     /**
+     * Get Message Instance 
+     * 
+     * @access public 
+     * @param  null
+     * @return object of MailMessage
+     * 
+     */
     public function getMessageInstance()
     {
         return MailMessage::newInstance();
     }
-
+    
+    /**
+     * Send email with message
+     * 
+     * @access public 
+     * @param  $message your email contents
+     * @return unknown
+     * 
+     */
     public function send($message)
     {
         $mailer = null;
@@ -186,9 +265,16 @@ class Mailer
         } catch (Exception $ex) {
             throw new Exception($ex->getMessage());
         }
-
     }
 
+    /**
+     * Add attachment to your email 
+     * 
+     * @access public 
+     * @param  $path path of your email attachment
+     * @return unknown
+     * 
+     */
     public function addAttachment($path)
     {
         return MailAttachment::fromPath($path);
