@@ -1,7 +1,7 @@
 <?php
 namespace Cygnite\Libraries;
 
-use Cygnite\Cygnite;
+use Cygnite\Application;
 use Cygnite\Helpers\Config;
 use Cygnite\Security;
 
@@ -33,7 +33,7 @@ use Cygnite\Security;
  *
  */
 
-class Session extends Security
+class Session
 {
     public $_var = "_SESSION";
 
@@ -67,39 +67,6 @@ class Session extends Security
         $config =  Config::getConfigItems('config_items');
         $this->config = $config['session_config'];
 
-        $keys = array('HTTP_USER_AGENT',
-                      'SERVER_PROTOCOL',
-                      'HTTP_ACCEPT_CHARSET',
-                      'HTTP_ACCEPT_ENCODING',
-                      'HTTP_ACCEPT_LANGUAGE'
-        );
-
-        $tmp = '';
-
-        foreach ($keys as $v) {
-            if (isset($_SERVER[$v])) {
-                $tmp .= $_SERVER[$v];
-            }
-        }
-
-        $browser_sig = md5($tmp);
-        
-        $this->session = $_SESSION;
-        
-        if (empty($this->session)) {// new session
-            $this->session['log'] = md5($browser_sig);
-            //  elseif ($this->session['log'] != md5($browser_sig)):
-            // session_destroy(); // destroy fake session
-            //  session_start(); // create a new “clean” session
-        }
-        if (!empty($_SERVER['HTTP_REFERER'])) {
-
-            $url = parse_url($_SERVER['HTTP_REFERER']);
-
-            if ($url['host'] != $_SERVER['HTTP_HOST']) {
-                session_destroy(); // destroy fake session
-            }
-        }
         $this->initialize();
     }
 
@@ -169,6 +136,44 @@ class Session extends Security
 
         if (!$this->isSessionStarted()) {
             //Set the path for session
+
+
+            $keys = array('HTTP_USER_AGENT',
+                'SERVER_PROTOCOL',
+                'HTTP_ACCEPT_CHARSET',
+                'HTTP_ACCEPT_ENCODING',
+                'HTTP_ACCEPT_LANGUAGE'
+            );
+
+            $tmp = '';
+
+            foreach ($keys as $v) {
+                if (isset($_SERVER[$v])) {
+                    $tmp .= $_SERVER[$v];
+                }
+            }
+
+            $browser_sig = md5($tmp);
+
+
+
+            $this->session = (isset($_SESSION)) ? $_SESSION : null;
+
+            if (empty($this->session)) {// new session
+                $this->session['log'] = md5($browser_sig);
+                //  elseif ($this->session['log'] != md5($browser_sig)):
+
+                session_start(); // create a new “clean” session
+                session_destroy(); // destroy fake session
+            }
+            if (!empty($_SERVER['HTTP_REFERER'])) {
+
+                $url = parse_url($_SERVER['HTTP_REFERER']);
+
+                if ($url['host'] != $_SERVER['HTTP_HOST']) {
+                    session_destroy(); // destroy fake session
+                }
+            }
 
             $path = str_replace('/', DS, APPPATH);
 
@@ -300,7 +305,7 @@ class Session extends Security
     private function setCookieParams($cookieValues)
     {
         // Make sure the session cookie is not accessable via javascript.
-        $cookie_params =session_get_cookie_falses();
+        $cookie_params =session_get_cookie_params();
         extract($cookie_params);
         extract($cookieValues);
 
@@ -411,27 +416,30 @@ class Session extends Security
         }
     }
 
-    public function trash($userData)
+    public function trash($userData = null)
     {
         if (is_string($userData)) {
             unset($this->session[$userData]);//unset(PHPSESSID);
-            $this->session = array();
+           // $this->session = array();
         }
 
-        if (is_array($userData)) {
+        /*if (is_array($userData)) {
             foreach ($userData as $key => $val) {
                 unset($this->session[$key]);
                 $this->session = array();
             }
-        }
+        }*/
 
-        $this->session = array();
+        if (is_null($userData)) {
+            $this->session = array();
+        }
+       // $this->session = array();
 
         if (isset($_COOKIE[session_name()])) {
             setcookie($this->getSessionName(), '', time() - 42000, '/');
         }
 
-        session_destroy();
+        //session_destroy();
         /*
          if (isset($_COOKIE[session_name()])) {
         $cookie_falses = session_get_cookie_falses();
