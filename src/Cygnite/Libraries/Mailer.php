@@ -36,7 +36,7 @@ if ( ! defined('CF_SYSTEM')) exit('External script access not allowed');
  * @Author                          :  Cygnite Dev Team
  * @Copyright                       :  Copyright (c) 2013 - 2014,
  * @Link                            :  http://www.cygniteframework.com
- * @Since	:  Version 1.0
+ * @Since                           :  Version 1.0.6
  * @Filesource                      :
  *
  *  Mailer::instance(function($mailer) {
