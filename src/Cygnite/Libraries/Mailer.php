@@ -4,6 +4,7 @@ namespace Cygnite\Libraries;
 use Closure;
 use Exception;
 use Swift_Image;
+use Cygnite\Application;
 use Swift_Mailer as Email;
 use Cygnite\Helpers\Config;
 use Swift_Message as MailMessage;
@@ -14,7 +15,6 @@ use Swift_SendmailTransport as SendmailTransport;
 
 if ( ! defined('CF_SYSTEM')) exit('External script access not allowed');
 
-include '/../../../../swiftmailer/swiftmailer/lib/swift_required.php';
 /**
  *  Cygnite Framework
  *
@@ -32,13 +32,12 @@ include '/../../../../swiftmailer/swiftmailer/lib/swift_required.php';
  * @Package                         :  Packages
  * @Sub Packages                    :  Library
  * @Filename                        :  Email
- * @Description                     :  This library will be available with all features in next version.
- * @Author                          :  Cygnite Dev Team
+ * @Description                     :  Swiftmailer wrapper class to handle email functionalities
+ * @Author                          :  Sanjoy Dey
  * @Copyright                       :  Copyright (c) 2013 - 2014,
- * @Link	                        :  http://www.cygniteframework.com
- * @Since	                        :  Version 1.0
+ * @Link                            :  http://www.cygniteframework.com
+ * @Since                           :  Version 1.0.6
  * @Filesource                      :
- * @Warning                         :  Any changes in this library can cause abnormal behaviour of the framework
  *
  *  Mailer::instance(function($mailer) {
  *
@@ -68,17 +67,221 @@ include '/../../../../swiftmailer/swiftmailer/lib/swift_required.php';
  *      $mailer->send($mailMessage);
  * });
  *
- *
- *
  */
 
 class Mailer
 {
 
+    // email configuration
     private $emailConfig = array();
 
     private $transportInstance;
 
+
+    public function __construct()
+    {
+        $this->emailConfig = Config::get('global_config', 'emailConfiguration');
+        try {
+            Application::import('vendor'.DS.$this->emailConfig['swift_mailer_path']);
+        }catch (Exception $ex) {
+            throw new Exception($ex->getMessage());
+        }
+        
+        //set transport type protocol
+        $this->setTransportType($this->emailConfig['protocol']);
+    }
+
+    /**
+     * Get the instance of the Mailer dynamically
+     * 
+     * @access public 
+     * @param $method string 
+     * @param arguments array
+     * @return object
+     * 
+     */
+    public static function __callStatic($method, $arguments)
+    {
+        if ($method == 'instance') {
+            return call_user_func_array(array(new self,'get'.ucfirst($method)), $arguments);
+        }
+    }
+
+    /**
+     * Get the instance of the Mailer by _callStatic
+     * 
+     * @access public 
+     * @param  Closure $callback
+     * @return object
+     * 
+     */
+    public function getInstance(Closure $callback = null)
+    {
+        if ($callback instanceof Closure) {
+            return $callback(new Mailer);
+        }
+
+        return new Mailer;
+    }
+
+    /**
+     * Set Transport Type Mail/Smtp/Sendmail
+     * 
+     * @access public 
+     * @param  $type
+     * @return void
+     * 
+     */
+    private function setTransportType($type)
+    {
+        $type = ucfirst($type);
+
+        switch ($type) {
+            case 'Mail':
+                $this->setMailTransport();
+                break;
+            case 'Smtp':
+                $this->setSmtpTransport();
+                break;
+            case 'Sendmail':
+                $this->setSendMailTransport();
+                break;
+        }
+
+    }
+
+    /**
+     * Set Email configurations dynamically to SwiftMailer
+     * 
+     * @access public 
+     * @param  $swift swift instance
+     * @param  $attributes attributes
+     * @return void
+     * 
+     */
+    private function setConfig($swift, $attributes)
+    {
+        foreach ($attributes as $key => $value) {
+            $method = 'set'.ucfirst($key);
+            $swift->{$method}($value);
+        }
+
+    }
+    
+    /**
+     * Set SMTP transport 
+     * 
+     * @access public 
+     * @param  null
+     * @return void
+     * 
+     */
+    private function setSmtpTransport()
+    {
+        $this->transportInstance = SmtpTransport::newInstance();
+
+        $this->setConfig($this->transportInstance, $this->emailConfig['smtp']);
+    }
+    
+     /**
+     * Set SendMail transport 
+     * 
+     * @access public 
+     * @param  null
+     * @return void
+     * 
+     */
+    private function setSendMailTransport()
+    {
+        SendmailTransport::newInstance();
+
+    }
+    
+    /**
+     * Set Mail transport 
+     * 
+     * @access public 
+     * @param  null
+     * @return void
+     * 
+     */
+    private function setMailTransport()
+    {
+
+        MailTransport::newInstance();
+    }
+
+     /**
+     * Get Transport instance (object). By default it will return smtp instance
+     * 
+     * @access public 
+     * @param  $type string
+     * @return object
+     * 
+     */
+    public function getTransportInstance($type = 'smtp')
+    {
+        if ($type == 'smtp') {
+            return SmtpTransport::newInstance();
+        } else if ($type == 'sendmail') {
+            return SendmailTransport::newInstance();
+        } else {
+            return MailTransport::newInstance();
+        }
+    }
+
+     /**
+     * Get Message Instance 
+     * 
+     * @access public 
+     * @param  null
+     * @return object of MailMessage
+     * 
+     */
+    public function getMessageInstance()
+    {
+        return MailMessage::newInstance();
+    }
+    
+    /**
+     * Send email with message
+     * 
+     * @access public 
+     * @param  $message your email contents
+     * @return unknown
+     * 
+     */
+    public function send($message)
+    {
+        $mailer = null;
+        if ($this->transportInstance instanceof SmtpTransport) {
+            $mailer = Email::newInstance($this->transportInstance);
+        }
+
+        try {
+            if ($message instanceof MailMessage) {
+                return $mailer->send($message);
+            }
+        } catch (Exception $ex) {
+            throw new Exception($ex->getMessage());
+        }
+    }
+
+    /**
+     * Add attachment to your email 
+     * 
+     * @access public 
+     * @param  $path path of your email attachment
+     * @return unknown
+     * 
+     */
+    public function addAttachment($path)
+    {
+        return MailAttachment::fromPath($path);
+
+    }
+    
+    /*
     public function post($request_data=NULL)
     {
         $transport = Swift_SmtpTransport::newInstance()
@@ -98,118 +301,6 @@ class Mailer
             ->addPart('<q>Here is the message itself</q>', 'text/html');
         ;
         $result = $mailer->send($message);
-    }
-
-
-    public function __construct()
-    {
-        $this->emailConfig = Config::get('global_config', 'email_configurations');
-        $this->setTransportType($this->emailConfig['protocol']);
-    }
-
-
-
-    public static function __callStatic($method, $arguments)
-    {
-        if ($method == 'instance') {
-            return call_user_func_array(array(new self,'get'.ucfirst($method)), $arguments);
-        }
-    }
-
-    public function getInstance(Closure $callback = null)
-    {
-        if ($callback instanceof Closure) {
-            return $callback(new self);
-        }
-
-        return new self;
-    }
-
-    private function setTransportType($type)
-    {
-        $type = ucfirst($type);
-
-        switch ($type) {
-            case 'Mail':
-                $this->setMailTransport();
-                break;
-            case 'Smtp':
-                $this->setSmtpTransport();
-                break;
-            case 'Sendmail':
-                $this->setSendMailTransport();
-                break;
-        }
-
-    }
-
-    private function setConfig($swift, $attributes)
-    {
-        foreach ($attributes as $key => $value) {
-            echo $method = 'set'.ucfirst($key); echo "<br>  ";
-            $swift->{$method}($value);
-        }
-
-    }
-
-    private function setSmtpTransport()
-    {
-        var_dump($this->emailConfig['smtp']);
-
-        $this->transportInstance = SmtpTransport::newInstance();
-
-        $this->setConfig($this->transportInstance, $this->emailConfig['smtp']);
-    }
-
-    private function setSendMailTransport()
-    {
-        SendmailTransport::newInstance();
-
-    }
-
-    private function setMailTransport()
-    {
-
-        MailTransport::newInstance();
-    }
-
-    public function getTransportInstance($type = 'smtp')
-    {
-        if ($type == 'smtp') {
-            return SmtpTransport::newInstance();
-        } else if ($type == 'sendmail') {
-            return SendmailTransport::newInstance();
-        } else {
-            return MailTransport::newInstance();
-        }
-    }
-
-    public function getMessageInstance()
-    {
-        return MailMessage::newInstance();
-    }
-
-    public function send($message)
-    {
-        $mailer = null;
-        if ($this->transportInstance instanceof SmtpTransport) {
-            $mailer = Email::newInstance($this->transportInstance);
-        }
-
-        try {
-            if ($message instanceof MailMessage) {
-                return $mailer->send($message);
-            }
-        } catch (Exception $ex) {
-            throw new Exception($ex->getMessage());
-        }
-
-    }
-
-    public function addAttachment($path)
-    {
-        return MailAttachment::fromPath($path);
-
-    }
+    }*/
 
 }

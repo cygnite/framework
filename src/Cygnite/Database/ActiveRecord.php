@@ -17,9 +17,9 @@ use Cygnite\Database\Exceptions\DatabaseException;
 
 
 /**
- *  Cygnite Framework
+ *   Cygnite Framework
  *
- *  An open source application development framework for PHP 5.3x or newer
+ *   An open source application development framework for PHP 5.3x or newer
  *
  *   License
  *
@@ -32,17 +32,17 @@ use Cygnite\Database\Exceptions\DatabaseException;
  *
  * @Package                   :  Packages
  * @Sub Packages              :  Database
- * @Filename                  :  ActiveRecords
- * @Description               :  Active Records to handle database manipulations. As                                Read, write, erase, update etc.
+ * @Filename                  :  ActiveRecord
+ * @Description               :  Active Record to handle database manipulations. As read,write,erase,update etc.
  * @Author                    :  Sanjoy Dey
  * @Copyright                 :  Copyright (c) 2013 - 2014,
- * @Link	                  :  http://www.cygniteframework.com
- * @Since	                  :  Version 1.0
+ * @Link	              :  http://www.cygniteframework.com
+ * @Since	              :  Version 1.0
  * @FileSource
  *
  */
  class ActiveRecord extends Connections
-{
+ {
     public $id;
     //Hold your connection object
     public $pdo;
@@ -212,7 +212,7 @@ use Cygnite\Database\Exceptions\DatabaseException;
         }
 
 
-        if ($method == 'fetchAll') {
+        if ($method == 'all') {
             return static::callDynamicMethod(array($class, $method), $arguments);
             //call_user_func_array(array($class, $method), $arguments);
         }
@@ -286,7 +286,7 @@ use Cygnite\Database\Exceptions\DatabaseException;
             }
         }
 
-        if ($method == 'fetchAll') {
+        if ($method == 'all') {
 
             if (isset($arguments[0]['orderBy'])) {
                 $exp = array();
@@ -631,8 +631,10 @@ use Cygnite\Database\Exceptions\DatabaseException;
             $sqlQuery = self::DELETE." FROM `".$this->tableName.$condition;
             $debugQuery = self::DELETE." FROM `".$this->tableName.$debugQuery;
         } else {
-            $sqlQuery = self::DELETE." FROM `".$this->tableName."` WHERE `".$column."` = :where";
-            $debugQuery = self::DELETE." FROM `".$this->tableName."` WHERE `".$column."` = ".$value;
+            $sqlQuery = 
+            self::DELETE." FROM `".$this->tableName."` WHERE `".$column."` = :where";
+            $debugQuery = 
+            self::DELETE." FROM `".$this->tableName."` WHERE `".$column."` = ".$value;
             //echo $debugQuery = "DELETE FROM `".$this->tableName.$debugQuery;
         }
 
@@ -953,7 +955,9 @@ use Cygnite\Database\Exceptions\DatabaseException;
             $this->_selectColumns = '*';
         }
 
-        $groupBy =(isset($this->_groupBy) && !is_null($this->_groupBy)) ? $this->_groupBy : '';
+        $groupBy =(isset($this->_groupBy) && !is_null($this->_groupBy)) ?
+                   $this->_groupBy : 
+                   '';
 
         $limit =  (isset($this->_limitValue)  && isset($this->_offsetValue)) ?
                " LIMIT ".$this->_limitValue.",".$this->_offsetValue." "  :  '';
@@ -1056,9 +1060,11 @@ use Cygnite\Database\Exceptions\DatabaseException;
                 ? ''
                 : ' WHERE  '.$this->_columnWhere." $this->_whereType ".$this->_fromWhere."";
 
-            $this->debugQuery = "SELECT ".$this->_selectColumns." FROM `".$this->tableName.'`'.$where.
+            $this->debugQuery = 
+            "SELECT ".$this->_selectColumns." FROM `".$this->tableName.'`'.$where.
                                 ' '.$groupBy.' '.$orderBy.$limit;
-            $this->sqlQuery = "SELECT ".$this->_selectColumns." FROM `".$this->tableName.'` '.$where.
+            $this->sqlQuery = 
+            "SELECT ".$this->_selectColumns." FROM `".$this->tableName.'` '.$where.
                                 ' '.$groupBy.' '.$orderBy.$limit;
            
         } else {
@@ -1068,9 +1074,11 @@ use Cygnite\Database\Exceptions\DatabaseException;
                 $where = " WHERE ".$this->_fromWhere
                 :
                 $where = "";
-             $this->debugQuery = "SELECT ".$this->_selectColumns." FROM `".$this->tableName.'` '.$where.' '.
+             $this->debugQuery = 
+             "SELECT ".$this->_selectColumns." FROM `".$this->tableName.'` '.$where.' '.
                 $groupBy.' '.$orderBy.$limit;
-            $this->sqlQuery = "SELECT ".$this->_selectColumns." FROM `".$this->tableName.'` '.$where.' '.
+            $this->sqlQuery = 
+            "SELECT ".$this->_selectColumns." FROM `".$this->tableName.'` '.$where.' '.
                 $groupBy.' '.$orderBy.$limit;
         }
     }
