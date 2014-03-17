@@ -1,4 +1,3 @@
-
 namespace Apps\Controllers;
 
 use Cygnite\Application;
@@ -71,7 +70,7 @@ class %controllerName% extends AbstractBaseController
     public function indexAction()
     {
         $%controllerName% = array();
-        $%controllerName% = %StaticModelName%::fetchAll(
+        $%controllerName% = %StaticModelName%::all(
             array(
                 'orderBy' => 'id desc',
                 /*'paginate' => array(
