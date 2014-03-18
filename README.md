@@ -1,4 +1,4 @@
-Cygnite PHP Framework 
+##Cygnite PHP Framework 
 =====================
 
 Cygnite Framework it's just a small footprint to give you the creative experience of developing a web application.
@@ -7,7 +7,7 @@ We have just begun and way to go. Cygnite Framework is under active development,
 
 You will find several eye catching features in Cygnite Framework - v1.06.
 
-##Core features - 
+###Core features - 
 =================
 
 1. Cygnite Framework redesigned and powered by Composer.
@@ -28,8 +28,12 @@ You will find several eye catching features in Cygnite Framework - v1.06.
 
 We are documenting latest changes, almost ready to release. 
 
-##Contributing To Cygnite Framework
+###Contributing To Cygnite Framework
 =================================
 
-You also can contribute on the development or its documentation, learn, get help and help others, find, report bugs, send us your feedback, send your wishlist for new features, write and send us patches for Cygnite Framework.. Keep visiting for latest features.
+Contribute on the development or its documentation, learn, get help and help others, find, report bugs, send us your feedback, send your wishlist for new features, write and send us patches for Cygnite Framework. 
+Keep visiting for latest features.
+
+###License
+Cygnite Framework is open source software released under [MIT License](http://opensource.org/licenses/MIT)
 
