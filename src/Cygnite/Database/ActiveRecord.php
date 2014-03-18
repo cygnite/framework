@@ -2,9 +2,9 @@
 namespace Cygnite\Database;
 
 use PDO;
+use Cygnite;
 use Exception;
 use PDOException;
-use Cygnite\Cygnite;
 use Cygnite\Inflector;
 use ReflectionClass;
 use ReflectionObject;
@@ -41,8 +41,8 @@ use Cygnite\Database\Exceptions\DatabaseException;
  * @FileSource
  *
  */
- class ActiveRecord extends Connections
- {
+class ActiveRecord extends Connections
+{
     public $id;
     //Hold your connection object
     public $pdo;
@@ -118,12 +118,23 @@ use Cygnite\Database\Exceptions\DatabaseException;
 
     public $pageNumber;
 
+    private $validFinders = array(
+        'first',
+        'last',
+        'findBy',
+        'all',
+        'findBySql',
+        'findByAnd',
+        'findByOr',
+        'save'
+    );
 
-     /*
-      * Restrict users to create active records object Directly
-      * Get the database configurations
-      *
-      */
+
+    /*
+     * Restrict users to create active records object Directly
+     * Get the database configurations
+     *
+     */
     protected function __construct()
     {
         $model = null;
@@ -157,9 +168,9 @@ use Cygnite\Database\Exceptions\DatabaseException;
 
     public function setAttributes($attributes = array())
     {
-         foreach ($attributes as $key => $value) {
+        foreach ($attributes as $key => $value) {
             $this->__set($key, $value);
-         }
+        }
     }
 
     /*
@@ -190,6 +201,16 @@ use Cygnite\Database\Exceptions\DatabaseException;
         }
     }
 
+    /**
+     * The finder make use of __callStatic() to invoke
+     * undefinded static methods dynamically. This magic method is mainly used
+     * for dynamic finders
+     *
+     * @param $method String
+     * @param $arguments array
+     * @return object
+     *
+     */
     public static function __callStatic($method, $arguments)
     {
         $class  = $params = null;
@@ -197,30 +218,51 @@ use Cygnite\Database\Exceptions\DatabaseException;
 
         if (substr($method, 0, 6) == 'findBy') {
 
-            $columnName =  Inflector::instance()->fromCamelCase(substr($method, 6));
+            if ($method == 'findBySql') {
+                return static::callDynamicMethod(array($class, $method), $arguments);
+            }
             $params = array();
+
+            if (strpos($method,'And') !== false) {
+
+                $params = static::buildFindersWhereConditions($method, $arguments);
+                return static::callDynamicMethod(array($class, 'findByAnd'), array($params));
+            }
+
+            if (strpos($method,'Or') !== false) {
+
+                $params = static::buildFindersWhereConditions($method, $arguments, 'Or');
+                return static::callDynamicMethod(array($class, 'findByOr'), array($params));
+            }
+
+            $columnName =  Inflector::instance()->fromCamelCase(substr($method, 6));
+
             $condition = (isset($arguments[1])) ? $arguments[1] : '=';
 
             $params = array(
-                    $columnName,
-                    $condition,
-                    $arguments[0],
-              );
+                $columnName,
+                $condition,
+                $arguments[0],
+            );
 
             return call_user_func_array(array($class, substr($method, 0, 6)), $params);
-            
         }
 
-
-        if ($method == 'all') {
+        if ($method == 'first') {
             return static::callDynamicMethod(array($class, $method), $arguments);
-            //call_user_func_array(array($class, $method), $arguments);
         }
 
         if ($method == 'find') {
 
             return static::callDynamicMethod(array($class, $method), $arguments);
-            //return call_user_func_array(array($class, $method), $arguments);
+        }
+
+        if ($method == 'all') {
+            return static::callDynamicMethod(array($class, $method), $arguments);
+        }
+
+        if ($method == 'last') {
+            return static::callDynamicMethod(array($class, $method), $arguments);
         }
 
         if ($method == 'createLinks') {
@@ -229,6 +271,38 @@ use Cygnite\Database\Exceptions\DatabaseException;
             $pagination = Pagination::instance(new $model());
             return $pagination->{$method}();
         }
+    }
+
+    /**
+     * This method is mainly used for building where conditions as array
+     * for dynamic finders.
+     *
+     *
+     * @param $method String
+     * @param $arguments array
+     * @param $type string
+     * @throws \Exception
+     * @return object
+     *
+     */
+    public static function buildFindersWhereConditions($method, $arguments, $type = 'And')
+    {
+        $conditions = array();
+        $conditions = explode($type, str_replace('findBy', '', $method));
+
+        if (count($conditions) == count($arguments[0])) {
+
+            foreach ($conditions as $key => $value) {
+                $field = Inflector::instance()->fromCamelCase($value);
+                $params[$field.' ='] = isset($arguments[0][$key]) ?
+                    trim($arguments[0][$key]) :
+                    '';
+            }
+        } else {
+            throw new Exception("Arguments doesn't matched with number of fields");
+        }
+
+        return $params;
     }
 
     public static function callDynamicMethod($callback, $arguments = array())
@@ -267,7 +341,7 @@ use Cygnite\Database\Exceptions\DatabaseException;
      */
     public function __call($method, $arguments = array())
     {
-        if ($method == 'save') {
+        if (in_array($method, $this->validFinders) && $method == 'save') {
 
             if (empty($arguments) && $this->isNew() == true) {
 
@@ -286,7 +360,31 @@ use Cygnite\Database\Exceptions\DatabaseException;
             }
         }
 
-        if ($method == 'all') {
+        if (in_array($method, $this->validFinders) && $method == 'first') {
+
+            $fetchObject = $this->select('*')
+                ->orderBy($this->primaryKey)
+                ->limit(1)
+                ->findAll();
+
+            if ($fetchObject == null) {
+                return $this->returnEmptyObject();
+            }
+
+            return $fetchObject;
+        }
+
+        if (in_array($method, $this->validFinders) && $method == 'findByAnd') {
+
+            return $this->select('*')->where($arguments[0])->findAll();
+        }
+
+        if (in_array($method, $this->validFinders) && $method == 'findByOr') {
+
+            return $this->select('*')->where($arguments[0], '', 'OR')->findAll();
+        }
+
+        if (in_array($method, $this->validFinders) && $method == 'all') {
 
             if (isset($arguments[0]['orderBy'])) {
                 $exp = array();
@@ -302,12 +400,12 @@ use Cygnite\Database\Exceptions\DatabaseException;
                 $page = $offset = $start = "";
                 $offset = $this->perPage; //how many items to show per page
                 $limit = !isset($arguments[0]['paginate']['limit']) ?
-                                $this->pageLimit() :
-                                $arguments[0]['paginate']['limit'];
+                    $this->pageLimit() :
+                    $arguments[0]['paginate']['limit'];
 
                 $page =  ($limit !== '')
-                            ? $limit
-                            : 0;
+                    ? $limit
+                    : 0;
 
                 if ($page) {
                     $start = ($page - 1) * $offset;//first item to display on this page
@@ -322,27 +420,19 @@ use Cygnite\Database\Exceptions\DatabaseException;
             return $this->select('*')->findAll();
         }
 
-        if ($method == 'find') {
+        if (in_array($method, $this->validFinders) && $method == 'find') {
 
             $id = array_shift($arguments);
             $fetch = $this->select('*')->where($this->primaryKey, $id)
-                          ->orderBy($this->primaryKey,'desc')
-                          ->findAll();
-            //var_dump($this->primaryKey);
-            //$this->id = $this->primaryKey;
-            //$this->id = $id;
+                ->orderBy($this->primaryKey,'DESC')
+                ->findAll();
 
             $this->setId($this->primaryKey, $id);
 
             if ($fetch == null) {
-                $class = self::getDynamicInstance();
-                $this->index[$this->primaryKey] = null;
-                return new $class;
+                return $this->returnEmptyObject();
             }
 
-            //show($fetch[0]->attributes);
-            //$attributes = (object) $fetch[0]->attributes;
-            //show($attributes);
             $this->{$this->primaryKey} = $fetch[0]->{$this->primaryKey};
             foreach ($fetch[0]->attributes as $key => $value) {
                 $this->{$key} = $value;
@@ -350,31 +440,56 @@ use Cygnite\Database\Exceptions\DatabaseException;
 
             $this->assignPropertiesToModel($this->attributes);
             return $this;
-
-            //Inflectors
         }
-        //var_dump($method);
-        if ($method == 'findBy') {
 
+        if (in_array($method, $this->validFinders) && $method == 'findBy') {
             $columnName = "";
-            
             $params = array();
+
             $params = array(
-                     $arguments[0].' '.$arguments[1] => $arguments[2]
-                 );
-            
+                $arguments[0].' '.$arguments[1] => $arguments[2]
+            );
+
             $fetch = $this->select('*')->where($params)->findAll();
-            
+
             if ($fetch == null) {
-                $class = self::getDynamicInstance();
-                $this->index[$this->primaryKey] = null;
-                return new $class;
+                return $this->returnEmptyObject();
             }
-            
+
             return $fetch;
         }
 
+        if (in_array($method, $this->validFinders) && $method == 'last') {
+
+            $fetchObject = $this->select('*')
+                ->orderBy($this->primaryKey, 'DESC')
+                ->limit(1)
+                ->findAll();
+
+            if ($fetchObject == null) {
+                return $this->returnEmptyObject();
+            }
+
+            return $fetchObject;
+        }
+
+        /** @var $method TYPE_NAME */
+        if (in_array($method, $this->validFinders) && $method == 'findBySql') {
+            $results = array();
+            $fetchObject = $this->pdo->prepare(trim($arguments[0]));
+            $fetchObject->execute();
+            $results = $this->fetchAs($fetchObject);
+            return $results;
+        }
+
         //throw new \Exception("Invalid method $name called  ");
+    }
+
+    private function returnEmptyObject()
+    {
+        $class = self::getDynamicInstance();
+        $this->index[$this->primaryKey] = null;
+        return new $class;
     }
 
     public function lastQuery()
@@ -382,27 +497,27 @@ use Cygnite\Database\Exceptions\DatabaseException;
         return $this->debugQuery;
     }
 
-     public function setPageNumber($number)
-     {
-         $this->pageNumber = intval($number);
-     }
+    public function setPageNumber($number)
+    {
+        $this->pageNumber = intval($number);
+    }
 
-     public function getPageNumber()
-     {
-         return (isset($this->pageNumber)) ? $this->pageNumber : null;
-         $this->pageNumber = intval($number);
-     }
+    public function getPageNumber()
+    {
+        return (isset($this->pageNumber)) ? $this->pageNumber : null;
+        $this->pageNumber = intval($number);
+    }
 
-     public function getPaginationOffset()
-     {
-         return (isset($this->paginationOffset)) ? $this->paginationOffset : null;
+    public function getPaginationOffset()
+    {
+        return (isset($this->paginationOffset)) ? $this->paginationOffset : null;
 
-     }
+    }
 
-     public function setPaginationOffset($offset)
-     {
-         $this->paginationOffset = intval($offset);
-     }
+    public function setPaginationOffset($offset)
+    {
+        $this->paginationOffset = intval($offset);
+    }
 
     private function extractConditionsReverse($arr)
     {
@@ -418,8 +533,6 @@ use Cygnite\Database\Exceptions\DatabaseException;
             $matches[1] = !empty($matches[1]) ? $matches[1] : null;
             $matches[2] = !empty($matches[2]) ? $matches[2] : null;
 
-            show($matches);
-
             $result []= array($matches[1], $matches[2], $value);
 
         }
@@ -429,7 +542,6 @@ use Cygnite\Database\Exceptions\DatabaseException;
 
     private function setId($key, $value)
     {
-        //$this->id = $id;
         $this->index[$key] = $value;
     }
 
@@ -441,14 +553,10 @@ use Cygnite\Database\Exceptions\DatabaseException;
     protected function assignPropertiesToModel($attributes = array())
     {
         $model = null;
-
-        //var_dump($this->attributes);
         $model = self::getDynamicInstance();
         foreach ($attributes as $key => $value) {
-            //$this->{$key} = $value;
+
             $model->{$key} = $value;
-            //$model->attributes[$key] = $value;
-            //var_dump($model->$key);
         }
     }
 
@@ -460,7 +568,7 @@ use Cygnite\Database\Exceptions\DatabaseException;
     private function findByColumn($key, $values = array())
     {
 
-        echo $key;
+        //echo $key;
     }
     /*
      * Save data into table
@@ -483,9 +591,9 @@ use Cygnite\Database\Exceptions\DatabaseException;
 
         foreach (array_keys($this->attributes) as $key) {
 
-             $fields[] = "`$key`";
-             $values[] = "'" .$this->attributes[$key] . "'";
-             $placeholder[] = substr(str_repeat('?,', count($key)), 0, -1);
+            $fields[] = "`$key`";
+            $values[] = "'" .$this->attributes[$key] . "'";
+            $placeholder[] = substr(str_repeat('?,', count($key)), 0, -1);
         }
 
         $fields = implode(',', $fields);
@@ -511,7 +619,7 @@ use Cygnite\Database\Exceptions\DatabaseException;
                 return true;
             }
         } catch (PDOException  $exception) {
-             throw new \RuntimeException($exception->getMessage()); //echo  $exception->getMessage();
+            throw new \RuntimeException($exception->getMessage()); //echo  $exception->getMessage();
         }
     }
 
@@ -559,10 +667,10 @@ use Cygnite\Database\Exceptions\DatabaseException;
             $i++;
         }
 
-            $query .=" WHERE ".$updateBy." =  :column";
-            $debugQuery .=" WHERE ".$updateBy." = ".$updateValue;
+        $query .=" WHERE ".$updateBy." =  :column";
+        $debugQuery .=" WHERE ".$updateBy." = ".$updateValue;
 
-            //$this->debugLastQuery($debugQuery);
+        //$this->debugLastQuery($debugQuery);
         try {
             $statement = $this->pdo->prepare($query);
             $statement->bindValue(':column', $updateValue);
@@ -575,7 +683,7 @@ use Cygnite\Database\Exceptions\DatabaseException;
             return $statement->rowCount();
 
         } catch (\PDOException  $exception) {
-             throw new Exception($exception->getMessage());
+            throw new Exception($exception->getMessage());
         }
     }
 
@@ -631,18 +739,18 @@ use Cygnite\Database\Exceptions\DatabaseException;
             $sqlQuery = self::DELETE." FROM `".$this->tableName.$condition;
             $debugQuery = self::DELETE." FROM `".$this->tableName.$debugQuery;
         } else {
-            $sqlQuery = 
-            self::DELETE." FROM `".$this->tableName."` WHERE `".$column."` = :where";
-            $debugQuery = 
-            self::DELETE." FROM `".$this->tableName."` WHERE `".$column."` = ".$value;
-            //echo $debugQuery = "DELETE FROM `".$this->tableName.$debugQuery;
+            $sqlQuery =
+                self::DELETE." FROM `".$this->tableName."` WHERE `".$column."` = :where";
+            $debugQuery =
+                self::DELETE." FROM `".$this->tableName."` WHERE `".$column."` = ".$value;
+
         }
 
 
         /** @var $exception TYPE_NAME */
         try {
             $statement = $this->pdo->prepare($sqlQuery);
-			
+
             if (is_array($values) && empty($values)) {
                 $statement->bindValue(':where', $value);
             }
@@ -663,17 +771,17 @@ use Cygnite\Database\Exceptions\DatabaseException;
 
     }
 
-     /**
-      * Find Function to selecting Table columns
-      *
-      * Generates the SELECT portion of the query
-      *
-      * @access    public
-      * @param $type
-      * @throws \Exception
-      * @internal  param $string
-      * @return    object
-      */
+    /**
+     * Find Function to selecting Table columns
+     *
+     * Generates the SELECT portion of the query
+     *
+     * @access    public
+     * @param $type
+     * @throws \Exception
+     * @internal  param $string
+     * @return    object
+     */
     public function select($type)
     {
         //create where condition with and if value is passed as array
@@ -762,7 +870,8 @@ use Cygnite\Database\Exceptions\DatabaseException;
 
                 $whereType = '';
                 $this->_fromWhere .= $whereField." ".$whereCondition.$whereValue;
-                $whereType = ($where == '') ? ' AND' : ' '.$where.' ';
+
+                $whereType = ($where == '' && $type !== 'OR') ? ' AND ' : ' '.$type.' ';
                 $this->_fromWhere .= ($i < $arrayCount-1) ? $whereType  :  '';
                 $this->_whereType = '';
 
@@ -772,6 +881,8 @@ use Cygnite\Database\Exceptions\DatabaseException;
 
             return $this;
         }
+
+
 
         if (is_string($columnName)) {
             $columnName = "`".$columnName."`";
@@ -867,21 +978,21 @@ use Cygnite\Database\Exceptions\DatabaseException;
         switch ($column) {
             case is_array($column):
                 $i = 0;
-                  $count = count($column);
+                $count = count($column);
                 while ($i < $count) { //Create group by in condition with and if value is passed as array
-                        $groupBy .= '`'.$column[$i].'`';
-                        $groupBy .= ($i < $count-1) ? ',' : '';
-                        $i ++;
+                    $groupBy .= '`'.$column[$i].'`';
+                    $groupBy .= ($i < $count-1) ? ',' : '';
+                    $i ++;
                 }
                 $this->_groupBy = 'GROUP BY '.$groupBy;
 
                 return $this;
-            break;
+                break;
             default:
-                  $this->_groupBy = 'GROUP BY `'.$column.'` ';//exit;
+                $this->_groupBy = 'GROUP BY `'.$column.'` ';//exit;
 
                 return $this;
-            break;
+                break;
         }
     }
 
@@ -956,23 +1067,23 @@ use Cygnite\Database\Exceptions\DatabaseException;
         }
 
         $groupBy =(isset($this->_groupBy) && !is_null($this->_groupBy)) ?
-                   $this->_groupBy : 
-                   '';
+            $this->_groupBy :
+            '';
 
         $limit =  (isset($this->_limitValue)  && isset($this->_offsetValue)) ?
-               " LIMIT ".$this->_limitValue.",".$this->_offsetValue." "  :  '';
+            " LIMIT ".$this->_limitValue.",".$this->_offsetValue." "  :  '';
 
         $orderBy= (isset($this->_columnName)  && isset($this->_orderType)) ?
-               " ORDER BY `".$this->_columnName."`  ".$this->_orderType  :  '';
+            " ORDER BY `".$this->_columnName."`  ".$this->_orderType  :  '';
 
-          $this->buildQuery($groupBy, $orderBy, $limit);
+        $this->buildQuery($groupBy, $orderBy, $limit);
 
         try {
-             $statement = $this->pdo->prepare($this->sqlQuery);
-             $this->setDbStatement($this->database, $statement);
-             $statement->bindValue(':where', $this->_fromWhere);
-             $statement->execute();
-             $data = $this->fetchAs($statement, $fetchMode);
+            $statement = $this->pdo->prepare($this->sqlQuery);
+            $this->setDbStatement($this->database, $statement);
+            $statement->bindValue(':where', $this->_fromWhere);
+            $statement->execute();
+            $data = $this->fetchAs($statement, $fetchMode);
 
             if ($statement->rowCount() > 0) {
                 return $data;
@@ -988,37 +1099,37 @@ use Cygnite\Database\Exceptions\DatabaseException;
      *
      * @access private
      * @param object $statement
-     * @param string $fetchMode
+     * @param string $fetchMode null
      * @return mixed.
      */
-    private function fetchAs($statement, $fetchMode)
+    public function fetchAs($statement, $fetchMode = null)
     {
         $data = array();
 
         switch ($fetchMode) {
             case 'GROUP':
-                $data = $statement->fetchAll(PDO::FETCH_GROUP| PDO::FETCH_ASSOC);
+                $data = $statement->fetchAll(\PDO::FETCH_GROUP| \PDO::FETCH_ASSOC);
                 break;
             case 'BOTH':
-                $data = $statement->fetchAll(PDO::FETCH_BOTH);
+                $data = $statement->fetchAll(\PDO::FETCH_BOTH);
                 break;
             case 'JSON':
-                $data = json_encode($statement->fetchAll(PDO::FETCH_ASSOC));
+                $data = json_encode($statement->fetchAll(\PDO::FETCH_ASSOC));
                 break;
             case 'OBJ':
-                $data = $statement->fetchAll(PDO::FETCH_OBJ);
+                $data = $statement->fetchAll(\PDO::FETCH_OBJ);
                 break;
             case 'ASSOC':
-                $data = $statement->fetchAll(PDO::FETCH_ASSOC);
+                $data = $statement->fetchAll(\PDO::FETCH_ASSOC);
                 break;
             case 'COLUMN':
-                $data = $statement->fetchAll(PDO::FETCH_COLUMN);
+                $data = $statement->fetchAll(\PDO::FETCH_COLUMN);
                 break;
             case 'CLASS':
-                $data = $statement->fetchAll(PDO::FETCH_CLASS, '\\'.__NAMESPACE__.'\\Datasource');
+                $data = $statement->fetchAll(\PDO::FETCH_CLASS, '\\'.__NAMESPACE__.'\\DataSource');
                 break;
             default:
-                $data = $statement->fetchAll(PDO::FETCH_CLASS, get_called_class());
+                $data = $statement->fetchAll(\PDO::FETCH_CLASS, get_called_class());
         }
 
         return $data;
@@ -1053,32 +1164,30 @@ use Cygnite\Database\Exceptions\DatabaseException;
         if ($searchKey === false) {
             ($this->_columnWhere)
                 ?
-                   $where = '  WHERE  '.$this->_columnWhere.' =  :where '
+                $where = '  WHERE  '.$this->_columnWhere.' =  :where '
                 :  $where = ' ';
 
             $where = (is_null($this->_columnWhere) && is_null($this->_fromWhere))
                 ? ''
                 : ' WHERE  '.$this->_columnWhere." $this->_whereType ".$this->_fromWhere."";
 
-            $this->debugQuery = 
-            "SELECT ".$this->_selectColumns." FROM `".$this->tableName.'`'.$where.
-                                ' '.$groupBy.' '.$orderBy.$limit;
-            $this->sqlQuery = 
-            "SELECT ".$this->_selectColumns." FROM `".$this->tableName.'` '.$where.
-                                ' '.$groupBy.' '.$orderBy.$limit;
-           
+            $this->debugQuery =
+                "SELECT ".$this->_selectColumns." FROM `".$this->tableName.'`'.$where.
+                ' '.$groupBy.' '.$orderBy.$limit;
+            $this->sqlQuery =
+                "SELECT ".$this->_selectColumns." FROM `".$this->tableName.'` '.$where.
+                ' '.$groupBy.' '.$orderBy.$limit;
+
         } else {
 
-            ($this->_fromWhere !="")
-                ?
-                $where = " WHERE ".$this->_fromWhere
-                :
-                $where = "";
-             $this->debugQuery = 
-             "SELECT ".$this->_selectColumns." FROM `".$this->tableName.'` '.$where.' '.
+            $where = ($this->_fromWhere !="") ?
+                " WHERE ".$this->_fromWhere :
+                '';
+            $this->debugQuery =
+                "SELECT ".$this->_selectColumns." FROM `".$this->tableName.'` '.$where.' '.
                 $groupBy.' '.$orderBy.$limit;
-            $this->sqlQuery = 
-            "SELECT ".$this->_selectColumns." FROM `".$this->tableName.'` '.$where.' '.
+            $this->sqlQuery =
+                "SELECT ".$this->_selectColumns." FROM `".$this->tableName.'` '.$where.' '.
                 $groupBy.' '.$orderBy.$limit;
         }
     }
@@ -1128,7 +1237,7 @@ use Cygnite\Database\Exceptions\DatabaseException;
     * @param  $fetchModel fetch type
     * @return array results
     */
-    public function getAll($fetchMode = PDO::FETCH_OBJECT)
+    public function getAll($fetchMode = \PDO::FETCH_OBJECT)
     {
         $data = array();
         ob_start();
@@ -1149,19 +1258,19 @@ use Cygnite\Database\Exceptions\DatabaseException;
      */
     public function bindArrayValue($req, $array, $typeArray = false)
     {
-        if (is_object($req) && ($req instanceof PDOStatement)) {
+        if (is_object($req) && ($req instanceof \PDOStatement)) {
             foreach ($array as $key => $value) {
                 if ($typeArray) {
                     $req->bindValue(":$key", $value, $typeArray[$key]);
                 } else {
                     if (is_int($value)) {
-                        $param = PDO::PARAM_INT;
+                        $param = \PDO::PARAM_INT;
                     } elseif (is_bool($value)) {
-                        $param = PDO::PARAM_BOOL;
+                        $param = \PDO::PARAM_BOOL;
                     } elseif (is_null($value)) {
-                        $param = PDO::PARAM_NULL;
+                        $param = \PDO::PARAM_NULL;
                     } elseif (is_string($value)) {
-                        $param = PDO::PARAM_STR;
+                        $param = \PDO::PARAM_STR;
                     } else {
                         $param = false;
                     }
@@ -1182,7 +1291,7 @@ use Cygnite\Database\Exceptions\DatabaseException;
 
     protected function debugLastQuery($sql)
     {
-        echo $sql;
+        //echo $sql;
     }
 
     public function getConnection($connection)
@@ -1224,10 +1333,10 @@ use Cygnite\Database\Exceptions\DatabaseException;
     }
 
     /**
-    * Closes the reader.
-    * This frees up the resources allocated for executing this SQL statement.
-    * Read attempts after this method call are unpredictable.
-    */
+     * Closes the reader.
+     * This frees up the resources allocated for executing this SQL statement.
+     * Read attempts after this method call are unpredictable.
+     */
     public function close()
     {
         $statement = null;
@@ -1238,29 +1347,21 @@ use Cygnite\Database\Exceptions\DatabaseException;
     }
 
     /**
-    * whether the reader is closed or not.
-    * @return boolean whether the reader is closed or not.
-    */
+     * whether the reader is closed or not.
+     * @return boolean whether the reader is closed or not.
+     */
     private function isClosed()
     {
         return $this->closed;
     }
 
-    public function getModelProperties()
+    /*public function getModelProperties()
     {
         echo $this->tableName;
         echo $this->database;
         echo $this->primaryKey;
         var_dump($this->columns);
-
-        /*$object = new ReflectionClass(get_class($this));
-        $ob =  get_class($this);
-        echo $object->getProperty('tableName')->getValue(new $ob);
-        echo "<pre>";
-        var_dump($object);
-        echo "</pre>"; */
-
-    }
+    }*/
 
     public function explainQuery()
     {
@@ -1269,12 +1370,14 @@ use Cygnite\Database\Exceptions\DatabaseException;
         $explain = $this->pdo->query($sql)->fetchAll(\PDO::FETCH_ASSOC);
         $html = "";
         $html  .= "<html> <head><title>Explain Query</title>
-                           <style type='text/css'>
-                             #contetainer { font-family:Lucida Grande,Verdana,Sans-serif; font-size:12px;padding: 20px 20px 12px 20px;margin:40px; background:#fff; border:1px solid #D3640F; }
-                           h2 { color: #990000;  font-size: 15px;font-weight: normal;margin: 5px 5px 5px 13px;}
-                           p {   margin:6px; padding: 9px; }
-                           </style>
-                           </head><body>
+       <style type='text/css'>
+       #contetainer { font-family:Lucida Grande,Verdana,Sans-serif;
+       font-size:12px;padding: 20px 20px 12px 20px;margin:40px; background:#fff;
+       border:1px solid #D3640F; }
+       h2 { color: #990000;  font-size: 15px;font-weight: normal;margin: 5px 5px 5px 13px;}
+       p {   margin:6px; padding: 9px; }
+       </style>
+       </head><body>
        <div id='contetainer'>
             <table >
             <th>ID</th>
@@ -1300,8 +1403,8 @@ use Cygnite\Database\Exceptions\DatabaseException;
             <td> ".$explain[0]['rows']."</td>
             <td> ".$explain[0]['filtered']."</td>
             <td> ".$explain[0]['Extra']."</td></tr></table></div></body></html>";
-       unset($explain);
-       echo $html;//exit;
+        unset($explain);
+        return $html;
 
     }
 
