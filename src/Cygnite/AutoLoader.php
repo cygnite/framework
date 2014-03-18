@@ -153,7 +153,7 @@ class AutoLoader
             foreach ($recursiveExtensionFilter as $item) {
                $alias = str_replace('.php', '', $item->getPathName());
 
-               $alias = implode("\\", array_map("ucfirst", explode('\\', $alias)));
+               $alias = implode("\\", array_map("ucfirst", explode(DS, $alias)));
                $this->directories[$alias] = str_replace('\\', '/', $item->getPathName());
             }
         }
