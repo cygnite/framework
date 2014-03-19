@@ -1,7 +1,7 @@
 <?php
 namespace Cygnite\Database;
 
-class Datasource
+class DataSource
 {
 
 }

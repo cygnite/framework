@@ -145,15 +145,15 @@ class AutoLoader
         {
             $path = str_replace(".", DS, $dir);
 
-	    //Iterate through all paths and filter with extension provided	
+	    //Iterate through all paths and filter with extension provided
 	    $recursiveExtensionFilter = new FileExtensionFilter(new \RecursiveDirectoryIterator($path));
-	    	
+
             // loop through the directory listing
             // we need to create a RecursiveIteratorIterator instance
             foreach ($recursiveExtensionFilter as $item) {
                $alias = str_replace('.php', '', $item->getPathName());
 
-               $alias = implode("\\", array_map("ucfirst", explode('\\', $alias)));
+               $alias = implode("\\", array_map("ucfirst", explode(DS, $alias)));
                $this->directories[$alias] = str_replace('\\', '/', $item->getPathName());
             }
         }
