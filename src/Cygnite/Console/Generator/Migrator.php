@@ -196,6 +196,12 @@ class Migrator
                 array()
             );
         }
+        $this->updateMigrationTable();
 
+    }
+    
+    public function updateMigrationTable()
+    {
+        $this->command->table->updateMigrationVersion($this);
     }
 }
