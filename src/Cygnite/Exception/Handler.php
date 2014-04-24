@@ -229,10 +229,18 @@ class Handler implements ExceptionInterface
 
     private function includeAssets($path)
     {
-        /*
-        echo "<style class='tracy-debug' type='text/css'>";
-        include $path.self::$style.'.css';
-        echo "</style>";*/
+        $vendor = dirname(dirname(dirname(dirname(dirname(dirname(__FILE__))))));
+        $stylePath = $vendor."/tracy/tracy/src/Tracy/templates/bluescreen.css";
+
+        if (!file_exists($stylePath)) {
+            throw new Exception("Tracy debugger not found in vendor directory");
+        }
+
+        $contents = file_get_contents($path.self::$style.'.css');
+
+        if( strpos(file_get_contents($stylePath), '@Author:Cygnite') == false) {
+            @file_put_contents($stylePath,$contents, FILE_APPEND);
+        }
     }
 
     public function assetsPath()
