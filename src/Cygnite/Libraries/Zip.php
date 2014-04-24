@@ -86,7 +86,7 @@ class Zip
                     while (true == ($file = readdir($dir_handler))) {
                               if (is_file($pathlocation.$file))  {
                                     $this->add_file($pathlocation.$filename, $new_location.$file);
-                              } ($file != '.' && $file != '..' and is_dir($directory.$file)) {
+                              } else if ($file != '.' && $file != '..' and is_dir($directory.$file)) {
                                     $this->add_dir($new_location.$file.DS);
                                     $this->make_zip($pathlocation.$file.DS, $new_location.$file.DS);
                               }
@@ -128,7 +128,7 @@ class Zip
         if(! file_exists( $zip_name) || $zip_name == "" )
                 throw new Exception("The zip archive file not specified to download.");
 
-		$downloader = new Downloader;		
+		$downloader = new Downloader;
         $downloader ->download($file_path);
 
         header("Pragma: public");

@@ -19,24 +19,16 @@ use Cygnite\Singleton;
  *   to sanjoy@hotmail.com so I can send you a copy immediately.
  *
  * @Package                   :  Packages
- * @Sub Packages              :
+ * @Sub Packages              :  
  * @Filename                  :  Cookie
- * @Description               :  This library will be available on next version
+ * @Description               :  Cookie Manager class to manage http cookie.
  * @Author                    :  Sanjoy Dey
  * @Copyright                 :  Copyright (c) 2013 - 2014,
  * @Link	                  :  http://www.cygniteframework.com
  * @Since	                  :  Version 1.0
- * @Filesource
- * @Warning                   :  Any changes in this library can cause abnormal behaviour of the framework
- *
- *
+ * @FileSource
  */
-/*
-|
-|Cookie Manager class to manage http cookie.
-|
-|
-*/
+
 class Cookie extends Singleton implements CookieInterface
 {
     /**
@@ -84,6 +76,12 @@ class Cookie extends Singleton implements CookieInterface
         );
     }
 
+
+    /**
+     * @param callable $callback
+     * @param array    $request
+     * @return object
+     */
     public static function getInstance(Closure $callback, $request = array())
     {
         if (!empty($request)) {
@@ -98,8 +96,6 @@ class Cookie extends Singleton implements CookieInterface
             self::$encrypt = $crypt;
         }
 
-        //$this->setExpire(time()+60);
-        //$crypt = new Encrypt();
         return (is_callable($callback)) ?
             $callback(parent::instance()) :
             parent::instance();
@@ -274,7 +270,6 @@ class Cookie extends Singleton implements CookieInterface
      */
     public function get($name = null)
     {
-        //var_dump($_COOKIE['cygnite_test']);
         if (is_null($name)) {
             $name = $this->security->sanitize($this->name);
         }
@@ -332,6 +327,10 @@ class Cookie extends Singleton implements CookieInterface
         return $bool;
     }
 
+    /**
+     * @param $cookie
+     * @return bool|mixed
+     */
     public function has($cookie)
     {
         if (isset(self::$cookies[$cookie]) || $cookie == $this->name) {

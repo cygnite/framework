@@ -41,8 +41,8 @@ use Cygnite\Database\Exceptions\DatabaseException;
  * @FileSource
  *
  */
-class ActiveRecord extends Connections
-{
+ class ActiveRecord extends Connections
+ {
     public $id;
     //Hold your connection object
     public $pdo;
@@ -129,12 +129,11 @@ class ActiveRecord extends Connections
         'save'
     );
 
-
-    /*
-     * Restrict users to create active records object Directly
-     * Get the database configurations
-     *
-     */
+     /*
+      * Restrict users to create active records object Directly
+      * Get the database configurations
+      *
+      */
     protected function __construct()
     {
         $model = null;
@@ -168,9 +167,9 @@ class ActiveRecord extends Connections
 
     public function setAttributes($attributes = array())
     {
-        foreach ($attributes as $key => $value) {
+         foreach ($attributes as $key => $value) {
             $this->__set($key, $value);
-        }
+         }
     }
 
     /*
@@ -236,14 +235,14 @@ class ActiveRecord extends Connections
             }
 
             $columnName =  Inflector::instance()->fromCamelCase(substr($method, 6));
-
+            $params = array();
             $condition = (isset($arguments[1])) ? $arguments[1] : '=';
 
             $params = array(
-                $columnName,
-                $condition,
-                $arguments[0],
-            );
+                    $columnName,
+                    $condition,
+                    $arguments[0],
+              );
 
             return call_user_func_array(array($class, substr($method, 0, 6)), $params);
         }
@@ -400,12 +399,12 @@ class ActiveRecord extends Connections
                 $page = $offset = $start = "";
                 $offset = $this->perPage; //how many items to show per page
                 $limit = !isset($arguments[0]['paginate']['limit']) ?
-                    $this->pageLimit() :
-                    $arguments[0]['paginate']['limit'];
+                                $this->pageLimit() :
+                                $arguments[0]['paginate']['limit'];
 
                 $page =  ($limit !== '')
-                    ? $limit
-                    : 0;
+                            ? $limit
+                            : 0;
 
                 if ($page) {
                     $start = ($page - 1) * $offset;//first item to display on this page
@@ -425,7 +424,7 @@ class ActiveRecord extends Connections
             $id = array_shift($arguments);
             $fetch = $this->select('*')->where($this->primaryKey, $id)
                 ->orderBy($this->primaryKey,'DESC')
-                ->findAll();
+                          ->findAll();
 
             $this->setId($this->primaryKey, $id);
 
@@ -447,8 +446,8 @@ class ActiveRecord extends Connections
             $params = array();
 
             $params = array(
-                $arguments[0].' '.$arguments[1] => $arguments[2]
-            );
+                     $arguments[0].' '.$arguments[1] => $arguments[2]
+                 );
 
             $fetch = $this->select('*')->where($params)->findAll();
 
@@ -497,27 +496,27 @@ class ActiveRecord extends Connections
         return $this->debugQuery;
     }
 
-    public function setPageNumber($number)
-    {
-        $this->pageNumber = intval($number);
-    }
+     public function setPageNumber($number)
+     {
+         $this->pageNumber = intval($number);
+     }
 
-    public function getPageNumber()
-    {
-        return (isset($this->pageNumber)) ? $this->pageNumber : null;
-        $this->pageNumber = intval($number);
-    }
+     public function getPageNumber()
+     {
+         return (isset($this->pageNumber)) ? $this->pageNumber : null;
+         $this->pageNumber = intval($number);
+     }
 
-    public function getPaginationOffset()
-    {
-        return (isset($this->paginationOffset)) ? $this->paginationOffset : null;
+     public function getPaginationOffset()
+     {
+         return (isset($this->paginationOffset)) ? $this->paginationOffset : null;
 
-    }
+     }
 
-    public function setPaginationOffset($offset)
-    {
-        $this->paginationOffset = intval($offset);
-    }
+     public function setPaginationOffset($offset)
+     {
+         $this->paginationOffset = intval($offset);
+     }
 
     private function extractConditionsReverse($arr)
     {
@@ -591,9 +590,9 @@ class ActiveRecord extends Connections
 
         foreach (array_keys($this->attributes) as $key) {
 
-            $fields[] = "`$key`";
-            $values[] = "'" .$this->attributes[$key] . "'";
-            $placeholder[] = substr(str_repeat('?,', count($key)), 0, -1);
+             $fields[] = "`$key`";
+             $values[] = "'" .$this->attributes[$key] . "'";
+             $placeholder[] = substr(str_repeat('?,', count($key)), 0, -1);
         }
 
         $fields = implode(',', $fields);
@@ -619,7 +618,7 @@ class ActiveRecord extends Connections
                 return true;
             }
         } catch (PDOException  $exception) {
-            throw new \RuntimeException($exception->getMessage()); //echo  $exception->getMessage();
+             throw new \RuntimeException($exception->getMessage()); //echo  $exception->getMessage();
         }
     }
 
@@ -667,10 +666,10 @@ class ActiveRecord extends Connections
             $i++;
         }
 
-        $query .=" WHERE ".$updateBy." =  :column";
-        $debugQuery .=" WHERE ".$updateBy." = ".$updateValue;
+            $query .=" WHERE ".$updateBy." =  :column";
+            $debugQuery .=" WHERE ".$updateBy." = ".$updateValue;
 
-        //$this->debugLastQuery($debugQuery);
+            //$this->debugLastQuery($debugQuery);
         try {
             $statement = $this->pdo->prepare($query);
             $statement->bindValue(':column', $updateValue);
@@ -683,7 +682,7 @@ class ActiveRecord extends Connections
             return $statement->rowCount();
 
         } catch (\PDOException  $exception) {
-            throw new Exception($exception->getMessage());
+             throw new Exception($exception->getMessage());
         }
     }
 
@@ -740,9 +739,9 @@ class ActiveRecord extends Connections
             $debugQuery = self::DELETE." FROM `".$this->tableName.$debugQuery;
         } else {
             $sqlQuery =
-                self::DELETE." FROM `".$this->tableName."` WHERE `".$column."` = :where";
+            self::DELETE." FROM `".$this->tableName."` WHERE `".$column."` = :where";
             $debugQuery =
-                self::DELETE." FROM `".$this->tableName."` WHERE `".$column."` = ".$value;
+            self::DELETE." FROM `".$this->tableName."` WHERE `".$column."` = ".$value;
 
         }
 
@@ -771,25 +770,25 @@ class ActiveRecord extends Connections
 
     }
 
-    /**
-     * Find Function to selecting Table columns
-     *
-     * Generates the SELECT portion of the query
-     *
-     * @access    public
-     * @param $type
-     * @throws \Exception
-     * @internal  param $string
-     * @return    object
-     */
+     /**
+      * Find Function to selecting Table columns
+      *
+      * Generates the SELECT portion of the query
+      *
+      * @access    public
+      * @param $type
+      * @throws \Exception
+      * @internal  param $string
+      * @return    object
+      */
     public function select($type)
     {
         //create where condition with and if value is passed as array
         if (is_string($type) && !is_null($type)) {
             if ($type === 'all' || $type == '*') {
-                $this->_selectColumns = '*';
+                $this->_selectColumns = $this->tableName.'.*';
             } else {
-                $this->_selectColumns = (string) $type; // Need to split the column name and add quotes
+                $this->_selectColumns = $this->tableName.'.'.(string) $type; // Need to split the column name and add quotes
             }
         } else {
             throw new Exception("Accepted parameters should be string format.");
@@ -854,7 +853,7 @@ class ActiveRecord extends Connections
 
             foreach ($resultArray as $row) {
 
-                $whereField = "`".$row['0']."`";
+               $whereField = $this->tableName.".`".$row['0']."`";
 
                 if ($row['0'] === null) {
                     $whereField = '';
@@ -882,14 +881,12 @@ class ActiveRecord extends Connections
             return $this;
         }
 
-
-
         if (is_string($columnName)) {
             $columnName = "`".$columnName."`";
         }
 
         $this->_whereType = '=';
-        $this->_columnWhere = $columnName;
+        $this->_columnWhere = $this->tableName.'.'.$columnName;
         $this->_fromWhere = " '".$where."' ";
 
         if (!is_null($type)) {
@@ -978,21 +975,21 @@ class ActiveRecord extends Connections
         switch ($column) {
             case is_array($column):
                 $i = 0;
-                $count = count($column);
+                  $count = count($column);
                 while ($i < $count) { //Create group by in condition with and if value is passed as array
-                    $groupBy .= '`'.$column[$i].'`';
-                    $groupBy .= ($i < $count-1) ? ',' : '';
-                    $i ++;
+                        $groupBy .= '`'.$column[$i].'`';
+                        $groupBy .= ($i < $count-1) ? ',' : '';
+                        $i ++;
                 }
                 $this->_groupBy = 'GROUP BY '.$groupBy;
 
                 return $this;
-                break;
+            break;
             default:
-                $this->_groupBy = 'GROUP BY `'.$column.'` ';//exit;
+                  $this->_groupBy = 'GROUP BY `'.$column.'` ';//exit;
 
                 return $this;
-                break;
+            break;
         }
     }
 
@@ -1067,26 +1064,26 @@ class ActiveRecord extends Connections
         }
 
         $groupBy =(isset($this->_groupBy) && !is_null($this->_groupBy)) ?
-            $this->_groupBy :
-            '';
+                   $this->_groupBy :
+                   '';
 
         $limit =  (isset($this->_limitValue)  && isset($this->_offsetValue)) ?
-            " LIMIT ".$this->_limitValue.",".$this->_offsetValue." "  :  '';
+               " LIMIT ".$this->_limitValue.",".$this->_offsetValue." "  :  '';
 
         $orderBy= (isset($this->_columnName)  && isset($this->_orderType)) ?
-            " ORDER BY `".$this->_columnName."`  ".$this->_orderType  :  '';
+               " ORDER BY `".$this->_columnName."`  ".$this->_orderType  :  '';
 
-        $this->buildQuery($groupBy, $orderBy, $limit);
+          $this->buildQuery($groupBy, $orderBy, $limit);
 
         try {
-            $statement = $this->pdo->prepare($this->sqlQuery);
-            $this->setDbStatement($this->database, $statement);
-            $statement->bindValue(':where', $this->_fromWhere);
-            $statement->execute();
-            $data = $this->fetchAs($statement, $fetchMode);
+             $statement = $this->pdo->prepare($this->sqlQuery);
+             $this->setDbStatement($this->database, $statement);
+             $statement->bindValue(':where', $this->_fromWhere);
+             $statement->execute();
+             $data = $this->fetchAs($statement, $fetchMode);
 
             if ($statement->rowCount() > 0) {
-                return $data;
+                return new \ArrayObject($data);
             }
 
         } catch (PDOException $ex) {
@@ -1164,7 +1161,7 @@ class ActiveRecord extends Connections
         if ($searchKey === false) {
             ($this->_columnWhere)
                 ?
-                $where = '  WHERE  '.$this->_columnWhere.' =  :where '
+                   $where = '  WHERE  '.$this->_columnWhere.' =  :where '
                 :  $where = ' ';
 
             $where = (is_null($this->_columnWhere) && is_null($this->_fromWhere))
@@ -1172,23 +1169,23 @@ class ActiveRecord extends Connections
                 : ' WHERE  '.$this->_columnWhere." $this->_whereType ".$this->_fromWhere."";
 
             $this->debugQuery =
-                "SELECT ".$this->_selectColumns." FROM `".$this->tableName.'`'.$where.
-                ' '.$groupBy.' '.$orderBy.$limit;
+            "SELECT ".$this->_selectColumns." FROM `".$this->tableName.'`'.$where.
+                                ' '.$groupBy.' '.$orderBy.' '.$limit;
             $this->sqlQuery =
-                "SELECT ".$this->_selectColumns." FROM `".$this->tableName.'` '.$where.
-                ' '.$groupBy.' '.$orderBy.$limit;
+            "SELECT ".$this->_selectColumns." FROM `".$this->tableName.'` '.$where.
+                                ' '.$groupBy.' '.$orderBy.' '.$limit;
 
         } else {
 
             $where = ($this->_fromWhere !="") ?
                 " WHERE ".$this->_fromWhere :
                 '';
-            $this->debugQuery =
-                "SELECT ".$this->_selectColumns." FROM `".$this->tableName.'` '.$where.' '.
-                $groupBy.' '.$orderBy.$limit;
+             $this->debugQuery =
+             "SELECT ".$this->_selectColumns." FROM `".$this->tableName.'` '.$where.' '.
+                $groupBy.' '.$orderBy.' '.$limit;
             $this->sqlQuery =
-                "SELECT ".$this->_selectColumns." FROM `".$this->tableName.'` '.$where.' '.
-                $groupBy.' '.$orderBy.$limit;
+            "SELECT ".$this->_selectColumns." FROM `".$this->tableName.'` '.$where.' '.
+                $groupBy.' '.$orderBy.' '.$limit;
         }
     }
 
@@ -1203,7 +1200,11 @@ class ActiveRecord extends Connections
     */
     public function query($sql)
     {
+		try {
         $this->_statement = $this->pdo->query($sql);
+		} catch (\PDOException $e) {
+			throw $e;
+		}
 
         return $this;
     }
@@ -1333,10 +1334,10 @@ class ActiveRecord extends Connections
     }
 
     /**
-     * Closes the reader.
-     * This frees up the resources allocated for executing this SQL statement.
-     * Read attempts after this method call are unpredictable.
-     */
+    * Closes the reader.
+    * This frees up the resources allocated for executing this SQL statement.
+    * Read attempts after this method call are unpredictable.
+    */
     public function close()
     {
         $statement = null;
@@ -1347,9 +1348,9 @@ class ActiveRecord extends Connections
     }
 
     /**
-     * whether the reader is closed or not.
-     * @return boolean whether the reader is closed or not.
-     */
+    * whether the reader is closed or not.
+    * @return boolean whether the reader is closed or not.
+    */
     private function isClosed()
     {
         return $this->closed;
@@ -1370,14 +1371,14 @@ class ActiveRecord extends Connections
         $explain = $this->pdo->query($sql)->fetchAll(\PDO::FETCH_ASSOC);
         $html = "";
         $html  .= "<html> <head><title>Explain Query</title>
-       <style type='text/css'>
-       #contetainer { font-family:Lucida Grande,Verdana,Sans-serif;
-       font-size:12px;padding: 20px 20px 12px 20px;margin:40px; background:#fff;
-       border:1px solid #D3640F; }
-       h2 { color: #990000;  font-size: 15px;font-weight: normal;margin: 5px 5px 5px 13px;}
-       p {   margin:6px; padding: 9px; }
-       </style>
-       </head><body>
+                           <style type='text/css'>
+                           #contetainer { font-family:Lucida Grande,Verdana,Sans-serif;
+                           font-size:12px;padding: 20px 20px 12px 20px;margin:40px; background:#fff;
+                           border:1px solid #D3640F; }
+                           h2 { color: #990000;  font-size: 15px;font-weight: normal;margin: 5px 5px 5px 13px;}
+                           p {   margin:6px; padding: 9px; }
+                           </style>
+                           </head><body>
        <div id='contetainer'>
             <table >
             <th>ID</th>
@@ -1403,7 +1404,7 @@ class ActiveRecord extends Connections
             <td> ".$explain[0]['rows']."</td>
             <td> ".$explain[0]['filtered']."</td>
             <td> ".$explain[0]['Extra']."</td></tr></table></div></body></html>";
-        unset($explain);
+       unset($explain);
         return $html;
 
     }

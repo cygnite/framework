@@ -24,14 +24,12 @@ use Cygnite\Singleton;
  * @Package                   :  Packages
  * @Sub Packages              :
  * @Filename                  :  Input
- * @Description               :  This library will be available on next version
+ * @Description               :  This class is used to handler post, get, cookies etc.
  * @Author                    :  Sanjoy Dey
  * @Copyright                 :  Copyright (c) 2013 - 2014,
  * @Link	                  :  http://www.cygniteframework.com
  * @Since	                  :  Version 1.0
- * @Filesource
- * @Warning                   :  Any changes in this library can cause abnormal behaviour of the framework
- *
+ * @FileSource
  *
  */
 
@@ -49,6 +47,7 @@ class Input extends Singleton
 
     private $cookie;
 
+
     protected function __construct()
     {
         $this->security = Security::instance(
@@ -59,6 +58,10 @@ class Input extends Singleton
         $this->request = $this->getRequest();
     }
 
+    /**
+     * @param callable $initialize
+     * @return object
+     */
     public static function getInstance(Closure $initialize = null)
     {
         if ($initialize instanceof Closure) {
@@ -68,6 +71,10 @@ class Input extends Singleton
         }
     }
 
+    /**
+     * @param $input
+     * @return bool
+     */
     public function hasPost($input)
     {
         return  filter_has_var(INPUT_POST, $input) ?
@@ -75,12 +82,22 @@ class Input extends Singleton
             false;
     }
 
+    /**
+     * @param $key
+     * @return $this
+     */
     public function except($key)
     {
         $this->except = $this->security->sanitize($key);
         return $this;
     }
 
+    /**
+     * @param null $key
+     * @param null $value
+     * @return bool|null
+     * @throws \InvalidArgumentException
+     */
     public function post($key = null, $value = null)
     {
         if (!is_null($this->except)) {
@@ -143,11 +160,18 @@ class Input extends Singleton
         }
     }
 
+    /**
+     * @param $string
+     * @return string
+     */
     public function htmlDecode($string)
     {
         return html_entity_decode($string);
     }
 
+    /**
+     * @return bool|string
+     */
     public function getMethod()
     {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
@@ -160,6 +184,9 @@ class Input extends Singleton
 
     }
 
+    /**
+     * @return array
+     */
     protected function getRequest()
     {
         return array(
@@ -169,13 +196,24 @@ class Input extends Singleton
         );
     }
 
+    /**
+     * @param $name
+     * @param $arguments
+     */
     public function __call($name, $arguments)
     {
-        //var_dump($name);
-        //var_dump($arguments);
         //call_user_func_array(array($this, $name), $arguments);
     }
 
+    /**
+     * @param        $name
+     * @param        $value
+     * @param int    $expire
+     * @param string $path
+     * @param null   $domain
+     * @param bool   $security
+     * @param bool   $httpOnly
+     */
     private function setCookie(
         $name,
         $value,
@@ -199,6 +237,10 @@ class Input extends Singleton
 
     /**
      * Sets or returns the cookie variable value.
+     *
+     * @param null  $method
+     * @param array $arguments
+     *
      */
     public function cookie($method = null, $arguments = array())
     {
@@ -208,8 +250,6 @@ class Input extends Singleton
              },
              $this->request
          );
-
-        //echo $cookie->get('cygnite_test');
 
         $cookie->setName('cygnite_cookie')
                     ->setValue('Cygnite Framework Cookie Testing')

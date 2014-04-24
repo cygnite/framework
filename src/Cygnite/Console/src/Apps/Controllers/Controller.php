@@ -133,7 +133,7 @@ class %controllerName% extends AbstractBaseController
 
                 $postArray = $input->except('btnSubmit')->post();
 
-				%model Columns%				
+				%model Columns%
 
                 if ($%modelName%->save()) {
                     Url::redirectTo('%controllerName%/index/'.Url::segment(4));

@@ -1,0 +1,16 @@
+
+#tracyBluescreenError {
+    background: none repeat scroll 0 0 #3E3E3E !important;box-shadow: 0 0 56px #666666 inset;
+    /*background: #4B93D4   !important; box-shadow: 0 0 56px rgba(0, 0, 0, 0.3) inset;*/
+}
+#tracyBluescreen div.inner{box-shadow: 0 0 6px rgba(0, 0, 0, 0.3) inset;}
+#tracyBluescreenError p { font-weight:bold;}
+#tracyBluescreen ul { background:#DADADA !important;}
+#tracyBluescreen h1 { color: #CD3F3F;}
+#tracyBluescreen ol { line-height: 2.7;}
+#tracyBluescreen pre, #tracyBluescreen table { background: #E6FFFF; }
+#tracyBluescreen pre, #tracyBluescreen table {
+    background: none repeat scroll 0 0 #FFFFE8 !important;
+    box-shadow: 0 0 0px #555555 inset;
+}
+.heading-blue { color:#0000FF;}

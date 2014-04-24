@@ -26,14 +26,9 @@ use Closure;
  * @Copyright           :  Copyright (c) 2013 - 2014,
  * @Link	            :  http://www.cygniteframework.com
  * @Since	            :  Version 1.0
- * @Filesource
- * @Warning             :  Any changes in this library can cause abnormal behaviour of the framework
- *
- *
+ * @FileSource
  */
-/*
- *
- *
+/**
  * <code>
  *  $this->instance =Security::instance(
  *          function ($instance) {
@@ -41,11 +36,7 @@ use Closure;
  *          }
  *       );
  *  $this->instance->sanitize($string);
- *
- *
  * </code>
- *
- *
  * Inspired by TravianZ and Kohana security library http://kohanaphp.com/
  *
  */
@@ -107,21 +98,6 @@ class Security
     {
         $this->checkMagicQuoteRuntime();
 
-        /*
-        if (get_magic_quotes_gpc()) {
-            $in = array(&$_GET, &$_POST, &$_COOKIE);
-            while (list($k,$v) = each($in)) {
-                foreach ($v as $key => $val) {
-                    if (!is_array($val)) {
-                        $in[$k][$key] = stripslashes($val);
-                        continue;
-                    }
-                    $in[] =& $in[$k][$key];
-                }
-            }
-            unset($in);
-        } */
-
         if (get_magic_quotes_gpc()) {
             // This is also deprecated. See http://php.net/magic_quotes for more information.
             $this->magicQuotesGpc = true;
@@ -147,6 +123,9 @@ class Security
         $_REQUEST = array_merge($this->get, $this->post);
     }
 
+    /**
+     * Check magic quote and disable it
+     */
     private function checkMagicQuoteRuntime()
     {
         // Check for magic quotes
@@ -156,6 +135,9 @@ class Security
         }
     }
 
+    /**
+     * disable all global variable
+     */
     private function disableGlobals()
     {
         // Same effect as disabling register_globals
@@ -168,6 +150,9 @@ class Security
         }
     }
 
+    /**
+     * @return array
+     */
     private function cleanPostArray()
     {
         $this->post = $_POST;
@@ -184,6 +169,9 @@ class Security
 
     }
 
+    /**
+     * @return array
+     */
     private function cleanGetArray()
     {
         if (is_array($_GET)) {
@@ -198,6 +186,9 @@ class Security
 
     }
 
+    /**
+     * @return array
+     */
     private function cleanCookieArray()
     {
         if (is_array($_COOKIE)) {
@@ -211,7 +202,7 @@ class Security
         return $_COOKIE;
 
     }
-    
+
     /**
      * Cross site filtering (XSS). Recursive.
      *
@@ -224,16 +215,16 @@ class Security
         if (empty($data)) {
             return $data;
         }
-            
+
         // Recursive loop for arrays
         if (is_array($data)) {
             foreach ($data as $key => $value) {
                 $data[$key] = $this->xssClean($data);
             }
-            
+
             return $data;
         }
-        
+
         // Fix &entity\n;
         $data = $this->fixEntity($data);
 
@@ -268,25 +259,9 @@ class Security
                 '',
                 $data
             );
-            /*
-            $data = htmlspecialchars($data, ENT_QUOTES, 'UTF-8');
-
-            $data = preg_replace_callback(
-                '!&amp;#((?:[0-9]+)|(?:x(?:[0-9A-F]+)));?!i',
-                array(__CLASS__, 'decode'),
-                $data
-            );
-
-            $data = preg_replace(
-                '!<([A-Z]\w*)
-                (?:\s* (?:\w+) \s* = \s* (?(?=["\']) (["\'])(?:.*?\2)+ | (?:[^\s>]*) ) )*
-                \s* (\s/)? >!ix',
-                '<\1\5>',
-                strip_tags(html_entity_decode($data))
-            );*/
 
         } while ($old_data !== $data);
-        
+
         return htmlentities($data);
     }
 
@@ -432,7 +407,7 @@ class Security
 
         return $data;
     }
-    
+
     /**
      * Escapes data.
      *
@@ -446,17 +421,17 @@ class Security
             foreach ($data as $key => $value) {
                 $new_array[$this->cleanKeys($key)] = $this->sanitize($value);
             }
-            
+
             return $new_array;
         }
-        
+
         if ($this->magicQuotesGpc === true) {
             // Get rid of those pesky magic quotes!
             $data = stripslashes($data);
         }
-        
+
         $data = $this->xssClean($data);
-        
+
         return $data;
     }
 

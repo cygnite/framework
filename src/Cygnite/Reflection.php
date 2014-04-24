@@ -1,6 +1,9 @@
 <?php
 namespace Cygnite;
 
+use ReflectionClass;
+use ReflectionProperty;
+
 if (!defined('CF_SYSTEM')) {
     exit('External script access not allowed');
 }
@@ -21,7 +24,8 @@ if (!defined('CF_SYSTEM')) {
  * @Package             :  Packages
  * @Sub Packages        :
  * @Filename            :  Reflection
- * @Description         :  Reflection class is used to get reflection class variables and make accessible for callea
+ * @Description         :  Reflection class is used to get reflection class variables
+ *                         and make accessible for callee
  * @Author              :  Sanjoy Dey
  * @Copyright           :  Copyright (c) 2013 - 2014,
  * @Link	            :  http://www.cygniteframework.com
@@ -33,56 +37,66 @@ if (!defined('CF_SYSTEM')) {
 
 class Reflection
 {
-	private $reflectionClass;
-	
+	public $reflectionClass;
+
 	//properties
 	private $properties;
 
+    public $reflectionProperty;
+
     /**
 	 * Get instance of your class using Reflection api
-	 * 
-	 * @access public 
+	 *
+	 * @access public
 	 * @param  $class
+     * @throws \Exception
 	 * @return object
-	 * 
 	 */
     public static function getInstance($class= null)
     {
         $reflector = null;
-        
+
         if (class_exists($class)) {
-            $reflector = new \ReflectionClass('\\'.$class);
+           throw new \Exception(sprintf("Class %s not found", $class));
+        }
+
+        $reflector = new ReflectionClass('\\'.$class);
 
             return new $reflector->name;
         }
-    }
-	
+
 	/**
 	 * Set your class to reflection api
-	 * 
-	 * @access public 
+	 *
+	 * @access public
 	 * @param  $class
 	 * @return void
-	 * 
+	 *
 	 */
 	public function setClass($class)
 	{
-		$this->reflectionClass = new \ReflectionClass(get_class($class));		
+        if (is_object($class)) {
+            $class = get_class($class);
 	}
-	
+
+		$this->reflectionClass = new ReflectionClass($class);
+
+        return $this;
+	}
+
 	/**
 	 * Make your protected or private property accessible
-	 * 
-	 * @access public 
+	 *
+	 * @access public
 	 * @param  $property
 	 * @return string/ int property value
-	 * 
+	 *
 	 */
 	public function makePropertyAccessible($property)
 	{
-		$reflectionProperty = $this->reflectionClass ->getProperty($property);
-        $reflectionProperty->setAccessible(true);
-        
-        return $reflectionProperty->getValue($this->reflectionClass);	
+		$this->reflectionProperty = $this->reflectionClass->getProperty($property);
+        $this->reflectionProperty->setAccessible(true);
+
+        return $this->reflectionProperty->getValue($this->reflectionClass);
 	}
 }

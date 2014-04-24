@@ -4,30 +4,53 @@ namespace Cygnite\Base;
 use Closure;
 use Cygnite\Reflection;
 
+/**
+ *  Cygnite Framework
+ *
+ *  An open source application development framework for PHP 5.3 or newer
+ *
+ *   License
+ *
+ *   This source file is subject to the MIT license that is bundled
+ *   with this package in the file LICENSE.txt.
+ *   http://www.cygniteframework.com/license.txt
+ *   If you did not receive a copy of the license and are unable to
+ *   obtain it through the world-wide-web, please send an email
+ *   to sanjoy@hotmail.com so I can send you a copy immediately.
+ *
+ * @Package            :  Packages
+ * @Sub Packages       :  Base
+ * @Filename           :  Event
+ * @Description        :  Create event and trigger it dynamically. Allow you
+ *                        event driven programming.
+ * @Copyright          :  Copyright (c) 2013 - 2014,
+ * @Link	           :  http://www.cygniteframework.com
+ * @Since	           :  Version 1.0
+ *
+ *
+ */
+
 class Event
 {
     protected $events = array();
 
-	/*
-    public static function __callStatic($method, $arguments)
-    {
-        var_dump($method);
-
-        if ($method == 'attach') {
-            Reflection::getInstance();
-            //return call_user_func_array(array(, substr($method, 0, 6)), $params);
-        } else if ($method == 'trigger') {
-
-        }
-    }*/
-
+    /**
+     * @param       $method
+     * @param array $arguments
+     * @return $this
+     */
     public function __call($method, $arguments = array())
 	{
 		if ($method == 'instance') {
 			return $this;
 		}
 	}
-	
+
+    /**
+     * @param       $method
+     * @param array $arguments
+     * @return mixed
+     */
     public static function __callStatic($method, $arguments = array())
     {
 		if ($method == 'instance') {
@@ -35,11 +58,12 @@ class Event
 		}
     }
 
+    /**
+     * @param $eventName
+     * @param $callback
+     */
     public function attach($eventName, $callback)
     {
-        /*if (is_array($eventName)) {
-
-        }*/
 
         if (!isset($this->events[$eventName])) {
             $this->events[$eventName] = array();
@@ -48,11 +72,14 @@ class Event
         $this->events[$eventName][] = $callback;
     }
 
-
+    /**
+     * @param       $eventName
+     * @param array $data
+     * @return mixed
+     */
     public function trigger($eventName, $data = array())
     {
         foreach ($this->events[$eventName] as $callback) {
-             // echo $eventName."<br>";
 
             if (is_object($callback) && ($callback instanceof Closure)) {
                 $callback($eventName, $data);
@@ -68,9 +95,8 @@ class Event
             }
 
             if (strpos($callback, '::')) {
-                $class = '';
-                //show($callback);
-                $expression = "";
+                $class = null;
+                $expression = array();
                 $expression = explode('::', $callback);
                 //show($expression);
                 $class = '\\'.str_replace('_', '\\', $expression[0]);
@@ -84,6 +110,9 @@ class Event
         }
     }
 
+    /**
+     * @param string $event
+     */
     public function flush($event = "")
     {
         if ($event !== "") {
