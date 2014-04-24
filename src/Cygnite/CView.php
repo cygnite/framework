@@ -22,9 +22,10 @@ if (!defined('CF_SYSTEM')) {
  *   to sanjoy@hotmail.com so I can send you a copy immediately.
  *
  * @Package               :  Packages
- * @Sub Packages          :  Base
- * @Filename              :  CFView
- * @Description           :  This file is used to render view page.
+ * @Sub Packages          :  Cygnite
+ * @Filename              :  CView
+ * @Description           :  This class used to render your view page or
+ *                           template.
  * @Author                :  Sanjoy Dey
  * @Copyright             :  Copyright (c) 2013 - 2014,
  * @Link	              :  http://www.cygniteframework.com
@@ -55,7 +56,7 @@ class CView
 
     private static $uiContent;
 
-    private static $content;
+    public $content;
 
     public $data =array();
 
@@ -65,7 +66,7 @@ class CView
 
     protected $templateExtension = '.html.twig';
 
-    private $viewsFilePath = 'views';
+    protected $viewsFilePath = 'views';
 
     public $twigLoader;
 
@@ -75,9 +76,16 @@ class CView
 
     protected $autoReload = false;
 
+    /**
+     * @param Template $template
+     */
     public function __construct(Template $template)
     {
-        $this->views = getcwd().DS.APPPATH.DS.$this->viewsFilePath.DS;
+        $viewPath = (strpos($this->viewsFilePath, '.') == true)?
+            str_replace('.', DS, $this->viewsFilePath) :
+            $this->viewsFilePath;
+
+        $this->views = getcwd().DS.APPPATH.DS.$viewPath.DS;
 
         if ($this->templateEngine !== false && $this->templateEngine == 'twig') {
 
@@ -108,6 +116,7 @@ class CView
 
     /**
     * Magic Method for handling dynamic data access.
+    * @param $key
     */
     public function __get($key)
     {
@@ -115,7 +124,9 @@ class CView
     }
 
     /**
-    * Magic Method for handling the dynamic setting of data.
+    * Magic Method to save data into array.
+    * @param $key
+    * @param $value
     */
     public function __set($key, $value)
     {
@@ -145,7 +156,13 @@ class CView
             strtolower(str_replace('Controller' , '', $controller)
         );
 
-        $path= getcwd().DS.APPPATH.DS.'views'.DS.$controller.DS;
+        $viewPath = null;
+
+        $viewPath = (strpos($this->viewsFilePath, '.') == true)?
+            str_replace('.', DS, $this->viewsFilePath) :
+            $this->viewsFilePath;
+
+        $path= getcwd().DS.APPPATH.DS.$viewPath.DS.$controller.DS;
 
         if (is_object($this->tpl) &&
             is_file($path.$view.$this->templateExtension
@@ -172,7 +189,8 @@ class CView
                 self::$uiContent =$ui_content;
                 $this->view_path = $path.self::$name[$view].'.view'.EXT;
                 $this->loadView();
-                return self::$content;
+                return $this->content;
+                //return $this;
             }
 
             $this->view_path = $path.self::$name[$view].'.view'.EXT;
@@ -182,11 +200,18 @@ class CView
 
     }
 
+    /**
+     * @param array $sections
+     */
     protected function createSections(array $sections)
     {
         $this->assignToProperties($sections);
     }
 
+    /**
+     * @param $resultArray
+     * @throws \Exception
+     */
     private function assignToProperties($resultArray)
     {
         try {
@@ -201,6 +226,11 @@ class CView
         }
     }
 
+    /**
+     * @param       $layout
+     * @param array $results
+     * @return string
+     */
     public function setLayout($layout, array $results)
     {
         $trace = debug_backtrace();
@@ -250,6 +280,11 @@ class CView
 
     }
 
+    /**
+     * @param $page
+     * @return string
+     * @throws \Exception
+     */
     public function renderPartial($page)
     {
         //$this->requestedController.
@@ -282,6 +317,10 @@ class CView
         return $this->bufferOutput();
     }
 
+    /**
+     * @param $arrayResult
+     * @return string
+     */
     public function with($arrayResult)
     {
        // var_dump($this->tpl);exit;
@@ -295,9 +334,13 @@ class CView
         }
 
         return $this->loadView();
-        
+
     }
 
+    /**
+     * @return string
+     * @throws \Exception
+     */
     private function loadView()
     {
         try {
@@ -309,6 +352,9 @@ class CView
         return $this->bufferOutput();
     }
 
+    /**
+     * @return string
+     */
     private function bufferOutput()
     {
         ob_start();
@@ -316,7 +362,7 @@ class CView
         ob_get_clean();
 
         if (isset(self::$uiContent) && self::$uiContent == true) {
-            self::$content =  $output;
+            $this->content =  $output;
         } else {
             return $output;
         }

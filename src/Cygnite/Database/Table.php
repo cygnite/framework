@@ -59,7 +59,8 @@ class Table extends Connections
     {
         $query = ($queryString == null) ? $this->query : $queryString;
 
-        $this->prepareQuery = $this->_connection->query($query);
+        $this->prepareQuery = $this->_connection->prepare($query);
+        $this->prepareQuery->execute();
 
         return $this;
     }
@@ -72,7 +73,7 @@ class Table extends Connections
     public function makeMigration($tableName = 'migrations')
     {
         $this->connect(
-            trim(Connections::getDefaultConnection()),
+            trim($this->getDefaultConnection()),
             $tableName
         );
 

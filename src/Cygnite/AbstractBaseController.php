@@ -1,6 +1,7 @@
 <?php
 namespace Cygnite;
 
+use Exception;
 use Cygnite\Application;
 use Cygnite\Template;
 
@@ -21,8 +22,8 @@ use Cygnite\Template;
  * @Package                   :  Packages
  * @SubPackages               :  Cygnite
  * @Filename                  :  Base Controller
- * @Description               :  This is the base loader of controller.
- *                               Controllers extends all base functionality from this BaseController.
+ * @Description               :  This is the base controller of your application.
+ *                               Controllers extends all base functionality of BaseController class.
  * @Author                    :  Cygnite Dev Team
  * @Copyright                 :  Copyright (c) 2013 - 2014,
  * @Link	                  :  http://www.cygniteframework.com
@@ -33,9 +34,7 @@ use Cygnite\Template;
 
 abstract class AbstractBaseController extends CView
 {
-
-    public static $instance;
-
+    public $app;
     /**
      * Constructor function
      *
@@ -45,10 +44,11 @@ abstract class AbstractBaseController extends CView
     public function __construct()
     {
         parent::__construct(new Template);
+        $this->app = Application::instance();
     }
 
     //prevent clone.
-    public function __clone()
+    private function __clone()
     {
 
     }
@@ -59,18 +59,19 @@ abstract class AbstractBaseController extends CView
      */
     public function __call($method, $arguments)
     {
-        throw new \Exception("Undefined method [$method] called by ".get_class($this).' Controller');
-
-
+        throw new Exception("Undefined method [$method] called by ".get_class($this).' Controller');
     }
 
+    /**
+     * @param $key
+     * @return @instance instance of your class
+     */
     protected function get($key)
     {
-        //return new {$key};
+        $class = null;
+        $class = explode('.', $key);
+        $class = array_map('ucfirst', $class);
+        $class = implode('\\', $class);
+        return $this->app->make('\\'.$class);
     }
-
-    public function getInstance($class)
-    {
-        //return Application::load()->$class;
-    }
-}
+ }

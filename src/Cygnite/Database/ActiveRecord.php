@@ -786,9 +786,9 @@ use Cygnite\Database\Exceptions\DatabaseException;
         //create where condition with and if value is passed as array
         if (is_string($type) && !is_null($type)) {
             if ($type === 'all' || $type == '*') {
-                $this->_selectColumns = '*';
+                $this->_selectColumns = $this->tableName.'.*';
             } else {
-                $this->_selectColumns = (string) $type; // Need to split the column name and add quotes
+                $this->_selectColumns = $this->tableName.'.'.(string) $type; // Need to split the column name and add quotes
             }
         } else {
             throw new Exception("Accepted parameters should be string format.");
@@ -853,7 +853,7 @@ use Cygnite\Database\Exceptions\DatabaseException;
 
             foreach ($resultArray as $row) {
 
-                $whereField = "`".$row['0']."`";
+               $whereField = $this->tableName.".`".$row['0']."`";
 
                 if ($row['0'] === null) {
                     $whereField = '';
@@ -888,7 +888,7 @@ use Cygnite\Database\Exceptions\DatabaseException;
         }
 
         $this->_whereType = '=';
-        $this->_columnWhere = $columnName;
+        $this->_columnWhere = $this->tableName.'.'.$columnName;
         $this->_fromWhere = " '".$where."' ";
 
         if (!is_null($type)) {
@@ -1085,7 +1085,7 @@ use Cygnite\Database\Exceptions\DatabaseException;
              $data = $this->fetchAs($statement, $fetchMode);
 
             if ($statement->rowCount() > 0) {
-                return $data;
+                return new \ArrayObject($data);
             }
 
         } catch (PDOException $ex) {
@@ -1172,10 +1172,10 @@ use Cygnite\Database\Exceptions\DatabaseException;
 
             $this->debugQuery =
             "SELECT ".$this->_selectColumns." FROM `".$this->tableName.'`'.$where.
-                                ' '.$groupBy.' '.$orderBy.$limit;
+                                ' '.$groupBy.' '.$orderBy.' '.$limit;
             $this->sqlQuery =
             "SELECT ".$this->_selectColumns." FROM `".$this->tableName.'` '.$where.
-                                ' '.$groupBy.' '.$orderBy.$limit;
+                                ' '.$groupBy.' '.$orderBy.' '.$limit;
 
         } else {
 
@@ -1184,10 +1184,10 @@ use Cygnite\Database\Exceptions\DatabaseException;
                 '';
              $this->debugQuery =
              "SELECT ".$this->_selectColumns." FROM `".$this->tableName.'` '.$where.' '.
-                $groupBy.' '.$orderBy.$limit;
+                $groupBy.' '.$orderBy.' '.$limit;
             $this->sqlQuery =
             "SELECT ".$this->_selectColumns." FROM `".$this->tableName.'` '.$where.' '.
-                $groupBy.' '.$orderBy.$limit;
+                $groupBy.' '.$orderBy.' '.$limit;
         }
     }
 
@@ -1202,7 +1202,11 @@ use Cygnite\Database\Exceptions\DatabaseException;
     */
     public function query($sql)
     {
+		try {
         $this->_statement = $this->pdo->query($sql);
+		} catch (\PDOException $e) {
+			throw $e;
+		}
 
         return $this;
     }
