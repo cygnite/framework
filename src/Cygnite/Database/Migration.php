@@ -56,4 +56,22 @@ class Migration extends ActiveRecord
             return false;
         }
     }
+
+    /**
+     * Delete rows using migration
+     *
+     * @param       $table
+     * @param array $attributes
+     * @return bool
+     */
+    public function delete($table, $attributes)
+    {
+        $this->tableName = $table;
+
+        if (is_array($attributes)) {
+            return $this->trash($attributes, true);
+        } else if (is_string($attributes)){
+            return $this->trash($attributes);
+        }
+    }
 }

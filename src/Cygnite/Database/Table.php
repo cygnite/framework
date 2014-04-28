@@ -37,18 +37,19 @@ class Table extends Connections
     public function getColumns()
     {
         $conn = null;
+        $me = $this;
         $conn = $this->_connection;
-        Schema::getInstance(
+        Schema::instance(
             $this,
-            function($table) {
-                $table->tableName = $this->tableName;
+            function($table) use ($me) {
+                $table->tableName = $me->tableName;
                 $columns = null;
                 //$table->setDbConnection($this->_connection, $this->database);
                 $table->setTableSchema();
                 //$columns = $conn->query($table->schema)->fetchAll();
-                $columns = $this->query($table->schema)->getAll();
+                $columns = $me->query($table->schema)->getAll();
 
-                $this->schemaInstance = $columns;
+                $me->schemaInstance = $columns;
             }
         );
 
@@ -77,11 +78,13 @@ class Table extends Connections
             $tableName
         );
 
+        $me = $this;
+
         //Create migration table in order to save migrations information
-        Schema::getInstance($this,
-            function($table) use ($tableName){
+        Schema::instance($this,
+            function($table) use ($tableName, $me){
                 $table->tableName = $tableName;
-                $table->database = trim($this->getDefaultConnection());
+                $table->database = trim($me->getDefaultConnection());
                 $table->create(
                     array(
                         array('name'=> 'id', 'type' => 'int', 'length' => 11,

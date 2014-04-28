@@ -26,14 +26,15 @@ if (!defined('CF_SYSTEM')) {
  *   obtain it through the world-wide-web, please send an email
  *   to sanjoy@hotmail.com so I can send you a copy immediately.
  *
- * @Package                     :  Cygnite
- * @Sub Packages          : Exception
- * @Filename                  :  Handler.php
- * @Description            :  This file is used to Define all necessary configurations for Tracy Exception handler Component
- * @Author                    :  Sanjoy Dey
+ * @Package               :  Cygnite
+ * @Sub Packages          :  Exception
+ * @Filename              :  Handler.php
+ * @Description           :  This file is used to Define all necessary configurations for
+ *                           Tracy debugger component
+ * @Author                :  Sanjoy Dey
  * @Copyright             :  Copyright (c) 2013 - 2014,
- * @Link	                     :  http://www.cygniteframework.com
- * @Since	               :  Version 1.0
+ * @Link	              :  http://www.cygniteframework.com
+ * @Since	              :  Version 1.0
  * @FileSource
  *
  */
@@ -41,7 +42,7 @@ if (!defined('CF_SYSTEM')) {
 class Handler implements ExceptionInterface
 {
 
-    public $name = '';
+    public $name = 'Cygnite Framework';
 
     private static $style = 'pretty';
 
@@ -139,6 +140,12 @@ class Handler implements ExceptionInterface
         return isset($this->debugger) ? $this->debugger : null;
     }
 
+    /**
+     * Get the self instance of handler
+     *
+     * @param callable $callback
+     * @return mixed
+     */
     public static function register(Closure $callback)
     {
         if ($callback instanceof Closure) {
@@ -146,19 +153,24 @@ class Handler implements ExceptionInterface
         }
     }
 
+    /**
+     * Run the debugger to handle all exception and
+     * display stack trace
+     *
+     *
+     */
     public function run()
     {
         $handler = $this;
-
-        if (!is_null($path = $handler->assetsPath())) {
-            $handler->includeAssets($path);
-        }
-
         $this->setCollapsePaths();
 
         //Add new panel to debug bar
         $this->addPanel(
             function($e) use($handler) {
+
+                if (!is_null($path = $handler->assetsPath())) {
+                    $contents = $handler->includeAssets($path);
+                }
 
                 if (!is_null($e)) {
 
@@ -173,7 +185,7 @@ class Handler implements ExceptionInterface
                         </span>
                         </h1>
                         <p> Version : '.Application::version().' </p>
-                        '
+                        <style type="text/css" class="tracy-debug">'.$contents.'</style>'
                     );
                 }
             }
@@ -227,20 +239,21 @@ class Handler implements ExceptionInterface
         Debugger::log($e);
     }
 
+    /**
+     * @param $path
+     * @return string
+     * @throws \Exception
+     */
     private function includeAssets($path)
     {
         $vendor = dirname(dirname(dirname(dirname(dirname(dirname(__FILE__))))));
         $stylePath = $vendor."/tracy/tracy/src/Tracy/templates/bluescreen.css";
 
         if (!file_exists($stylePath)) {
-            throw new Exception("Tracy debugger not found in vendor directory");
+            throw new Exception("Tracy debugger not found inside vendor directory");
         }
 
-        $contents = file_get_contents($path.self::$style.'.css');
-
-        if( strpos(file_get_contents($stylePath), '@Author:Cygnite') == false) {
-            @file_put_contents($stylePath,$contents, FILE_APPEND);
-        }
+        return file_get_contents($path.self::$style.'.css');
     }
 
     public function assetsPath()
@@ -288,5 +301,14 @@ class Handler implements ExceptionInterface
                 unset($config);
             }
         );
+    }
+
+    /**
+     * @param $data
+     * @param $type
+     */
+    public function dump($data, $type)
+    {
+        Debugger::barDump($data, $type);
     }
 }

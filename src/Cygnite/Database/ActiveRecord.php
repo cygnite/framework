@@ -152,7 +152,7 @@ use Cygnite\Database\Exceptions\DatabaseException;
         }
 
         if (!property_exists($model, 'database')) {
-            $this->database = Connections::getDefaultConnection();
+            $this->database = $this->getDefaultConnection();
         }
 
         if (is_null($this->database)) {
@@ -161,8 +161,8 @@ use Cygnite\Database\Exceptions\DatabaseException;
             );
         }
 
-        $this->pdo = Connections::getConnection($this->database);
-
+        //$this->pdo = Connections::getConnection($this->database);
+        $this->setDatabaseConnection($this->getConnection($this->database));
     }
 
     public function setAttributes($attributes = array())
@@ -475,7 +475,7 @@ use Cygnite\Database\Exceptions\DatabaseException;
         /** @var $method TYPE_NAME */
         if (in_array($method, $this->validFinders) && $method == 'findBySql') {
             $results = array();
-            $fetchObject = $this->pdo->prepare(trim($arguments[0]));
+            $fetchObject = $this->getDatabaseConnection()->prepare(trim($arguments[0]));
             $fetchObject->execute();
             $results = $this->fetchAs($fetchObject);
             return $results;
@@ -606,11 +606,11 @@ use Cygnite\Database\Exceptions\DatabaseException;
            ($fields) VALUES"." ($values)".";";
 
         try {
-            //$this->pdo->quote($string, $parameter_type=null); have to write a method to escape strings
-            $statement = $this->pdo->prepare($query);
+            //$this->getDatabaseConnection()->quote($string, $parameter_type=null); have to write a method to escape strings
+            $statement = $this->getDatabaseConnection()->prepare($query);
 
             if ( true == $statement->execute(array_values($this->attributes)))  {
-                $this->{$this->primaryKey} = (int) $this->pdo->lastInsertId();
+                $this->{$this->primaryKey} = (int) $this->getDatabaseConnection()->lastInsertId();
 
                 if (method_exists($this, 'afterCreate')) {
                     Event::instance()->trigger('afterCreate', $this);
@@ -671,7 +671,7 @@ use Cygnite\Database\Exceptions\DatabaseException;
 
             //$this->debugLastQuery($debugQuery);
         try {
-            $statement = $this->pdo->prepare($query);
+            $statement = $this->getDatabaseConnection()->prepare($query);
             $statement->bindValue(':column', $updateValue);
             $statement->execute();
 
@@ -748,7 +748,7 @@ use Cygnite\Database\Exceptions\DatabaseException;
 
         /** @var $exception TYPE_NAME */
         try {
-            $statement = $this->pdo->prepare($sqlQuery);
+            $statement = $this->getDatabaseConnection()->prepare($sqlQuery);
 
             if (is_array($values) && empty($values)) {
                 $statement->bindValue(':where', $value);
@@ -1078,7 +1078,7 @@ use Cygnite\Database\Exceptions\DatabaseException;
           $this->buildQuery($groupBy, $orderBy, $limit);
 
         try {
-             $statement = $this->pdo->prepare($this->sqlQuery);
+             $statement = $this->getDatabaseConnection()->prepare($this->sqlQuery);
              $this->setDbStatement($this->database, $statement);
              $statement->bindValue(':where', $this->_fromWhere);
              $statement->execute();
@@ -1193,23 +1193,32 @@ use Cygnite\Database\Exceptions\DatabaseException;
 
     ########
 
-    /*
-    * Build user raw query
-    *
-    * @access public
-    * @param  string $sql
-    * @return object pointer $this
-    */
-    public function query($sql)
-    {
-		try {
-        $this->_statement = $this->pdo->query($sql);
-		} catch (\PDOException $e) {
-			throw $e;
-		}
+     /**
+      * Build raw queries
+      *
+      * @access public
+      * @param  string $sql
+      * @param array   $attributes
+      * @throws \Exception|\PDOException
+      * @return object pointer $this
+      */
+     public function query($sql, $attributes = array())
+     {
+         try {
+             $this->_statement = $this->getDatabaseConnection()->prepare($sql);
 
-        return $this;
-    }
+             if (!empty($attributes)) {
+                 $this->_statement->execute($attributes);
+             } else {
+                 $this->_statement->execute();
+             }
+
+         } catch (\PDOException $e) {
+             throw new Exception($e->getMessage());
+         }
+
+         return $this;
+     }
 
     /*
     * Execute user raw queries
@@ -1233,24 +1242,17 @@ use Cygnite\Database\Exceptions\DatabaseException;
         return $this->_statement->fetch();
     }
 
-    /*
-    * get all rows of table
-    *
-    * @access public
-    * @param  $fetchModel fetch type
-    * @return array results
-    */
-    public function getAll($fetchMode = \PDO::FETCH_OBJECT)
-    {
-        $data = array();
-        ob_start();
-        $data  = $this->_statement->fetchAll($fetchMode);
-
-        ob_end_clean();
-        ob_end_flush();
-
-        return $data;
-    }
+     /**
+      * get all rows of table
+      *
+      * @access   public
+      * @internal param \Cygnite\Database\fetch $fetchModel type
+      * @return array results
+      */
+     public function getAll()
+     {
+         return $this->_statement->fetchAll(\PDO::FETCH_CLASS, get_called_class());
+     }
 
     /**
      * @param string     $req       : the query on which link the values
@@ -1297,10 +1299,20 @@ use Cygnite\Database\Exceptions\DatabaseException;
         //echo $sql;
     }
 
-    public function getConnection($connection)
-    {
-        return is_resource($this->pdo) ? $this->pdo : null;
-    }
+     public function setDatabaseConnection($connection)
+     {
+         $this->pdo = $connection;
+     }
+
+     /**
+      * Get Database Connection
+      *
+      * @return null|object
+      */
+     public function getDatabaseConnection()
+     {
+         return is_object($this->pdo) ? $this->pdo : null;
+     }
 
 
 
@@ -1370,7 +1382,7 @@ use Cygnite\Database\Exceptions\DatabaseException;
     {
         $sql = $explain = "";
         $sql = 'EXPLAIN EXTENDED '.$this->sqlQuery;
-        $explain = $this->pdo->query($sql)->fetchAll(\PDO::FETCH_ASSOC);
+        $explain = $this->getDatabaseConnection()->query($sql)->fetchAll(\PDO::FETCH_ASSOC);
         $html = "";
         $html  .= "<html> <head><title>Explain Query</title>
                            <style type='text/css'>
