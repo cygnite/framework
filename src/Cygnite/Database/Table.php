@@ -91,11 +91,36 @@ class Table extends Connections
                             'increment' => true, 'key' => 'primary'),
                         array('name'=> 'migration', 'type' => 'string', 'length' =>255),
                         array('name'=> 'version', 'type' => 'int', 'length' =>11),
+                        array('name'=> 'created_at',  'type' => 'datetime',
+                        'length'  =>"DEFAULT '0000-00-00 00:00:00'"
+                        ),
                     ),
                     'InnoDB',
                     'latin1'
                 )->run();
             }
         );
+    }
+
+    public function updateMigrationVersion($migration)
+    {
+        $date = new \DateTime("now");
+
+        $date->setTimezone(new \DateTimeZone(SET_TIME_ZONE));
+
+        $migrationName = $migration->getVersion().$migration->getMigrationClass();
+
+        $this->connect(
+            trim($this->getDefaultConnection()),
+            'migrations'
+        );
+
+        $sql = "INSERT INTO migrations (`migration`,  `created_at`)
+                VALUES('".$migrationName."',
+                          '".$date->format('Y-m-d H:i:s')."'
+                      )";
+
+        return $this->_connection->prepare($sql)->execute();
+
     }
 }

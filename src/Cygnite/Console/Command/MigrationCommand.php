@@ -31,8 +31,8 @@ use Symfony\Component\Console\Formatter\OutputFormatterStyle;
  *
  * @Package               :  Console
  * @Filename             :  MigrationCommand.php
- * @Description        :  Migration Command class used to take care of your database migrations using Cygnite CLI. 
- *                                         Cygnite Cli driven by Symfony2 Console Component. 
+ * @Description        :  Migration Command class used to take care of your database migrations using Cygnite CLI.
+ *                                         Cygnite Cli driven by Symfony2 Console Component.
  * @Author                :  Sanjoy Dey
  * @Copyright         :  Copyright (c) 2013 - 2014,
  * @Link	                  :  http://www.cygniteframework.com
@@ -45,7 +45,7 @@ class MigrationCommand extends Command
 {
     private $name = 'migrate';
 
-    private $table;
+    public $table;
 
     private $migrationDir;
 
@@ -54,7 +54,7 @@ class MigrationCommand extends Command
         //cygnite migrate:init
         $this->setName($this->name)
              ->setDescription('Migrate database By Cygnite CLI')
-			 //->addArgument('name', null, InputArgument::OPTIONAL, 'Migration Name ?')
+              //->addArgument('name', null, InputArgument::OPTIONAL, 'Migration Name ?')
              //->addArgument('version',null, InputArgument::OPTIONAL, 'Your migration version')
              ->addArgument('type', null, InputArgument::OPTIONAL, '')
              //->addOption('yell', null, InputOption::VALUE_NONE, 'If set, the task will yell in uppercase letters')
@@ -80,6 +80,7 @@ class MigrationCommand extends Command
         } else {
             $migration->updateMigration('down');
         }
+        $output->writeln("Migration completed Successfully!");
     }
 
     public function setSchema(Table $table)
