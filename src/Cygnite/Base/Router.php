@@ -1,11 +1,12 @@
 <?php
 namespace Cygnite\Base;
 
-use Cygnite\Helpers\Helper;
-use ErrorException;
-use Reflection;
-use Cygnite\Inflector;
 use Exception;
+use Reflection;
+use ErrorException;
+use Cygnite\Application;
+use Cygnite\Inflector;
+use Cygnite\Helpers\Helper;
 
 if (!defined('CF_SYSTEM')) {
     exit('No External script access allowed');
@@ -27,19 +28,19 @@ if (!defined('CF_SYSTEM')) {
  * @Package            :  Packages
  * @Sub Packages       :  Base
  * @Filename           :  Router
- * @Description        :  This file is used to route user requests
+ * @Description        :  This file is used to route user requests.
+ *                        This class is highly inspired and few part of the code
+ *                        borrowed from Barmus Router.
  * @Copyright          :  Copyright (c) 2013 - 2014,
  * @Link	           :  http://www.cygniteframework.com
  * @Since	           :  Version 1.0
- * @warning            :  Any changes in this library can cause abnormal behaviour of the framework
- *
  */
 /**
 * @author	Bram(us) Van Damme
-* @author  Sanjoy Dey
+* @author   Sanjoy Dey
 */
 
-class Router
+class Router implements RouterInterface
 {
     /**
      * @var array The route patterns and their handling functions
@@ -50,7 +51,7 @@ class Router
     /**
      * @var array The before middle-ware route patterns and their handling functions
      */
-    private $befores = array();
+    private $before = array();
 
 
     /**
@@ -58,62 +59,75 @@ class Router
      */
     private $notFound;
 
+	 /**
+     * @var base url
+     */
+	public $currentUrl;
+
+	public $data = array();
 
     /**
-     * Store a before middleware route and a handling function to be executed
+     * @var string Application namespace
+     */
+    private $namespace = '\\Apps\\Controllers\\';
+
+    private $controller;
+
+    private $controllerWithNS;
+
+    private $method;
+
+    public $base;
+
+
+    /**
+     * Store a before middle-ware route and a handling function to be executed
      * when accessed using one of the specified methods
      *
-     * @false string $methods Allowed methods, | delimited
-     * @false string $pattern A route pattern such as /about/system
-     * @false object $fn The handling function to be executed
+     * @param string $methods Allowed methods, | delimited
+     * @param string $pattern A route pattern such as /about/system
+     * @param object $func The handling function to be executed
      */
-    public function before($methods, $pattern, $fn)
+    public function before($methods, $pattern, $func)
     {
-
         $pattern = '/' .trim($pattern, '/');
 
         foreach (explode('|', $methods) as $method) {
-            $this->befores[$method][] = array(
+            $this->before[$method][] = array(
                 'pattern' => $pattern,
-                'fn' => $fn
+                'fn' => $func
             );
         }
 
     }
 
+    /**
+     * Set controller and method name here
+     * @param $arguments
+     */
+    private function setUpControllerAndMethodName($arguments)
+    {
+        $expression = Helper::stringSplit($arguments[0]);
+        $this->controller = Inflector::instance()->covertAsClassName($expression[0]).'Controller';
+        $this->controllerWithNS = $this->namespace.$this->controller;
+        $this->method = Inflector::instance()->toCameCase($expression[1]).'Action';
+
+    }
+
+    /**
+     * @param $method
+     * @param $arguments
+     * @return mixed
+     */
     public static function __callStatic($method, $arguments)
     {
-        //$reflection = Reflection::getInstance(__CLASS__);
+
         if ($method == 'call') {
-            $expression = $controller = null;
-            $params = array();
 
-            if (!isset($arguments[1])) {
-
-                $expression = Helper::stringSplit($arguments[0]);
-                $controller = Inflector::instance()->covertAsClassName($expression[0]).'Controller';
-                $ns = ucfirst(APPPATH).'\\Controllers\\';
-                $controllerName = $ns.$controller;
-                $method = Inflector::instance()->toCameCase($expression[1]).'Action';
-                $file = CYGNITE_BASE.DS.strtolower(str_replace('\\', DS, $ns)).$controller.EXT;
-                $params = array();
-            } else{
-                $expression = Helper::stringSplit($arguments[0]);
-                $controller = Inflector::instance()->covertAsClassName($expression[0]).'Controller';
-                $ns = ucfirst(APPPATH).'\\Controllers\\';
-                $controllerName = $ns.$controller;
-                $file = CYGNITE_BASE.DS.strtolower(str_replace('\\', DS, $ns)).$controller.EXT;
-                $method = Inflector::instance()->toCameCase($expression[1]).'Action';
-                $params = $arguments[1];
-            }
-
-            if (is_readable($file)) {
-                //include_once $file;
-                return call_user_func_array(array(new $controllerName, $method), $params);
-            } else {
-                throw new \Exception("Route ".array_pop($arguments)." not found. ");
-            }
-
+            return call_user_func_array(
+                array(new Router(), $method),
+                $arguments
+            );
         }
 
         if ($method == 'instance') {
@@ -121,17 +135,68 @@ class Router
             if (self::$instance === null) {
                 self::$instance = new self();
             }
+
             return call_user_func_array(array(self::$instance, $method), array($arguments));
         }
 
         if ($method == 'end') { exit;}
     }
 
+    /**
+     * @param       $method
+     * @param array $arguments
+     * @return $this
+     */
     public function __call($method, $arguments = array())
     {
         if ($method == 'instance') {
             return $this;
         }
+
+        if ($method == 'call') {
+            return $this->{$method.'Controller'}($arguments);
+        }
+    }
+
+    /**
+     * @param $arguments
+     * @return object
+     * @throws \Exception
+     */
+    private function callController($arguments)
+    {
+        $params = array();
+
+        if (isset($arguments[1])) {
+            $params = $arguments[1];
+        }
+
+        $this->setUpControllerAndMethodName($arguments);
+
+        $file = (CYGNITE_BASE.strtolower(
+                str_replace('\\', DS, $this->namespace)
+            ).$this->controller.EXT);
+
+        if (!is_readable($file)) {
+            throw new \Exception("Route ".array_pop($arguments)." not found. ");
+        }
+
+        //include $file;
+        $router = $this;
+        // Get the instance of controller from Cygnite Container
+        // and inject all dependencies into controller dynamically
+        // It's cool. You can write powerful rest api using restful
+        // routing
+        return Application::instance(
+            function($app) use($router)
+            {
+                // make and return instance of controller
+                $instance = $app->make($router->controllerWithNS);
+                // inject all properties of controller defined in definition
+                $app->propertyInjection($instance, $router->controllerWithNS);
+                return $instance->{$router->method}();
+            }
+        );
     }
 
     private function getCalledRouter()
@@ -142,11 +207,11 @@ class Router
     /**
     * Store a route and a handling function to be executed when accessed using one of the specified methods
     *
-    * @false string $methods Allowed methods, | delimited
-    * @false string $pattern A route pattern such as /about/system
-    * @false object $fn The handling function to be executed
+    * @param string $methods Allowed methods, | delimited
+    * @param string $pattern A route pattern such as /about/system
+    * @param object $func The handling function to be executed
     */
-    public function match($methods, $pattern, $fn)
+    public function match($methods, $pattern, $func)
     {
 
         $pattern = '/' . trim($pattern, '/');
@@ -154,7 +219,7 @@ class Router
         foreach (explode('|', $methods) as $method) {
             $this->routes[$method][] = array(
                 'pattern' => $pattern,
-                'fn' => $fn
+                'fn' => $func
             );
         }
 
@@ -164,62 +229,65 @@ class Router
     /**
     * Shorthand for a route accessed using GET
     *
-    * @false string $pattern A route pattern such as /about/system
-    * @false object $fn The handling function to be executed
+    * @param string $pattern A route pattern such as /about/system
+    * @param object $func The handling function to be executed
     */
-    public function get($pattern, $fn)
+    public function get($pattern, $func)
     {
-        $this->match('GET', $pattern, $fn);
+        $this->match(strtoupper(__FUNCTION__), $pattern, $func);
     }
 
 
     /**
      * Shorthand for a route accessed using POST
      *
-     * @false string $pattern A route pattern such as /about/system
-     * @false object $fn The handling function to be executed
+     * @param string $pattern A route pattern such as /about/system
+     * @param object $func The handling function to be executed
      */
-    public function post($pattern, $fn)
+    public function post($pattern, $func)
     {
-        $this->match('POST', $pattern, $fn);
+        $this->match(strtoupper(__FUNCTION__), $pattern, $func);
     }
 
 
     /**
      * Shorthand for a route accessed using DELETE
      *
-     * @false string $pattern A route pattern such as /about/system
-     * @false object $fn The handling function to be executed
+     * @param string $pattern A route pattern such as /about/system
+     * @param object $func The handling function to be executed
      */
-    public function delete($pattern, $fn)
+    public function delete($pattern, $func)
     {
-        $this->match('DELETE', $pattern, $fn);
+        $this->match(strtoupper(__FUNCTION__), $pattern, $func);
     }
 
 
     /**
      * Shorthand for a route accessed using PUT
      *
-     * @false string $pattern A route pattern such as /about/system
-     * @false object $fn The handling function to be executed
+     * @param string $pattern A route pattern such as /about/system
+     * @param object $func The handling function to be executed
      */
-    public function put($pattern, $fn)
+    public function put($pattern, $func)
     {
-        $this->match('PUT', $pattern, $fn);
+        $this->match(strtoupper(__FUNCTION__), $pattern, $func);
     }
 
 
     /**
      * Shorthand for a route accessed using OPTIONS
      *
-     * @false string $pattern A route pattern such as /about/system
-     * @false object $fn The handling function to be executed
+     * @param string $pattern A route pattern such as /about/system
+     * @param object $func The handling function to be executed
      */
-    public function options($pattern, $fn)
+    public function options($pattern, $func)
     {
-        $this->match('OPTIONS', $pattern, $fn);
+        $this->match(strtoupper(__FUNCTION__), $pattern, $func);
     }
 
+    /**
+     * @return unknown
+     */
     public function urlRoutes()
     {
         return (isset($this->routes[$_SERVER['REQUEST_METHOD']] )) ?
@@ -229,18 +297,18 @@ class Router
 
 
     /**
-     * Execute the router: Loop all defined before middlewares and routes,
-     * and execute the handling function if a mactch was found
+     * Execute the router: Loop all defined before middle-wares and routes,
+     * and execute the handling function if a match was found
      *
-     * @false object $callback Function to be executed after a matching
-     * route was handled (= after router middleware)
+     * @param object $callback Function to be executed after a matching
+     * route was handled (= after router middle-ware)
      */
     public function run($callback = null)
     {
 
-        // Handle all before middlewares
-        if (isset($this->befores[$_SERVER['REQUEST_METHOD']])) {
-            $this->handle($this->befores[$_SERVER['REQUEST_METHOD']]);
+        // Handle all before middle wares
+        if (isset($this->before[$_SERVER['REQUEST_METHOD']])) {
+            $this->handle($this->before[$_SERVER['REQUEST_METHOD']]);
         }
 
         // Handle all routes
@@ -251,13 +319,15 @@ class Router
 
         // If no route was handled, trigger the 404 (if any)
         if ($numHandled == 0) {
-            if ($this->notFound && is_callable($this->notFound)) {
+
+            if (!is_null($this->notFound) && is_callable($this->notFound)) {
                 call_user_func($this->notFound);
-            } else {
-                if (!headers_sent()) {
-                    header('HTTP/1.1 404 Not Found');
-                }
             }
+            /*else {
+                if (!headers_sent()) {
+                    //header('HTTP/1.1 404 Not Found');
+                }
+            }*/
         } else {
             // If a route was handled, perform the finish callback (if any)
             if ($callback) {
@@ -269,19 +339,31 @@ class Router
 
     /**
     * Set the 404 handling function
-    * @false object $fn The function to be executed
+    * @param object $func The function to be executed
     */
-    public function set404($fn)
+    public function set404($func)
     {
-        $this->notFound = $fn;
+        $this->notFound = $func;
     }
 
+    /**
+     * @param $uri
+     * @return mixed|string
+     */
+    public function removeIndexDotPhpAndTrillingSlash($uri)
+	{
+			return  (strpos($uri,'index.php') !== false) ?
+                preg_replace(
+                    '/(\/+)/','/', str_replace('index.php', '', rtrim($uri))
+                ) :
+                trim($uri);
+	}
 
     /**
      * Handle a a set of routes: if a match is found, execute the relating handling function
      *
-     * @false array $routes Collection of route patterns and their handling functions
-     * @false boolean $quitAfterRun Does the handle function need to quit after one route was matched?
+     * @param array $routes Collection of route patterns and their handling functions
+     * @param boolean $quitAfterRun Does the handle function need to quit after one route was matched?
      * @param      $routes
      * @param bool $quitAfterRun
      * @return int The number of routes handled
@@ -292,19 +374,21 @@ class Router
         // Counter to keep track of the number of routes we've handled
         $numHandled = 0;
 
-        // The current page URL
-         $uri = $this->getCurrentUri();
-
-        // Variables in the URL
-        //$urlvars = array();
+		 //remove index.php and extra slash from url if exists to match with routing
+		 $uri = $this->removeIndexDotPhpAndTrillingSlash($this->getCurrentUri());
 
         // Loop all routes
         foreach ($routes as $route) {
 
             // we have a match!
-            if (preg_match_all('#^' . $route['pattern'] . '$#', $uri, $matches, PREG_SET_ORDER)) {
+            if ( preg_match_all(
+                '#^' . $route['pattern'] . '$#',
+                $uri,
+                $matches,
+                PREG_SET_ORDER)
+            ) {
 
-                // Extract the matched URL falseeters (and only the falseeters)
+                // Extract the matched URL (and only the falseeters)
                 $params = array_map(
                     function ($match) {
                         $var = explode('/', trim($match, '/'));
@@ -315,7 +399,7 @@ class Router
                         1
                     )
                 );
-                    // call the handling function with the URL falseeters
+                // call the handling function with the URL
                 call_user_func_array($route['fn'], $params);
 
                 // yay!
@@ -325,9 +409,7 @@ class Router
                 if ($quitAfterRun) {
                     break;
                 }
-
             }
-
         }
 
         // Return the number of routes handled
@@ -335,18 +417,28 @@ class Router
 
     }
 
+	public function getBaseUrl()
+	{
+		// Current Request URI
+        $this->currentUrl = $_SERVER['REQUEST_URI'];
+
+        // Remove rewrite base path (= allows one to run the router in a sub folder)
+        $basePath = implode('/', array_slice(explode('/', $_SERVER['SCRIPT_NAME']), 0, -1)) . '/';
+
+		return $basePath;
+
+	}
+
     /**
      * Define the current relative URI
      * @return string
      */
     public function getCurrentUri()
     {
+		$uri = $this->currentUrl;
+		$basePath = $this->getbaseUrl ();
 
-        // Current Request URI
-        $uri = $_SERVER['REQUEST_URI'];
-
-        // Remove rewrite basepath (= allows one to run the router in a subfolder)
-        $basePath = implode('/', array_slice(explode('/', $_SERVER['SCRIPT_NAME']), 0, -1)) . '/';
+		 $this->base = 	$basePath;
         $uri = substr($uri, strlen($basePath));
 
         // Don't take query params into account on the URL

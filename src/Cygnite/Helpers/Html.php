@@ -46,7 +46,7 @@ class Html
      */
     public static function entities($value)
     {
-        return htmlentities($value, ENT_QUOTES, Config::getConfig('global_config', 'encoding'), false);
+        return htmlentities($value, ENT_QUOTES, Config::get('global_config', 'encoding'), false);
     }
 
     /**
@@ -58,7 +58,7 @@ class Html
      */
     public static function decode($value)
     {
-        return html_entity_decode($value, ENT_QUOTES, Config::getConfig('global_config', 'encoding'));
+        return html_entity_decode($value, ENT_QUOTES, Config::get('global_config', 'encoding'));
     }
 
     /**
@@ -77,7 +77,7 @@ class Html
             throw new InvalidArgumentException("Cannot pass null argument to ".__METHOD__);
         }
 
-        return htmlspecialchars($value, ENT_QUOTES, Config::getConfig('global_config', 'encoding'), false);
+        return htmlspecialchars($value, ENT_QUOTES, Config::get('global_config', 'encoding'), false);
     }
 
     /**

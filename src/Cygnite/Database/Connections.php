@@ -18,7 +18,8 @@ abstract class Connections
 
     public $connection;
 
-    public static $default;
+    //public static $default;
+    public $default;
 
     private $_options = array(
         PDO::ATTR_ERRMODE           =>  PDO::ERRMODE_EXCEPTION,
@@ -167,16 +168,18 @@ abstract class Connections
         return $this->connection;
     }
 
-    public static function getDefaultConnection()
+    public function getDefaultConnection()
     {
+        $me = $this;
         Configurations::initialize(
-            function ($config) {
-                self::$default = $config->getDefaultConnection();
+            function ($config) use($me) {
+                $me->default = $config->getDefaultConnection();
             }
         );
 
-        $connection= Connections::parseUrl(self::$default);
+        $connection= Connections::parseUrl($me->default);
 
         return $connection->database;
     }
+
 }

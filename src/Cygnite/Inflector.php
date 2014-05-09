@@ -20,8 +20,8 @@ if (!defined('CF_SYSTEM')) {
  *
  * @Package                  :  Packages
  * @Sub Packages             :
- * @Filename                 :  Inflectors
- * @Description              :  This library will be available on next version
+ * @Filename                 :  Inflector
+ * @Description              :  This class is used to make class name, method name and others.
  * @Author                   :  Cygnite Dev Team
  * @Copyright                :  Copyright (c) 2013 - 2014,
  * @Link	                 :  http://www.cygniteframework.com
@@ -39,6 +39,10 @@ class Inflector
     /********************* Inflections ******************/
 
 
+    /**
+     * @param $word
+     * @return mixed
+     */
     public function deCamelize($word)
     {
         return preg_replace(
@@ -47,8 +51,10 @@ class Inflector
             $word
         );
     }
-    /*
+    /**
+     *
      * Class name - ClassName
+     * @param $word string
      */
     public function covertAsClassName($word)
     {
@@ -101,6 +107,10 @@ class Inflector
         return $s;
     }
 
+    /**
+     * @param $string
+     * @return string
+     */
     public function underscoreToSpace($string)
     {
         $string = strtolower($string);
@@ -192,11 +202,19 @@ class Inflector
         return preg_replace_callback('/_([a-z])/', $func, $str);
     }
 
+    /**
+     * @param $string
+     * @return mixed
+     */
     public function toDirectorySeparator($string)
     {
         return str_replace(array('.', '\\'), DS, $string);
     }
 
+    /**
+     * @param $class
+     * @return mixed
+     */
     public function getClassNameFromNamespace($class)
     {
         $nsParts = null;
@@ -211,7 +229,7 @@ class Inflector
     {
         return preg_replace('/(^|_)([a-z])/e', 'strtoupper("\\2")', $word);
     }
-	
+
     public function __call($method, $arguments = array())
     {
         if ($method == 'instance') {
@@ -219,6 +237,11 @@ class Inflector
         }
     }
 
+    /**
+     * @param       $method
+     * @param array $arguments
+     * @return mixed
+     */
     public static function __callStatic($method, $arguments = array())
     {
         if ($method == 'instance') {
@@ -227,5 +250,117 @@ class Inflector
             }
             return call_user_func_array(array(self::$instance, $method), array($arguments));
         }
+    }
+
+    /**
+     * @param $word
+     * @return mixed|string
+     */
+    public function pluralize($word)
+    {
+        $result = strval($word);
+
+        if (in_array(strtolower($result), $this->uncountableWords())) {
+            return $result;
+        } else {
+            foreach($this->pluralRules() as $rule => $replacement) {
+                if (preg_match($rule, $result)) {
+                    $result = preg_replace($rule, $replacement, $result);
+                    break;
+                }
+            }
+
+            return $result;
+        }
+    }
+
+    /**
+     * @param $word
+     * @return mixed|string
+     */
+    public function singularize($word)
+    {
+        $result = strval($word);
+
+        if (in_array(strtolower($result), $this->uncountableWords())) {
+            return $result;
+        } else {
+            foreach($this->singularRules() as $rule => $replacement) {
+                if (preg_match($rule, $result)) {
+                    $result = preg_replace($rule, $replacement, $result);
+                    break;
+                }
+            }
+
+            return $result;
+        }
+    }
+
+
+    public function uncountableWords()
+    {
+        #:doc
+        return array( 'equipment', 'information', 'rice', 'money', 'species', 'series', 'fish' );
+    }
+
+    public function pluralRules()
+    {
+        #:doc:
+        return array(
+            '/^(ox)$/'                => '\1\2en',     # ox
+            '/([m|l])ouse$/'          => '\1ice',      # mouse, louse
+            '/(matr|vert|ind)ix|ex$/' => '\1ices',     # matrix, vertex, index
+            '/(x|ch|ss|sh)$/'         => '\1es',       # search, switch, fix, box, process, address
+            #'/([^aeiouy]|qu)ies$/'    => '\1y', -- seems to be a bug(?)
+            '/([^aeiouy]|qu)y$/'      => '\1ies',      # query, ability, agency
+            '/(hive)$/'               => '\1s',        # archive, hive
+            '/(?:([^f])fe|([lr])f)$/' => '\1\2ves',    # half, safe, wife
+            '/sis$/'                  => 'ses',        # basis, diagnosis
+            '/([ti])um$/'             => '\1a',        # datum, medium
+            '/(p)erson$/'             => '\1eople',    # person, salesperson
+            '/(m)an$/'                => '\1en',       # man, woman, spokesman
+            '/(c)hild$/'              => '\1hildren',  # child
+            '/(buffal|tomat)o$/'      => '\1\2oes',    # buffalo, tomato
+            '/(bu)s$/'                => '\1\2ses',    # bus
+            '/(alias|status)/'        => '\1es',       # alias
+            '/(octop|vir)us$/'        => '\1i',        # octopus, virus - virus has no defined plural (according to Latin/dictionary.com), but viri is better than viruses/viruss
+            '/(ax|cri|test)is$/'      => '\1es',       # axis, crisis
+            '/s$/'                    => 's',          # no change (compatibility)
+            '/$/'                     => 's'
+        );
+    }
+
+    public function singularRules()
+    {
+        #:doc:
+        return array(
+            '/(matr)ices$/'         =>'\1ix',
+            '/(vert|ind)ices$/'     => '\1ex',
+            '/^(ox)en/'             => '\1',
+            '/(alias)es$/'          => '\1',
+            '/([octop|vir])i$/'     => '\1us',
+            '/(cris|ax|test)es$/'   => '\1is',
+            '/(shoe)s$/'            => '\1',
+            '/(o)es$/'              => '\1',
+            '/(bus)es$/'            => '\1',
+            '/([m|l])ice$/'         => '\1ouse',
+            '/(x|ch|ss|sh)es$/'     => '\1',
+            '/(m)ovies$/'           => '\1\2ovie',
+            '/(s)eries$/'           => '\1\2eries',
+            '/([^aeiouy]|qu)ies$/'  => '\1y',
+            '/([lr])ves$/'          => '\1f',
+            '/(tive)s$/'            => '\1',
+            '/(hive)s$/'            => '\1',
+            '/([^f])ves$/'          => '\1fe',
+            '/(^analy)ses$/'        => '\1sis',
+            '/((a)naly|(b)a|(d)iagno|(p)arenthe|(p)rogno|(s)ynop|(t)he)ses$/' => '\1\2sis',
+            '/([ti])a$/'            => '\1um',
+            '/(p)eople$/'           => '\1\2erson',
+            '/(m)en$/'              => '\1an',
+            '/(s)tatuses$/'         => '\1\2tatus',
+            '/(c)hildren$/'         => '\1\2hild',
+            '/(n)ews$/'             => '\1\2ews',
+            '/s$/'                  => ''
+        );
     }
 }

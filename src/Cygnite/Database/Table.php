@@ -37,18 +37,19 @@ class Table extends Connections
     public function getColumns()
     {
         $conn = null;
+        $me = $this;
         $conn = $this->_connection;
-        Schema::getInstance(
+        Schema::instance(
             $this,
-            function($table) {
-                $table->tableName = $this->tableName;
+            function($table) use ($me) {
+                $table->tableName = $me->tableName;
                 $columns = null;
                 //$table->setDbConnection($this->_connection, $this->database);
                 $table->setTableSchema();
                 //$columns = $conn->query($table->schema)->fetchAll();
-                $columns = $this->query($table->schema)->getAll();
+                $columns = $me->query($table->schema)->getAll();
 
-                $this->schemaInstance = $columns;
+                $me->schemaInstance = $columns;
             }
         );
 
@@ -59,7 +60,8 @@ class Table extends Connections
     {
         $query = ($queryString == null) ? $this->query : $queryString;
 
-        $this->prepareQuery = $this->_connection->query($query);
+        $this->prepareQuery = $this->_connection->prepare($query);
+        $this->prepareQuery->execute();
 
         return $this;
     }
@@ -72,26 +74,53 @@ class Table extends Connections
     public function makeMigration($tableName = 'migrations')
     {
         $this->connect(
-            trim(Connections::getDefaultConnection()),
+            trim($this->getDefaultConnection()),
             $tableName
         );
 
+        $me = $this;
+
         //Create migration table in order to save migrations information
-        Schema::getInstance($this,
-            function($table) use ($tableName){
+        Schema::instance($this,
+            function($table) use ($tableName, $me){
                 $table->tableName = $tableName;
-                $table->database = trim($this->getDefaultConnection());
+                $table->database = trim($me->getDefaultConnection());
                 $table->create(
                     array(
                         array('name'=> 'id', 'type' => 'int', 'length' => 11,
                             'increment' => true, 'key' => 'primary'),
                         array('name'=> 'migration', 'type' => 'string', 'length' =>255),
                         array('name'=> 'version', 'type' => 'int', 'length' =>11),
+                        array('name'=> 'created_at',  'type' => 'datetime',
+                        'length'  =>"DEFAULT '0000-00-00 00:00:00'"
+                        ),
                     ),
                     'InnoDB',
                     'latin1'
                 )->run();
             }
         );
+    }
+
+    public function updateMigrationVersion($migration)
+    {
+        $date = new \DateTime("now");
+
+        $date->setTimezone(new \DateTimeZone(SET_TIME_ZONE));
+
+        $migrationName = $migration->getVersion().$migration->getMigrationClass();
+
+        $this->connect(
+            trim($this->getDefaultConnection()),
+            'migrations'
+        );
+
+        $sql = "INSERT INTO migrations (`migration`,  `created_at`)
+                VALUES('".$migrationName."',
+                          '".$date->format('Y-m-d H:i:s')."'
+                      )";
+
+        return $this->_connection->prepare($sql)->execute();
+
     }
 }

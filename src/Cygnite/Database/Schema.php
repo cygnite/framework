@@ -28,9 +28,7 @@ use Cygnite\Database\Connections;
  * @Copyright                 :  Copyright (c) 2013 - 2014,
  * @Link	                  :  http://www.cygniteframework.com
  * @Since	                  :  Version 1.0
- * @Filesource
- * @Warning                   :  Any changes in this library can cause abnormal behaviour of the framework
- *
+ * @FileSource
  *
  */
 
@@ -60,9 +58,15 @@ class Schema extends Connections
 
     const SELECT = 'SELECT';
 
+    /**
+     * @param       $method
+     * @param array $arguments
+     * @return callable|void
+     * @throws \Exception
+     */
     public static function __callStatic($method, $arguments = array())
     {
-        if ($method == 'getInstance' && !empty($arguments)) {
+        if ($method == 'instance' && !empty($arguments)) {
 
             $schema = new self($arguments[0], new Inflector);
 
@@ -204,7 +208,7 @@ class Schema extends Connections
             switch ($value['type']) {
 
                 case 'int':
-                    $length = ($value['length'] !=='') ? $value['length'] : 11;
+                    $length = (isset($value['length']) && $value['length'] !=='') ? $value['length'] : 11;
                     $type = strtoupper($value['type']).'('.$length.')';
                     break;
                 case 'char':
@@ -272,7 +276,8 @@ class Schema extends Connections
         $tableName = ($table !=='') ?
             $table : $this->tableName;
 
-        $this->schema = strtoupper(__FUNCTION__).' TABLE IF EXISTS `'.$this->database.'`.`'.$tableName.'`'.PHP_EOL;
+        $this->schema = strtoupper(__FUNCTION__).' TABLE IF EXISTS
+        `'.$this->database.'`.`'.$tableName.'`'.PHP_EOL;
 
         return $this;
     }
@@ -343,9 +348,6 @@ class Schema extends Connections
                 $arguments[2] = trim($callMethod[0]);
             }
 
-            //var_dump($callMethod);
-
-            //var_dump($arguments);
             if (trim($callMethod[0]) == 'add') {
 
                 if (isset($arguments[0]) && is_array($arguments[0])) {
@@ -355,8 +357,6 @@ class Schema extends Connections
                     $arguments[2] = trim($callMethod[0]);
                 }
             }
-
-            //var_dump($arguments);
 
             if (!empty($arguments)) {
                 if (method_exists($this, 'column')) {
@@ -373,7 +373,7 @@ class Schema extends Connections
      *
      *
      */
-    public function column($columns, $defination = null, $type)
+    public function column($columns, $definition = null, $type)
     {
         if (is_null($columns)) {
             throw new \BadMethodCallException("Column cannot be empty.");
@@ -411,13 +411,13 @@ class Schema extends Connections
         }
 
         if (is_string($columns)
-            && $defination != null
+            && $definition != null
         ) {
-            /** @var $defination TYPE_NAME */
-            $defination =(trim($type) == 'drop') ? '' : strtoupper($defination);
+            /** @var $definition TYPE_NAME */
+            $definition =(trim($type) == 'drop') ? '' : strtoupper($definition);
 
             $this->schema = self::ALTER_TABLE.'`'.$this->database.'`.`'.$this->tableName.'`
-            '.strtoupper($type).' `'.$columns.'` '.$defination.';';
+            '.strtoupper($type).' `'.$columns.'` '.$definition.';';
         }
 
         return $this;
@@ -489,7 +489,6 @@ class Schema extends Connections
 
     public function dropPrimary()
     {
-        //echo $this->config->dbType;
         $this->schema = static::ALTER_TABLE.'
         `'.$this->database.'`.`'.$this->tableName.'` DROP PRIMARY KEY';
 
@@ -605,14 +604,10 @@ class Schema extends Connections
 
     public function run()
     {
-        //$connection = Connections::get($this->database);
-        //echo "<br>";
-        //echo $this->schema;
-        //echo "<br>";
-
         if (is_object($this->_connection)) {
-            if ($return = $this->_connection->prepare($this->schema)->execute()) {
-                //var_dump($return);
+            $stmt = $this->_connection->prepare($this->schema);
+
+            if ($return = $stmt->execute()) {
                 return $return;
             } else {
                 return false;

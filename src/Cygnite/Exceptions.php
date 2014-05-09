@@ -41,7 +41,7 @@ if (!defined('CF_SYSTEM')) {
 */
 
 /* If you need to log errors please use set logger
-$logConfig = Config::getConfig('error_config', 'log_errors');
+$logConfig = Config::get('error_config', 'log_errors');
 
 if ($logConfig == 'on') {
     // Load the Logger Library.

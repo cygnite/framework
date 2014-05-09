@@ -15,12 +15,37 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 
+/**
+ *  Cygnite Framework
+ *
+ *  An open source application development framework for PHP 5.3 or newer
+ *
+ *   License
+ *
+ *   This source file is subject to the MIT license that is bundled
+ *   with this package in the file LICENSE.txt.
+ *   http://www.cygniteframework.com/license.txt
+ *   If you did not receive a copy of the license and are unable to
+ *   obtain it through the world-wide-web, please send an email
+ *   to sanjoy@hotmail.com so that I can send you a copy immediately.
+ *
+ * @Package               :  Console
+ * @Filename             :  MigrationCommand.php
+ * @Description        :  Migration Command class used to take care of your database migrations using Cygnite CLI.
+ *                                         Cygnite Cli driven by Symfony2 Console Component.
+ * @Author                :  Sanjoy Dey
+ * @Copyright         :  Copyright (c) 2013 - 2014,
+ * @Link	                  :  http://www.cygniteframework.com
+ * @Since	             :  Version 1.0.6
+ * @File Source
+ *
+ */
 
 class MigrationCommand extends Command
 {
     private $name = 'migrate';
 
-    private $table;
+    public $table;
 
     private $migrationDir;
 
@@ -29,7 +54,7 @@ class MigrationCommand extends Command
         //cygnite migrate:init
         $this->setName($this->name)
              ->setDescription('Migrate database By Cygnite CLI')
-			 //->addArgument('name', null, InputArgument::OPTIONAL, 'Migration Name ?')
+              //->addArgument('name', null, InputArgument::OPTIONAL, 'Migration Name ?')
              //->addArgument('version',null, InputArgument::OPTIONAL, 'Your migration version')
              ->addArgument('type', null, InputArgument::OPTIONAL, '')
              //->addOption('yell', null, InputOption::VALUE_NONE, 'If set, the task will yell in uppercase letters')
@@ -38,15 +63,10 @@ class MigrationCommand extends Command
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        // Migrate init - to create migration table and
-        // migrate create_users_table to create class and then you write schema to create
-        // Then When you run "migrate run" it will make ur schema up
-        // To rollback changes - migrate create_user_table --version 1232344 -1
-        //$name = $input->getArgument('name');
-        //$version = $input->getArgument('version');
+        // Migrate init - to create migration table
         $type = $input->getArgument('type');
-		//$output->writeln($name);
-		//$output->writeln($version);
+        //$output->writeln($name);
+        //$output->writeln($version);
         //$output->writeln($yell);
 
         $migration = $migrationName = null;
@@ -60,6 +80,7 @@ class MigrationCommand extends Command
         } else {
             $migration->updateMigration('down');
         }
+        $output->writeln("Migration completed Successfully!");
     }
 
     public function setSchema(Table $table)

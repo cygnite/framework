@@ -1,7 +1,8 @@
 <?php
 namespace Cygnite;
 
-use Cygnite\Base\Router;
+use ReflectionClass;
+use ReflectionProperty;
 
 if (!defined('CF_SYSTEM')) {
     exit('External script access not allowed');
@@ -20,31 +21,82 @@ if (!defined('CF_SYSTEM')) {
  *   obtain it through the world-wide-web, please send an email
  *   to sanjoy@hotmail.com so I can send you a copy immediately.
  *
- * @Package                  :  Packages
- * @Sub Packages             :
- * @Filename                 :  Inflectors
- * @Description              :  This library will be available on next version
- * @Author                   :  Cygnite Dev Team
- * @Copyright                :  Copyright (c) 2013 - 2014,
- * @Link	                 :  http://www.cygniteframework.com
- * @Since	                 :  Version 1.0
+ * @Package             :  Packages
+ * @Sub Packages        :
+ * @Filename            :  Reflection
+ * @Description         :  Reflection class is used to get reflection class variables
+ *                         and make accessible for callee
+ * @Author              :  Sanjoy Dey
+ * @Copyright           :  Copyright (c) 2013 - 2014,
+ * @Link	            :  http://www.cygniteframework.com
+ * @Since	            :  Version 1.0
  * @Filesource
- * @Warning                  :  Any changes in this library can cause abnormal behaviour of the framework
  *
  *
  */
 
 class Reflection
 {
+	public $reflectionClass;
 
+	//properties
+	private $properties;
+
+    public $reflectionProperty;
+
+    /**
+	 * Get instance of your class using Reflection api
+	 *
+	 * @access public
+	 * @param  $class
+     * @throws \Exception
+	 * @return object
+	 */
     public static function getInstance($class= null)
     {
         $reflector = null;
-        echo get_called_class();
+
         if (class_exists($class)) {
-            $reflector = new \ReflectionClass('\\'.$class);
+           throw new \Exception(sprintf("Class %s not found", $class));
+        }
+
+        $reflector = new ReflectionClass('\\'.$class);
 
             return new $reflector->name;
         }
-    }
+
+	/**
+	 * Set your class to reflection api
+	 *
+	 * @access public
+	 * @param  $class
+	 * @return void
+	 *
+	 */
+	public function setClass($class)
+	{
+        if (is_object($class)) {
+            $class = get_class($class);
+	}
+
+		$this->reflectionClass = new ReflectionClass($class);
+
+        return $this;
+	}
+
+	/**
+	 * Make your protected or private property accessible
+	 *
+	 * @access public
+	 * @param  $property
+	 * @return string/ int property value
+	 *
+	 */
+	public function makePropertyAccessible($property)
+	{
+		$this->reflectionProperty = $this->reflectionClass->getProperty($property);
+        $this->reflectionProperty->setAccessible(true);
+
+        return $this->reflectionProperty->getValue($this->reflectionClass);
+	}
 }

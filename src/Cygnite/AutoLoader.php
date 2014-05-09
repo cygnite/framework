@@ -23,7 +23,10 @@ if (!defined('CF_SYSTEM')) {
  *@package                    :  Packages
  *@subpackages                :  Base
  *@filename                   :  AutoLoader
- *@description                :  This is registry auto loader for CF
+ *@description                :  Cygnte Auto loader will load all your file dynamically
+ *                               at runtime. You just need to configure your directories,
+ *                               It will auto load all your files has .php extension.
+ *                               Don't worry about performance, everything lazy loaded
  *@author                     :  Sanjoy Dey
  *@copyright                  :  Copyright (c) 2013 - 2014,
  *@link	                      :  http://www.cygniteframework.com
@@ -42,14 +45,21 @@ class AutoLoader
 
     private $inflection;
 
-    private function __construct()
+    /**
+     * @param $inflection
+     */
+    public function __construct($inflection)
     {
+        $this->inflection = $inflection;
+        $this->init();
 
     }
 
-    protected function init($inflection)
+    /**
+     * Initialize SPL AutoLoader
+     */
+    protected function init()
     {
-        $this->inflection = $inflection;
         spl_autoload_unregister(array($this, 'autoLoad'));
         spl_autoload_extensions(".php");
         spl_autoload_register(array($this, 'autoLoad'));
@@ -139,24 +149,32 @@ class AutoLoader
         }
     }
 
+    /**
+     * Register all your directories in order to auto load
+     * @param $paths
+     */
     private function setDirectories($paths)
     {
+
         foreach ($paths as $key => $dir)
         {
             $path = str_replace(".", DS, $dir);
 
-	    //Iterate through all paths and filter with extension provided	
-	    $recursiveExtensionFilter = new FileExtensionFilter(new \RecursiveDirectoryIterator($path));
-	    	
+	        //Iterate through all paths and filter with extension provided
+	        $recursiveExtensionFilter = new FileExtensionFilter(
+                new \RecursiveDirectoryIterator($path)
+            );
+
             // loop through the directory listing
             // we need to create a RecursiveIteratorIterator instance
             foreach ($recursiveExtensionFilter as $item) {
                $alias = str_replace('.php', '', $item->getPathName());
 
-               $alias = implode("\\", array_map("ucfirst", explode('\\', $alias)));
+               $alias = implode("\\", array_map("ucfirst", explode(DS, $alias)));
                $this->directories[$alias] = str_replace('\\', '/', $item->getPathName());
             }
         }
+
     }
 
 
@@ -171,7 +189,7 @@ class AutoLoader
     * @throws \Exception
     * @return bool
     */
-    public static function import($path)
+    public function import($path)
     {
         if (is_null($path) || $path == "") {
             throw new \InvalidArgumentException("Empty path passed on ".__METHOD__);
@@ -181,7 +199,7 @@ class AutoLoader
         $dirPath = CYGNITE_BASE.DS.str_replace('.', DS, $path).EXT;
 
         if (is_readable($dirPath) && file_exists($dirPath)) {
-            return include_once $dirPath;
+            return include $dirPath;
         } else {
             throw new \Exception("Requested file doesn't exist in following path $dirPath ".__METHOD__);
         }

@@ -1,4 +1,3 @@
-
 namespace Apps\Controllers;
 
 use Cygnite\Application;
@@ -71,7 +70,7 @@ class %controllerName% extends AbstractBaseController
     public function indexAction()
     {
         $%controllerName% = array();
-        $%controllerName% = %StaticModelName%::fetchAll(
+        $%controllerName% = %StaticModelName%::all(
             array(
                 'orderBy' => 'id desc',
                 /*'paginate' => array(
@@ -134,7 +133,7 @@ class %controllerName% extends AbstractBaseController
 
                 $postArray = $input->except('btnSubmit')->post();
 
-				%model Columns%				
+				%model Columns%
 
                 if ($%modelName%->save()) {
                     Url::redirectTo('%controllerName%/index/'.Url::segment(4));
