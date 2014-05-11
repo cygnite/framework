@@ -19,34 +19,6 @@ if (!defined('CF_SYSTEM')) {
     exit('External script access not allowed');
 }
 
-/**
- *  Cygnite Framework
- *
- *  An open source application development framework for PHP 5.3 or newer
- *
- *   License
- *
- *   This source file is subject to the MIT license that is bundled
- *   with this package in the file LICENSE.txt.
- *   http://www.cygniteframework.com/license.txt
- *   If you did not receive a copy of the license and are unable to
- *   obtain it through the world-wide-web, please send an email
- *   to sanjoy@hotmail.com so that I can send you a copy immediately.
- *
- * @Package             :  Cygnite Framework BootStrap file
- * @Filename            :  Application.php
- * @Description         :  Cygnite Application will take care of all your
- *                         auto loading files and save and fetch you the
- *                         data from container
- *
- * @Author              :  Sanjoy Dey
- * @Copyright           :  Copyright (c) 2013 - 2014,
- * @Link	        :  http://www.cygniteframework.com
- * @Since	        :  Version 1.0
- * @File Source
- *
- */
-
 class Application extends Container
 {
 
@@ -66,47 +38,59 @@ class Application extends Container
      * instance method will dynamically return you instance of
      * Application
      *
-     * @param Inflector
-     *
+     * @param Inflector $inflection
+     * @param Autoloader $loader
+     * @return void
      */
 
-    protected function __construct(Inflector $inflection)
+    protected function __construct(Inflector $inflection=null,Autoloader $loader=null)
     {
-        self::$loader = new AutoLoader($inflection);
+        $inflection = $inflection ?: new Inflector(); 
+        self::$loader = $loader ? :new AutoLoader($inflection);
     }
 
     /**
-     * @param       $method
-     * @param array $arguments
-     * @return mixed
+     * ----------------------------------------------------
+     *  Instance
+     * ----------------------------------------------------
+     * 
+     * Returns a Instance for a Closure Callback and general calls.
+     * @param Closure $callback
+     * @return Application
      */
-    public static function __callStatic($method, $arguments = array())
+    public static function instance(Closure $callback = null)
     {
-        if ($method == 'instance') {
-                return call_user_func_array(
-                             array(new Application(Inflector::instance()), 'getInstance'),
-                                        $arguments
-               );
-         }
-    }
-
-
-    /**
-     * ----------------------------------------------------
-     * Return instance of Application or Closure instance of Cygnite
-     * ----------------------------------------------------
-     *
-     * @param callable Closure $callback
-     * @return object
-     */
-      public function getInstance(Closure $callback = null)
-	 {
         if (!is_null($callback) && $callback instanceof Closure) {
-            return $callback(new Application(Inflector::instance()));
-        } else {
-           return new Application(Inflector::instance());
-            }
+            if(static::$instance instanceof Application)
+                return $callback(static::$instance);
+        } elseif(static::$instance instanceof Application) {
+            return static::$instance;
         }
+
+        return static::getInstance();
+        
+    }
+    /**
+     * ----------------------------------------------------
+     * Return instance of Application 
+     * ----------------------------------------------------
+     *
+     * @param Inflector $inflector object
+     * @param Autoloader $loader object
+     * @return Application object
+     */
+    public static function getInstance(Inflector $inflection=null,Autoloader $loader=null)
+	{
+            if(static::$instance instanceof Application)
+                return static::$instance;
+            
+
+            $inflection = $inflection ?:new Inflector();
+            $loader = $loader ?:new AutoLoader($inflection);
+
+
+            return static::$instance = new Application($inflection,$loader);
+    }
 
     /**
      * set all your configurations
