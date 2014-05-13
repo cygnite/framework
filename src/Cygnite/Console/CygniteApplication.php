@@ -24,17 +24,18 @@ require '/../../'.APP_PATH.'/configs/database.php';
  *   obtain it through the world-wide-web, please send an email
  *   to sanjoy@hotmail.com so that I can send you a copy immediately.
  *
- * @Package               :  Console
- * @Filename             :  CygniteApplication.php
+ * @Package            :  Console
+ * @Filename           :  CygniteApplication.php
  * @Description        :  Cygnite Application is the middle ware of all your console command using Cygnite CLI. 
- *                                         Cygnite Cli driven by Symfony2 Console Component. 
- * @Author                :  Sanjoy Dey
- * @Copyright         :  Copyright (c) 2013 - 2014,
- * @Link	                  :  http://www.cygniteframework.com
- * @Since	             :  Version 1.0.6
+ *                        Cygnite Cli driven by Symfony2 Console Component.
+ * @Author             :  Sanjoy Dey
+ * @Copyright          :  Copyright (c) 2013 - 2014,
+ * @Link	           :  http://www.cygniteframework.com
+ * @Since	           :  Version 1.0.6
  * @File Source
  *
  */
+
 class CygniteApplication extends Application
 {
     private $version;

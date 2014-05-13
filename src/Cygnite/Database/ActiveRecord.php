@@ -10,6 +10,7 @@ use ReflectionClass;
 use ReflectionObject;
 use ReflectionProperty;
 use Cygnite\Base\Event;
+use Cygnite\Database\Schema;
 use Cygnite\Database\Connections;
 use Cygnite\Libraries\Pagination;
 use Cygnite\Database\Configurations;
@@ -33,11 +34,12 @@ use Cygnite\Database\Exceptions\DatabaseException;
  * @Package                   :  Packages
  * @Sub Packages              :  Database
  * @Filename                  :  ActiveRecord
- * @Description               :  Active Record to handle database manipulations. As read,write,erase,update etc.
+ * @Description               :  Active Record to handle database manipulations.
+ *                               As read,write,erase,update etc.
  * @Author                    :  Sanjoy Dey
  * @Copyright                 :  Copyright (c) 2013 - 2014,
- * @Link	              :  http://www.cygniteframework.com
- * @Since	              :  Version 1.0
+ * @Link	                  :  http://www.cygniteframework.com
+ * @Since	                  :  Version 1.0
  * @FileSource
  *
  */
@@ -270,6 +272,9 @@ use Cygnite\Database\Exceptions\DatabaseException;
             $pagination = Pagination::instance(new $model());
             return $pagination->{$method}();
         }
+
+        //Use the power of PDO methods directly via static functions
+        return call_user_func_array(array(new $class, $method), $arguments);
     }
 
     /**
@@ -480,6 +485,11 @@ use Cygnite\Database\Exceptions\DatabaseException;
             $results = $this->fetchAs($fetchObject);
             return $results;
         }
+
+        if  (!method_exists($this->getDatabaseConnection(), $method)) {
+            throw new Exception("$method method not exists ");
+        }
+        return call_user_func_array(array($this->getDatabaseConnection(), $method), $arguments);
 
         //throw new \Exception("Invalid method $name called  ");
     }
@@ -1159,6 +1169,35 @@ use Cygnite\Database\Exceptions\DatabaseException;
     private function buildQuery($groupBy, $orderBy, $limit)
     {
         $searchKey = strpos($this->_fromWhere, 'AND');
+
+
+        if (method_exists($this, 'exceptColumns')) {
+
+            $ar = $this;
+
+            $selectColumns = Schema::instance(
+                $this,
+                function ($table) use ($ar) {
+                    $table->database = $ar->database;
+                    $table->tableName = $ar->tableName;
+
+                    return $table->getColumns();
+                }
+            );
+
+            $columns = $this->query($selectColumns)->getAll();
+
+            // Get all column name which need to remove from the result set
+            $exceptColumns = $this->exceptColumns();
+
+            foreach ($columns as $key => $value) {
+
+                if (!in_array($value['column_name'], $exceptColumns)) {
+                    $columnArray[] = $value['column_name'];
+                }
+            }
+            $this->_selectColumns = (string) implode (',', $columnArray);
+        }
 
         if ($searchKey === false) {
             ($this->_columnWhere)

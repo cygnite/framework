@@ -14,7 +14,6 @@ use Cygnite\Helpers\Config;
 use Apps\Configs\Definitions\DefinitionManager;
 use Cygnite\Base\DependencyInjection\Container;
 
-
 if (!defined('CF_SYSTEM')) {
     exit('External script access not allowed');
 }
@@ -61,14 +60,15 @@ class Application extends Container
     public static function instance(Closure $callback = null)
     {
         if (!is_null($callback) && $callback instanceof Closure) {
+
             if(static::$instance instanceof Application)
                 return $callback(static::$instance);
-        } elseif(static::$instance instanceof Application) {
+
+        } elseif (static::$instance instanceof Application) {
             return static::$instance;
         }
 
         return static::getInstance();
-        
     }
 
     /**
@@ -81,17 +81,15 @@ class Application extends Container
      * @internal param \Cygnite\Inflector $inflector object
      * @return Application object
      */
-    public static function getInstance(Inflector $inflection=null,Autoloader $loader=null)
+    public static function getInstance(Inflector $inflection = null, Autoloader $loader = null)
 	{
-            if(static::$instance instanceof Application)
-                return static::$instance;
-            
+        if(static::$instance instanceof Application)
+            return static::$instance;
 
-            $inflection = $inflection ?:new Inflector();
-            $loader = $loader ?:new AutoLoader($inflection);
+        $inflection = $inflection ?:new Inflector();
+        $loader = $loader ?:new AutoLoader($inflection);
 
-
-            return static::$instance = new Application($inflection,$loader);
+        return static::$instance = new Application($inflection,$loader);
     }
 
     /**

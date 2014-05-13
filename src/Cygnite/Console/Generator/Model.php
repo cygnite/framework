@@ -17,13 +17,13 @@ use Cygnite\Inflector;
  *   obtain it through the world-wide-web, please send an email
  *   to sanjoy@hotmail.com so that I can send you a copy immediately.
  *
- * @Package               :  Console
- * @Filename             :  Model.php
+ * @Package            :  Console
+ * @Filename           :  Model.php
  * @Description        :  This class is used to generate your model code using cygnite console
- * @Author                :  Sanjoy Dey
- * @Copyright         :  Copyright (c) 2013 - 2014,
- * @Link	                  :  http://www.cygniteframework.com
- * @Since	             :  Version 1.0.6
+ * @Author             :  Sanjoy Dey
+ * @Copyright          :  Copyright (c) 2013 - 2014,
+ * @Link	           :  http://www.cygniteframework.com
+ * @Since	           :  Version 1.0.6
  * @File Source
  *
  */
@@ -78,14 +78,12 @@ class Model
 
     private function modelTemplateName()
     {
-        return 'model'.self::EXTENSION;
+        return 'Model'.self::EXTENSION;
     }
 
     public function updateTemplate()
     {
        $file = $this->getModelTemplatePath().$this->modelTemplateName();
-
-
         //file_exists($file) or die("Model Template File doesn't exists");
 
         /*read operation ->*/

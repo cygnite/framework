@@ -26,14 +26,14 @@ use Symfony\Component\Console\Formatter\OutputFormatterStyle;
  *   obtain it through the world-wide-web, please send an email
  *   to sanjoy@hotmail.com so that I can send you a copy immediately.
  *
- * @Package               :  Console
- * @Filename             :  InitCommand.php
+ * @Package            :  Console
+ * @Filename           :  InitCommand.php
  * @Description        :  Init Command class used to generate your migration file using Cygnite CLI. 
- *                                         Cygnite Cli driven by Symfony2 Console Component. 
- * @Author                :  Sanjoy Dey
- * @Copyright         :  Copyright (c) 2013 - 2014,
- * @Link	                  :  http://www.cygniteframework.com
- * @Since	             :  Version 1.0.6
+ *                        Cygnite Cli driven by Symfony2 Console Component.
+ * @Author             :  Sanjoy Dey
+ * @Copyright          :  Copyright (c) 2013 - 2014,
+ * @Link	           :  http://www.cygniteframework.com
+ * @Since	           :  Version 1.0.6
  * @File Source
  *
  */

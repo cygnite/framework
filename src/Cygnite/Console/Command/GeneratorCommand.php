@@ -29,14 +29,14 @@ use Symfony\Component\Console\Formatter\OutputFormatterStyle;
  *   obtain it through the world-wide-web, please send an email
  *   to sanjoy@hotmail.com so that I can send you a copy immediately.
  *
- * @Package               :  Console
- * @Filename             :  GeneratorCommand.php
+ * @Package            :  Console
+ * @Filename           :  GeneratorCommand.php
  * @Description        :  Generator Command class used to generate crud application using Cygnite CLI. 
- *                                         Cygnite Cli driven by Symfony2 Console Component. 
- * @Author                :  Sanjoy Dey
- * @Copyright         :  Copyright (c) 2013 - 2014,
- * @Link	                  :  http://www.cygniteframework.com
- * @Since	             :  Version 1.0.6
+ *                        Cygnite Cli driven by Symfony2 Console Component.
+ * @Author             :  Sanjoy Dey
+ * @Copyright          :  Copyright (c) 2013 - 2014,
+ * @Link	           :  http://www.cygniteframework.com
+ * @Since	           :  Version 1.0.6
  * @File Source
  *
  */
@@ -110,17 +110,8 @@ class GeneratorCommand extends Command
         $this->generateController();
         $this->generateModel();
         $this->generateViews();
-        $output->writeln("<info>Crud process ended successfully by Cygnite CLI </info>");
 
-        /*
-        $output->getFormatter()->setStyle('fcbarcelona',
-            new OutputFormatterStyle('red', 'blue',
-                array('blink', 'bold', 'underscore'
-                )
-            )
-        );
-        $output->writeln('<fcbarcelona>Messi for the win</fcbarcelona>');
-        */
+        $output->writeln("<info>Crud process ended successfully by Cygnite CLI </info>");
     }
 
     private function generateController()

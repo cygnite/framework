@@ -23,7 +23,8 @@ use Cygnite\Database\Connections;
  * @Package                   :  Packages
  * @Sub Packages              :  Database
  * @Filename                  :  Schema
- * @Description               :  Schema is used to build your database table.
+ * @Description               :  Schema is used to build and
+ *                               can alter your database schema.
  * @Author                    :  Sanjoy Dey
  * @Copyright                 :  Copyright (c) 2013 - 2014,
  * @Link	                  :  http://www.cygniteframework.com
@@ -38,7 +39,7 @@ class Schema extends Connections
 
     private $_pointer;
 
-    private $inflector;
+    private $inflection;
 
     public $primaryKey;
 
@@ -50,9 +51,9 @@ class Schema extends Connections
 
     public $schema =array();
 
-    private $_informationSchema = 'information_schema';
+    private $_informationSchema = 'INFORMATION_SCHEMA';
 
-    private $_tableSchema = 'table_schema';
+    private $_tableSchema = 'TABLE_SCHEMA';
 
     const ALTER_TABLE = 'ALTER TABLE ';
 
@@ -73,7 +74,7 @@ class Schema extends Connections
             if (is_callable(array($schema, 'init'))) {
 
                 if ($arguments[1] instanceof Closure) {
-                    $schema->init($arguments[1], $schema);
+                    return $schema->init($arguments[1], $schema);
                 } else {
                     return $schema->init($schema);
                 }
@@ -84,10 +85,17 @@ class Schema extends Connections
         }
     }
 
-    private function __construct($model, Inflector $inflector)
+    /**
+     * You cannot create an instance of Schema class
+     * directly
+     *
+     * @param $model
+     * @param \Cygnite\Inflector $inflection
+     */
+    private function __construct($model, Inflector $inflection)
     {
         $this->_pointer = $model;
-        $this->inflector = $inflector;
+        $this->inflector = $inflection;
 
         if (class_exists(get_class($this->_pointer))) {
 
@@ -130,39 +138,13 @@ class Schema extends Connections
     public function init(Closure $callback = null, $schema = null)
     {
         if ($callback instanceof Closure) {
-           $callback($schema);
+           return $callback($schema);
         } else {
             return $callback;
         }
 
     }
 
-    /*
-    public static function getInstance($_pointer, Closure $callback = null)
-    {
-        $this->_pointer = $_pointer;
-        if (class_exists(get_class($this->_pointer))) {
-
-            $reflectionClass = new \ReflectionClass(get_class($this->_pointer));
-            $reflectionProperty = $reflectionClass->getProperty('database');
-            $reflectionProperty->setAccessible(true);
-            $reflectionPropertyKey = $reflectionClass->getProperty('primaryKey');
-            $reflectionPropertyKey->setAccessible(true);
-            $this->database = $reflectionProperty->getValue($this->_pointer);
-            $this->primaryKey = $reflectionPropertyKey->getValue($this->_pointer);
-            self::setConn($this->database);
-
-        }
-
-        self::$config = Connections::getConfiguration();
-
-        if ($callback instanceof Closure) {
-            $callback(parent::instance());
-        }
-
-    }
-
-    */
 
     public function setConn($database)
     {
@@ -177,9 +159,6 @@ class Schema extends Connections
     public function create($columns, $engine = 'MyISAM', $charset = 'utf8')
     {
         $schema = $comma = $isNull = $tableKey = $type = "";
-
-        //$config = Connections::getConfiguration();
-        //$charset = $config->charset;
 
         $schema .= strtoupper(__FUNCTION__).' TABLE IF NOT EXISTS
         `'.$this->database.'`.`'.$this->tableName.'` (';
@@ -438,15 +417,27 @@ class Schema extends Connections
 
     }
 
+    private function getSchemaQuery()
+    {
+        return "".$this->_informationSchema.".COLUMNS
+                        WHERE TABLE_SCHEMA = '".$this->database."'
+                        AND TABLE_NAME = '".$this->tableName."'";
+    }
+
+    public function getColumns()
+    {
+        $this->schema = self::SELECT." COLUMN_NAME FROM".$this->getSchemaQuery();
+
+        return $this;
+    }
+
     /**
      *
      */
     public function hasColumn($column)
     {
         $this->schema = self::SELECT." COUNT(COLUMN_NAME) FROM
-                        ".$this->_informationSchema.".COLUMNS
-                        WHERE TABLE_SCHEMA = '".$this->database."'
-                        AND TABLE_NAME = '".$this->tableName."'
+                        ".$this->getSchemaQuery()."
                         AND COLUMN_NAME = '".$column."' ";
 
         return $this;
@@ -602,6 +593,10 @@ class Schema extends Connections
 
     }
 
+    /**
+     * Build schema and return result set
+     * @return bool
+     */
     public function run()
     {
         if (is_object($this->_connection)) {

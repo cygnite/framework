@@ -17,13 +17,13 @@ use Cygnite\Inflector;
  *   obtain it through the world-wide-web, please send an email
  *   to sanjoy@hotmail.com so that I can send you a copy immediately.
  *
- * @Package               :  Console
- * @Filename             :  View.php
+ * @Package            :  Console
+ * @Filename           :  View.php
  * @Description        :  This class is used to generate view pages of your application using Cygnite console
- * @Author                :  Sanjoy Dey
- * @Copyright         :  Copyright (c) 2013 - 2014,
- * @Link	                  :  http://www.cygniteframework.com
- * @Since	             :  Version 1.0.6
+ * @Author             :  Sanjoy Dey
+ * @Copyright          :  Copyright (c) 2013 - 2014,
+ * @Link	           :  http://www.cygniteframework.com
+ * @Since	           :  Version 1.0.6
  * @File Source
  *
  */
@@ -308,5 +308,4 @@ class View
         fclose($this->filePointer);
         $this->replacedContent = '';
     }
-
 }
