@@ -1,6 +1,7 @@
 <?php
 namespace Cygnite;
 
+use Cygnite\Exception;
 use Cygnite\Libraries\FileExtensionFilter;
 
 if (!defined('CF_SYSTEM')) {

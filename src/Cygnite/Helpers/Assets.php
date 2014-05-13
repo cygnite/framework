@@ -2,6 +2,7 @@
 namespace Cygnite\Helpers;
 
 use Cygnite\Helpers\Html;
+use InvalidArgumentException;
 
 if (!defined('CF_SYSTEM')) {
     exit('External script access not allowed');

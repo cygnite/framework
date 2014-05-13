@@ -70,7 +70,7 @@ class Reflection
 	 *
 	 * @access public
 	 * @param  $class
-	 * @return void
+	 * @return $this
 	 *
 	 */
 	public function setClass($class)

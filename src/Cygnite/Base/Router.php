@@ -29,8 +29,7 @@ if (!defined('CF_SYSTEM')) {
  * @Sub Packages       :  Base
  * @Filename           :  Router
  * @Description        :  This file is used to route user requests.
- *                        This class is highly inspired and few part of the code
- *                        borrowed from Barmus Router.
+ *                        This class is highly inspired by Barmus Router.
  * @Copyright          :  Copyright (c) 2013 - 2014,
  * @Link	           :  http://www.cygniteframework.com
  * @Since	           :  Version 1.0

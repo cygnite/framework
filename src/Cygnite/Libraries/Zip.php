@@ -1,6 +1,8 @@
 <?php
 namespace Cygnite\Libraries;
 
+use ZipArchive;
+
 if (!defined('CF_SYSTEM')) {
     exit('External script access not allowed');
 }
@@ -159,13 +161,15 @@ class Zip
     return $fileArray;
 }
 
-/**
- * Function to Zip entire directory with all its files and subdirectories
- *
- * @false string $dirName
- * @access public
- * @return void
- */
+    /**
+     * Function to Zip entire directory with all its files and subdirectories
+     *
+     * @false  string $dirName
+     * @access public
+     * @param $dirName
+     * @param $outputDir
+     * @return void
+     */
 public function zipDirectory($dirName, $outputDir)
 {
     if (!is_dir($dirName)){

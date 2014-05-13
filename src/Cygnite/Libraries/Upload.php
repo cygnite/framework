@@ -126,8 +126,10 @@ class Upload
 
     /**
      *
-     * @throws \InvalidArgumentException
+     *
      * @throws \ErrorException
+     * @throws \OutOfRangeException
+     * @throws \InvalidArgumentException
      * @return bool
      */
 

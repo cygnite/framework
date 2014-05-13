@@ -93,7 +93,7 @@ class Container extends DependencyExtension implements ContainerInterface, Array
      *
      * @access public
      * @param mixed $key
-     * @return void
+     * @return bool
      */
     public function isShared($key)
     {

@@ -64,7 +64,7 @@ abstract class AbstractBaseController extends CView
 
     /**
      * @param $key
-     * @return @instance instance of your class
+     * @return object @instance instance of your class
      */
     protected function get($key)
     {

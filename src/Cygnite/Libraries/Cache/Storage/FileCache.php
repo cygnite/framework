@@ -225,10 +225,10 @@ class FileCache
     }
 
     /**
-    * get cache name
-    *
-    * @return void
-    */
+     * get cache name
+     *
+     * @return string
+     */
     public function getCacheName()
     {
          return $this->_cacheName;

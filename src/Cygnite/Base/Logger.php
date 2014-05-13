@@ -1,6 +1,9 @@
 <?php
 namespace Cygnite\Base;
 
+use Config;
+use Cygnite\Exception;
+
 /**
  *  Cygnite Framework
  *

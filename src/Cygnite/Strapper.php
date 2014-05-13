@@ -111,7 +111,7 @@ class Strapper
 	}
 
     /**
-     * @return void
+     * @return bool
      */
     public function terminate()
 	{
@@ -126,5 +126,5 @@ class Strapper
 		}
 
 		Application::import('apps.routes');
-				}
-			}
+    }
+}

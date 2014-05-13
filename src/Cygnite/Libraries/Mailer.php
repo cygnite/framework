@@ -93,12 +93,12 @@ class Mailer
 
     /**
      * Get the instance of the Mailer dynamically
-     * 
-     * @access public 
-     * @param $method string 
-     * @param arguments array
+     *
+     * @access   public
+     * @param       $method string
+     * @param array $arguments
+     * @internal param array $arguments
      * @return object
-     * 
      */
     public static function __callStatic($method, $arguments)
     {
@@ -242,14 +242,14 @@ class Mailer
     {
         return MailMessage::newInstance();
     }
-    
+
     /**
      * Send email with message
-     * 
-     * @access public 
+     *
+     * @access public
      * @param  $message your email contents
+     * @throws \Exception
      * @return unknown
-     * 
      */
     public function send($message)
     {

@@ -2,7 +2,7 @@
 namespace Cygnite\Console\Command;
 
 use Cygnite\Console\Generator\Migrator;
-use Cygnite\Cygnite;
+use Cygnite\Application;
 use Cygnite\Inflector;
 use Cygnite\Database;
 use Cygnite\Database\Table;

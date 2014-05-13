@@ -1,7 +1,7 @@
 <?php
 namespace Cygnite\Libraries;
 
-use Cygnite\Cygnite;
+use Cygnite\Application;
 use Cygnite\Inflector;
 use Closure;
 use Cygnite\Input;
@@ -212,7 +212,6 @@ class Validator
         //var_dump(strlen($value));
 
         if (is_string($value) == true && strlen($value) == 0) {
-            echo "sdsddfsdf";
             $this->errors[$key.self::ERROR] = $conCate.$columnName.' valid string';
             return false;
         }

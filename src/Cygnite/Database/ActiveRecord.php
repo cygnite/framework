@@ -788,7 +788,7 @@ use Cygnite\Database\Exceptions\DatabaseException;
             if ($type === 'all' || $type == '*') {
                 $this->_selectColumns = $this->tableName.'.*';
             } else {
-                $this->_selectColumns = $this->tableName.'.'.(string) $type; // Need to split the column name and add quotes
+                $this->_selectColumns = (string) $type; // Need to split the column name and add quotes
             }
         } else {
             throw new Exception("Accepted parameters should be string format.");

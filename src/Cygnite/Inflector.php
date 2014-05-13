@@ -55,6 +55,7 @@ class Inflector
      *
      * Class name - ClassName
      * @param $word string
+     * @return mixed
      */
     public function covertAsClassName($word)
     {

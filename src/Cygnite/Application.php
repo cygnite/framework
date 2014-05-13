@@ -38,9 +38,9 @@ class Application extends Container
      * instance method will dynamically return you instance of
      * Application
      *
-     * @param Inflector $inflection
+     * @param Inflector  $inflection
      * @param Autoloader $loader
-     * @return void
+     * @return \Cygnite\Application
      */
 
     protected function __construct(Inflector $inflection=null,Autoloader $loader=null)
@@ -70,13 +70,15 @@ class Application extends Container
         return static::getInstance();
         
     }
+
     /**
      * ----------------------------------------------------
-     * Return instance of Application 
+     * Return instance of Application
      * ----------------------------------------------------
      *
-     * @param Inflector $inflector object
+     * @param Inflector  $inflection
      * @param Autoloader $loader object
+     * @internal param \Cygnite\Inflector $inflector object
      * @return Application object
      */
     public static function getInstance(Inflector $inflection=null,Autoloader $loader=null)

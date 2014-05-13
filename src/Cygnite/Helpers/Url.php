@@ -100,7 +100,7 @@ class Url
      *
      * @access public
      * @false  int
-     * @param int $segment
+     * @param array|int $segment
      * @return string
      */
     public function getSegment($segment = array())
@@ -158,7 +158,7 @@ class Url
             return $this;
         }		
 		if ($method == 'segment') {
-            return call_user_func_array(array(new Url, 'get'.ucfirst($method)), array($arguments));;
+            return call_user_func_array(array(new Url, 'get'.ucfirst($method)), array($arguments));
         }
     }
 	
