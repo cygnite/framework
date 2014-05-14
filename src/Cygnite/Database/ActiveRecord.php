@@ -123,6 +123,7 @@ use Cygnite\Database\Exceptions\DatabaseException;
     private $validFinders = array(
         'first',
         'last',
+        'find',
         'findBy',
         'all',
         'findBySql',
