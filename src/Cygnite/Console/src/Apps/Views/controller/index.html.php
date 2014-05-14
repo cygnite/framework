@@ -54,7 +54,7 @@
 
     </table>
 
-    <div style=" margin-left: 797px;">{{ links |raw }} </div>
+    <div >{{ links |raw }} </div>
 
 
 {% endblock %}

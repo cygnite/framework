@@ -101,14 +101,14 @@ class Controller
 
     private function buildFormOpen()
     {
-        return "\t\t".'$form = Form::instance()
+        return "\t".'$form = Form::instance()
                             ->open(
                                 "'.$this->controller.'",
                                 array(
                                     "method" => "post",
                                     "action" => Url::sitePath("'.
                                 strtolower(
-                                    Inflector::instance()->covertAsClassName($this->controller)
+                                    str_replace('Controller', '', $this->controller)
                                 ).'/type/$id/$pageNumber"),
                                     "id"     => "uniform",
                                     "role"   => "form"
@@ -119,22 +119,15 @@ class Controller
     private function generateFormElements($value)
     {
         $form = '';
-        $form .= "\t\t".'->addElement("label", "'.$this->inflector->underscoreToSpace($value->column_name).'", array(
-                                    "class" => "col-sm-2 control-label",
-                                    )
-                                )'.PHP_EOL;
+        $form .= "\t\t".'->addElement("label", "'.$this->inflector->underscoreToSpace($value->column_name).'",
+                                      array( "class" => "col-sm-2 control-label",))'.PHP_EOL;
         $form .= "\t\t".'->addElement("text", "'.$value->column_name.'", array(
-                            "value" => (isset($'.
+                                      "value" => (isset($'.
             strtolower(
-                Inflector::instance()->covertAsClassName($this->controller)
-            ).'->'.$value->column_name.')) ?
-                                            $'.
-            strtolower(
-                Inflector::instance()->covertAsClassName($this->controller)
-            ).'->'.$value->column_name.' :
-                                            "",
+                str_replace("Controller", "", $this->controller)
+            ).'->'.$value->column_name.')) ? $'.
+            strtolower(str_replace("Controller", "", $this->controller)).'->'.$value->column_name.' : "",
                             "class" => "form-control",
-
                             )
                         )'.PHP_EOL;
 

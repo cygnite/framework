@@ -146,7 +146,7 @@ class Dispatcher
 
                                 $instance = $app->make($controller);
                                 $app->propertyInjection($instance, $controller);
-                                return $instance->{$action}();
+                                return call_user_func_array(array($instance, $action), array());
                             }
                         );
                     }
@@ -181,7 +181,7 @@ class Dispatcher
                         $instance = $app->make($controller);
                         $app->propertyInjection($instance, $controller);
 
-                        return $instance->{$action}($params);
+                        return call_user_func_array(array($instance, $action), $params);
                     }
                 );
 
@@ -207,7 +207,7 @@ class Dispatcher
                         $instance = $app->make($controller);
                         $app->propertyInjection($instance, $controller);
 
-                        return $instance->{$action}($params);
+                        return call_user_func_array(array($instance, $action), $params);
                     }
                 );
             }
