@@ -22,7 +22,7 @@ class %controllerName% extends AbstractBaseController
     *
     *      public function formAction()
     *     {
-    *            echo "Cygnite : Hellow ! World ";
+    *            echo "Cygnite : Hello ! World ";
     *     }
     * Note: By default cygnite doesn't allow you to pass query string in url, which
     * consider as bad url format.

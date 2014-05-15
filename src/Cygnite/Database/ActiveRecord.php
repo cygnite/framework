@@ -1173,28 +1173,26 @@ use Cygnite\Database\Exceptions\DatabaseException;
 
 
         if (method_exists($this, 'exceptColumns')) {
-
             $ar = $this;
-
-            $selectColumns = Schema::instance(
+            $select = Schema::instance(
                 $this,
                 function ($table) use ($ar) {
-                    $table->database = $ar->database;
+                    $table->database =  $ar->database;
                     $table->tableName = $ar->tableName;
 
                     return $table->getColumns();
                 }
             );
 
-            $columns = $this->query($selectColumns)->getAll();
+            $columns = $this->query($select->schema)->getAll();
 
             // Get all column name which need to remove from the result set
             $exceptColumns = $this->exceptColumns();
 
             foreach ($columns as $key => $value) {
 
-                if (!in_array($value['column_name'], $exceptColumns)) {
-                    $columnArray[] = $value['column_name'];
+                if (!in_array($value->column_name, $exceptColumns)) {
+                    $columnArray[] = $value->column_name;
                 }
             }
             $this->_selectColumns = (string) implode (',', $columnArray);
