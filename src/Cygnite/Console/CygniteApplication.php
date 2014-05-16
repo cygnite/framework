@@ -9,7 +9,7 @@ use Cygnite\Console\Command\MigrationCommand;
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Input\InputOption;
 
-require '/../../'.APP_PATH.'/configs/database.php';
+require BASE_PATH.DS.APP_PATH.'/configs/database.php';
 /**
  *  Cygnite Framework
  *
@@ -30,8 +30,8 @@ require '/../../'.APP_PATH.'/configs/database.php';
  *                        Cygnite Cli driven by Symfony2 Console Component.
  * @Author             :  Sanjoy Dey
  * @Copyright          :  Copyright (c) 2013 - 2014,
- * @Link	           :  http://www.cygniteframework.com
- * @Since	           :  Version 1.0.6
+ * @Link	       :  http://www.cygniteframework.com
+ * @Since	       :  Version 1.0.6
  * @File Source
  *
  */
