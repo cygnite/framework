@@ -1,7 +1,7 @@
 <?php
 namespace Cygnite\Console\Generator;
 
-use Cygnite\Inflector;
+use Cygnite\Helpers\Inflector;
 
 /**
  *  Cygnite Framework
@@ -97,7 +97,7 @@ class Model
     private function replaceModelTemplate($content)
     {
         $content = str_replace('%StaticModelName%',
-            $this->inflector->covertAsClassName($this->command->model),
+            $this->inflector->classify($this->command->model),
             $content
         );
         $content = str_replace('%modelName%', $this->command->model, $content);
@@ -113,7 +113,7 @@ class Model
         $filePath =  $this->command->applicationDir.
             DS.'models'.
             DS.
-            $this->inflector->covertAsClassName($this->command->model)
+            $this->inflector->classify($this->command->model)
             .'.php';
 
         /*write operation ->*/

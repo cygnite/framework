@@ -2,8 +2,8 @@
 namespace Cygnite\Base;
 
 use Exception;
-use Cygnite\Inflector;
-use Cygnite\Application;
+use Cygnite\Helpers\Inflector;
+use Cygnite\Foundation\Application;
 use Cygnite\Helpers\Helper;
 use Cygnite\Helpers\Config;
 
@@ -166,6 +166,7 @@ class Dispatcher
 
                 $requestUri = preg_split('/[\.\ ]/', $matchedUrl['controllerPath']);
 
+                // We are matching with static routing if match then dispatch it
                 $response  = Application::instance(
                     function($app) use($requestUri, $matchedUrl, $dispatcher)
                     {
@@ -190,19 +191,31 @@ class Dispatcher
                 $response  = Application::instance(
                     function($app) use($exp, $dispatcher)
                     {
+                        $controller = $method = $param = $instance = null;
+                        $controller = $exp[1];
+                        $method = $exp[2];
+                        $params = array_slice($exp, 2);
+                        $controllerDir = '';
 
-                        $controller = $app->getController($exp[1]);
-                        $instance = null;
+                        if ( is_dir (CYGNITE_BASE.str_replace(
+                                '\\', DS, strtolower($app->namespace.$exp[1]
+                                )))
+                        ) {
 
-                        $action = isset($exp[2]) ? $exp[2] : 'index';
+                            $controllerDir = ucfirst($exp[1]);
+                            $controller = $exp[2];
+                            $method = $exp[3];
+                            $params = array_slice($exp, 3);
+                        }
+
+                        $controller = $app->getController($controller, $controllerDir);
+
+                        $action = isset($method) ? $method : 'index';
                         $action = $app->getActionName($action);
-
 
                         if (!class_exists($controller)) {
                             throw new Exception('Unhandled Exception (404 Page)');
                         }
-
-                        $params = array_slice($exp, 2);
 
                         $instance = $app->make($controller);
                         $app->propertyInjection($instance, $controller);

@@ -1,7 +1,7 @@
 <?php
 namespace Cygnite\Console\Generator;
 
-use Cygnite\Inflector;
+use Cygnite\Helpers\Inflector;
 
 /**
  *  Cygnite Framework

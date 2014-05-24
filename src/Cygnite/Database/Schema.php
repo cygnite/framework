@@ -2,8 +2,8 @@
 namespace Cygnite\Database;
 
 use Closure;
-use Cygnite\Singleton;
-use Cygnite\Inflector;
+use Cygnite\Common\Singleton;
+use Cygnite\Helpers\Inflector;
 use Cygnite\Database\Connections;
 
 /**
@@ -426,7 +426,7 @@ class Schema extends Connections
 
     public function getColumns()
     {
-        $this->schema = self::SELECT." COLUMN_NAME FROM".$this->getSchemaQuery();
+        $this->schema = self::SELECT." COLUMN_NAME FROM ".$this->getSchemaQuery();
 
         return $this;
     }

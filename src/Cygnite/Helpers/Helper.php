@@ -1,7 +1,7 @@
 <?php
 namespace Cygnite\Helpers;
 
-use Cygnite\Application;
+use Cygnite\Foundation\Application;
 
 if (!defined('CF_SYSTEM')) {
     exit('External script access not allowed');
@@ -20,9 +20,9 @@ if (!defined('CF_SYSTEM')) {
  *   obtain it through the world-wide-web, please send an email
  *   to sanjoy@hotmail.com so I can send you a copy immediately.
  *
- * @Package                    :  Packages
- * @Sub Packages               :  Helper
- * @Filename                   :  GHelper
+ * @Package                    :  Cygnite
+ * @Sub Packages               :  Helpers
+ * @Filename                   :  Helper
  * @Description                :  This helper is used to global functionalist's of the framework.
  * @Author                     :  Cygnite Dev Team
  * @Copyright                  :  Copyright (c) 2013 - 2014,

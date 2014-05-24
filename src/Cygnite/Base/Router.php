@@ -4,8 +4,8 @@ namespace Cygnite\Base;
 use Exception;
 use Reflection;
 use ErrorException;
-use Cygnite\Application;
-use Cygnite\Inflector;
+use Cygnite\Foundation\Application;
+use Cygnite\Helpers\Inflector;
 use Cygnite\Helpers\Helper;
 
 if (!defined('CF_SYSTEM')) {
@@ -34,10 +34,6 @@ if (!defined('CF_SYSTEM')) {
  * @Link	           :  http://www.cygniteframework.com
  * @Since	           :  Version 1.0
  */
-/**
-* @author	Bram(us) Van Damme
-* @author   Sanjoy Dey
-*/
 
 class Router implements RouterInterface
 {
@@ -107,7 +103,7 @@ class Router implements RouterInterface
     private function setUpControllerAndMethodName($arguments)
     {
         $expression = Helper::stringSplit($arguments[0]);
-        $this->controller = Inflector::instance()->covertAsClassName($expression[0]).'Controller';
+        $this->controller = Inflector::instance()->classify($expression[0]).'Controller';
         $this->controllerWithNS = $this->namespace.$this->controller;
         $this->method = Inflector::instance()->toCameCase($expression[1]).'Action';
 

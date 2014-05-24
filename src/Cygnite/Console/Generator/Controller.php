@@ -1,7 +1,7 @@
 <?php
 namespace Cygnite\Console\Generator;
 
-use Cygnite\Inflector;
+use Cygnite\Helpers\Inflector;
 
 /**
  *  Cygnite Framework
@@ -236,7 +236,7 @@ class Controller
     {
         $content = str_replace(
             'class %controllerName%',
-            'class '.$this->inflector->covertAsClassName($this->controller),
+            'class '.$this->inflector->classify($this->controller),
             $content
         );
         $content = str_replace(
@@ -255,14 +255,14 @@ class Controller
         $newContent = '';
         $content = str_replace(
             'new %modelName%',
-            'new '.$this->inflector->covertAsClassName($this->model),
+            'new '.$this->inflector->classify($this->model),
             $content
         );
 
 
         $content = str_replace(
             '%StaticModelName%',
-            $this->inflector->covertAsClassName($this->model),
+            $this->inflector->classify($this->model),
             $content
         );
 
@@ -309,7 +309,7 @@ class Controller
     {
         /*write operation ->*/
         $writeTmp =fopen(
-            $this->applicationDir.DS.'controllers'.DS.$this->inflector->covertAsClassName($this->controller).'.php',
+            $this->applicationDir.DS.'controllers'.DS.$this->inflector->classify($this->controller).'.php',
             "w"
         ) or die('Unable to generate controller');
 

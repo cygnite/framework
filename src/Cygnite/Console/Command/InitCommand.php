@@ -1,9 +1,9 @@
 <?php
 namespace Cygnite\Console\Command;
 
-use Cygnite\Application;
+use Cygnite\Foundation\Application;
 use Cygnite\Database\Table;
-use Cygnite\Inflector;
+use Cygnite\Helpers\Inflector;
 use Cygnite\Console\Generator\Migrator;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;

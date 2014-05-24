@@ -5,14 +5,14 @@ use PDO;
 use Cygnite;
 use Exception;
 use PDOException;
-use Cygnite\Inflector;
+use Cygnite\Helpers\Inflector;
 use ReflectionClass;
 use ReflectionObject;
 use ReflectionProperty;
 use Cygnite\Base\Event;
 use Cygnite\Database\Schema;
 use Cygnite\Database\Connections;
-use Cygnite\Libraries\Pagination;
+use Cygnite\Common\Pagination;
 use Cygnite\Database\Configurations;
 use Cygnite\Database\Exceptions\DatabaseException;
 
@@ -271,6 +271,7 @@ use Cygnite\Database\Exceptions\DatabaseException;
             $model = get_called_class();
             $pagination = null;
             $pagination = Pagination::instance(new $model());
+             
             return $pagination->{$method}();
         }
 
@@ -1086,10 +1087,11 @@ use Cygnite\Database\Exceptions\DatabaseException;
         $orderBy= (isset($this->_columnName)  && isset($this->_orderType)) ?
                " ORDER BY `".$this->_columnName."`  ".$this->_orderType  :  '';
 
-          $this->buildQuery($groupBy, $orderBy, $limit);
+        $this->buildQuery($groupBy, $orderBy, $limit);
 
         try {
              $statement = $this->getDatabaseConnection()->prepare($this->sqlQuery);
+             $this->sqlQuery = null;
              $this->setDbStatement($this->database, $statement);
              $statement->bindValue(':where', $this->_fromWhere);
              $statement->execute();

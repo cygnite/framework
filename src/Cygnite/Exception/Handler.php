@@ -2,7 +2,7 @@
 namespace Cygnite\Exception;
 
 use Closure;
-use Cygnite\Application;
+use Cygnite\Foundation\Application;
 use Exception;
 use Tracy\Helpers;
 use Tracy\Debugger;

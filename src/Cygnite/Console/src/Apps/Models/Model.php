@@ -1,9 +1,9 @@
 
 namespace Apps\Models;
 
-use Cygnite\Application;
-use Cygnite\Helpers\Url;
+use Cygnite\Foundation\Application;
 use Cygnite\Database\Schema;
+use Cygnite\Common\UrlManager\Url;
 use Cygnite\Database\ActiveRecord;
 
 class %StaticModelName% extends ActiveRecord

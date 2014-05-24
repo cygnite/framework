@@ -4,8 +4,8 @@ namespace Cygnite\Base;
 use Exception;
 use Reflection;
 use ErrorException;
-use Cygnite\Application;
-use Cygnite\Inflector;
+use Cygnite\Foundation\Application;
+use Cygnite\Helpers\Inflector;
 use Cygnite\Helpers\Helper;
 
 if (!defined('CF_SYSTEM')) {

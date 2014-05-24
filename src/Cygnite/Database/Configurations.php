@@ -1,7 +1,7 @@
 <?php
 namespace Cygnite\Database;
 
-use Cygnite\Singleton;
+use Cygnite\Common\Singleton;
 use Closure;
 
 class Configurations extends Singleton

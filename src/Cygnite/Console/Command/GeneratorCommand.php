@@ -1,8 +1,8 @@
 <?php
 namespace Cygnite\Console\Command;
 
-use Cygnite\Application;
-use Cygnite\Inflector;
+use Cygnite\Foundation\Application;
+use Cygnite\Helpers\Inflector;
 use Cygnite\Database;
 use Cygnite\Database\Schema;
 use Cygnite\Console\Generator\Model;
@@ -96,8 +96,8 @@ class GeneratorCommand extends Command
     {
         $this->inflect = new Inflector;
 
-        $this->controller = $this->inflect->covertAsClassName($input->getArgument('name')).'Controller';
-        $this->model = $this->inflect->covertAsClassName($input->getArgument('model'));
+        $this->controller = $this->inflect->classify($input->getArgument('name')).'Controller';
+        $this->model = $this->inflect->classify($input->getArgument('model'));
         $this->database = (!is_null($input->getArgument('database'))) ?
                            $input->getArgument('database') :
                            $this->tableSchema->getDefaultDatabaseConnection();

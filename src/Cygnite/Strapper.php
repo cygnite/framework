@@ -5,6 +5,7 @@ use Tracy\Debugger;
 use Cygnite\Helpers\Config;
 use Cygnite\Helpers\Profiler;
 use Cygnite\Exception\Handler;
+use Cygnite\Foundation\Application;
 
 if (defined('CF_SYSTEM') === false) {
     exit('External script access not allowed');

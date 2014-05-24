@@ -1,13 +1,13 @@
 namespace Apps\Controllers;
 
-use Cygnite\Application;
-use Cygnite\Input;
-use Cygnite\Libraries\Form;
-use Cygnite\Libraries\Validator;
-use Cygnite\Helpers\Url;
-use Cygnite\Helpers\Assets;
+use Cygnite\Foundation\Application;
+use Cygnite\Common\Input;
+use Cygnite\FormBuilder\Form;
+use Cygnite\Validator\Validator;
+use Cygnite\AssetManager\Assets;
+use Cygnite\Common\UrlManager\Url;
+use Cygnite\Mvc\Controller\AbstractBaseController;
 use Apps\Models\%StaticModelName%;
-use Cygnite\AbstractBaseController;
 
 class %controllerName% extends AbstractBaseController
 {

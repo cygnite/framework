@@ -3,7 +3,7 @@ namespace Cygnite\Console\Generator;
 
 use Cygnite\Database\Configurations;
 use Cygnite\Database\Connections;
-use Cygnite\Inflector;
+use Cygnite\Helpers\Inflector;
 
 /**
  *  Cygnite Framework
@@ -102,7 +102,7 @@ class Migrator
     public function replaceTemplateByInput($template = 'migration')
     {
         #replace with table name - {%className%}
-        //var_dump($this->inflector->covertAsClassName(strtolower($this->command->input)));
+        //var_dump($this->inflector->classify(strtolower($this->command->input)));
 
         $file = $this->getTemplatePath().$template.self::EXTENSION;
 
@@ -113,7 +113,7 @@ class Migrator
         $fileContent = file_get_contents($file);
 
         $content = str_replace('{%className%}',
-            $this->inflector->covertAsClassName(strtolower($this->command->input)),
+            $this->inflector->classify(strtolower($this->command->input)),
             $fileContent
         );
 
@@ -201,7 +201,7 @@ class Migrator
 
         if (is_readable($file)) {
             include_once $file;
-            $class = $this->inflector->covertAsClassName($this->getMigrationClass());
+            $class = $this->inflector->classify($this->getMigrationClass());
         }
 
         if ($type == 'down') {
