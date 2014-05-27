@@ -203,7 +203,9 @@ class Dispatcher
                         ) {
 
                             $controllerDir = ucfirst($exp[1]);
-                            $controller = $exp[2];
+                            if (isset($exp[2])) {
+                                $method = $exp[2];
+                            }
                             $method = $exp[3];
                             $params = array_slice($exp, 3);
                         }
