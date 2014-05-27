@@ -193,7 +193,9 @@ class Dispatcher
                     {
                         $controller = $method = $param = $instance = null;
                         $controller = $exp[1];
-                        $method = $exp[2];
+                        if (isset($exp[2])) {
+                            $method = $exp[2];
+                        }
                         $params = array_slice($exp, 2);
                         $controllerDir = '';
 

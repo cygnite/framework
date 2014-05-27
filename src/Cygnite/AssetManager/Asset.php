@@ -272,9 +272,11 @@ class Asset extends Facade implements \ArrayAccess
      */
     public function addAttributes($attributes = array(), $html = array())
     {
-        foreach ($attributes as $key => $value) {
-            if (!is_null($value)) {
-                $html[] = $key.'="'.Html::entities($value).'"';
+        if (!empty($attributes)) {
+            foreach ($attributes as $key => $value) {
+                if (!is_null($value)) {
+                    $html[] = $key.'="'.Html::entities($value).'"';
+                }
             }
         }
 
