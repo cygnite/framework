@@ -99,7 +99,10 @@ class Migrator
         return is_dir($directory) || mkdir($directory);
     }
 
-    public function replaceTemplateByInput($template = 'migration')
+    /**
+     * @param string $template
+     */
+    public function replaceTemplateByInput($template = 'Migration')
     {
         #replace with table name - {%className%}
         //var_dump($this->inflector->classify(strtolower($this->command->input)));
@@ -120,8 +123,6 @@ class Migrator
         $contentAppendWith = '';
 
         $contentAppendWith .= '<?php '.PHP_EOL;
-
-        //$contentAppendWith .= 'use Cygnite\Database\Migration;';
 
         $this->replacedContent = $contentAppendWith.$content;
     }

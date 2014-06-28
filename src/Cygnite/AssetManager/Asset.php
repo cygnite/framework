@@ -1,7 +1,7 @@
 <?php
 namespace Cygnite\AssetManager;
 
-use Cygnite\Facade\Facade;
+use Cygnite\Proxy\StaticResolver;
 use Cygnite\AssetManager\Html;
 use Cygnite\Common\UrlManager\Url;
 use InvalidArgumentException;
@@ -55,7 +55,7 @@ $asset->dump('link');
 
 
 
-class Asset extends Facade implements \ArrayAccess
+class Asset extends StaticResolver implements \ArrayAccess
 {
     protected $assets = array();
 
@@ -67,16 +67,15 @@ class Asset extends Facade implements \ArrayAccess
     {
         switch ($type) {
             case 'style':
-                list($path, $media, $title) = array_values($arguments);
-                $this->{$type}($path, $media, $title);
+                call_user_func_array(array($this, $type), $arguments);
                 break;
             case 'script':
-                list($path, $attributes) = array_values($arguments);
-                $this->{$type}($path, $attributes);
+                call_user_func_array(array($this, $type), $arguments);
                 break;
             case 'link':
-                list($path, $name, $attributes) = array_values($arguments);
-                $this->{$type}($path, $name, $attributes);
+                call_user_func_array(array($this, $type), $arguments);
+                /*list($path, $name, $attributes) = array_values($arguments);
+                $this->{$type}($path, $name, $attributes);*/
                 break;
         }
 
@@ -228,7 +227,7 @@ class Asset extends Facade implements \ArrayAccess
 
     private function isFacade($caller)
     {
-        return (strpos($caller['file'], 'Facade') !== FALSE) ? true : false;
+        return (strpos($caller['file'], 'StaticResolver') !== FALSE) ? true : false;
     }
 
     /**
@@ -270,7 +269,7 @@ class Asset extends Facade implements \ArrayAccess
      * @param array $html
      * @return string
      */
-    public function addAttributes($attributes = array(), $html = array())
+    public function addAttributes($attributes, $html = array())
     {
         if (!empty($attributes)) {
             foreach ($attributes as $key => $value) {

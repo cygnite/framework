@@ -1,12 +1,12 @@
 <?php
 namespace Cygnite\Console\Command;
 
-use Cygnite\Console\Generator\Migrator;
-use Cygnite\Foundation\Application;
-use Cygnite\Helpers\Inflector;
 use Cygnite\Database;
 use Cygnite\Database\Table;
 use Cygnite\Database\Schema;
+use Cygnite\Helpers\Inflector;
+use Cygnite\Foundation\Application;
+use Cygnite\Console\Generator\Migrator;
 use Cygnite\Console\Generator\Controller;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;

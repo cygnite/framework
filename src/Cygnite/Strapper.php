@@ -51,7 +51,7 @@ class Strapper
          * define('DEVELOPMENT_ENVIRONMENT', 'production');
          * </code>
          */
-        define('MODE', Config::get('global_config', 'environment'));
+        define('MODE', Config::get('global.config', 'environment'));
 
         global $event;
 
@@ -66,12 +66,12 @@ class Strapper
 
 	   /**
 		 *--------------------------------------------------
-		 * Turn on benchmarking application if profiling is on
+		 * Turn on 	 application if profiling is on
 		 * in configuration
 		 *--------------------------------------------------
 		 */
 
-		if (Config::get('global_config', 'enable_profiling') == true) {
+		if (Config::get('global.config', 'enable_profiling') == true) {
 			  Profiler::start();
 		}
 
@@ -79,16 +79,16 @@ class Strapper
 		 *  Set Cygnite user defined encryption key
 		 * ---------------------------------------------------
 		*/
-		 if (!is_null(Config::get('global_config', 'cf_encryption_key')) ||
-			in_array('encrypt', Config::get('autoload_config', 'helpers')) == true ) {
-			define('CF_ENCRYPT_KEY', Config::get('global_config', 'cf_encryption_key'));
+		 if (!is_null(Config::get('global.config', 'cf_encryption_key')) ||
+			in_array('encrypt', Config::get('config.autoload', 'helpers')) == true ) {
+			define('CF_ENCRYPT_KEY', Config::get('global.config', 'cf_encryption_key'));
 		}
 
 		/**----------------------------------------------------------------
 		 * Get Session config and set it here
 		 * ----------------------------------------------------------------
 		 */
-		define('SECURE_SESSION', Config::get('session_config', 'cf_session'));
+		define('SECURE_SESSION', Config::get('config.session', 'cf_session'));
 
 		/**----------------------------------------------------------------
 		 * Auto load Session library based on user configurations
@@ -103,7 +103,7 @@ class Strapper
 		 * has not been set in configuration
 		 * ------------------------------------------------------------------
 		 */
-		if (is_null(Config::get('global_config', "default_controller"))) {
+		if (is_null(Config::get('global.config', "default_controller"))) {
 			trigger_error(
 				"Default controller not found ! Please set the default
 							controller in configs/application".EXT

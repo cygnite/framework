@@ -26,7 +26,7 @@ class Container extends DependencyExtension implements ContainerInterface, Array
      * @var array
      * @access private
      */
-    private $storage;
+    private $storage = array();
 
     private $services;
 
@@ -78,7 +78,7 @@ class Container extends DependencyExtension implements ContainerInterface, Array
      * @internal param $callable
      * @return type
      */
-    public function asShared(Closure $callable)
+    public function share(Closure $callable)
     {
         return function ($c) use ($callable) {
             static $object;
@@ -269,6 +269,20 @@ class Container extends DependencyExtension implements ContainerInterface, Array
     }
 
     /**
+     * Resolve the class. We will create and return instance if already
+     * not exists.
+     *
+     * @param $class
+     * @return object
+     */
+    public function resolve($class)
+    {
+        $class = Inflector::instance()->toNamespace($class);
+
+        return $this->make($class);
+    }
+
+    /**
      * Resolve all dependencies of your class and return instance of
      * your class
      *
@@ -300,7 +314,7 @@ class Container extends DependencyExtension implements ContainerInterface, Array
         // if class does not have explicitly defined constructor or constructor does not have parameters
         // get the new instance
         if (!isset($constructor) && is_null($constructor) || $constructorArgsCount < 1) {
-            $this->services[$class] = $reflection->reflectionClass->newInstance();
+            $this->storage[$class] = $reflection->reflectionClass->newInstance();
         } else {
             $dependencies = $constructor->getParameters();
 
@@ -345,10 +359,10 @@ class Container extends DependencyExtension implements ContainerInterface, Array
                 }
             }
 
-            $this->services[$class] = $reflection->reflectionClass->newInstanceArgs($constructorArgs);
+            $this->storage[$class] = $reflection->reflectionClass->newInstanceArgs($constructorArgs);
         }
 
-        return $this[$class] = $this->services[$class];
+        return $this->storage[$class];
     }
 
     /**

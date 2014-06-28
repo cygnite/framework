@@ -248,7 +248,10 @@ class CView
         try {
             $path = "";
             foreach ($resultArray as $key => $value) {
-                $path = str_replace(':', DS, $value);
+                if (is_string($value)) {
+                    $path = str_replace(':', DS, $value);
+                }
+
                 $this->{$key} = $path;
                 $this->__set($key, $value);
                 //$this->layout[$key] = $path;

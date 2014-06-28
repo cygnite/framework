@@ -2,11 +2,12 @@
 namespace Cygnite\Common;
 
 use Closure;
+use Cygnite\Common\CookieManager\CookieInterface;
 use Cygnite\Common\Security;
+use Cygnite\Proxy\StaticResolver;
 use InvalidArgumentException;
 use Cygnite\Common\Singleton;
 use Cygnite\Common\CookieManager\Cookie;
-
 
 /*
  *   Cygnite PHP Framework
@@ -34,7 +35,7 @@ use Cygnite\Common\CookieManager\Cookie;
  *
  */
 
-class Input extends Singleton
+class Input
 {
     public $except;
 
@@ -49,26 +50,28 @@ class Input extends Singleton
     private $cookie;
 
 
-    protected function __construct()
+    /**
+     *
+     * @param Security $security
+     */
+    public function __construct(Security $security)
     {
-        $this->security = Security::instance(
-            function ($instance) {
-                return $instance;
-            }
-        );
+        $this->security = $security;
         $this->request = $this->getRequest();
     }
 
     /**
-     * @param callable $initialize
+     * @param callable $callback
      * @return object
      */
-    public static function getInstance(Closure $initialize = null)
+    public static function make(Closure $callback = null)
     {
-        if ($initialize instanceof Closure) {
-            return $initialize(parent::instance());
+        $security = new Security;
+
+        if ($callback instanceof Closure) {
+            return $callback(new self($security));
         } else {
-            return parent::instance();
+            return new self($security);
         }
     }
 
@@ -182,7 +185,6 @@ class Input extends Singleton
         }
 
         return false;
-
     }
 
     /**
@@ -198,50 +200,16 @@ class Input extends Singleton
     }
 
     /**
-     * @param $name
-     * @param $arguments
-     */
-    public function __call($name, $arguments)
-    {
-        //call_user_func_array(array($this, $name), $arguments);
-    }
-
-    /**
-     * @param        $name
-     * @param        $value
-     * @param int    $expire
-     * @param string $path
-     * @param null   $domain
-     * @param bool   $security
-     * @param bool   $httpOnly
-     */
-    private function setCookie(
-        $name,
-        $value,
-        $expire = 0,
-        $path = '/',
-        $domain = null,
-        $security = false,
-        $httpOnly = false
-    ) {
-        if ($this->cookieInstance instanceof CookieInterface) {
-            echo "Cookie Instane";
-        }
-
-
-    }
-
-    private function getCookie($name)
-    {
-
-    }
-
-    /**
      * Sets or returns the cookie variable value.
      *
      */
-    public function cookie()
+    public function cookie(Closure $callback = null)
     {
-         return Cookie::create();
+        if ($callback instanceof CookieInterface) {
+            return Cookie::create($callback);
+        }
+
+        return Cookie::create();
+
     }
 }

@@ -106,7 +106,6 @@ class Router implements RouterInterface
         $this->controller = Inflector::instance()->classify($expression[0]).'Controller';
         $this->controllerWithNS = $this->namespace.$this->controller;
         $this->method = Inflector::instance()->toCameCase($expression[1]).'Action';
-
     }
 
     /**
@@ -383,7 +382,7 @@ class Router implements RouterInterface
                 PREG_SET_ORDER)
             ) {
 
-                // Extract the matched URL (and only the falseeters)
+                // Extract the matched URL (and only the parameters)
                 $params = array_map(
                     function ($match) {
                         $var = explode('/', trim($match, '/'));
@@ -397,7 +396,6 @@ class Router implements RouterInterface
                 // call the handling function with the URL
                 call_user_func_array($route['fn'], $params);
 
-                // yay!
                 $numHandled++;
 
                 // If we need to quit, then quit
@@ -412,7 +410,11 @@ class Router implements RouterInterface
 
     }
 
-	public function getBaseUrl()
+    /**
+     * Get the base url
+     * @return string
+     */
+    public function getBaseUrl()
 	{
 		// Current Request URI
         $this->currentUrl = $_SERVER['REQUEST_URI'];
@@ -430,10 +432,10 @@ class Router implements RouterInterface
      */
     public function getCurrentUri()
     {
-		$uri = $this->currentUrl;
-		$basePath = $this->getbaseUrl ();
+		$basePath = $this->getBaseUrl();
+        $uri = $this->currentUrl;
 
-		 $this->base = 	$basePath;
+		$this->base = 	$basePath;
         $uri = substr($uri, strlen($basePath));
 
         // Don't take query params into account on the URL
@@ -442,7 +444,7 @@ class Router implements RouterInterface
         }
 
         // Remove trailing slash + enforce a slash at the start
-         $uri = '/' . trim($uri, '/');
+        $uri = '/' . trim($uri, '/');
 
         return $uri;
 

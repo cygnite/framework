@@ -1,13 +1,13 @@
 <?php
 namespace Cygnite\Mvc\View;
 
-use Cygnite\Facade\Facade;
+use Cygnite\Proxy\StaticResolver;
 
 if (!defined('CF_SYSTEM')) {
     exit('External script access not allowed');
 }
 
-class Output extends Facade
+class Output extends StaticResolver
 {
 
    /*protected function startBuffer()

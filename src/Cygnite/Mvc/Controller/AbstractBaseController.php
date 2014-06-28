@@ -1,6 +1,10 @@
 <?php
 namespace Cygnite\Mvc\Controller;
 
+use Cygnite\Common\Encrypt;
+use Cygnite\Common\SessionManager\Session;
+use Cygnite\Common\SessionManager\Flash\FlashMessage;
+use Cygnite\DependencyInjection\Container;
 use Cygnite\Helpers\Inflector;
 use Exception;
 use Cygnite\Foundation\Application;
@@ -22,9 +26,9 @@ use Cygnite\Mvc\View\Template;
  *   obtain it through the world-wide-web, please send an email
  *   to sanjoy@hotmail.com so I can send you a copy immediately.
  *
- * @Package                   :  Packages
- * @SubPackages               :  Cygnite
- * @Filename                  :  Base Controller
+ * @Package                   :  Cygnite
+ * @SubPackages               :  Mvc
+ * @Filename                  :  AbstractBaseController
  * @Description               :  This is the base controller of your application.
  *                               Controllers extends all base functionality of BaseController class.
  * @Author                    :  Cygnite Dev Team
@@ -37,7 +41,9 @@ use Cygnite\Mvc\View\Template;
 
 abstract class AbstractBaseController extends CView
 {
-    public $app;
+    public $container;
+
+    private $validFlashMessage = array('setFlash', 'hasFlash', 'getFlash', 'hasError');
 
     /**
      * Constructor function
@@ -48,7 +54,7 @@ abstract class AbstractBaseController extends CView
     public function __construct()
     {
         parent::__construct(new Template);
-        $this->app = Application::instance();
+        $this->container = new Container();
     }
 
     //prevent clone.
@@ -63,21 +69,38 @@ abstract class AbstractBaseController extends CView
      */
     public function __call($method, $arguments)
     {
+        if (in_array($method, $this->validFlashMessage)) {
+            $flashSession = $this->get('cygnite.common.session-manager.flash.FlashMessage');
+
+            $return = call_user_func_array(array($flashSession, $method), $arguments);
+
+            return ($method == 'setFlash') ? $this : $return;
+        }
+
         throw new Exception("Undefined method [$method] called by ".get_class($this).' Controller');
     }
 
     /**
-     * @param $key
+     * @param string $uri
+     * @param string $type
+     * @param int    $httpResponseCode
+     * @return $this
+     */
+    protected function redirectTo($uri = '', $type = 'location', $httpResponseCode = 302)
+    {
+        $url = $this->get('cygnite.common.url-manager.url');
+        $url->redirectTo($uri, $type, $httpResponseCode);
+
+        return $this;
+    }
+
+    /**
+     * @param $class
      * @return object @instance instance of your class
      */
-    protected function get($key)
+    protected function get($class)
     {
-        $class = null;
-        $class = explode('.', $key);
-        $class = array_map('ucfirst', $class);
-        $class = implode('\\', $class);
-
-        return $this->app->make('\\'.$class);
+        return $this->container->resolve($class);
     }
 
     /**

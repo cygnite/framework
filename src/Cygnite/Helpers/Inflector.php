@@ -1,6 +1,8 @@
 <?php
 namespace Cygnite\Helpers;
 
+use Cygnite\Proxy\StaticResolver;
+
 if (!defined('CF_SYSTEM')) {
     exit('External script access not allowed');
 }
@@ -32,7 +34,7 @@ if (!defined('CF_SYSTEM')) {
  *
  */
 
-class Inflector
+class Inflector extends StaticResolver
 {
 
     private static $instance;
@@ -54,12 +56,17 @@ class Inflector
     /**
      *
      * Class name - ClassName
+     * Convert underscore or - separated string to class name
+     *
+     * foo_bar -> FooBar
+     * foo-bar -> FooBar
+     *
      * @param $word string
      * @return mixed
      */
     public function classify($word)
     {
-        return preg_replace('/(^|_)([a-z])/e', 'strtoupper("\\2")', $word);
+        return preg_replace('/(^|_|-)([a-z])/e', 'strtoupper("\\2")', $word);
     }
 
     /*
@@ -180,7 +187,7 @@ class Inflector
      * @param    string   $str    String in camel case format
      * @return    string            $str Translated into underscore format
      */
-    public function fromCamelCase($str)
+    public function tabilize($str)
     {
         $str[0] = strtolower($str[0]);
         $func = create_function('$c', 'return "_" . strtolower($c[1]);');
@@ -221,6 +228,22 @@ class Inflector
         $nsParts = null;
         $nsParts = explode('\\', $class);
         return end($nsParts);
+    }
+
+    /**
+     * Covert dash-dot to namespace
+     *
+     * @param $key
+     * @return string
+     */
+    public function toNamespace($key)
+    {
+        $class = null;
+        $class = explode('.', $key);
+        $class = array_map('ucfirst', Inflector::instance()->classify($class));
+        $class = '\\'.implode('\\', $class);
+
+        return $class;
     }
 
     /*

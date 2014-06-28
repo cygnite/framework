@@ -1,7 +1,8 @@
 <?php
-namespace Cygnite\Validator;
+namespace Cygnite\Validation;
 
 use Closure;
+use Cygnite\Proxy\StaticResolver;
 use Cygnite\Foundation\Application;
 use Cygnite\Helpers\Inflector;
 use Cygnite\Common\Input;
@@ -73,7 +74,7 @@ class Validator
 
     private $rules = array();
 
-    private $errors= array();
+    public $errors= array();
 
     public $columns = array();
 
@@ -206,10 +207,7 @@ class Validator
             $columnName = '';
         }
 
-
-        //var_dump(is_string($this->param[$key]));
         $value = trim($this->param[$key]);
-        //var_dump(strlen($value));
 
         if (is_string($value) == true && strlen($value) == 0) {
             $this->errors[$key.self::ERROR] = $conCate.$columnName.' valid string';
@@ -280,6 +278,11 @@ class Validator
     }
 
 
+    /**
+     *
+     * @param $key
+     * @return bool
+     */
     public function validDate($key)
     {
         $conCate =  '';
@@ -297,6 +300,12 @@ class Validator
         return true;
     }
 
+    /**
+     * Validate phone number
+     *
+     * @param $key
+     * @return bool
+     */
     private function phone($key)
     {
         $num = preg_replace('#\d+#', '', $this->param[$key]);
@@ -323,20 +332,37 @@ class Validator
 
     private function setErrors($name, $value)
     {
-        $this->columns[$name] = '<span style="color:red;">'.$value.' doesn\'t match validation rules </span>';
+        $this->columns[$name] = '<span class="error">'.$value.' doesn\'t match validation rules </span>';
+    }
+
+    /**
+     * If you are willing to display custom error message
+     * you can simple pass the field name with _error prefix and
+     * set the message for it.
+     *
+     * @param $key
+     * @param $value
+     */
+    public function setCustomError($key, $value)
+    {
+        $this->errors[$key] = $value;
     }
 
     public function getErrors($column = null)
     {
-
         if ($column === null) {
             return implode("<br />", array_values($this->errors));
         }
 
-        return $this->errors[$column.self::ERROR];
-
+        return isset($this->errors[$column.self::ERROR]) ? $this->errors[$column.self::ERROR] : null;
     }
 
+    /**
+     * Run validation rules and catch errors
+     *
+     * @return bool
+     * @throws \Exception
+     */
     public function run()
     {
         $isValid = true;
@@ -362,7 +388,7 @@ class Validator
                     }
                     //echo $key."<br>";
                     if ($isValid === false) {
-                        $this->setErrors($key.self::ERROR, ucfirst($key));
+                        $this->setErrors($key.self::ERROR, Inflector::camelize((str_replace('_', ' ', $key))));
                     }
 
                     $isValid = $this->$method($key);
@@ -379,7 +405,7 @@ class Validator
                     }
 
                     if ($isValid === false) {
-                        $this->setErrors($key.self::ERROR, ucfirst($key));
+                        $this->setErrors($key.self::ERROR, Inflector::camelize(str_replace('_', ' ', $key)));
                     }
 
                     //$isValid = call_user_func_array(array($this, $rule[0]), array($key,$rule[1]));

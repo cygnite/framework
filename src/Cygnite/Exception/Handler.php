@@ -278,7 +278,7 @@ class Handler implements ExceptionInterface
      */
     public function handleException()
     {
-        $config = Config::get('global_config');
+        $config = Config::get('global.config');
 
         // Exception handler registered here. So it will handle all your exception
         // and throw you pretty format
