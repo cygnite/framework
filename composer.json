@@ -1,23 +1,29 @@
 {
     "name": "cygnite/framework",
-    "description": "The Cygnite PHP Framework.",
-    "type": "package",
-    "keywords": ["framework", "cygnite"],
+    "description": "Cygnite PHP Framework",
+    "keywords": ["Cygnite", "Framework"],
+    "homepage": "http://www.cygniteframework.com",
     "license": "MIT",
-    "authors": [{
-        "name": "Sanjoy Dey",
-        "email": "sanjoy09@hotmail.com"
-    }],
+    "authors": [
+        {
+            "name": "Sanjoy Dey",
+            "email": "dey.sanjoy0@gmail.com"
+        }
+    ],
     "require": {
-        "php": ">=5.3.3"
-    },
-    "require-dev": {
+			 "php": ">=5.3.3",
+			 "twig/twig": "1.*",
+			 "symfony/console": "2.3.*",
+			 "tracy/tracy": "2.2",
+			 "swiftmailer/swiftmailer": "~5.1"
+   },	
+   "require-dev": {
         "mockery/mockery": "dev-master",
         "phpunit/phpunit": "dev-master"
     },
-    "autoload": {
+     "autoload": {
         "psr-0": {
-            "Cygnite\\": "src/"
+            "Cygnite": "src/"
         }
     },
     "minimum-stability": "dev"
