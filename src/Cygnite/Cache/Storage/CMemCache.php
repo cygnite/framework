@@ -1,5 +1,5 @@
 <?php
-namespace Cygnite\Libraries\Cache\Storage;
+namespace Cygnite\Cache\Storage;
 
 use Cygnite\Cache\StorageInterface;
 

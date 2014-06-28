@@ -35,27 +35,40 @@ class Url
 
 	private static $instance = 'instance';
 
-	private $router;
+	private static $router;
 
-	public function __construct($route ='')
+	public function __construct(Router $route)
 	{
-		if ($route instanceof Router) {
-			$this->router = $route;
-		}
+        if(is_object($route)) {
+            if ($route instanceof Router) {
+                $this->setRoute($route);
+            }
+        }
 	}
 
-	public function getRoute()
+    /**
+     * @param $route
+     */
+    private function setRoute($route)
+    {
+        static::$router = $route;
+    }
+
+    /**
+     * @return instance / null
+     */
+    public function getRoute()
 	{
-		return isset($this->router) ? $this->router : null;
+		return isset(static::$router) && is_object(static::$router) ? static::$router : null;
 	}
 
     /**
      * Header Redirect
      *
      * @access    public
-     * @false     string $uri
-     * @false     string $type
-     * @false     int    $httpResponseCode
+     * @param     string $uri
+     * @param    string $type
+     * @param     int    $httpResponseCode
      * @internal  false \Cygnite\Helpers\the $string URL
      * @internal  false \Cygnite\Helpers\the $string method: location or redirect
      * @param string $uri
@@ -102,9 +115,8 @@ class Url
      */
     public function getSegment($segment = array())
     {
-		 $segment = (!is_null($segment[0])) ? $segment[0] : 1;
+		$segment = (!is_null($segment[0])) ? $segment[0] : 1;
 	    $uri = $this->getRoute()->getCurrentUri();
-
         $urlArray = array_filter(explode('/', $uri));
 
         $indexCount = array_search('index.php', $urlArray);
@@ -151,7 +163,7 @@ class Url
 		}
 
 		if ($method == 'segment') {
-			return call_user_func_array(array(new Url, $method), (array)$args);
+            return call_user_func_array(array(new Url(new Router()), 'get'.ucfirst($method)), array($args));
 		}
     }
 
@@ -165,9 +177,6 @@ class Url
 
         if ($method == self::$instance) {
             return $this;
-        }
-		if ($method == 'segment') {
-            return call_user_func_array(array(new Url, 'get'.ucfirst($method)), array($arguments));
         }
     }
 

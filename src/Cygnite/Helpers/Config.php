@@ -1,6 +1,8 @@
 <?php
 namespace Cygnite\Helpers;
 
+use Exception;
+use Cygnite\Proxy\StaticResolver;
 use InvalidArgumentException;
 
 if (defined('CF_SYSTEM') == false) {
@@ -36,16 +38,12 @@ if (defined('CF_SYSTEM') == false) {
  *
  */
 
-/**
- * Class Config
- * @author Sanjoy Dey
- * @package Cygnite\Helpers
- */
-
-class Config
+class Config extends StaticResolver
 {
 
     private static $_config = array();
+
+    private $configuration = array();
 
 
     /**
@@ -58,11 +56,11 @@ class Config
      * @return mixed
      * @throws InvalidArgumentException
      */
-    public static function get($arrKey, $keyValue = false)
+    protected function get($arrKey, $keyValue = false)
     {
         $config = array();
 
-        $config = self::getConfigItems('config_items');
+        $config = $this->getConfigItems('config.items');
 
         if ($arrKey === null) {
             throw new InvalidArgumentException(
@@ -82,14 +80,23 @@ class Config
 
     }//end of getConfig()
 
-
-    public static function set($name, $values = array())
+    /**
+     * Store new configurations
+     * @param       $name
+     * @param array $values
+     */
+    protected function set($name, $values = array())
     {
         self::$_config[$name] = $values;
 
-    }//end setConfigItems()
+    }
 
-    public static function getConfigItems($key)
+    /**
+     * @param $key
+     * @return null
+     * @throws \InvalidArgumentException
+     */
+    protected function getConfigItems($key)
     {
         if (is_null($key) == true) {
             throw new InvalidArgumentException(
@@ -104,41 +111,37 @@ class Config
 
     }
     /*
-     * Save user configurations
+     * Import application configurations
      */
-    public static function load()
+    protected function load()
     {
         $config = array();
-	
-	if (file_exists(strtolower(APPPATH).DS.'configs'.DS.'application'.EXT)) {
-            $config['global_config'] = include_once strtolower(APPPATH).DS.'configs'.DS.'application'.EXT;
+
+        $this->importConfigurations('global.config', 'application');
+        $this->importConfigurations('config.database', 'database');
+        $this->importConfigurations('config.session', 'session');
+        $this->importConfigurations('config.autoload', 'autoload');
+        $this->importConfigurations('config.router', 'routerconfig', '');
+
+        return $this->configuration;
+    }
+
+    /**
+     * @param        $name
+     * @param        $fileName
+     * @param string $configDir
+     * @return mixed
+     * @throws \Exception
+     */
+    private function importConfigurations($name, $fileName, $configDir = 'configs')
+    {
+        $configPath = "";
+        $configPath = strtolower(APPPATH).DS.$configDir.DS;
+
+        if (file_exists($configPath.$fileName.EXT)) {
+           $this->configuration[$name] = include_once $configPath.$fileName.EXT;
         } else {
-           throw new \Exception("File not exixts ".strtolower(APPPATH).DS.'configs'.DS.'application'.EXT);
+            throw new Exception("File not exists on the path ".$configPath.$fileName.EXT);
         }
-
-	if (file_exists(strtolower(APPPATH).DS.'configs'.DS.'database'.EXT)) {
-            $config['db_config'] = include_once strtolower(APPPATH).DS.'configs'.DS.'database'.EXT;
-	} else {
-           throw new \Exception("File not exixts ".strtolower(APPPATH).DS.'configs'.DS.'database'.EXT);
-        }
-
-	if (file_exists(strtolower(APPPATH).DS.'configs'.DS.'session'.EXT)) {
-            $config['session_config'] = include_once strtolower(APPPATH).DS.'configs'.DS.'session'.EXT;
-	} else {
-           throw new \Exception("File not exixts ".strtolower(APPPATH).DS.'configs'.DS.'session'.EXT);
-        }
-
-	if (file_exists(strtolower(APPPATH).DS.'configs'.DS.'autoload'.EXT)) {
-            $config['autoload_config'] = include_once strtolower(APPPATH).DS.'configs'.DS.'autoload'.EXT;
-	} else {
-           throw new \Exception("File not exixts ".strtolower(APPPATH).DS.'configs'.DS.'autoload'.EXT);
-        }
-
-	if (file_exists(strtolower(APPPATH).DS.'routerconfig'.EXT)) {
-            $config['routing_config'] = include_once strtolower(APPPATH).DS.'routerconfig'.EXT;
-	} else {
-           throw new \Exception("File not exixts ".strtolower(APPPATH).DS.'routerconfig'.EXT);
-        }
-        return $config;
     }
 }

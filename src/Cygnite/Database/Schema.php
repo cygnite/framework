@@ -90,7 +90,7 @@ class Schema extends Connections
      * directly
      *
      * @param $model
-     * @param \Cygnite\Inflector $inflection
+     * @param \Cygnite\Helpers\Inflector $inflection
      */
     private function __construct($model, Inflector $inflection)
     {
@@ -119,7 +119,7 @@ class Schema extends Connections
             $this->setConn($this->database);
 
             if (!property_exists($this->_pointer, 'tableName')) {
-                $this->tableName = $this->inflector->fromCamelCase(get_class($this->_pointer));
+                $this->tableName = $this->inflector->tabilize(get_class($this->_pointer));
             }
 
         }

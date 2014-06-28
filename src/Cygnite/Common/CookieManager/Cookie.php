@@ -4,7 +4,7 @@ namespace Cygnite\Common\CookieManager;
 use Closure;
 use Cygnite\Common\Security;
 use Cygnite\Common\Singleton;
-use Cygnite\Facade\Facade;
+use Cygnite\Proxy\StaticResolver;
 
 /**
  *   Cygnite PHP Framework

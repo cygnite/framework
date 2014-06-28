@@ -1,11 +1,11 @@
 <?php
-namespace Cygnite\Facade;
+namespace Cygnite\Proxy;
 
 if (!defined('CF_SYSTEM')) {
     exit('External script access not allowed');
 }
 
-class Facade
+abstract class StaticResolver
 {
     public static function __callStatic($method, $arguments = array())
     {

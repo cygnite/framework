@@ -151,7 +151,7 @@ use Cygnite\Database\Exceptions\DatabaseException;
         $this->modelClass = Inflector::instance()->getClassNameFromNamespace($model);
 
         if (!property_exists($model, 'tableName') || is_null($this->tableName)) {
-            $this->tableName = Inflector::instance()->fromCamelCase($this->modelClass);
+            $this->tableName = Inflector::instance()->tabilize($this->modelClass);
         }
 
         if (!property_exists($model, 'database')) {
@@ -237,7 +237,7 @@ use Cygnite\Database\Exceptions\DatabaseException;
                 return static::callDynamicMethod(array($class, 'findByOr'), array($params));
             }
 
-            $columnName =  Inflector::instance()->fromCamelCase(substr($method, 6));
+            $columnName =  Inflector::instance()->tabilize(substr($method, 6));
             $params = array();
             $condition = (isset($arguments[1])) ? $arguments[1] : '=';
 
@@ -299,7 +299,7 @@ use Cygnite\Database\Exceptions\DatabaseException;
         if (count($conditions) == count($arguments[0])) {
 
             foreach ($conditions as $key => $value) {
-                $field = Inflector::instance()->fromCamelCase($value);
+                $field = Inflector::instance()->tabilize($value);
                 $params[$field.' ='] = isset($arguments[0][$key]) ?
                     trim($arguments[0][$key]) :
                     '';
@@ -597,7 +597,7 @@ use Cygnite\Database\Exceptions\DatabaseException;
         }
         $insertMethod = null;
         $insertMethod = str_replace('_', ' ',
-            strtoupper(Inflector::instance()->fromCamelCase(__FUNCTION__))
+            strtoupper(Inflector::instance()->tabilize(__FUNCTION__))
         );
 
         foreach (array_keys($this->attributes) as $key) {
@@ -647,7 +647,7 @@ use Cygnite\Database\Exceptions\DatabaseException;
         $updateBy = $updateValue = null;
 
         $updateMethod = null;
-        $updateMethod = strtoupper(Inflector::instance()->fromCamelCase(__FUNCTION__));
+        $updateMethod = strtoupper(Inflector::instance()->tabilize(__FUNCTION__));
 
         if (method_exists($this, 'beforeUpdate')) {
             Event::instance()->trigger('beforeUpdate', $this);

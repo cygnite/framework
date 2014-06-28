@@ -59,13 +59,14 @@ class GeneratorCommand extends Command
     private $columns;
 
     private $output;
+
+    private $viewType;
 	
 	public static function __callStatic($method, $arguments = array())
 	{
 		if ($method == 'instance') {
 			return new self();
 		}
-
 	}
 	
 	public function setSchema($table)
@@ -76,31 +77,48 @@ class GeneratorCommand extends Command
     protected function configure()
     {
         $this->setName('generate:crud')
-             ->setDescription('Generate Crud By Cygnite CLI')
+             ->setDescription('Generate Sample Crud Application Using Cygnite CLI')
              ->addArgument('name', InputArgument::OPTIONAL, 'Your Controller Name ?')
              ->addArgument('model', InputArgument::OPTIONAL, 'Your Model Name ?')
              ->addArgument('database', InputArgument::OPTIONAL, '')
-            //->addOption('yell', null, InputOption::VALUE_NONE, 'If set, the task will yell in uppercase letters')
+             ->addOption('template', null, InputOption::VALUE_NONE, 'If set, will use twig template for view page.')
         ;
     }
 
+    /**
+     * We will get all column schema from database
+     * @return mixed
+     */
     private function getColumns()
     {
         return $this->tableSchema->connect(
             $this->database,
-            $this->inflect->fromCamelCase($this->model)
+            $this->inflect->tabilize($this->model)
         )->getColumns();
     }
 
+    /**
+     * We will execute the crud command and generate files
+     * @param InputInterface  $input
+     * @param OutputInterface $output
+     */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $this->inflect = new Inflector;
 
+        // Your controller name
         $this->controller = $this->inflect->classify($input->getArgument('name')).'Controller';
+        // Model name
         $this->model = $this->inflect->classify($input->getArgument('model'));
+        /** Check for argument database name if not given we will use default
+         *  database connection
+         */
         $this->database = (!is_null($input->getArgument('database'))) ?
                            $input->getArgument('database') :
                            $this->tableSchema->getDefaultDatabaseConnection();
+
+        // By default we will generate plain php layout and view pages
+        $this->viewType = ($input->getOption('template') == false) ? 'php' : 'twig';
 
         $this->columns = $this->getColumns();
 
@@ -111,13 +129,16 @@ class GeneratorCommand extends Command
         $this->generateModel();
         $this->generateViews();
 
-        $output->writeln("<info>Crud process ended successfully by Cygnite CLI </info>");
+        $output->writeln("<info>Crud Generated Successfully By Cygnite Cli.</info>");
     }
 
+    /**
+     * We will generate Controller
+     */
     private function generateController()
     {
         // Generate Controller class
-        $controllerInstance = Controller::instance($this->inflect, $this->columns);
+        $controllerInstance = Controller::instance($this->inflect, $this->columns, $this->viewType);
 
         $controllerTemplateDir =
             dirname(dirname(__FILE__)).DS.'src'.DS.ucfirst('apps').DS.ucfirst('controllers').DS;
@@ -129,11 +150,15 @@ class GeneratorCommand extends Command
         $controllerInstance->setModelName($this->model);
         $controllerInstance->updateTemplate();
         $controllerInstance->generateControllerTemplate();
+
         $controllerInstance->generate();
 
-        $this->output->writeln("Controller $this->controller generated successfully");
+        $this->output->writeln("Controller $this->controller generated successfully..");
     }
 
+    /**
+     * We will generate model here
+     */
     private function generateModel()
     {
         $modelInstance = Model::instance($this->inflect, $this);
@@ -143,20 +168,30 @@ class GeneratorCommand extends Command
         $modelInstance->setModelTemplatePath($modelTemplateDir);
         $modelInstance->updateTemplate();
         $modelInstance->generate();
-        $this->output->writeln("Model $this->model generated successfully");
+        $this->output->writeln("Model $this->model generated successfully..");
     }
 
+    /**
+     * We will generate the view pages into views directory
+     */
     private function generateViews()
     {
         $viewInstance = View::instance($this->inflect, $this);
+        $viewInstance->setLayoutType($this->viewType);
         $viewTemplateDir = dirname(dirname(__FILE__)).DS.'src'.DS.ucfirst('apps').DS.ucfirst('views').DS;
         $viewInstance->setTableColumns($this->columns);
         $viewInstance->setViewTemplatePath($viewTemplateDir);
-        $viewInstance->generateLayout('layout.main');
+
+        // generate twig template layout if type has set via user
+        if ($this->viewType == 'php') {
+            // Type not set then we will generate php layout
+            $viewInstance->generateLayout('layout');
+        } else {
+            $viewInstance->generateLayout('layout.main');
+        }
+
         $viewInstance->generateViews();
 
-        $this->output->writeln("Views generated in ".str_replace("Controller", "", $this->controller)." directory");
+        $this->output->writeln("Views generated in ".str_replace("Controller", "", $this->controller)." directory..");
     }
-
-
 }

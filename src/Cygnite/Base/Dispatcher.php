@@ -62,10 +62,10 @@ class Dispatcher
     {
         $this->router = $route;
         $this->default['controller'] = lcfirst(
-            Config::get('global_config', 'default_controller')
+            Config::get('global.config', 'default_controller')
         );
         $this->default['action'] = lcfirst(
-            Config::get('global_config', 'default_method')
+            Config::get('global.config', 'default_method')
         );
 
     }
@@ -154,7 +154,7 @@ class Dispatcher
             }
         } else {
 
-            $routeConfig = Config::get('routing_config');
+            $routeConfig = Config::get('config.router');
 
             $newUrl = str_replace('/index.php', '', rtrim($this->router->getCurrentUri()));
 
@@ -193,7 +193,11 @@ class Dispatcher
                     {
                         $controller = $method = $param = $instance = null;
                         $controller = $exp[1];
-                        $method = $exp[2];
+
+                        if (isset($exp[2])) {
+                            $method = $exp[2];
+                        }
+
                         $params = array_slice($exp, 2);
                         $controllerDir = '';
 
@@ -203,9 +207,7 @@ class Dispatcher
                         ) {
 
                             $controllerDir = ucfirst($exp[1]);
-                            if (isset($exp[2])) {
-                                $method = $exp[2];
-                            }
+                            $controller = $exp[2];
                             $method = $exp[3];
                             $params = array_slice($exp, 3);
                         }

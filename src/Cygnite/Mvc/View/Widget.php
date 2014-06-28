@@ -1,25 +1,37 @@
 <?php
 namespace Cygnite\Mvc\View;
 
-use Cygnite\Facade\Facade;
+use Cygnite\Proxy\StaticResolver;
 
 if (!defined('CF_SYSTEM')) {
     exit('External script access not allowed');
 }
 
-class Widget extends Facade implements \ArrayAccess
+class Widget extends StaticResolver implements \ArrayAccess
 {
     public $widget = array();
 
-    protected function make($name, $arguments)
+    protected function make($name, $arguments = array())
     {
         if ($this->has($name)) {
             return $this->widget[$name];
         }
 
-        $expression = explode('::', $name);
+        if (strpos($name, '::') != false) {
+            $expression = explode('::', $name);
+        }
 
-        $path = getcwd().DS.APPPATH.DS.$expression[0].DS.$expression[1].DS.'Views'.DS;
+        //we will check is modules is available in given string
+        // if not we will look for view widget into the normal views directory
+        if (strpos($name, 'modules') !== false) {
+            $views = $expression[0];
+            $moduleViews = DS.'Views'.DS;
+        } else {
+            $moduleViews = '';
+            $views = 'views'.DS.$expression[0];
+        }
+
+        $path = getcwd().DS.APPPATH.DS.$views.DS.$expression[1].$moduleViews;
 
         $view = $path.str_replace('.', DS, $expression[2]).'.view'.EXT;
 

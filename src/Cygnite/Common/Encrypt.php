@@ -52,7 +52,7 @@ class Encrypt
     */
     public function __construct()
     {
-        $encryptKey = Config::get('global_config', 'cf_encryption_key');
+        $encryptKey = Config::get('global.config', 'cf_encryption_key');
 
         if (!is_null($encryptKey)) {
 

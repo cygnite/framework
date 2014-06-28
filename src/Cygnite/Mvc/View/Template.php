@@ -2,7 +2,7 @@
 namespace Cygnite\Mvc\View;
 
 use Cygnite\Reflection;
-use Cygnite\AssetManager\Assets;
+use Cygnite\AssetManager\Asset;
 
 if (!defined('CF_SYSTEM')) {
     exit('External script access not allowed');

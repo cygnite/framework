@@ -147,16 +147,16 @@ class Application extends Container
     public function boot()
     {
         Url::instance($this['router']);
-       //Set up configurations for your awesome application
-        Config::set('config_items', $this['config']);
-       //Set URL base path.
-       Url::setBase(
-       	(Config::get('global_config', 'base_path') == '') ?
+        //Set up configurations for your awesome application
+        Config::set('config.items', $this['config']);
+        //Set URL base path.
+        Url::setBase(
+        (Config::get('global.config', 'base_path') == '') ?
             $this['router']->getBaseUrl()  :
-       	    Config::get('global_config', 'base_path')
-       	);
+            Config::get('global.config', 'base_path')
+        );
 
-       //initialize framework
+        //initialize framework
         $this['boot']->initialize();
         $this['boot']->terminate();
 

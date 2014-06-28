@@ -1,0 +1,57 @@
+<?php
+use Cygnite\AssetManager\Asset;
+?>
+<?php
+if ($this->hasFlash('success')) {
+    echo $this->getFlash('success');
+} elseif ($this->hasError()) {
+    echo $this->getFlash('error');
+}
+?>
+<div style="margin-left: 79%;margin-bottom: 10px;margin-top: 10px;">
+    <?php echo Asset::link('#controllerName#/type', 'Add #ControllerName#', array('class' => 'btn btn btn-info')); ?>
+</div>
+
+<table cellspacing="0" id="dataTable" cellpadding="0" style="width:890px;margin:0px auto;" class="tablesorter data-grid">
+    <thead>
+    <tr>
+        <th>Sl No.</th>
+        {#thColumns#}
+        <th class="sorter-false">Action</th>
+    </tr>
+    </thead>
+
+    <tbody>
+    <?php
+    if (count($this->records) > 0) {
+        $i = 1;
+        $rowType = null;
+        foreach ($this->records as $key => $value) {
+
+            $rowType = ($i % 2 == 0) ? 'even' : 'odd';
+            ?>
+            <tr class='<?php echo $rowType; ?>'>
+                <td> <?php echo $i; ?></td>
+                {#tdColumns#}
+                <td>
+                    <?php
+                    echo Asset::link('#controllerName#/show/' . $value->id, 'View', array('class' => 'btn btn btn-info'));
+                    echo Asset::link('#controllerName#/type/' . $value->id, 'Edit', array('class' => 'btn btn btn-info'));
+                    echo Asset::link('#controllerName#/delete/' . $value->id, 'Delete', array('class' => 'btn btn-danger'));
+                    ?>
+
+                </td>
+            </tr>
+            <?php
+            $i++;
+        }
+    } else {
+        echo 'No records found !';
+    }
+    ?>
+    </tbody>
+
+
+</table>
+
+<div ><?php echo $this->links; ?> </div>

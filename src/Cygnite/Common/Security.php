@@ -74,13 +74,18 @@ class Security
      * @param callable| Closure $callback
      * @return object Instance of Security
      */
-    public static function instance(Closure $callback)
+    protected function create(Closure $callback = null)
     {
         if (self::$instance === null) {
             self::$instance = new self();
         }
 
-        return $callback(self::$instance);
+        if ($callback instanceof Closure) {
+            return $callback(self::$instance);
+        }
+
+        return self::$instance;
+
     }
 
 
@@ -90,11 +95,10 @@ class Security
      * don't bother us. This is private because we don't want it to
      * access instance directly.
      *
-     *
      * @throws \Exception
-     * @return \Cygnite\Security
+     * @return \Cygnite\Common\Security
      */
-    private function __construct()
+    public function __construct()
     {
         $this->checkMagicQuoteRuntime();
 
