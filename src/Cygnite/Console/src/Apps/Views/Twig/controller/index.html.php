@@ -47,7 +47,7 @@
 
             {% endfor %}
         {% else %}
-            No records found !
+           <tr><td> No records found !</td></tr>
         {% endif  %}
         </tbody>
 

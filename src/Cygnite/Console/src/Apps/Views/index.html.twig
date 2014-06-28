@@ -20,7 +20,7 @@
         {# dump(productLists) #}
 
         <div style="margin-left: 79%;margin-bottom: 10px;margin-top: 10px;">
-            {{ Assets_addLink('products.type', 'Add Products', buttonAttributes.primary) | raw }}
+            {{ link('products.type', 'Add Products', buttonAttributes.primary) | raw }}
         </div>
 
         <table cellspacing="0" cellpadding="0" style="width:890px;margin:0px auto;" class="data-grid">
@@ -51,16 +51,16 @@
                             <td>{{ product.name|e}}</td>
                             <td>{{ product.price|e}}</td>
                             <td>
-                                {{ Assets_addLink('products.show.' ~ product.id ~ '/' ~ pageNumber , 'View' | upper, buttonAttributes.primary) | raw }}
-                                {{ Assets_addLink('products.type.' ~ product.id ~ '/' ~ pageNumber , 'Edit' | upper, buttonAttributes.primary) | raw }}
-                                {{ Assets_addLink('products.delete.' ~ product.id ~ '/' ~ pageNumber  , 'Delete' | upper, buttonAttributes.delete) | raw }}
+                                {{ link('products.show.' ~ product.id ~ '/' ~ pageNumber , 'View' | upper, buttonAttributes.primary) | raw }}
+                                {{ link('products.type.' ~ product.id ~ '/' ~ pageNumber , 'Edit' | upper, buttonAttributes.primary) | raw }}
+                                {{ link('products.delete.' ~ product.id ~ '/' ~ pageNumber  , 'Delete' | upper, buttonAttributes.delete) | raw }}
 
                             </td>
                         </tr>
 
                     {% endfor %}
                 {% else %}
-                    No records found !
+                    <tr> <td>No records found ! </td></tr>
                 {% endif  %}
             </tbody>
 

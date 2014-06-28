@@ -46,7 +46,7 @@ if ($this->hasFlash('success')) {
             $i++;
         }
     } else {
-        echo 'No records found !';
+        echo '<tr> <td >No records found !</td></tr>';
     }
     ?>
     </tbody>
