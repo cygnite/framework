@@ -11,11 +11,11 @@
         }
     ],
     "require": {
-			 "php": ">=5.3.3",
-			 "twig/twig": "1.*",
-			 "symfony/console": "2.3.*",
-			 "tracy/tracy": "2.2",
-			 "swiftmailer/swiftmailer": "~5.1"
+	 "php": ">=5.3.3",
+	 "twig/twig": "1.*",
+	 "symfony/console": "2.3.*",
+	 "tracy/tracy": "2.2",
+	 "swiftmailer/swiftmailer": "~5.1"
    },	
    "require-dev": {
         "mockery/mockery": "dev-master",

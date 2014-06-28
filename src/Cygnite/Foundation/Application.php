@@ -236,40 +236,4 @@ class Application extends Container
 
         return $this['config.definition'];
     }
-
-    /**
-     * Inject all your properties into controller at run time
-     * @param $instance
-     * @param $controller
-     * @throws Exception
-     */
-    public function propertyInjection($instance, $controller)
-    {
-        $definition = $this->getDefinition();
-
-        $injectableDefinitions = $definition()->getPropertyDependencies();
-
-        $this->setPropertyInjection($injectableDefinitions);
-
-        $dependencies = $this->getDefinitions($controller);
-
-        if (array_key_exists($controller, $this->definitions)) {
-
-            $property = key($dependencies);
-
-            $reflection = new Reflection();
-            $reflection->setClass($controller);
-
-            if (!$reflection->reflectionClass->hasProperty($property)) {
-                throw new Exception(
-                    sprintf("Property %s is not defined in $controller controller", $property)
-                );
-            }
-
-            $reflection->makePropertyAccessible($property);
-            $reflection->reflectionProperty->setValue(
-                $instance, $dependencies[$property]
-            );
-        }
-    }
 }

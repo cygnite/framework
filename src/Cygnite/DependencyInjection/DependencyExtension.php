@@ -2,6 +2,8 @@
 namespace Cygnite\DependencyInjection;
 
 use SplObjectStorage;
+use Cygnite\Reflection;
+use Cygnite\Helpers\Inflector;
 
 class DependencyExtension extends SplObjectStorage
 {
@@ -21,12 +23,15 @@ class DependencyExtension extends SplObjectStorage
     public function setPropertyInjection($propertyInjections)
     {
         if (!is_array($propertyInjections)) {
-            throw new \Exception(__METHOD__." accept parameter as array.");
+            throw new \Exception(__METHOD__." only accept parameter as array.");
         }
 
-        foreach ($propertyInjections as $controller => $property) {
+        foreach ($propertyInjections as $controller => $properties) {
 
-           $this->definitions[$this->namespace.$controller][key($property)] = $property[key($property)];
+            foreach ($properties as $key => $value) {
+                $classInstance = Inflector::instance()->toNamespace($value);
+                $this->definitions[$this->namespace.$controller][$key] = new $classInstance;
+            }
         }
     }
 
@@ -57,9 +62,50 @@ class DependencyExtension extends SplObjectStorage
      * @param $key
      * @return null
      */
-    public function getDefinitions($key)
+    public function getDefinitions($key = null)
     {
-        return isset($this->definitions[$key]) ? $this->definitions[$key] : null ;
+        if (!is_null($key)) {
+            return isset($this->definitions[$key]) ? $this->definitions[$key] : null ;
+        } else {
+            return !empty($this->definitions) ? $this->definitions : array();
+        }
     }
 
+    /**
+     * Inject all your properties into controller at run time
+     * @param $controllerInstance
+     * @param $controller
+     * @throws Exception
+     */
+    public function propertyInjection($controllerInstance, $controller)
+    {
+        $definition = $this->getDefinition();
+
+        $injectableDefinitions = $definition()->getPropertyDependencies();
+
+        $this->setPropertyInjection($injectableDefinitions);
+
+        $dependencies = $this->getDefinitions($controller);
+
+        if (array_key_exists($controller, $this->definitions)) {
+
+            $reflection = new Reflection();
+            $reflection->setClass($controller);
+
+            foreach ($dependencies as $classProperty => $object) {
+
+                if (!$reflection->reflectionClass->hasProperty($classProperty)) {
+                    throw new Exception(
+                        sprintf("Property %s is not defined in $controller controller", $classProperty)
+                    );
+                }
+
+                $reflection->makePropertyAccessible($classProperty);
+                //set property value
+                $reflection->reflectionProperty->setValue(
+                    $controllerInstance, $object
+                );
+            }
+        }
+    }
 }
