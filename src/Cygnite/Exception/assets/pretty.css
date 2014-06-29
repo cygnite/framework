@@ -1,6 +1,7 @@
 
 /* Cygnite pretty error style
 *  @Author:Cygnite
+* @ override the tracy stylesheet
 */
 #tracyBluescreenError {
     background: none repeat scroll 0 0 #3E3E3E !important;box-shadow: 0 0 56px #666666 inset;
@@ -12,9 +13,7 @@
 #tracyBluescreen h1 { color: #CD3F3F;}
 #tracyBluescreen ol { line-height: 2.7;}
 #tracyBluescreen pre, #tracyBluescreen table { background: #E6FFFF; }
-#tracyBluescreen pre, #tracyBluescreen table {
-    background: none repeat scroll 0 0 #FFFFE8 !important;
-    box-shadow: 0 0 0px #555555 inset;
-}
+#tracyBluescreen pre, #tracyBluescreen table { background: none repeat scroll 0 0 #FFFFE8 !important;box-shadow: 0 0 0px #555555 inset;}
 .heading-blue { color:#0000FF;}
-#tracy-debug-logo {background: none !important;}
+#tracy-debug-logo {display: none !important;}
+div#tracyBluescreenLogo a { display: none !important; }

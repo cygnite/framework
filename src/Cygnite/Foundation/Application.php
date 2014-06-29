@@ -29,6 +29,8 @@ class Application extends Container
     public $aliases = array();
 
     public $namespace = '\\Apps\\Controllers\\';
+	
+	private static $version = 'v1.2';
 
     /**
      * ---------------------------------------------------
@@ -120,7 +122,7 @@ class Application extends Container
 	 */
     public static function version()
     {
-        return CF_VERSION;
+        return static::$version;
     }
 
     /**
@@ -129,7 +131,7 @@ class Application extends Container
      */
     public static function poweredBy()
     {
-        return 'Cygnite Framework - '.CF_VERSION.' Powered by -
+        return 'Cygnite Framework - '.static::$version.' Powered by -
             Sanjoy Productions (<a href="http://www.cygniteframework.com">
             http://www.cygniteframework.com
             </a>)';
