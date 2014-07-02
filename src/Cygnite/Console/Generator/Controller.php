@@ -63,6 +63,8 @@ class Controller
 
     private $formPath;
 
+    private $controllerCommand;
+
 
     /*
      * Since constructor is private you cannot create object
@@ -73,13 +75,14 @@ class Controller
      * @param $columns array of columns
      * @return void
      */
-    private function __construct(Inflector $inflect, $columns = array(), $viewType = null)
+    private function __construct(Inflector $inflect, $columns = array(), $viewType = null, $generator = null)
     {
         if ($inflect instanceof Inflector) {
             $this->inflector = $inflect;
         }
         $this->columns = $columns;
         $this->viewType = $viewType;
+        $this->controllerCommand = $generator;
     }
 
     /**
@@ -363,7 +366,9 @@ class Controller
 
         $content = $this->replaceControllerName($content);
 
+        $primaryKey = $this->controllerCommand->getPrimaryKey();
 
+        $content = str_replace('{%primaryKey%}', $primaryKey, $content);
         $content = str_replace('%modelColumns%', $this->getDbCode().PHP_EOL, $content);
         $content = str_replace('%addRule%', $this->getValidationCode().PHP_EOL, $content);
         $controllerNameOnly = $this->inflector->classify(str_replace('Controller', '', $this->controller));
@@ -448,7 +453,7 @@ class Controller
     public static function __callStatic($method, $arguments = array())
     {
         if ($method == 'instance') {
-            return new self($arguments[0], $arguments[1], $arguments[2]);
+            return new self($arguments[0], $arguments[1], $arguments[2], $arguments[3]);
         }
     }
 }

@@ -70,7 +70,7 @@ class %controllerName% extends AbstractBaseController
         $%controllerName% = array();
         $%controllerName% = %StaticModelName%::all(
             array(
-                'orderBy' => 'id desc',
+                'orderBy' => '{%primaryKey%} desc',
                 /*'paginate' => array(
                     'limit' => Url::segment(3)
                 )*/

@@ -100,6 +100,9 @@ class Model
             $this->inflector->classify($this->command->model),
             $content
         );
+
+        $primaryKey = $this->command->getPrimaryKey();
+        $content = str_replace('{%primaryKey%}', $primaryKey, $content);
         $content = str_replace('%modelName%', $this->command->model, $content);
         $content = str_replace('%databaseName%', $this->command->database, $content);
 

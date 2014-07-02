@@ -133,12 +133,32 @@ class GeneratorCommand extends Command
     }
 
     /**
+     * Get primary key of the table
+     * @return null
+     */
+    public function getPrimaryKey()
+    {
+        if (count($this->columns) > 0) {
+            $primaryKey = null;
+
+            foreach ($this->columns as $key => $value) {
+                if ($value->column_key == 'PRI' && $value->extra == 'auto_increment') {
+                    $primaryKey = $value->column_name;
+                    break;
+                }
+            }
+        }
+
+        return $primaryKey;
+    }
+
+    /**
      * We will generate Controller
      */
     private function generateController()
     {
         // Generate Controller class
-        $controllerInstance = Controller::instance($this->inflect, $this->columns, $this->viewType);
+        $controllerInstance = Controller::instance($this->inflect, $this->columns, $this->viewType, $this);
 
         $controllerTemplateDir =
             dirname(dirname(__FILE__)).DS.'src'.DS.ucfirst('apps').DS.ucfirst('controllers').DS;
