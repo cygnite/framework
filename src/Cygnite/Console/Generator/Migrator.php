@@ -105,9 +105,12 @@ class Migrator
     public function replaceTemplateByInput($template = 'Migration')
     {
         #replace with table name - {%className%}
-        //var_dump($this->inflector->classify(strtolower($this->command->input)));
 
-        $file = $this->getTemplatePath().$template.self::EXTENSION;
+        $file =  str_replace(
+                array('apps', 'database'),
+                array('Apps', 'Database'),
+                $this->getTemplatePath()
+            ).$template.self::EXTENSION;
 
         file_exists($file) or die("Base template doesn't exists");
 
@@ -196,8 +199,15 @@ class Migrator
         return $this->migrationClass;
     }
 
+    /**
+     * Call migration and do update
+     *
+     * @param string $type
+     */
     public function updateMigration($type = 'up')
     {
+        $file = $class = null;
+
         $file = $this->migrationDir.$this->getVersion().$this->getMigrationClass().self::EXTENSION;
 
         if (is_readable($file)) {

@@ -369,8 +369,16 @@ class Controller
         $controllerNameOnly = $this->inflector->classify(str_replace('Controller', '', $this->controller));
         $content = str_replace('%ControllerName%Form', $controllerNameOnly.'Form', $content);
 
-        //We will generate Form Component
-        $formContent = file_get_contents($this->formPath.'Form.php');
+        $formTemplatePath = null;
+        $formTemplatePath = str_replace('Controllers', '', $this->formPath);
+
+        if (file_exists($formTemplatePath.'Form.php')) {
+            //We will generate Form Component
+            $formContent = file_get_contents($formTemplatePath.'Form.php', true);
+        } else{
+            die("Form template doesn't exists in ".$formTemplatePath.'Form.php'." directory.");
+        }
+        
         $formContent = str_replace('%controllerName%', $controllerNameOnly, $formContent);
         $formContent = str_replace('{%formElements%}', $this->getForm().PHP_EOL, $formContent);
         $this->generateFormComponent($formContent);
