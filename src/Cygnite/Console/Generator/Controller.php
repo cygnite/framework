@@ -41,7 +41,7 @@ class Controller
 
     private $columns = array();
 
-    private $controller;
+    public $controller;
 
     private $controllerTemplatePath;
 
@@ -55,7 +55,7 @@ class Controller
 
     private $replacedContent;
 
-    private $applicationDir;
+    public $applicationDir;
 
     private $filePointer;
 
@@ -153,14 +153,14 @@ class Controller
     {
         $form = '';
         $form .= "\t".'->addElement("label", "'.$this->inflector->underscoreToSpace($value->column_name).'",
-                                      array("class" => "col-sm-2 control-label",
-                                            "style" => "width:100%;")
+                                    array("class" => "col-sm-2 control-label","style" => "width:100%;")
                                    )'.PHP_EOL;
+
         $form .= "\t".'->addElement("text", "'.$value->column_name.'",
-                                      array(
-                                          "value" => (isset($this->model->'.$value->column_name.')) ? $this->model->'.$value->column_name.' : "",
-                                          "class" => "form-control",
-                                      )
+                                   array(
+                                      "value" => (isset($this->model->'.$value->column_name.')) ? $this->model->'.$value->column_name.' : "",
+                                      "class" => "form-control",
+                                   )
                                    )'.PHP_EOL;
         return $form;
     }
@@ -172,7 +172,8 @@ class Controller
     private function buildFormCloseTags()
     {
         $form = '';
-        $form .= "\t".'->addElement("submit", "btnSubmit", array(
+        $form .= "\t".'->addElement("submit", "btnSubmit",
+                array(
                     "value" => "Save",
                     "class" => "btn btn-primary",
                     "style" => "margin-top:15px;"
@@ -245,7 +246,11 @@ class Controller
     }
 
 
-    private function getForm()
+    /**
+     * Get the form
+     * @return null|string
+     */
+    public function getForm()
     {
         return (is_string($this->form) && $this->form !== '') ?
             $this->form :
@@ -398,7 +403,7 @@ class Controller
      * @param $formContent
      * @return bool
      */
-    private function generateFormComponent($formContent)
+    public function generateFormComponent($formContent)
     {
 
         /*write operation ->*/

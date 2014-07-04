@@ -164,6 +164,9 @@ use Cygnite\Database\Exceptions\DatabaseException;
             );
         }
 
+        // making default primary key as id
+        $this->primaryKey = isset($this->primaryKey) && is_null($this->primaryKey) ? 'id' : $this->primaryKey;
+
         //$this->pdo = Connections::getConnection($this->database);
         $this->setDatabaseConnection($this->getConnection($this->database));
     }
