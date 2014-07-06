@@ -31,8 +31,8 @@ use Symfony\Component\Console\Formatter\OutputFormatterStyle;
  *   to sanjoy@hotmail.com so that I can send you a copy immediately.
  *
  * @Package            :  Console
- * @Filename           :  GeneratorCommand.php
- * @Description        :  Generator Command class used to generate crud application using Cygnite CLI. 
+ * @Filename           :  FormGeneratorCommand.php
+ * @Description        :  Generator Command class used to generate crud application using Cygnite CLI.
  *                        Cygnite Cli driven by Symfony2 Console Component.
  * @Author             :  Sanjoy Dey
  * @Copyright          :  Copyright (c) 2013 - 2014,
@@ -62,25 +62,28 @@ class FormGeneratorCommand extends Command
     private $output;
 
     private $viewType;
-	
-	public static function __callStatic($method, $arguments = array())
-	{
-		if ($method == 'instance') {
-			return new self();
-		}
-	}
-	
-	public function setSchema($table)
-	{
-		$this->tableSchema = $table;
-	}
-	
+
+    public static function __callStatic($method, $arguments = array())
+    {
+        if ($method == 'instance') {
+            return new self();
+        }
+    }
+
+    public function setSchema($table)
+    {
+        $this->tableSchema = $table;
+    }
+
+    /**
+     * Configure the form generate command
+     */
     protected function configure()
     {
         $this->setName('generate:form')
              ->setDescription('Generate Form using Cygnite CLI')
              ->addArgument('name', InputArgument::OPTIONAL, '')
-	         ->addArgument('database', InputArgument::OPTIONAL, '');
+             ->addArgument('database', InputArgument::OPTIONAL, '');
     }
 
     /**
@@ -107,18 +110,18 @@ class FormGeneratorCommand extends Command
          *  database connection
          */
         $this->database = (!is_null($input->getArgument('database'))) ?
-                           $input->getArgument('database') :
-                           $this->tableSchema->getDefaultDatabaseConnection(); 
- 
+            $input->getArgument('database') :
+            $this->tableSchema->getDefaultDatabaseConnection();
+
         $this->table = (!is_null($input->getArgument('name'))) ?
-                           $input->getArgument('name') :
-                           'Form';
+            $input->getArgument('name') :
+            'Form';
 
         $this->columns = $this->getColumns();
         $this->applicationDir = BASE_PATH.DS.APP_PATH;
         $this->generateForm();
 
-        $output->writeln("<info>Form Generated Successfully By Cygnite Cli.</info>");
+        $output->writeln("<info>Form apps/components/form/".$this->inflect->classify($this->table)."Form Generated Successfully By Cygnite Cli.</info>");
     }
 
 
@@ -132,7 +135,7 @@ class FormGeneratorCommand extends Command
 
         $formTemplateDir =
             dirname(dirname(__FILE__)).DS.'src'.DS.ucfirst('apps').DS.ucfirst('components').DS.'Form'.DS;
- 
+
         $form = new Form($controllerInstance, $this, $this->inflect);
         $form->setFormTemplatePath($formTemplateDir);
 
