@@ -128,19 +128,14 @@ class Controller
      */
     private function buildFormOpen()
     {
-        return '$this->open(
-                        "'.$this->controller.'",
-                        array(
-                            "method" => "post",
+        return '$this->open("'.$this->controller.'", array(
+                            "method" => "post", "id"     => "uniform", "role"   => "form",
                             "action" => Url::sitePath("'.
-                        strtolower(
-                            str_replace('Controller', '', $this->controller)
-                        ).'/type/$id/$this->segment"),
-                            "id"     => "uniform",
-                            "role"   => "form",
-                            "style" => "width:500px;margin-top:35px;float:left;"
-                        )
-                    )';
+                            strtolower(
+                                str_replace('Controller', '', $this->controller)
+                            ).'/type/$id/$this->segment"),
+                            "style" => "width:500px;margin-top:35px;float:left;" )
+                            )';
     }
 
     /**
@@ -151,16 +146,13 @@ class Controller
      */
     private function generateFormElements($value)
     {
-        $form = '';
-        $form .= "\t".'->addElement("label", "'.$this->inflector->underscoreToSpace($value->column_name).'",
-                                    array("class" => "col-sm-2 control-label","style" => "width:100%;")
-                                   )'.PHP_EOL;
+        $form = $label = '';
+        $label = $this->inflector->underscoreToSpace($value->column_name);
+        $form .= "\t\t".'->addElement("label", "'.$label.'", array("class" => "col-sm-2 control-label","style" => "width:100%;"))'.PHP_EOL;
 
-        $form .= "\t".'->addElement("text", "'.$value->column_name.'",
-                                   array(
+        $form .= "\t\t".'->addElement("text", "'.$value->column_name.'", array(
                                       "value" => (isset($this->model->'.$value->column_name.')) ? $this->model->'.$value->column_name.' : "",
-                                      "class" => "form-control",
-                                   )
+                                      "class" => "form-control", )
                                    )'.PHP_EOL;
         return $form;
     }
@@ -172,13 +164,11 @@ class Controller
     private function buildFormCloseTags()
     {
         $form = '';
-        $form .= "\t".'->addElement("submit", "btnSubmit",
-                array(
-                    "value" => "Save",
-                    "class" => "btn btn-primary",
-                    "style" => "margin-top:15px;"
-                )
-                )'.PHP_EOL;
+        $form .= "\t\t".'->addElement("submit", "btnSubmit", array(
+                                            "value" => "Save",
+                                            "class" => "btn btn-primary",
+                                            "style" => "margin-top:15px;" )
+                                   )'.PHP_EOL;
 
         $form .= "\t\t".'->close()'.PHP_EOL;
         $form .= "\t\t".'->createForm();'.PHP_EOL;
@@ -208,7 +198,7 @@ class Controller
     private function generateValidator($value)
     {
         $validationCode = '';
-        $validationCode .= "\t->addRule('".$value->column_name."', 'required|min:5')".PHP_EOL;
+        $validationCode .= "\t\t->addRule('".$value->column_name."', 'required|min:5')".PHP_EOL;
 
         return $validationCode;
     }

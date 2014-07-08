@@ -620,7 +620,8 @@ class Schema extends Connections
     public function setTableSchema()
     {
         /** @var $this TYPE_NAME */
-        $this->schema = self::SELECT.' '.strtoupper($this->_tableSchema).",TABLE_NAME,COLUMN_NAME,DATA_TYPE
+        $this->schema = self::SELECT.' '.strtoupper($this->_tableSchema).",TABLE_NAME,COLUMN_NAME,DATA_TYPE,
+                        `COLUMN_KEY`,`Extra`
                         FROM ".strtoupper($this->_informationSchema).".COLUMNS
                         WHERE ".strtoupper($this->_tableSchema)." = '".$this->database."' AND
                         TABLE_NAME = '".$this->tableName."'";
