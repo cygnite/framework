@@ -626,7 +626,7 @@ class Schema extends Connections
                         WHERE ".strtoupper($this->_tableSchema)." = '".$this->database."' AND
                         TABLE_NAME = '".$this->tableName."'";
 
-        //return $this;
+        return $this;
     }
 
     public function setDbConnection($conn, $database ='')
