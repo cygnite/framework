@@ -56,23 +56,38 @@ class Form
 
     }
 
+    /**
+     * Set form template path
+     * @param $path
+     */
     public function setFormTemplatePath($path)
     {
         $this->formTemplatePath = $path;
     }
 
+    /**
+     * Get form Template path
+     * @return null
+     */
     public function getFormTemplatePath()
     {
-        return (isset($this->FormTemplatePath)) ?
+        return (isset($this->formTemplatePath)) ?
             $this->formTemplatePath :
             null;
     }
 
+    /**
+     * Form template name
+     * @return string
+     */
     private function formTemplateName()
     {
         return 'Form'.self::EXTENSION;
     }
 
+    /**
+     * Generate Form
+     */
     public function generate()
     {
         $filePath = '';
@@ -92,5 +107,4 @@ class Form
         $formContent = str_replace('{%formElements%}', $this->controller->getForm().PHP_EOL, $formContent);
         $this->controller->generateFormComponent($formContent);
     }
-
 }

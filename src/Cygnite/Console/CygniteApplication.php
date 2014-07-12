@@ -51,13 +51,16 @@ class CygniteApplication extends Application
         $generateInstance = GeneratorCommand::instance();
         $generateInstance->setSchema(new Table);
 
+        //Initialise Migration
         $initInstance = InitCommand::instance();
         $initInstance->setSchema(new Table);
 
+        //Get the migration instance and Set schema
         $migrationInstance = MigrationCommand::instance();
         $migrationInstance->setSchema(new Table);
         $migrationInstance->setMigrationPath($this->getApplicationDirectory());
 
+        //Get the Form Generator instance and set Schema
         $formInstance = FormGeneratorCommand::instance();
         $formInstance->setSchema(new Table);
 
@@ -71,6 +74,7 @@ class CygniteApplication extends Application
         );
     }
 
+    // Get the Application directory
     private function getApplicationDirectory()
     {
         return BASE_PATH.DS.APP_PATH;
