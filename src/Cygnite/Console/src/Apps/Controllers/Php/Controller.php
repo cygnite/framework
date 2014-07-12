@@ -93,9 +93,12 @@ class %controllerName% extends AbstractBaseController
         $input = Input::make();
 
         $errors =  $validator = null;
+
+        //Check is form posted
         if ($input->hasPost('btnSubmit') == true) {
 
             $validator = null;
+            //Set Form validation rules
             $validator = Validator::instance(
                 $input,
                 function ($validate) {
@@ -109,16 +112,20 @@ class %controllerName% extends AbstractBaseController
             //Run validation
             if ($validator->run()) {
 
+                // If id null we will get model object to insert
+                // else we will find by primary key to update form database
                 if ($id == null || $id == '') {
                     $%modelName% = new %modelName%();
                 } else {
                     $%modelName% = %StaticModelName%::find($id);
                 }
 
+                // get post array value except the submit button
                 $postArray = $input->except('btnSubmit')->post();
 
 				%modelColumns%
 
+                // Save form details
                 if ($%modelName%->save()) {
                     $this->setFlash('success', '%controllerName% saved successfully!')
                          ->redirectTo('%controllerName%/index/'.Url::segment(4));
