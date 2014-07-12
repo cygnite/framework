@@ -138,11 +138,11 @@ class GeneratorCommand extends Command
      */
     public function getPrimaryKey()
     {
-        if (count($this->columns) > 0) {
-            $primaryKey = null;
+        $primaryKey = null;
 
+        if (count($this->columns) > 0) {
             foreach ($this->columns as $key => $value) {
-                if ($value->column_key == 'PRI' && $value->extra == 'auto_increment') {
+                if ($value->column_key == 'PRI' || $value->extra == 'auto_increment') {
                     $primaryKey = $value->column_name;
                     break;
                 }
