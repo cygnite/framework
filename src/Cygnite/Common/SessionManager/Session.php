@@ -55,7 +55,7 @@ class Session implements SessionInterface
 
     private $httpOnly = true;
 
-    private $sessionVal;
+    private static $sessionVal;
 
     public static $session;
 
@@ -157,9 +157,6 @@ class Session implements SessionInterface
             }
 
             $browser_sig = md5($tmp);
-
-
-
             static::$session = (isset($_SESSION) && !empty($_SESSION)) ? $_SESSION : null;
 
             if (empty(static::$session)) {// new session

@@ -503,7 +503,7 @@ use Cygnite\Database\Exceptions\DatabaseException;
     {
         $class = self::getDynamicInstance();
         $this->index[$this->primaryKey] = null;
-        return new $class;
+        return array();//new $class;
     }
 
     public function lastQuery()
