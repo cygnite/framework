@@ -40,22 +40,9 @@ class Inflector extends StaticResolver
     private static $instance;
     /********************* Inflections ******************/
 
-
-    /**
-     * @param $word
-     * @return mixed
-     */
-    public function deCamelize($word)
-    {
-        return preg_replace(
-            '/(^|[a-z])([A-Z])/e',
-            'strtolower(strlen("\\1") ? "\\1_\\2" : "\\2")',
-            $word
-        );
-    }
     /**
      *
-     * Class name - ClassName
+     * class_name - ClassName
      * Convert underscore or - separated string to class name
      *
      * foo_bar -> FooBar
@@ -66,7 +53,13 @@ class Inflector extends StaticResolver
      */
     public function classify($word)
     {
-        return preg_replace('/(^|_|-)([a-z])/e', 'strtoupper("\\2")', $word);
+        //return preg_replace('/(^|_|-)([a-z])/e', 'strtoupper("\\2")', $word);
+        $s = strtolower(trim($word));
+        $s = preg_replace('#([.-])(?=[a-z])#', '$1 ', $s);
+        $s = preg_replace('#([._])(?=[a-z])#', '$1 ', $s);
+        $s = ucwords($s);
+        $s = str_replace('. ', ':', $s);
+        return $s = str_replace(array('_ ', '- '), '', $s);
     }
 
     /*
@@ -132,7 +125,7 @@ class Inflector extends StaticResolver
 
 
     /**
-     * PascalCase: Presenter name -> dash-and-dot-separated.
+     * PascalCase: name -> dash-and-dot-separated.
      *
      * @false  string
      * @param $s
@@ -149,7 +142,7 @@ class Inflector extends StaticResolver
 
 
     /**
-     * Dash-and-dot-separated -> PascalCase:Presenter name.
+     * Dash-and-dot-separated -> PascalCase:name.
      *
      * @false  string
      * @param $s
@@ -197,17 +190,32 @@ class Inflector extends StaticResolver
     /**
      * Translates a string with underscores into camel case (e.g. first_name -&gt; firstName)
      * @param    string   $str                     String in underscore format
-     * @param    bool     $capitalise_first_char   If true, capitalise the first char in $str
+     * @param    bool     $capitaliseFirstChar   If true, capitalise the first char in $str
      * @return   string                              $str translated into camel caps
      */
-    public function toCamelCase($str, $capitalise_first_char = false)
+    public function toCamelCase($str, $capitaliseFirstChar = false)
     {
-        if ($capitalise_first_char) {
+        if ($capitaliseFirstChar) {
             $str[0] = strtoupper($str[0]);
         }
         $func = create_function('$c', 'return strtoupper($c[1]);');
 
         return preg_replace_callback('/_([a-z])/', $func, $str);
+    }
+
+    /**
+     * @param        $word
+     * @param string $splitter
+     * @return mixed
+     */
+    public function deCamelize($word, $splitter = '_')
+    {
+        /*return preg_replace(
+            '/(^|[a-z])([A-Z])/e',
+            'strtolower(strlen("\\1") ? "\\1_\\2" : "\\2")',
+            $word
+        );*/
+        return strtolower(preg_replace('/([a-z])([A-Z])/', '$1'.$splitter.'$2', trim($word)));
     }
 
     /**
@@ -240,7 +248,8 @@ class Inflector extends StaticResolver
     {
         $class = null;
         $class = explode('.', $key);
-        $class = array_map('ucfirst', Inflector::instance()->classify($class));
+        $class = array_map('ucfirst', $class);
+        $class = array_map('self::classify', $class);
         $class = '\\'.implode('\\', $class);
 
         return $class;

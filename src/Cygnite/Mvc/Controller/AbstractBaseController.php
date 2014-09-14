@@ -70,7 +70,7 @@ abstract class AbstractBaseController extends CView
     public function __call($method, $arguments)
     {
         if (in_array($method, $this->validFlashMessage)) {
-            $flashSession = $this->get('cygnite.common.session-manager.flash.FlashMessage');
+            $flashSession = $this->get('cygnite.common.session-manager.flash.flash-message');
 
             $return = call_user_func_array(array($flashSession, $method), $arguments);
 
