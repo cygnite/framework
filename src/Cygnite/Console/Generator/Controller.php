@@ -65,6 +65,7 @@ class Controller
 
     private $controllerCommand;
 
+    public $isFormGenerator = false;
 
     /*
      * Since constructor is private you cannot create object
@@ -210,7 +211,9 @@ class Controller
         foreach ($this->columns as $key=> $value) {
 
             if ($value->column_name !== 'id') {
-                $codeDb .= $this->generateDbCode($value);
+                if ($this->isFormGenerator == false) {
+                    $codeDb .= $this->generateDbCode($value);
+                }
                 $validationCode .= $this->generateValidator($value);
                 $form .= $this->generateFormElements($value);
             }

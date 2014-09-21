@@ -100,6 +100,7 @@ class Form
            die("Form template doesn't exists in ".$this->getFormTemplatePath().'Form.php'." directory.");
         }
 
+        $this->controller->isFormGenerator = true;
         $this->controller->updateTemplate();
         $this->controller->controller = $formName;
         $this->controller->applicationDir = BASE_PATH.DS.APP_PATH;
