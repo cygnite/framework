@@ -68,7 +68,7 @@ class MigrationCommand extends Command
         $migration->getLatestMigration($this->migrationDir)
                   ->setMigrationClassName();
 
-        if ($type == '') {
+        if ($type == '' || $type == 'up') {
             $migration->updateMigration();
         } else {
             $migration->updateMigration('down');

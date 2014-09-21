@@ -41,8 +41,6 @@ use Cygnite\Mvc\View\Template;
 
 abstract class AbstractBaseController extends CView
 {
-    public $container;
-
     private $validFlashMessage = array('setFlash', 'hasFlash', 'getFlash', 'hasError');
 
     /**
@@ -54,13 +52,17 @@ abstract class AbstractBaseController extends CView
     public function __construct()
     {
         parent::__construct(new Template);
-        $this->container = new Container();
     }
 
     //prevent clone.
     private function __clone()
     {
 
+    }
+
+    public function getContainer()
+    {
+        return new Container();
     }
 
     /**
@@ -100,18 +102,19 @@ abstract class AbstractBaseController extends CView
      */
     protected function get($class)
     {
-        return $this->container->resolve($class);
+        $container = $this->getContainer();
+        return $container->resolve($class);
     }
 
     /**
     <code>
-    * // Call the "index" method on the "user" controller
-    *  $response = $this->call('admin::user@index');
-    *
-    * // Call the "user/admin" controller and pass parameters
-    *   $response = $this->call('modules.admin.user@profile', $arguments);
-    * </code>
-    */
+     * // Call the "index" method on the "user" controller
+     *  $response = $this->call('admin::user@index');
+     *
+     * // Call the "user/admin" controller and pass parameters
+     *   $response = $this->call('modules.admin.user@profile', $arguments);
+     * </code>
+     */
     public function call($resource, $arguments = array())
     {
         //$expression = explode('@', $resource);
@@ -125,4 +128,4 @@ abstract class AbstractBaseController extends CView
 
         return call_user_func_array(array(new $class, $method), $arguments);
     }
- }
+}

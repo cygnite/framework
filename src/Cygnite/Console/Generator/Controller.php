@@ -150,10 +150,7 @@ class Controller
         $label = $this->inflector->underscoreToSpace($value->column_name);
         $form .= "\t\t".'->addElement("label", "'.$label.'", array("class" => "col-sm-2 control-label","style" => "width:100%;"))'.PHP_EOL;
 
-        $form .= "\t\t".'->addElement("text", "'.$value->column_name.'", array(
-                                      "value" => (isset($this->model->'.$value->column_name.')) ? $this->model->'.$value->column_name.' : "",
-                                      "class" => "form-control", )
-                                   )'.PHP_EOL;
+        $form .= "\t\t".'->addElement("text", "'.$value->column_name.'", array("value" => (isset($this->model->'.$value->column_name.')) ? $this->model->'.$value->column_name.' : "", "class" => "form-control"))'.PHP_EOL;
         return $form;
     }
 
@@ -164,11 +161,7 @@ class Controller
     private function buildFormCloseTags()
     {
         $form = '';
-        $form .= "\t\t".'->addElement("submit", "btnSubmit", array(
-                                            "value" => "Save",
-                                            "class" => "btn btn-primary",
-                                            "style" => "margin-top:15px;" )
-                                   )'.PHP_EOL;
+        $form .= "\t\t".'->addElement("submit", "btnSubmit", array("value" => "Save", "class" => "btn btn-primary", "style" => "margin-top:15px;" ))'.PHP_EOL;
 
         $form .= "\t\t".'->close()'.PHP_EOL;
         $form .= "\t\t".'->createForm();'.PHP_EOL;

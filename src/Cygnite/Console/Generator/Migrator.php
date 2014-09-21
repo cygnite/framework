@@ -180,8 +180,11 @@ class Migrator
 
     public function setMigrationClassName($file = '')
     {
-        $file = str_replace('.php', '',$this->latestFile);
+        if (pathinfo($this->latestFile, PATHINFO_EXTENSION) !== 'php') {
+            throw new \Exception("apps/database/migrations/ must contain only {xxxx_table_name.php} file types");
+        }
 
+        $file = str_replace('.php', '',$this->latestFile);
         $exp = '';
         $exp =  preg_split('((\d+|\D+))', $file, -1, PREG_SPLIT_DELIM_CAPTURE|PREG_SPLIT_NO_EMPTY);
 
