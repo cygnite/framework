@@ -32,8 +32,8 @@ class Controller
     /**
      * Controller template replacement
      *  #controllerName
-	 *	#modelName
-	 *	#%model Columns%
+     *	#modelName
+     *	#%model Columns%
      *  #%StaticModelName%
      *  #%$validate->addRule%
      */
@@ -131,9 +131,9 @@ class Controller
         return '$this->open("'.$this->controller.'", array(
                             "method" => "post", "id"     => "uniform", "role"   => "form",
                             "action" => Url::sitePath("'.
-                            strtolower(
-                                str_replace('Controller', '', $this->controller)
-                            ).'/type/$id/$this->segment"),
+        strtolower(
+            str_replace('Controller', '', $this->controller)
+        ).'/type/$id/$this->segment"),
                             "style" => "width:500px;margin-top:35px;float:left;" )
                             )';
     }
@@ -178,7 +178,7 @@ class Controller
     {
         $code = '';
         $code .=
-            "\t".'$'.$this->model.'->'.$value->column_name.' = $postArray["'.$value->column_name.'"];'.PHP_EOL;
+            "\t".'$'.$this->inflector->tabilize($this->model).'->'.$value->column_name.' = $postArray["'.$value->column_name.'"];'.PHP_EOL;
 
         return $code;
     }
@@ -280,8 +280,8 @@ class Controller
     private function replaceControllerName($content)
     {
         $content = str_replace(
-            'class %controllerName%',
-            'class '.$this->inflector->classify($this->controller),
+            'class %ControllerName%',
+            'class '.$this->inflector->classify(str_replace("Controller", "", $this->controller)),
             $content
         );
         $content = str_replace(
@@ -306,17 +306,23 @@ class Controller
         $newContent = '';
         $content = str_replace(
             'new %modelName%',
-            'new '.$this->inflector->classify($this->model),
+            'new '.$this->model,
             $content
         );
 
         $content = str_replace(
             '%StaticModelName%',
-            $this->inflector->classify($this->model),
+            $this->model,
             $content
         );
 
-        $newContent = str_replace('%modelName%', $this->model, $content);
+        $content = str_replace(
+            'new %StaticModelName%()',
+            $this->model,
+            $content
+        );
+
+        $newContent = str_replace('%modelName%', $this->inflector->tabilize($this->model), $content);
 
         return $newContent;
     }
@@ -339,10 +345,10 @@ class Controller
         $file = $this->getControllerTemplatePath().$controllerTemplate;
 
         $this->formPath = str_replace(
-            'Controllers\\',
-            '',
-            $this->getControllerTemplatePath()
-        ).'Components'.DS.'Form'.DS;
+                'Controllers\\',
+                '',
+                $this->getControllerTemplatePath()
+            ).'Components'.DS.'Form'.DS;
 
         file_exists($file) or die("Controller Template not Exists");
         //file_exists($modelFl ) or die("No Model Exists");
@@ -371,12 +377,13 @@ class Controller
         } else{
             die("Form template doesn't exists in ".$formTemplatePath.'Form.php'." directory.");
         }
-        
+
         $formContent = str_replace('%controllerName%', $controllerNameOnly, $formContent);
         $formContent = str_replace('{%formElements%}', $this->getForm().PHP_EOL, $formContent);
         $this->generateFormComponent($formContent);
 
         $newContent = $this->replaceModelName($content);
+        $content = null;
 
         $this->replacedContent = $newContent;
     }
@@ -422,7 +429,7 @@ class Controller
     {
         /*write operation ->*/
         $writeTmp =fopen(
-            $this->applicationDir.DS.'controllers'.DS.$this->inflector->classify($this->controller).'.php',
+            $this->applicationDir.DS.'controllers'.DS.$this->controller.'.php',
             "w"
         ) or die('Unable to generate controller');
 

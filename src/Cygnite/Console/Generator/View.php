@@ -27,7 +27,7 @@ use Cygnite\Helpers\Inflector;
  * @File Source
  *
  */
- 
+
 class View
 {
     private $command;
@@ -38,12 +38,12 @@ class View
 
     private $replacedContent;
 
-    const TEMP_EXTENSION = '.html.php';
+    const TEMP_EXTENSION = '.html.stub';
 
     public $layoutType = 'php';
 
     // Plain php layout extension
-    const EXTENSION = '.view.php';
+    const EXTENSION = '.view.stub';
 
     // Twig layout extension
     const TWIG_EXTENSION = '.html.twig';
@@ -123,7 +123,7 @@ class View
 
     private function viewLayoutName()
     {
-        return  ($this->layoutType == 'twig') ? 'base.html.twig': 'base.view.php';
+        return ($this->layoutType == 'twig') ? 'base.html.stub': 'base.view.stub';
     }
 
     /**
@@ -155,12 +155,18 @@ class View
         $this->hasDirectory($appViewPath.'layout');
         $this->hasDirectory($appViewPath.DS.$layout);
 
-        file_exists($file) or die("Base Layout stub File doesn't exists in Cygnite Core");
+        file_exists($file) or die("Base layout stub file doesn't exists in Cygnite Core");
 
         $layoutFile = $appViewPath.$layout.DS.$this->viewLayoutName();
 
+        if ($this->layoutType == 'php') {
+            $layoutFile = str_replace('.stub', '.php', $layoutFile);
+        } else {
+            $layoutFile = str_replace('.stub', '.twig', $layoutFile);
+        }
+
         if (file_exists($layoutFile)) {
-            echo "\n Layout file exists in $layoutFile directory \n";
+            echo "\n Layout file already exists in $layoutFile directory \n";
             return true;
         }
 
@@ -247,6 +253,11 @@ class View
 
         $content = str_replace('#ControllerName#',
             ucfirst($this->command->controller),
+            $content
+        );
+
+        $content = str_replace('{%primaryKey%}',
+            $this->command->getPrimaryKey(),
             $content
         );
 
@@ -366,6 +377,13 @@ class View
     {
         $filePath = '';
         $appViewPath = $this->getApplicationViewPath();
+
+        if ($this->layoutType == 'php') {
+           $viewName = str_replace('.stub', '.php', $viewName);
+        } else {
+           $viewName = str_replace('.stub', '.twig', $viewName);
+        }
+
         $filePath =  $appViewPath.strtolower($viewName);
         $this->hasDirectory($appViewPath);
 

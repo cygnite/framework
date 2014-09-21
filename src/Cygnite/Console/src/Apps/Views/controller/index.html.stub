@@ -38,16 +38,16 @@
                     {#tdColumns#}
 
                     <td>
-                        {{ link('#controllerName#.show.' ~ row.id ~ '/' ~ pageNumber , 'View' | upper, buttonAttributes.primary) | raw }}
-                        {{ link('#controllerName#.type.' ~ row.id ~ '/' ~ pageNumber , 'Edit' | upper, buttonAttributes.primary) | raw }}
-                        {{ link('#controllerName#.delete.' ~ row.id ~ '/' ~ pageNumber  , 'Delete' | upper, buttonAttributes.delete) | raw }}
+                        {{ link('#controllerName#.show.' ~ row.{%primaryKey%} ~ '/' ~ pageNumber , 'View' | upper, buttonAttributes.primary) | raw }}
+                        {{ link('#controllerName#.type.' ~ row.{%primaryKey%} ~ '/' ~ pageNumber , 'Edit' | upper, buttonAttributes.primary) | raw }}
+                        {{ link('#controllerName#.delete.' ~ row.{%primaryKey%} ~ '/' ~ pageNumber  , 'Delete' | upper, buttonAttributes.delete) | raw }}
 
                     </td>
                 </tr>
 
             {% endfor %}
         {% else %}
-           <tr><td> No records found !</td></tr>
+            No records found !
         {% endif  %}
         </tbody>
 

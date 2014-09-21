@@ -35,9 +35,9 @@ if ($this->hasFlash('success')) {
                 {#tdColumns#}
                 <td>
                     <?php
-                    echo Asset::link('#controllerName#/show/' . $value->id, 'View', array('class' => 'btn btn btn-info'));
-                    echo Asset::link('#controllerName#/type/' . $value->id, 'Edit', array('class' => 'btn btn btn-info'));
-                    echo Asset::link('#controllerName#/delete/' . $value->id, 'Delete', array('class' => 'btn btn-danger'));
+                    echo Asset::link('#controllerName#/show/' . $value->{%primaryKey%}, 'View', array('class' => 'btn btn btn-info'));
+                    echo Asset::link('#controllerName#/type/' . $value->{%primaryKey%}, 'Edit', array('class' => 'btn btn btn-info'));
+                    echo Asset::link('#controllerName#/delete/' . $value->{%primaryKey%}, 'Delete', array('class' => 'btn btn-danger'));
                     ?>
 
                 </td>
@@ -46,7 +46,7 @@ if ($this->hasFlash('success')) {
             $i++;
         }
     } else {
-        echo '<tr> <td >No records found !</td></tr>';
+        echo 'No records found !';
     }
     ?>
     </tbody>

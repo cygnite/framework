@@ -15,7 +15,7 @@ use Apps\Models\%StaticModelName%;
 * You may alter code to fit your needs
 */
 
-class %controllerName% extends AbstractBaseController
+class %ControllerName%Controller extends AbstractBaseController
 {
     /**
     * --------------------------------------------------------------------------
@@ -115,7 +115,7 @@ class %controllerName% extends AbstractBaseController
                 // If id null we will get model object to insert
                 // else we will find by primary key to update form database
                 if ($id == null || $id == '') {
-                    $%modelName% = new %modelName%();
+                    $%modelName% = new %StaticModelName%();
                 } else {
                     $%modelName% = %StaticModelName%::find($id);
                 }
@@ -123,7 +123,7 @@ class %controllerName% extends AbstractBaseController
                 // get post array value except the submit button
                 $postArray = $input->except('btnSubmit')->post();
 
-				%modelColumns%
+                 %modelColumns%
 
                 // Save form details
                 if ($%modelName%->save()) {
@@ -210,7 +210,7 @@ class %controllerName% extends AbstractBaseController
     */
     public function deleteAction($id)
     {
-        $%controllerName% = new %modelName%();
+        $%controllerName% = new %StaticModelName%();
 
         if ($%controllerName%->trash($id) == true) {
             $this->setFlash('success', '%controllerName% Deleted Successfully!')

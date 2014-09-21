@@ -83,7 +83,7 @@ class Model
 
     public function updateTemplate()
     {
-       $file = $this->getModelTemplatePath().$this->modelTemplateName();
+        $file = $this->getModelTemplatePath().$this->modelTemplateName();
         //file_exists($file) or die("Model Template File doesn't exists");
 
         /*read operation ->*/
@@ -97,13 +97,13 @@ class Model
     private function replaceModelTemplate($content)
     {
         $content = str_replace('%StaticModelName%',
-            $this->inflector->classify($this->command->model),
+            $this->command->model,
             $content
         );
 
         $primaryKey = $this->command->getPrimaryKey();
         $content = str_replace('{%primaryKey%}', $primaryKey, $content);
-        $content = str_replace('%modelName%', $this->command->model, $content);
+        $content = str_replace('%modelName%', $this->inflector->tabilize($this->command->model), $content);
         $content = str_replace('%databaseName%', $this->command->database, $content);
 
         return $content;
@@ -116,12 +116,12 @@ class Model
         $filePath =  $this->command->applicationDir.
             DS.'models'.
             DS.
-            $this->inflector->classify($this->command->model)
+            $this->command->model
             .'.php';
 
         /*write operation ->*/
         $writeTmp =fopen(
-           $filePath,
+            $filePath,
             "w"
         ) or die('Unable to generate model');
 

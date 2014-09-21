@@ -15,7 +15,7 @@ use Apps\Models\%StaticModelName%;
 * You may alter code to fit your needs
 */
 
-class %controllerName% extends AbstractBaseController
+class %ControllerName%Controller extends AbstractBaseController
 {
     /**
     * --------------------------------------------------------------------------
@@ -135,7 +135,7 @@ class %controllerName% extends AbstractBaseController
 
                 $postArray = $input->except('btnSubmit')->post();
 
-				%modelColumns%
+                 %modelColumns%
 
                 if ($%modelName%->save()) {
                     $this->setFlash('success', '%controllerName% saved successfully!')
