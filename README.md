@@ -1,6 +1,8 @@
 ##Cygnite PHP Framework
 =====================
 
+[![Latest Stable Version](https://poser.pugx.org/cygnite/framework/v/stable.svg)](https://packagist.org/packages/cygnite/framework) [![Total Downloads](https://poser.pugx.org/cygnite/framework/downloads.svg)](https://packagist.org/packages/cygnite/framework) [![Latest Unstable Version](https://poser.pugx.org/cygnite/framework/v/unstable.svg)](https://packagist.org/packages/cygnite/framework) [![License](https://poser.pugx.org/cygnite/framework/license.svg)](https://packagist.org/packages/cygnite/framework)
+
 Cygnite Framework it's just a small footprint to give you the creative experience of developing a web application.
 
 Cygnite Framework is under active development, also we are continuously upgrading the core features to make your job simple and better.
@@ -8,7 +10,7 @@ Cygnite Framework is under active development, also we are continuously upgradin
 You will find several eye catching features into Cygnite Framework.
 
 ###Core features -
-=================
+-----------------------
 
 1. Cygnite Framework redesigned and powered by Composer.
 2. Zero configuration.
@@ -28,7 +30,7 @@ You will find several eye catching features into Cygnite Framework.
 Feel free to open an issue if you require anything.
 
 ###Contributing To Cygnite Framework
-=================================
+---------------------------------------------------
 
 Contribute on the development or its documentation, learn, get help and help others, find, report bugs, send us your feedback, send your wishlist for new features, write and send us patches for Cygnite Framework.
 
