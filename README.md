@@ -1,6 +1,5 @@
 ##Cygnite PHP Framework
-=====================
-
+-----------------------------------
 [![Latest Stable Version](https://poser.pugx.org/cygnite/framework/v/stable.svg)](https://packagist.org/packages/cygnite/framework) [![Total Downloads](https://poser.pugx.org/cygnite/framework/downloads.svg)](https://packagist.org/packages/cygnite/framework) [![Latest Unstable Version](https://poser.pugx.org/cygnite/framework/v/unstable.svg)](https://packagist.org/packages/cygnite/framework) [![License](https://poser.pugx.org/cygnite/framework/license.svg)](https://packagist.org/packages/cygnite/framework)
 
 Cygnite Framework it's just a small footprint to give you the creative experience of developing a web application.
