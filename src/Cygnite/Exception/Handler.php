@@ -244,7 +244,7 @@ class Handler implements ExceptionInterface
      * @return string
      * @throws \Exception
      */
-    private function includeAssets($path)
+    public function includeAssets($path)
     {
         $vendor = dirname(dirname(dirname(dirname(dirname(dirname(__FILE__))))));
         $stylePath = $vendor."/tracy/tracy/src/Tracy/templates/bluescreen.css";
