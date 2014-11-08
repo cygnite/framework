@@ -51,7 +51,7 @@ class Dispatcher
     */
     private static $router_enabled = false;
 
-    private $default = array();
+    public $default = array();
 
     private $routes = array();
 
