@@ -27,7 +27,7 @@ if (defined('CF_SYSTEM') === false) {
  * @author                     :  Sanjoy Dey <sanjoy09@hotmail.com>
  * @copyright                  :  Copyright (c) 2013 - 2014,
  * @link	                   :  http://www.cygniteframework.com
- * @since	                   :  Version 1.0
+ * @since	                   :  v1.2.4
  * @filesource
  * @warning                    :  Any changes in this library can cause
  * abnormal behaviour of the framework
@@ -46,15 +46,15 @@ class Upload implements FileUploadInterface
      * @type array
      */
     protected $fileInfo = array(
-                                  'ext'    => array(
-                                               'jpeg','png','jpg',
-                                               'gif','pdf','doc',
-                                               'docx','txt','xlsx',
-                                               'xls','ppt','pptx',
-                                              ),
-                                  'params' => array(),
-                                  'file'   => array()
-                                 );
+              'ext'    => array(
+                           'jpeg','png','jpg',
+                           'gif','pdf','doc',
+                           'docx','txt','xlsx',
+                           'xls','ppt','pptx',
+                          ),
+              'params' => array(),
+              'file'   => array()
+             );
 
     /**
      * @access private
@@ -140,7 +140,7 @@ class Upload implements FileUploadInterface
 	
 	private function getFileName($options)
 	{
-		if  ( isset($options['fileName']) && !is_null($options['fileName']) )  {
+		if ( isset($options['fileName']) && !is_null($options['fileName']) ) {
 			return $options['fileName'].'.'.$this->filePathInfo['extension'];
 		} 
 		
@@ -149,9 +149,24 @@ class Upload implements FileUploadInterface
 	
 	private function setPathInfo()
 	{
-		 $this->filePathInfo =  pathinfo($this->fileInfo['file']['name']);
+	    $this->filePathInfo =  pathinfo($this->fileInfo['file']['name']);
 	}
-   
+
+    /**
+    * $status = Upload::process( function($upload)
+    *  {
+    *    // Your code goes here
+    *    $upload->file = 'document';
+    *	 $upload->ext = array("JPG");
+    *	 $upload->size = '32092';
+    *    //"multiUpload"=>true
+    *    if ( $upload->save(array("destination"=> "upload",  "fileName"=>"file_new_name")) ) {
+    *       // Upload Success
+    *    } else {
+    *       // Error catch here
+    *    }
+    *  });
+    */
 	public static function process(\Closure  $callback)
 	{
 		return $callback(new Upload());
@@ -181,32 +196,41 @@ class Upload implements FileUploadInterface
 
         if (isset($this->filePathInfo['extension'])) {
 		
-        // If invalid file uploaded return collect error.
-        if ( ! in_array( strtolower($this->filePathInfo['extension']),  array_map('strtolower', $this->fileInfo['ext'] )) )  {
-			 $this->error[] = "Invalid file format. Valid file format: ".implode(',',$this->fileInfo['ext'] );
-			 return false;
+            // If invalid file uploaded return collect error.
+            if (
+             !in_array(
+                strtolower($this->filePathInfo['extension']),
+                array_map('strtolower', $this->fileInfo['ext'])
+             )
+            )  {
+                 $this->error[] = "Invalid file format. Valid file format: ".implode(',',$this->fileInfo['ext'] );
+                 return false;
+            }
         }
-    }
 
 		if  ( isset($this->fileInfo['file']['size']) 
 			&& 
 			$this->fileInfo['file']['size'] <= $this->getNumericfileSize($this->fileInfo['size'])
         ) {
-           $path = str_replace('/', DS, $this->getRootDir().DS.$this->fileInfo['params']['destination'].DS.$this->getFileName($options));
+           $path = str_replace(
+               '/',
+               DS,
+               $this->getRootDir().DS.$this->fileInfo['params']['destination'].DS.$this->getFileName($options)
+           );
 			
-			 try {
-					if  (move_uploaded_file( $this->fileInfo['file']['tmp_name'], $path) === true)  {				
-						return true;
-					}			
-			} catch (\ErrorException $e) {
-					// If file was not uploaded we will catch error.
-					$this->error[] = $e->getMessage();
-					return false;
-			}		    
+            try {
+                if  (move_uploaded_file( $this->fileInfo['file']['tmp_name'], $path) === true)  {
+                    return true;
+                }
+            } catch (\ErrorException $e) {
+                // If file was not uploaded we will catch error.
+                $this->error[] = $e->getMessage();
+                return false;
+            }
         } else {            
-                 // If file size was too large  OutofRange exception will throw.
-				$this->error[] =$this->fileInfo['file']['name'].' is too large. Exceeds upload limit '.$this->fileInfo['size'];
-				return false;
+            // If file size was too large  OutofRange exception will throw.
+            $this->error[] =$this->fileInfo['file']['name'].' is too large. Exceeds upload limit '.$this->fileInfo['size'];
+            return false;
         }
     }
 
@@ -351,7 +375,7 @@ class Upload implements FileUploadInterface
 
             return round($fileSize, 2).' '.strtoupper($this->_prefix[$step]);
         } else {
-                   return 'NaN';
+            return 'NaN';
         }
 
     }
@@ -367,7 +391,6 @@ class Upload implements FileUploadInterface
      */
     private function getNumericfileSize($str)
     {
-
         $bytes = 0;
         $str = strtoupper($str);
         $bytesArray = array(
@@ -397,12 +420,12 @@ class Upload implements FileUploadInterface
         return $bytes;
     }
 	
-		/**
+    /**
 	 * Cleans up the loaded Upload instances.
 	 * This method is mainly used by test scripts to set up a fixture.
 	 */
-	public static function reset()
+	public function reset()
 	{
-		$this->fileInfo=array();
+		$this->fileInfo = array();
 	}
 }
