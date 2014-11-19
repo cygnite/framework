@@ -23,9 +23,7 @@ if (defined('CF_SYSTEM') === false) {
  * @package                    :  Packages
  * @sub packages               :  Library
  * @filename                   :  Upload
- * @description                :  This library used to handle all errors
- *                                or exceptions of Cygnite Framework.
- * @author                     :  Balamathan Kumar
+ * @description                :  This class is used to handle file upload
  * @author                     :  Sanjoy Dey <sanjoy09@hotmail.com>
  * @copyright                  :  Copyright (c) 2013 - 2014,
  * @link	                   :  http://www.cygniteframework.com
@@ -37,7 +35,7 @@ if (defined('CF_SYSTEM') === false) {
  *
  */
 
-class Upload
+class Upload implements FileUploadInterface
 {
 
     /**
@@ -47,7 +45,7 @@ class Upload
      *  provision to user to set file extensions type not here.
      * @type array
      */
-    private $_fileRequirements = array(
+    protected $fileInfo = array(
                                   'ext'    => array(
                                                'jpeg','png','jpg',
                                                'gif','pdf','doc',
@@ -74,11 +72,11 @@ class Upload
     private $_validationArray = array(
         'size'   => array(
                   'func' => 'is_string',
-                  'msg'  => 'String values only valid',
+                  'msg'  => 'Size should be valid string',
                  ),
         'file'   => array(
                   'func' => 'is_array',
-                  'msg'  => 'Array values only valid',
+                  'msg'  => 'File should be valid array',
                  ),
         'params' => array(
                   'func' => 'is_array',
@@ -86,9 +84,15 @@ class Upload
                  ),
         'ext'    => array(
                   'func' => 'is_array',
-                  'msg'  => 'Array values only valid',
+                  'msg'  => 'File Extensions should be valid array',
                  )
         );
+		
+	private $rootDir;
+		
+	private $filePathInfo;
+		
+	private $error = array();
 
 
     /**
@@ -99,7 +103,8 @@ class Upload
      */
     public function __construct()
     {
-        $this->_fileRequirements['size'] = ini_get('upload_max_filesize');
+         $this->fileInfo['size'] = ini_get('upload_max_filesize');
+		 $this->setRootDir();
     }
 
     /**
@@ -114,166 +119,213 @@ class Upload
     public function setUploadSize($size)
     {
         if (is_null($size)) {
-            throw new \InvalidArgumentException(
-                'Cannot pass null argument to '.__FUNCTION__
-            );
+            throw new \InvalidArgumentException('Cannot pass null argument to '.__FUNCTION__);
         }
-
         ini_set('upload_max_filesize', $size);
-
-    }//end setUploadSize()
-
-
+    }
+	
+	public function setRootDir($rootPath = false)
+	{
+		if ($rootPath) {
+			$this->rootDir = $rootPath;
+		} else {
+			$this->rootDir = getcwd(). DS;
+		}
+	}
+	
+	public function getRootDir()
+	{
+		return isset($this->rootDir) ? $this->rootDir : null;
+	}
+	
+	private function getFileName($options)
+	{
+		if  ( isset($options['fileName']) && !is_null($options['fileName']) )  {
+			return $options['fileName'].'.'.$this->filePathInfo['extension'];
+		} 
+		
+		return $this->fileInfo['file']['name'];	
+	}
+	
+	private function setPathInfo()
+	{
+		 $this->filePathInfo =  pathinfo($this->fileInfo['file']['name']);
+	}
+   
+	public static function process(\Closure  $callback)
+	{
+		return $callback(new Upload());
+	}
+	
     /**
-     *
      *
      * @throws \ErrorException
      * @throws \OutOfRangeException
      * @throws \InvalidArgumentException
      * @return bool
      */
-
-    private function uploadFile()
+    protected function uploadFile($options)
     {
-        // If upload path not specified InvalidArgumentException will throw.
-        if (!(isset($this->_fileRequirements['params']['upload_path'])
-            && !empty($this->_fileRequirements['params']['upload_path']))
+	    // If upload path not specified InvalidArgumentException will throw.
+        if  ( !(isset($this->fileInfo['params']['destination'])
+            && !empty($this->fileInfo['params']['destination']))
         ) {
-
-            throw new \InvalidArgumentException('Upload path required');
+            //throw new \InvalidArgumentException('Upload path required');
+			$this->error[] = 'Upload path required';
+			return false;
         }
-        $pathArray = array();
-        show($this->_fileRequirements);
-        if (isset($this->_fileRequirements['file']['name'])) {
-            $pathArray = pathinfo($this->_fileRequirements['file']['name']);
+        		
+        if (isset($this->fileInfo['file']['name'])) {
+            $this->setPathInfo();
         }
 
-        if (isset($pathArray['extension'])) {
-        // If invalid file uploaded InvalidArgumentException will throw.
-        /** @var $this TYPE_NAME */
-        if (in_array(
-            strtolower(
-                $pathArray['extension']
-            ),
-            $this->_fileRequirements['ext']
-        ) === false
-        ) {
-            throw new \InvalidArgumentException(
-                "<span style='color: #D8000C;' >
-                Invalid file upload: Following formats only allowed
-                ".implode(
-                ',',
-                $this->_fileRequirements['ext']
-                )."</span>"
-            );
+        if (isset($this->filePathInfo['extension'])) {
+		
+        // If invalid file uploaded return collect error.
+        if ( ! in_array( strtolower($this->filePathInfo['extension']),  array_map('strtolower', $this->fileInfo['ext'] )) )  {
+			 $this->error[] = "Invalid file format. Valid file format: ".implode(',',$this->fileInfo['ext'] );
+			 return false;
         }
     }
 
-
-        if (isset($this->_fileRequirements['file']['size']) && $this->_fileRequirements['file']['size'] <=
-            $this->getNumericfileSize($this->_fileRequirements['size'])
+		if  ( isset($this->fileInfo['file']['size']) 
+			&& 
+			$this->fileInfo['file']['size'] <= $this->getNumericfileSize($this->fileInfo['size'])
         ) {
-            $path = getcwd().$this->_fileRequirements['params']['upload_path'].'/'.$this->_fileRequirements['file']['name'];
-            if (move_uploaded_file(
-                    $this->_fileRequirements['file']['tmp_name'],
-                    $path
-                )
-                === true
-            ) {
-                return true;
-            } else {
-                // If file was not uploaded successfully  ErrorException will throw.
-                throw new \ErrorException(
-                    '<span style="color: #00B050;">
-                    '.$this->_fileRequirements["file"]["name"].'
-                    was not uploaded successfully</span>'
-                );
-            }
-        } else {
-            echo "sasssa";
-            // If file size was too large  OutofRange exception will throw.
-            throw new \OutOfRangeException(
-                '<span style="color: #D8000C;" >
-                '.$this->_fileRequirements['file']['name'].'
-                was too large exceeds upload limit
-                '.$this->_fileRequirements['size'].'
-                </span>'
-            );
-        }//end if
-
-    }//end uploadFile()
-
+           $path = str_replace('/', DS, $this->getRootDir().DS.$this->fileInfo['params']['destination'].DS.$this->getFileName($options));
+			
+			 try {
+					if  (move_uploaded_file( $this->fileInfo['file']['tmp_name'], $path) === true)  {				
+						return true;
+					}			
+			} catch (\ErrorException $e) {
+					// If file was not uploaded we will catch error.
+					$this->error[] = $e->getMessage();
+					return false;
+			}		    
+        } else {            
+                 // If file size was too large  OutofRange exception will throw.
+				$this->error[] =$this->fileInfo['file']['name'].' is too large. Exceeds upload limit '.$this->fileInfo['size'];
+				return false;
+        }
+    }
 
     public function __set($key, $value)
     {
-        if (!isset($this->_fileRequirements[$key])) {
-            throw new \InvalidArgumentException(
-                'Invalid : undefined variable '.__CLASS__.'::$'.$key
-            );
+        if (!isset($this->fileInfo[$key])) {
+            throw new \InvalidArgumentException('Invalid : undefined variable '.__CLASS__.'::$'.$key);
         }
+		
+		if(!isset($_FILES) || !is_array($_FILES))
+			return;
+		
+		if ($key == 'file') {
+			$value = $_FILES[$value];
+		} else if ($key == 'size') {
+		    $this->setUploadSize($value);
+		}
 
-        if (!call_user_func($this->_validationArray[$key]['func'], $value)) {
-            throw new \InvalidArgumentException(
-                'Invalid type : '.__CLASS__.'::$'.$key.'
-                 '.$this->_validationArray[$key]['msg']
-            );
+        if  (!call_user_func($this->_validationArray[$key]['func'], $value ))  {
+		   $this->error[] = 'Invalid type : '.__CLASS__.'::$'.$key.' '.$this->_validationArray[$key]['msg'];
+		    return false;
         }
-
-        $this->_fileRequirements[$key] = $value;
+		
+        $this->fileInfo[$key] = $value;
 
     }//end __set()
 
-
     public function __call($function, $arguments)
     {
-        if ($function !== 'upload') {
-            throw new \ErrorException(
-                'Undefined function call :
-                '.__CLASS__."::{$function} function name undefined"
-            );
-        }
+        if ($function !== 'save') {
+            throw new \ErrorException( 'Undefined function call : '.__CLASS__."::{$function} function name undefined" );
+        } else if (empty($arguments)) {
+			throw new \ErrorException( "Empty argument passed to method: ".__CLASS__."::{$function}" );
+		}
+		
+		$this->setFileOptions('params', !isset($arguments[0]) ?:  $arguments[0]);
+		$this->setFileOptions('file', !isset($arguments[1]) ?: $arguments[1]);
+		$this->setFileOptions('ext', !isset($arguments[2]) ?:  $arguments[2]);
+		$this->setFileOptions('size', !isset($arguments[3]) ?: $arguments[3]);
+			
+        $tempArguments = $this->fileInfo['file'];
 
-
-        if (isset($arguments[0])
-            && is_array($arguments[0])
-            && count($arguments[0]) > 0
-        ) {
-            $this->_fileRequirements['params'] = $arguments[0];
-        }
-
-        if (isset($arguments[1])
-            && is_array($arguments[1])
-            && count($arguments[1]) > 0
-        ) {
-            $this->_fileRequirements['file'] = $arguments[1];
-        }
-
-
-        if (isset($arguments[2])
-            && is_array($arguments[2])
-            && count($arguments[2]) > 0
-        ) {
-            $this->_fileRequirements['ext'] = $arguments[2];
-        }
-
-
-        if (isset($arguments[3]) && is_array($arguments[3])&& count($arguments[3]) > 0) {
-            $this->_fileRequirements['size'] = $arguments[3];
-        }
-
-
-        $temp_arguments = $this->_fileRequirements['file'];
-
-        if (isset($arguments[0]) && isset($arguments[0]['multi_upload']) === true) {
-            foreach ($temp_arguments as $key => $value) {
-                $this->_fileRequirements['file'] = $value;
-                call_user_func_array(array($this, 'uploadFile'), array());
+        if  (isset($arguments[0])  &&  isset($arguments[0]['multiUpload']) === true)  {
+		
+            foreach ($tempArguments as $key => $value)  {
+			
+                $this->fileInfo['file'] = $value;
+                $status[] = call_user_func_array(array($this, 'uploadFile'), array());
             }
+			
         } else {
-            call_user_func_array(array($this, 'uploadFile'), array());
+             return   call_user_func_array(array($this, 'uploadFile'), $arguments);
         }
+		
+		return $status;
     }
+	
+	private function setFileOptions($key, $value)
+	{
+		if ( isset($value)  &&  is_array($value) && count($value) > 0 )  {
+            $this->fileInfo[$key] = $value;
+        }
+	}
 
+	/**
+	 * @return string the original name of the file being uploaded
+	 */
+	public function getName()
+	{
+		return $this->fileInfo['file']['name'];
+	}
+
+	/**
+	 * @return string the path of the uploaded file on the server.
+	 * Note, this is a temporary file which will be automatically deleted by PHP
+	 * after the current request is processed.
+	 */
+	public function getTempName()
+	{
+		return $this->fileInfo['file']['tmp_name'];
+	}
+
+	/**
+	 * @return string the MIME-type of the uploaded file (such as "image/gif").
+	 */
+	public function getType()
+	{
+		return $this->fileInfo['file']['type'];
+	}
+
+	/**
+	 * @return integer the actual size of the uploaded file in bytes
+	 */
+	public function getSize()
+	{
+		return $this->fileInfo['file']['size'];
+	}
+	
+	public function getFileExtension()
+	{
+		return $this->filePathInfo['extension'];
+	}
+	
+	/**
+	* Return number of errors as array
+	*/
+	public function getError()
+	{
+		return $this->error;
+	}
+	
+	/*
+	* Has valid error 
+	* @return bool true/false
+	*/
+	public function hasError()
+	{
+		return !empty($this->error) ? true : false;
+	}
 
     /**
      *
@@ -343,13 +395,14 @@ class Upload
         $bytes = intval(round($bytes, 2));
 
         return $bytes;
-
     }
-
-    public function __destruct()
-    {
-        unset($this->_fileRequirements);
-        unset($this->_prefix);
-        unset($this->_validationArray);
-    }
+	
+		/**
+	 * Cleans up the loaded Upload instances.
+	 * This method is mainly used by test scripts to set up a fixture.
+	 */
+	public static function reset()
+	{
+		$this->fileInfo=array();
+	}
 }
