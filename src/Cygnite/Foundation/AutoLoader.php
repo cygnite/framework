@@ -2,7 +2,7 @@
 namespace Cygnite\Foundation;
 
 use Cygnite\Exception;
-use Cygnite\Common\FileExtensionFilter;
+use Cygnite\Common\File\FileExtensionFilter;
 
 if (!defined('CF_SYSTEM')) {
     exit('External script access not allowed');
