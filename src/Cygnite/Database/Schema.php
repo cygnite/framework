@@ -1,4 +1,14 @@
 <?php
+
+/*
+ * This file is part of the Cygnite package.
+ *
+ * (c) Sanjoy Dey <dey.sanjoy0@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Cygnite\Database;
 
 use Closure;
@@ -6,31 +16,12 @@ use Cygnite\Common\Singleton;
 use Cygnite\Helpers\Inflector;
 use Cygnite\Database\Connections;
 
-/**
- *  Cygnite Framework
+/*
+ * Database Schema Builder
  *
- *  An open source application development framework for PHP 5.3x or newer
+ * Build and alter your database schema on the fly.
  *
- *   License
- *
- *   This source file is subject to the MIT license that is bundled
- *   with this package in the file LICENSE.txt.
- *   http://www.cygniteframework.com/license.txt
- *   If you did not receive a copy of the license and are unable to
- *   obtain it through the world-wide-web, please send an email
- *   to sanjoy@hotmail.com so I can send you a copy immediately.
- *
- * @Package                   :  Packages
- * @Sub Packages              :  Database
- * @Filename                  :  Schema
- * @Description               :  Schema is used to build and
- *                               can alter your database schema.
- * @Author                    :  Sanjoy Dey
- * @Copyright                 :  Copyright (c) 2013 - 2014,
- * @Link	                  :  http://www.cygniteframework.com
- * @Since	                  :  Version 1.0
- * @FileSource
- *
+ * @author Sanjoy Dey <dey.sanjoy0@gmail.com>
  */
 
 class Schema extends Connections
@@ -142,9 +133,7 @@ class Schema extends Connections
         } else {
             return $callback;
         }
-
     }
-
 
     public function setConn($database)
     {

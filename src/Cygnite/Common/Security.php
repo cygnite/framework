@@ -1,4 +1,14 @@
 <?php
+
+/**
+ * This file is part of the Cygnite package.
+ *
+ * (c) Sanjoy Dey <dey.sanjoy0@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Cygnite\Common;
 
 use Closure;
@@ -29,12 +39,17 @@ use Closure;
  * @FileSource
  */
 /**
+ * Security.
+ *
+ * @author Sanjoy Dey <dey.sanjoy0@gmail.com>
+ *
+ * GLOBAL variables will be accessed securely through Security package.
+ * This package provides necessary in built validation for users data.
+ *
  * <code>
- *  $this->instance =Security::instance(
- *          function ($instance) {
+ *  $this->instance = Security::instance(function ($instance) {
  *               return $instance;
- *          }
- *       );
+ *  });
  *  $this->instance->sanitize($string);
  * </code>
  * Inspired by TravianZ and Kohana security library http://kohanaphp.com/

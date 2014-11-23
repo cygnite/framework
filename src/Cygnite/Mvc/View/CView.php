@@ -1,4 +1,13 @@
 <?php
+
+/*
+ * This file is part of the Cygnite Framework package.
+ *
+ * (c) Sanjoy Dey <dey.sanjoy0@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 namespace Cygnite\Mvc\View;
 
 use Cygnite\Reflection;
@@ -9,32 +18,11 @@ if (!defined('CF_SYSTEM')) {
     exit('External script access not allowed');
 }
 /**
- *  Cygnite Framework
+ * Form.
  *
- *  An open source application development framework for PHP 5.3x or newer
+ * Render your view page or template
  *
- *   License
- *
- *   This source file is subject to the MIT license that is bundled
- *   with this package in the file LICENSE.txt.
- *   http://www.cygniteframework.com/license.txt
- *   If you did not receive a copy of the license and are unable to
- *   obtain it through the world-wide-web, please send an email
- *   to sanjoy@hotmail.com so I can send you a copy immediately.
- *
- * @Package               :  Packages
- * @Sub Packages          :  Cygnite
- * @Filename              :  CView
- * @Description           :  This class used to render your view page or
- *                           template.
- * @Author                :  Sanjoy Dey
- * @Copyright             :  Copyright (c) 2013 - 2014,
- * @Link	              :  http://www.cygniteframework.com
- * @Since	              :  Version 1.0
- * @Filesource
- * @Warning               :  Any changes in this library can cause abnormal behaviour of the framework
- *
- *
+ * @author Sanjoy Dey <dey.sanjoy0@gmail.com>
  */
 
 class CView

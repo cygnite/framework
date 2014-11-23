@@ -1,40 +1,29 @@
 <?php
+
+/**
+ * This file is part of the Cygnite package.
+ *
+ * (c) Sanjoy Dey <dey.sanjoy0@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Cygnite\Common;
 
 use Closure;
-use Cygnite\Common\CookieManager\CookieInterface;
 use Cygnite\Common\Security;
 use Cygnite\Proxy\StaticResolver;
 use InvalidArgumentException;
 use Cygnite\Common\Singleton;
 use Cygnite\Common\CookieManager\Cookie;
+use Cygnite\Common\CookieManager\CookieInterface;
 
-/*
- *   Cygnite PHP Framework
+/**
+ * Input.
  *
- *   An open source application development framework for PHP 5.3x or newer
- *
- *   License
- *
- *   This source file is subject to the MIT license that is bundled
- *   with this package in the file LICENSE.txt.
- *   http://www.cygniteframework.com/license.txt
- *   If you did not receive a copy of the license and are unable to
- *   obtain it through the world-wide-web, please send an email
- *   to sanjoy@hotmail.com so I can send you a copy immediately.
- *
- * @Package                   :  Cygnite\Common
- * @Sub Packages              :
- * @Filename                  :  Input
- * @Description               :  This class is used to handler post, get, cookies etc.
- * @Author                    :  Sanjoy Dey
- * @Copyright                 :  Copyright (c) 2013 - 2014,
- * @Link	                  :  http://www.cygniteframework.com
- * @Since	                  :  Version 1.0
- * @FileSource
- *
+ * @author Sanjoy Dey <dey.sanjoy0@gmail.com>
  */
-
 class Input
 {
     public $except;

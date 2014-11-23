@@ -2,13 +2,13 @@
 namespace Cygnite\DependencyInjection;
 
 use Closure;
-use ArrayAccess;
-use Cygnite\Foundation\Application;
-use Cygnite\Helpers\Inflector;
-use InvalidArgumentException;
 use Exception;
-use Cygnite\Reflection;
+use ArrayAccess;
 use ReflectionClass;
+use Cygnite\Reflection;
+use InvalidArgumentException;
+use Cygnite\Helpers\Inflector;
+use Cygnite\Foundation\Application;
 
 /**
  * Class Container

@@ -1,4 +1,14 @@
 <?php
+
+/*
+ * This file is part of the Cygnite package.
+ *
+ * (c) Sanjoy Dey <dey.sanjoy0@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Cygnite\FormBuilder;
 
 use Closure;
@@ -8,30 +18,13 @@ use Cygnite\Proxy\StaticResolver;
 if (!defined('CF_SYSTEM')) {
     exit('No External script access allowed');
 }
+
 /**
- *  Cygnite Framework
+ * Form.
  *
- *  An open source application development framework for PHP 5.3x or newer
+ * Build your form on the fly.
  *
- *   License
- *
- *   This source file is subject to the MIT license that is bundled
- *   with this package in the file LICENSE.txt.
- *   http://www.cygniteframework.com/license.txt
- *   If you did not receive a copy of the license and are unable to
- *   obtain it through the world-wide-web, please send an email
- *   to sanjoy@hotmail.com so I can send you a copy immediately.
- *
- * @package               :  Cygnite
- * @subpackages           :  FormBuilder
- * @filename              :  Form
- * @description           :  This class used to build your form
- * @author                :  Sanjoy Dey
- * @copyright             :  Copyright (c) 2013 - 2014,
- * @link	              :  http://www.cygniteframework.com
- * @since	              :  Version 1.0
- * @FileSource
- *
+ * @author Sanjoy Dey <dey.sanjoy0@gmail.com>
  */
 
 class Form extends StaticResolver implements FormInterface
@@ -104,20 +97,7 @@ class Form extends StaticResolver implements FormInterface
         return $this;
     }
 
-    public function __call($method, $arguments = array())
-    {
-
-        $inputType = null;
-        $inputType = strtolower(substr($method, 3));
-
-        if ($inputType == 'text') {
-           // $this->attributes['type'] = $arguments;
-            $arguments['type'] = $inputType;
-            return call_user_func_array(array(new self, 'addEl'), $arguments);
-        }
-    }
-
-    /*
+   /*
     * Add form elements
     *
     * @param  $key

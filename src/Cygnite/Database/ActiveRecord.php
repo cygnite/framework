@@ -1,50 +1,38 @@
 <?php
+
+/*
+ * This file is part of the Cygnite package.
+ *
+ * (c) Sanjoy Dey <dey.sanjoy0@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Cygnite\Database;
 
 use PDO;
 use Cygnite;
 use Exception;
 use PDOException;
-use Cygnite\Helpers\Inflector;
 use ReflectionClass;
 use ReflectionObject;
 use ReflectionProperty;
 use Cygnite\Base\Event;
 use Cygnite\Database\Schema;
-use Cygnite\Database\Connections;
 use Cygnite\Common\Pagination;
+use Cygnite\Helpers\Inflector;
+use Cygnite\Database\Connections;
 use Cygnite\Database\Configurations;
 use Cygnite\Database\Exceptions\DatabaseException;
 
-
-/**
- *   Cygnite Framework
+/*
+ * Database ActiveRecord.
  *
- *   An open source application development framework for PHP 5.3x or newer
- *
- *   License
- *
- *   This source file is subject to the MIT license that is bundled
- *   with this package in the file LICENSE.txt.
- *   http://www.cygniteframework.com/license.txt
- *   If you did not receive a copy of the license and are unable to
- *   obtain it through the world-wide-web, please send an email
- *   to sanjoy@hotmail.com so I can send you a copy immediately.
- *
- * @Package                   :  Packages
- * @Sub Packages              :  Database
- * @Filename                  :  ActiveRecord
- * @Description               :  Active Record to handle database manipulations.
- *                               As read,write,erase,update etc.
- * @Author                    :  Sanjoy Dey
- * @Copyright                 :  Copyright (c) 2013 - 2014,
- * @Link	                  :  http://www.cygniteframework.com
- * @Since	                  :  Version 1.0
- * @FileSource
- *
+ * @author Sanjoy Dey <dey.sanjoy0@gmail.com>
  */
- class ActiveRecord extends Connections
- {
+class ActiveRecord extends Connections
+{
     public $id;
     //Hold your connection object
     public $pdo;

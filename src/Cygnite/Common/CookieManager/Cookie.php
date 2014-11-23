@@ -1,4 +1,14 @@
 <?php
+
+/*
+ * This file is part of the Cygnite package.
+ *
+ * (c) Sanjoy Dey <dey.sanjoy0@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Cygnite\Common\CookieManager;
 
 use Closure;
@@ -6,32 +16,7 @@ use Cygnite\Common\Security;
 use Cygnite\Common\Singleton;
 use Cygnite\Proxy\StaticResolver;
 
-/**
- *   Cygnite PHP Framework
- *
- *   An open source application development framework for PHP 5.3x or newer
- *
- *   License
- *
- *   This source file is subject to the MIT license that is bundled
- *   with this package in the file LICENSE.txt.
- *   http://www.cygniteframework.com/license.txt
- *   If you did not receive a copy of the license and are unable to
- *   obtain it through the world-wide-web, please send an email
- *   to sanjoy@hotmail.com so I can send you a copy immediately.
- *
- * @Package                   :  Cygnite
- * @Sub Packages              :
- * @Filename                  :  Cookie
- * @Description               :  Cookie Manager class to manage http cookie.
- * @Author                    :  Sanjoy Dey
- * @Copyright                 :  Copyright (c) 2013 - 2014,
- * @Link	                  :  http://www.cygniteframework.com
- * @Since	                  :  Version 1.0
- * @FileSource
- */
-
-class Cookie extends Facade implements CookieInterface
+class Cookie extends StaticResolver implements CookieInterface
 {
     /**
      * Cookie attributes
