@@ -26,8 +26,8 @@ if (!defined('CF_SYSTEM')) {
  * @Description              :  This class is used to make class name, method name and others.
  * @Author                   :  Cygnite Dev Team
  * @Copyright                :  Copyright (c) 2013 - 2014,
- * @Link	                 :  http://www.cygniteframework.com
- * @Since	                 :  Version 1.0
+ * @Link                     :  http://www.cygniteframework.com
+ * @Since                    :  Version 1.0
  * @Filesource
  * @Warning                  :  Any changes in this library can cause abnormal behaviour of the framework
  *

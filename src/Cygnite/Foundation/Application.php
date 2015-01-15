@@ -39,8 +39,8 @@ class Application extends Container
     public $aliases = array();
 
     public $namespace = '\\Apps\\Controllers\\';
-	
-	private static $version = 'v1.2';
+    
+    private static $version = 'v1.2';
 
     /**
      * ---------------------------------------------------
@@ -95,7 +95,7 @@ class Application extends Container
      * @return Application object
      */
     public static function getInstance(Inflector $inflection = null, Autoloader $loader = null)
-	{
+    {
         if(static::$instance instanceof Application)
             return static::$instance;
 
@@ -120,16 +120,16 @@ class Application extends Container
         return $this;
     }
 
-	public function getAliases($key)
-	{
-		return isset($this->aliases) ? $this->aliases : null;
-	}
+    public function getAliases($key)
+    {
+        return isset($this->aliases) ? $this->aliases : null;
+    }
 
 
-	/**
+    /**
      * Get framework version
-	 * @access public
-	 */
+     * @access public
+     */
     public static function version()
     {
         return static::$version;

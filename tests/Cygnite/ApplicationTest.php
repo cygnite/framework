@@ -10,11 +10,11 @@ class ApplicationTest extends PHPUnit_Framework_TestCase {
 
   public function testInstance()
   {
-  	$inflector = m::mock('Cygnite\Inflector');
-  	$loader = m::mock("Cygnite\Autoloader");
+    $inflector = m::mock('Cygnite\Inflector');
+    $loader = m::mock("Cygnite\Autoloader");
 
-  	$application = Cygnite\Application::getInstance($inflector,$loader);
+    $application = Cygnite\Application::getInstance($inflector,$loader);
 
-  	$this->assertInstanceOf('Cygnite\Application',$application);
+    $this->assertInstanceOf('Cygnite\Application',$application);
   }
 }

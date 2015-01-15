@@ -37,7 +37,7 @@ abstract class Connections
         PDO::ATTR_CASE              =>  PDO::CASE_LOWER,
         PDO::ATTR_PERSISTENT        =>  true,
         PDO::ATTR_ORACLE_NULLS      =>  PDO::NULL_NATURAL,
-        PDO::ATTR_STRINGIFY_FETCHES	=>  false
+        PDO::ATTR_STRINGIFY_FETCHES =>  false
     );
 
     public function initialize($connection_name = null)

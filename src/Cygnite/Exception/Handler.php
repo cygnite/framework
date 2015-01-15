@@ -33,8 +33,8 @@ if (!defined('CF_SYSTEM')) {
  *                           Tracy debugger component
  * @Author                :  Sanjoy Dey
  * @Copyright             :  Copyright (c) 2013 - 2014,
- * @Link	              :  http://www.cygniteframework.com
- * @Since	              :  Version 1.0
+ * @Link                  :  http://www.cygniteframework.com
+ * @Since                 :  Version 1.0
  * @FileSource
  *
  */

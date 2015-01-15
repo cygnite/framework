@@ -24,18 +24,18 @@ class Url
 
     public static $base;
 
-	private static $instance = 'instance';
+    private static $instance = 'instance';
 
-	private static $router;
+    private static $router;
 
-	public function __construct(Router $route)
-	{
+    public function __construct(Router $route)
+    {
         if(is_object($route)) {
             if ($route instanceof Router) {
                 $this->setRoute($route);
             }
         }
-	}
+    }
 
     /**
      * @param $route
@@ -49,9 +49,9 @@ class Url
      * @return instance / null
      */
     public function getRoute()
-	{
-		return isset(static::$router) && is_object(static::$router) ? static::$router : null;
-	}
+    {
+        return isset(static::$router) && is_object(static::$router) ? static::$router : null;
+    }
 
     /**
      * Header Redirect
@@ -106,8 +106,8 @@ class Url
      */
     public function getSegment($segment = array())
     {
-		$segment = (!is_null($segment[0])) ? $segment[0] : 1;
-	    $uri = $this->getRoute()->getCurrentUri();
+        $segment = (!is_null($segment[0])) ? $segment[0] : 1;
+        $uri = $this->getRoute()->getCurrentUri();
         $urlArray = array_filter(explode('/', $uri));
 
         $indexCount = array_search('index.php', $urlArray);
@@ -149,13 +149,13 @@ class Url
                     throw new \InvalidArgumentException("Url Property {$property} doesn't exist");
             }
         }
-		if ($method == self::$instance) {
-			return call_user_func_array(array(new Url($args[0]), $method), array($args));
-		}
+        if ($method == self::$instance) {
+            return call_user_func_array(array(new Url($args[0]), $method), array($args));
+        }
 
-		if ($method == 'segment') {
+        if ($method == 'segment') {
             return call_user_func_array(array(new Url(new Router()), 'get'.ucfirst($method)), array($args));
-		}
+        }
     }
 
     /**

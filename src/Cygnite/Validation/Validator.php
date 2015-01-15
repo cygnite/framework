@@ -28,8 +28,8 @@ use Cygnite\Common\Input;
  *
  * @Author                    :  Sanjoy Dey
  * @Copyright                 :  Copyright (c) 2013 - 2014,
- * @Link	                  :  http://www.cygniteframework.com
- * @Since	                  :  Version 1.0
+ * @Link                      :  http://www.cygniteframework.com
+ * @Since                     :  Version 1.0
  * @Filesource
  * @Warning                   :  Any changes in this library can cause abnormal behaviour of the framework
  *
@@ -38,10 +38,10 @@ use Cygnite\Common\Input;
  * @example
 <code>
     $input = Input::getInstance(
-			function ($instance) {
-				return $instance;
-			}
-		);
+            function ($instance) {
+                return $instance;
+            }
+        );
     $validator = Validator::instance(
         $input,
         function ($validate) {

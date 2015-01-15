@@ -24,8 +24,8 @@ if (!defined('CF_SYSTEM')) {
  * @Description                :  This library used to benchmark the code.
  * @Author                     :  Cygnite Dev Team
  * @Copyright                  :  Copyright (c) 2013 - 2014,
- * @Link	                   :  http://www.cygniteframework.com
- * @Since	                   :  Version 1.0
+ * @Link                       :  http://www.cygniteframework.com
+ * @Since                      :  Version 1.0
  * @Filesource
  * @Warning                    :  Any changes in this library can cause abnormal behaviour of the framework
  *
@@ -40,8 +40,8 @@ class Profiler
     /**
     * Profiler starting point
     *
-    * @access	public
-    * @false	string
+    * @access   public
+    * @false    string
     */
     public static function start($starttoken = 'cygnite_start')
     {
@@ -64,8 +64,8 @@ class Profiler
      /**
     * Profiler end point
     *
-    * @access	public
-    * @false	string
+    * @access   public
+    * @false    string
     */
 
     public static function end($endToken = 'cygnite_start')
@@ -90,8 +90,8 @@ class Profiler
     /**
     *  This funtion is to calculate the total memory usage by the running script
     *
-    * @access	public
-    * @false	string
+    * @access   public
+    * @false    string
     * @return string
     */
     public static function getMemorySpaceUsage()

@@ -26,8 +26,8 @@ if (!defined('CF_SYSTEM')) {
  * @Description                   :  This library is used to zip files and download it
  * @Author                          :   Cygnite Dev Team
  * @Copyright                     :  Copyright (c) 2013 - 2014,
- * @Link	                  :  http://www.cygniteframework.com
- * @Since	                  :  Version 1.0
+ * @Link                      :  http://www.cygniteframework.com
+ * @Since                     :  Version 1.0
  * @Filesource
  * @Warning                     :  Any changes in this library can cause abnormal behaviour of the framework
  *
@@ -130,7 +130,7 @@ class Zip
         if(! file_exists( $zip_name) || $zip_name == "" )
                 throw new Exception("The zip archive file not specified to download.");
 
-		$downloader = new Downloader;
+        $downloader = new Downloader;
         $downloader ->download($file_path);
 
         header("Pragma: public");

@@ -22,8 +22,8 @@ use Cygnite\Helpers\Inflector;
  * @Description        :  This class is used to generate your model code using cygnite console
  * @Author             :  Sanjoy Dey
  * @Copyright          :  Copyright (c) 2013 - 2014,
- * @Link	           :  http://www.cygniteframework.com
- * @Since	           :  Version 1.0.6
+ * @Link               :  http://www.cygniteframework.com
+ * @Since              :  Version 1.0.6
  * @File Source
  *
  */

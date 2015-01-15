@@ -24,8 +24,8 @@ if (!defined('CF_SYSTEM')) {
  *@Description            :  This file is required to implement  Cygnite caching system.
  *@Author                 :  Sanjoy Dey
  *@Copyright              :  Copyright (c) 2013 - 2014,
- *@Link	                  :  http://www.cygniteframework.com
- *@Since	              :  Version 1.0
+ *@Link                   :  http://www.cygniteframework.com
+ *@Since                  :  Version 1.0
  *@FileSource
  *@warning                :  Any changes in this library can cause abnormal behaviour of the framework
  *

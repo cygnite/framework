@@ -27,8 +27,8 @@ if (!defined('CF_SYSTEM')) {
  * @Description             :  This file is used to Define all necessary configurations for template engine
  * @Author                     :  Sanjoy Dey
  * @Copyright              :  Copyright (c) 2013 - 2014,
- * @Link	                       :  http://www.cygniteframework.com
- * @Since	                  :  Version 1.0
+ * @Link                           :  http://www.cygniteframework.com
+ * @Since                     :  Version 1.0
  * @FileSource
  *
  */
@@ -36,10 +36,10 @@ if (!defined('CF_SYSTEM')) {
 interface ExceptionInterface 
 {
 
-	/**
-	 * Display the given exception to the user.
-	 */
-	public function run();
+    /**
+     * Display the given exception to the user.
+     */
+    public function run();
 
     public static function register(Closure $callback);
 

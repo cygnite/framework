@@ -36,13 +36,13 @@ class FileExtensionFilter extends FilterIterator
         }
 
         parent::__construct($iterator);
-    }	
+    }   
 
  
     // an abstract method which must be implemented in subclass
     public function accept() {
 
-	 $file = $this->getInnerIterator()->current();
+     $file = $this->getInnerIterator()->current();
 
         // If we somehow have something other than an SplFileInfo object, just 
         // return false
@@ -59,7 +59,7 @@ class FileExtensionFilter extends FilterIterator
         if ($file->getBasename('.php') == $file->getBasename()) {
             return false;
         }
-		
-	return in_array($this->getExtension(), $this->ext);
+        
+    return in_array($this->getExtension(), $this->ext);
     }
 }

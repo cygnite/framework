@@ -30,8 +30,8 @@ if (defined('CF_SYSTEM') === false) {
 * @Description           :  Bootstrap file to auto load core libraries initially.
 * @Author                :  Sanjoy Dey
 * @Copyright             :  Copyright (c) 2013 - 2014,
-* @Link	                 :  http://www.cygniteframework.com
-* @Since	             :  Version 1.0
+* @Link                  :  http://www.cygniteframework.com
+* @Since                 :  Version 1.0
 * @FilesSource
 *
 */
@@ -42,7 +42,7 @@ class Strapper
      * Initialize and do all configuration then start booting
      */
     public function initialize()
-	{
+    {
         /**
          * Set Environment for Application
          * Example:
@@ -64,68 +64,68 @@ class Strapper
         }
         $event->trigger("exception");
 
-	   /**
-		 *--------------------------------------------------
-		 * Turn on 	 application if profiling is on
-		 * in configuration
-		 *--------------------------------------------------
-		 */
+       /**
+         *--------------------------------------------------
+         * Turn on   application if profiling is on
+         * in configuration
+         *--------------------------------------------------
+         */
 
-		if (Config::get('global.config', 'enable_profiling') == true) {
-			  Profiler::start();
-		}
+        if (Config::get('global.config', 'enable_profiling') == true) {
+              Profiler::start();
+        }
 
-		/** --------------------------------------------------
-		 *  Set Cygnite user defined encryption key
-		 * ---------------------------------------------------
-		*/
-		 if (!is_null(Config::get('global.config', 'cf_encryption_key')) ||
-			in_array('encrypt', Config::get('config.autoload', 'helpers')) == true ) {
-			define('CF_ENCRYPT_KEY', Config::get('global.config', 'cf_encryption_key'));
-		}
+        /** --------------------------------------------------
+         *  Set Cygnite user defined encryption key
+         * ---------------------------------------------------
+        */
+         if (!is_null(Config::get('global.config', 'cf_encryption_key')) ||
+            in_array('encrypt', Config::get('config.autoload', 'helpers')) == true ) {
+            define('CF_ENCRYPT_KEY', Config::get('global.config', 'cf_encryption_key'));
+        }
 
-		/**----------------------------------------------------------------
-		 * Get Session config and set it here
-		 * ----------------------------------------------------------------
-		 */
-		define('SECURE_SESSION', Config::get('config.session', 'cf_session'));
+        /**----------------------------------------------------------------
+         * Get Session config and set it here
+         * ----------------------------------------------------------------
+         */
+        define('SECURE_SESSION', Config::get('config.session', 'cf_session'));
 
-		/**----------------------------------------------------------------
-		 * Auto load Session library based on user configurations
-		 * ----------------------------------------------------------------
-		 */
-		if (SECURE_SESSION === true) {
-			Session::instance();
-		}
+        /**----------------------------------------------------------------
+         * Auto load Session library based on user configurations
+         * ----------------------------------------------------------------
+         */
+        if (SECURE_SESSION === true) {
+            Session::instance();
+        }
 
-		/**------------------------------------------------------------------
-		 * Throw Exception is default controller
-		 * has not been set in configuration
-		 * ------------------------------------------------------------------
-		 */
-		if (is_null(Config::get('global.config', "default_controller"))) {
-			trigger_error(
-				"Default controller not found ! Please set the default
-							controller in configs/application".EXT
-			);
-		}
-	}
+        /**------------------------------------------------------------------
+         * Throw Exception is default controller
+         * has not been set in configuration
+         * ------------------------------------------------------------------
+         */
+        if (is_null(Config::get('global.config', "default_controller"))) {
+            trigger_error(
+                "Default controller not found ! Please set the default
+                            controller in configs/application".EXT
+            );
+        }
+    }
 
     /**
      * @return bool
      */
     public function terminate()
-	{
-		/**-------------------------------------------------------------------
-		 * Check if it is running via cli and return false
-		 * -------------------------------------------------------------------
-		 */
-		$filename = preg_replace('#(\?.*)$#', '', $_SERVER['REQUEST_URI']);
+    {
+        /**-------------------------------------------------------------------
+         * Check if it is running via cli and return false
+         * -------------------------------------------------------------------
+         */
+        $filename = preg_replace('#(\?.*)$#', '', $_SERVER['REQUEST_URI']);
 
-		if (php_sapi_name() === 'cli-server' && is_file($filename)) {
-			return false;
-		}
+        if (php_sapi_name() === 'cli-server' && is_file($filename)) {
+            return false;
+        }
 
-		Application::import('apps.routes');
+        Application::import('apps.routes');
     }
 }

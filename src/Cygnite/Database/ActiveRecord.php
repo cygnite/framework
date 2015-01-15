@@ -837,10 +837,10 @@ class ActiveRecord extends Connections
     * $this->where($conditions4);
     * </code>
     *
-    * @access	public
-    * @param	column name
-    * @param	value
-    * @return	object
+    * @access   public
+    * @param    column name
+    * @param    value
+    * @return   object
     */
     public function where($columnName, $where = "", $type = null)
     {

@@ -143,8 +143,8 @@ class AutoLoader
         {
             $path = str_replace(".", DS, $dir);
 
-	        //Iterate through all paths and filter with extension provided
-	        $recursiveExtensionFilter = new FileExtensionFilter(
+            //Iterate through all paths and filter with extension provided
+            $recursiveExtensionFilter = new FileExtensionFilter(
                 new \RecursiveDirectoryIterator($path)
             );
 
