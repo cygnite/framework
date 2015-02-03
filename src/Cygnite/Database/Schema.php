@@ -24,7 +24,7 @@ use Cygnite\Database\Connection;
  * @author Sanjoy Dey <dey.sanjoy0@gmail.com>
  */
 
-class Schema extends Connection
+class Schema
 {
     public $database;
 
@@ -136,7 +136,7 @@ class Schema extends Connection
 
     public function setConn($database)
     {
-        $this->_connection = $this->getConnection($database);
+        $this->_connection = Connection::getConnection($database);
     }
 
     public function connection()

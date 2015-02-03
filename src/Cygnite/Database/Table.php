@@ -1,5 +1,4 @@
 <?php
-
 /*
  * This file is part of the Cygnite package.
  *
@@ -34,14 +33,14 @@ class Table extends Connection
     {
         $this->database = $database;
         $this->tableName = $model;
-        $this->_connection = $this->getConnection($database);
+        $this->_connection = Connection::getConnection($database);
 
         return $this;
     }
 
     public function getDefaultDatabaseConnection()
     {
-        return $this->getDefaultConnection();
+        return Connection::getDefaultConnection();
     }
 
     public function getColumns()
@@ -84,7 +83,7 @@ class Table extends Connection
     public function makeMigration($tableName = 'migrations')
     {
         $this->connect(
-            trim($this->getDefaultConnection()),
+            trim($this->getDefaultDatabaseConnection()),
             $tableName
         );
 
@@ -94,7 +93,7 @@ class Table extends Connection
         Schema::instance($this,
             function($table) use ($tableName, $me){
                 $table->tableName = $tableName;
-                $table->database = trim($me->getDefaultConnection());
+                $table->database = trim($me->getDefaultDatabaseConnection());
                 $table->create(
                     array(
                         array('name'=> 'id', 'type' => 'int', 'length' => 11,
@@ -121,7 +120,7 @@ class Table extends Connection
         $migrationName = $migration->getVersion().$migration->getMigrationClass();
 
         $this->connect(
-            trim($this->getDefaultConnection()),
+            trim($this->getDefaultDatabaseConnection()),
             'migrations'
         );
 
