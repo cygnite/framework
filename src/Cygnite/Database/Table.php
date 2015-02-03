@@ -11,9 +11,9 @@
 
 namespace Cygnite\Database;
 
-use Cygnite\Database\Connections;
+use Cygnite\Database\Connection;
 
-class Table extends Connections
+class Table extends Connection
 {
 
     private $_connection;

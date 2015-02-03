@@ -14,7 +14,7 @@ namespace Cygnite\Database;
 use Closure;
 use Cygnite\Common\Singleton;
 use Cygnite\Helpers\Inflector;
-use Cygnite\Database\Connections;
+use Cygnite\Database\Connection;
 
 /*
  * Database Schema Builder
@@ -24,7 +24,7 @@ use Cygnite\Database\Connections;
  * @author Sanjoy Dey <dey.sanjoy0@gmail.com>
  */
 
-class Schema extends Connections
+class Schema extends Connection
 {
     public $database;
 
@@ -97,7 +97,7 @@ class Schema extends Connections
                 $reflectionProperty->setAccessible(true);
                 $this->database = $reflectionProperty->getValue($this->_pointer);
             } else {
-                $this->database = Connections::getDefaultConnection();
+                $this->database = Connection::getDefaultConnection();
             }
 
 
@@ -112,10 +112,9 @@ class Schema extends Connections
             if (!property_exists($this->_pointer, 'tableName')) {
                 $this->tableName = $this->inflector->tabilize(get_class($this->_pointer));
             }
-
         }
 
-       // $this->config = Connections::getConfiguration();
+       // $this->config = Connection::getConfiguration();
     }
 
     /*

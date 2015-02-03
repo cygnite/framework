@@ -2,7 +2,7 @@
 namespace Cygnite\Console\Generator;
 
 use Cygnite\Database\Configurations;
-use Cygnite\Database\Connections;
+use Cygnite\Database\Connection;
 use Cygnite\Helpers\Inflector;
 
 /**
