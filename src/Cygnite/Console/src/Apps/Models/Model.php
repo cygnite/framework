@@ -27,7 +27,7 @@ class %StaticModelName% extends ActiveRecord
         parent::__construct();
     }
 
-    protected function pageLimit()
+    public function pageLimit()
     {
         return Url::segment(3);
     }
