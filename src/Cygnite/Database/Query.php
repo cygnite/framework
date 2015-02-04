@@ -158,7 +158,7 @@ class Query
 
             if (true == $statement->execute(array_values(self::getActiveRecordInstance()->attributes))) {
                 self::getActiveRecordInstance()->{self::getActiveRecordInstance()->getPrimaryKey(
-                )} = (int)$this->getDatabaseConnection()->lastInsertId();
+                    )} = (int)$this->getDatabaseConnection()->lastInsertId();
 
                 if (method_exists(self::getActiveRecordInstance()->attributes, 'afterCreate') &&
                     in_array('afterCreate', self::getActiveRecordInstance()->getModelEvents())
@@ -255,7 +255,7 @@ class Query
             $updateBy = $x[0];
             $updateValue = $args[$x[0]];
         } else {
-            echo $updateBy = $ar->getPrimaryKey();
+            $updateBy = $ar->getPrimaryKey();
             $updateValue = $args;
         }
 
@@ -1312,7 +1312,7 @@ class Query
         if (isset($arguments[0]['orderBy'])) {
             $exp = array();
             $exp = explode(' ', $arguments[0]['orderBy']);
-            $this->orderBy(explode(',', $exp[0]), (isset($exp[1])) ? $exp[1] : 'ASC');
+            $this->orderBy($this->quoteIdentifier($exp[0]), (isset($exp[1])) ? strtoupper($exp[1]) : 'ASC');
         } else {
             $this->orderBy(self::getActiveRecordInstance()->getPrimaryKey());
         }
@@ -1390,7 +1390,7 @@ class Query
 
     public function limit($limit, $offset = "")
     {
-        if ($limit == ' ' || is_null($limit)) {
+        if (is_null($limit)) {
             throw new \Exception('Empty parameter given to limit clause ');
         }
 
