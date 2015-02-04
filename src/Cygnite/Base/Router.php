@@ -31,8 +31,8 @@ if (!defined('CF_SYSTEM')) {
  * @Description        :  This file is used to route user requests.
  *                        This class is highly inspired by Barmus Router.
  * @Copyright          :  Copyright (c) 2013 - 2014,
- * @Link	           :  http://www.cygniteframework.com
- * @Since	           :  Version 1.0
+ * @Link               :  http://www.cygniteframework.com
+ * @Since              :  Version 1.0
  */
 
 class Router implements RouterInterface
@@ -54,12 +54,12 @@ class Router implements RouterInterface
      */
     private $notFound;
 
-	 /**
+     /**
      * @var base url
      */
-	public $currentUrl;
+    public $currentUrl;
 
-	public $data = array();
+    public $data = array();
 
     /**
      * @var string Application namespace
@@ -345,13 +345,13 @@ class Router implements RouterInterface
      * @return mixed|string
      */
     public function removeIndexDotPhpAndTrillingSlash($uri)
-	{
-			return  (strpos($uri,'index.php') !== false) ?
+    {
+            return  (strpos($uri,'index.php') !== false) ?
                 preg_replace(
                     '/(\/+)/','/', str_replace('index.php', '', rtrim($uri))
                 ) :
                 trim($uri);
-	}
+    }
 
     /**
      * Handle a a set of routes: if a match is found, execute the relating handling function
@@ -368,8 +368,8 @@ class Router implements RouterInterface
         // Counter to keep track of the number of routes we've handled
         $numHandled = 0;
 
-		 //remove index.php and extra slash from url if exists to match with routing
-		 $uri = $this->removeIndexDotPhpAndTrillingSlash($this->getCurrentUri());
+         //remove index.php and extra slash from url if exists to match with routing
+         $uri = $this->removeIndexDotPhpAndTrillingSlash($this->getCurrentUri());
 
         // Loop all routes
         foreach ($routes as $route) {
@@ -415,16 +415,16 @@ class Router implements RouterInterface
      * @return string
      */
     public function getBaseUrl()
-	{
-		// Current Request URI
+    {
+        // Current Request URI
         $this->currentUrl = $_SERVER['REQUEST_URI'];
 
         // Remove rewrite base path (= allows one to run the router in a sub folder)
         $basePath = implode('/', array_slice(explode('/', $_SERVER['SCRIPT_NAME']), 0, -1)) . '/';
 
-		return $basePath;
+        return $basePath;
 
-	}
+    }
 
     /**
      * Define the current relative URI
@@ -432,10 +432,10 @@ class Router implements RouterInterface
      */
     public function getCurrentUri()
     {
-		$basePath = $this->getBaseUrl();
+        $basePath = $this->getBaseUrl();
         $uri = $this->currentUrl;
 
-		$this->base = 	$basePath;
+        $this->base =   $basePath;
         $uri = substr($uri, strlen($basePath));
 
         // Don't take query params into account on the URL

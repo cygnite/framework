@@ -27,8 +27,8 @@ if (!defined('CF_SYSTEM')) {
  * @Description           :  This file is used to Define all necessary configurations for template engine
  * @Author                :  Sanjoy Dey
  * @Copyright             :  Copyright (c) 2013 - 2014,
- * @Link	              :  http://www.cygniteframework.com
- * @Since	              :  Version 1.0
+ * @Link                  :  http://www.cygniteframework.com
+ * @Since                 :  Version 1.0
  * @FileSource
  *
  */
@@ -40,9 +40,9 @@ class Template
      */
     private $view;
 
-	public $properties;
+    public $properties;
 
-	private $reflection;
+    private $reflection;
 
     /**
      * @param            $view
@@ -54,38 +54,38 @@ class Template
 
         $this->view = $view;
 
-		if ($reflection instanceof Reflection) {
-			$this->reflection = $reflection;
-			$this->reflection->setClass($this->view);
-		}
-
-		if (property_exists($this->view, 'twigLoader')) {
-			$this->setPropertyAccessible('twigLoader');
-        }
-		if (property_exists($this->view, 'autoReload')) {
-			$this->setPropertyAccessible('autoReload');
+        if ($reflection instanceof Reflection) {
+            $this->reflection = $reflection;
+            $this->reflection->setClass($this->view);
         }
 
-		if (property_exists($this->view, 'twigDebug')) {
-			$this->setPropertyAccessible('twigDebug');
+        if (property_exists($this->view, 'twigLoader')) {
+            $this->setPropertyAccessible('twigLoader');
+        }
+        if (property_exists($this->view, 'autoReload')) {
+            $this->setPropertyAccessible('autoReload');
         }
 
-		if (property_exists($this->view, 'layout')) {
-			$this->setPropertyAccessible('layout');
+        if (property_exists($this->view, 'twigDebug')) {
+            $this->setPropertyAccessible('twigDebug');
         }
 
-		if (property_exists($this->view, 'templateExtension')) {
-			$this->setPropertyAccessible('templateExtension');
+        if (property_exists($this->view, 'layout')) {
+            $this->setPropertyAccessible('layout');
+        }
+
+        if (property_exists($this->view, 'templateExtension')) {
+            $this->setPropertyAccessible('templateExtension');
         }
     }
 
     /**
      * @param $property
      */
-	public function setPropertyAccessible($property)
-	{
-		$this->properties[$property] = $this->reflection->makePropertyAccessible($property);
-	}
+    public function setPropertyAccessible($property)
+    {
+        $this->properties[$property] = $this->reflection->makePropertyAccessible($property);
+    }
 
     /**
      * @return \Twig_Environment
@@ -94,7 +94,7 @@ class Template
     {
         $this->properties['twigLoader'] = new \Twig_Loader_Filesystem($this->view->views);
 
-		$this->template = new \Twig_Environment($this->properties['twigLoader'] , array(
+        $this->template = new \Twig_Environment($this->properties['twigLoader'] , array(
             'cache' => getcwd().DS.APPPATH.DS.'temp'.DS.'twig'.DS.'tmp'.DS.'cache',
             'auto_reload' => $this->properties['autoReload'],
             'debug' => $this->properties['twigDebug'],

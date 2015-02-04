@@ -79,7 +79,7 @@ class Image
     public function resize()
     {
         $path = array();
-        $src = getcwd().DS.str_replace(array('/','\\'), DS, $this->directory);	 /* read the source image */
+        $src = getcwd().DS.str_replace(array('/','\\'), DS, $this->directory);   /* read the source image */
 
 
         if (file_exists($src)) {

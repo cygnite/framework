@@ -149,7 +149,7 @@ class Pagination
         //last page is = total pages / items per page, rounded up.
         $this->lastPage = ceil($this->getTotalNumberOfPages()/$this->model->perPage);
 
-        $this->lastPageMinusOne = $this->lastPage - 1;	//last page minus 1
+        $this->lastPageMinusOne = $this->lastPage - 1;  //last page minus 1
         $this->create();
     }
 

@@ -24,8 +24,8 @@ if (!defined('CF_SYSTEM')) {
  * @description             :  Form Interface to declare form methods
  * @author                  :  Cygnite Dev Team
  * @copyright               :  Copyright (c) 2013 - 2014,
- * @link	                :  http://www.cygniteframework.com
- * @since	                :  Version 1.0
+ * @link                    :  http://www.cygniteframework.com
+ * @since                   :  Version 1.0
  * @FileSource
  *
  */

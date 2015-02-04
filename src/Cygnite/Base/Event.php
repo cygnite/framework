@@ -24,8 +24,8 @@ use Cygnite\Reflection;
  * @Description        :  Create event and trigger it dynamically. Allow you
  *                        event driven programming.
  * @Copyright          :  Copyright (c) 2013 - 2014,
- * @Link	           :  http://www.cygniteframework.com
- * @Since	           :  Version 1.0
+ * @Link               :  http://www.cygniteframework.com
+ * @Since              :  Version 1.0
  *
  *
  */
@@ -40,11 +40,11 @@ class Event
      * @return $this
      */
     public function __call($method, $arguments = array())
-	{
-		if ($method == 'instance') {
-			return $this;
-		}
-	}
+    {
+        if ($method == 'instance') {
+            return $this;
+        }
+    }
 
     /**
      * @param       $method
@@ -53,9 +53,9 @@ class Event
      */
     public static function __callStatic($method, $arguments = array())
     {
-		if ($method == 'instance') {
-			return call_user_func_array(array(new self, $method), array($arguments));
-		}
+        if ($method == 'instance') {
+            return call_user_func_array(array(new self, $method), array($arguments));
+        }
     }
 
     /**
