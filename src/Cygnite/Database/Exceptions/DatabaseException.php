@@ -3,13 +3,13 @@ namespace Cygnite\Database\Exceptions;
 
 use PDOStatement;
 use PDOException;
-use Cygnite\Database\Connections;
+use Cygnite\Database\Connection;
 
 class DatabaseException extends PDOException
 {
     public function __construct($exceptions)
     {
-        if ($exceptions instanceof Connections) {
+        if ($exceptions instanceof Connection) {
             parent::__construct(
                 join(", ", $exceptions->connection->errorInfo()),
                 intval($exceptions->connection->errorCode())
