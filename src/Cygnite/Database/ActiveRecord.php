@@ -24,6 +24,8 @@ abstract class ActiveRecord implements \ArrayAccess
     const DEFAULT_FOREIGN_KEY_SUFFIX = '_id';
     public static $ar;
 
+    public static $defaultPrimaryKey = 'id';
+
     //set closed property as true is set else false
     private static $events = array(
         'beforeCreate',
@@ -164,7 +166,7 @@ abstract class ActiveRecord implements \ArrayAccess
 
     /**
      * The finder make use of __callStatic() to invoke
-     * undefind static methods dynamically. This magic method is mainly used
+     * undefined static methods dynamically. This magic method is mainly used
      * for dynamic finders
      *
      * @param $method    String
@@ -269,14 +271,6 @@ abstract class ActiveRecord implements \ArrayAccess
     {
         return self::$events;
     }
-
-    /*
-     * Get your table columns dynamically
-     * @access public
-     * @param $key
-     * @return void
-     *
-     */
 
     /**
      * get table name
@@ -423,9 +417,9 @@ abstract class ActiveRecord implements \ArrayAccess
         return isset($this->attributes[$key]);
     }
 
-    public function trash($arguments)
+    public function trash($arguments, $multiple = false)
     {
-        return static::callDynamicMethod(array($this->fluentQuery(), __FUNCTION__), $arguments);
+        return $this->fluentQuery()->{__FUNCTION__}($arguments, $multiple);
     }
 
     /**
@@ -439,6 +433,7 @@ abstract class ActiveRecord implements \ArrayAccess
      */
     public function __call($method, $arguments = array())
     {
+        // save attributes into table
         if (in_array($method, self::$validFinders) && $method == 'save') {
             return $this->_save($arguments);
         }
@@ -448,6 +443,7 @@ abstract class ActiveRecord implements \ArrayAccess
             return $this->findByPk($method, $arguments);
         }
 
+        // try calling method against Query if exists
         if (method_exists($this->fluentQuery(), $method)) {
             return static::callDynamicMethod(array($this->fluentQuery(), $method), $arguments);
         }
@@ -504,7 +500,7 @@ abstract class ActiveRecord implements \ArrayAccess
      */
     public function getPrimaryKey()
     {
-        return isset($this->primaryKey) ? $this->primaryKey : null;
+        return isset($this->primaryKey) ? $this->primaryKey : static::$defaultPrimaryKey;
     }
 
     private function findByPK($method, $arguments)
@@ -629,19 +625,37 @@ abstract class ActiveRecord implements \ArrayAccess
         return $this->fluentQuery()->leftOuterJoin($tableWith, $params, $arguments[2]);
     }
 
+    /**
+     * We will get Fluent Query Object
+     * @return Query
+     */
     public function fluentQuery()
     {
-        $ar = static::$ar;
         return new Query($this);
     }
 
-    public static function table($table)
+    /**
+     * Use Connection to build fluent queries against any table
+     *
+     * @param $database
+     * @return mixed
+     */
+    public static function on($database)
     {
+        static::$ar->setDatabase($database);
 
+        return static::$ar->fluentQuery();
     }
 
+    /**
+     * Get Database Connection
+     *
+     * @param $database
+     * @return mixed
+     */
     public static function connection($database)
     {
-
+        static::$ar->setDatabase($database);
+        return static::$ar->fluentQuery()->getDatabaseConnection();
     }
 }
