@@ -61,17 +61,17 @@ class Migration extends ActiveRecord
      * Delete rows using migration
      *
      * @param       $table
-     * @param array $attributes
+     * @param array $attribute
      * @return bool
      */
-    public function delete($table, $attributes)
+    public function delete($table, $attribute)
     {
         $this->tableName = $table;
 
-        if (is_array($attributes)) {
-            return $this->trash($attributes, true);
-        } else if (is_string($attributes)){
-            return $this->trash($attributes);
+        if (is_array($attribute)) {
+            return $this->trash($attribute, true);
+        } else if (is_string($attribute) || is_int($attribute)) {
+            return $this->trash($attribute);
         }
     }
 }
