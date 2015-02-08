@@ -64,7 +64,7 @@ class Router implements RouterInterface
     /**
      * @var string Application namespace
      */
-    private $namespace = '\\Apps\\Controllers\\';
+    private $namespace = '\\Controllers\\';
 
     private $controller;
 
@@ -104,7 +104,7 @@ class Router implements RouterInterface
     {
         $expression = Helper::stringSplit($arguments[0]);
         $this->controller = Inflector::instance()->classify($expression[0]).'Controller';
-        $this->controllerWithNS = $this->namespace.$this->controller;
+        $this->controllerWithNS = "\\".ucfirst(APPPATH).$this->namespace.$this->controller;
         $this->method = Inflector::instance()->toCameCase($expression[1]).'Action';
     }
 
@@ -168,7 +168,7 @@ class Router implements RouterInterface
         $this->setUpControllerAndMethodName($arguments);
 
         $file = (CYGNITE_BASE.strtolower(
-                str_replace('\\', DS, $this->namespace)
+                str_replace('\\', DS, "\\".ucfirst(APPPATH).$this->namespace)
             ).$this->controller.EXT);
 
         if (!is_readable($file)) {

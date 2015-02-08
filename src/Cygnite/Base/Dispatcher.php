@@ -202,7 +202,7 @@ class Dispatcher
                         $controllerDir = '';
 
                         if ( is_dir (CYGNITE_BASE.str_replace(
-                                '\\', DS, strtolower($app->namespace.$exp[1]
+                                '\\', DS, strtolower("\\".APPPATH.$app->namespace.$exp[1]
                                 )))
                         ) {
 

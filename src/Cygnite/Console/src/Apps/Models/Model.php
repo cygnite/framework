@@ -1,5 +1,5 @@
 
-namespace Apps\Models;
+namespace {%Apps%}\Models;
 
 use Cygnite\Foundation\Application;
 use Cygnite\Database\Schema;
