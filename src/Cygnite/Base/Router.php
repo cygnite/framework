@@ -1,4 +1,12 @@
 <?php
+/*
+ * This file is part of the Cygnite package.
+ *
+ * (c) Sanjoy Dey <dey.sanjoy0@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 namespace Cygnite\Base;
 
 use Exception;
@@ -7,6 +15,12 @@ use ErrorException;
 use Cygnite\Foundation\Application as App;
 use Cygnite\Helpers\Inflector;
 use Cygnite\Helpers\Helper;
+
+/*
+ * Cygnite Router
+ *
+ * @author Sanjoy Dey <dey.sanjoy0@gmail.com>
+ */
 
 if (!defined('CF_SYSTEM')) {
     exit('No External script access allowed');
