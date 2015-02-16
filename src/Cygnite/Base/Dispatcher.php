@@ -22,7 +22,7 @@ use Cygnite\Helpers\Config;
  *   to sanjoy@hotmail.com so I can send you a copy immediately.
  *
  * @Package            :  Packages
- * @Sub Packages       :  Base
+ * @SubPackages        :  Base
  * @Filename           :  Dispatcher
  * @Description        :  Handle all user request and dispatch it.
  * @Copyright          :  Copyright (c) 2013 - 2014,
@@ -32,23 +32,24 @@ use Cygnite\Helpers\Config;
  *
  */
 /**
- * @author  Bram(us) Van Damme
  * @author   Sanjoy Dey
  */
 
 class Dispatcher
 {
     /**
-    * The name of the entry page
-    * @var string
-    */
+     * The name of the entry page
+     *
+     * @var string
+     */
     private static $indexPage = 'index.php';
 
     private $router;
     /**
-    * Define the router variable. default value set as false
-    * @var bool
-    */
+     * Define the router variable. default value set as false
+     *
+     * @var bool
+     */
     private static $router_enabled = false;
 
     public $default = array();
@@ -86,26 +87,26 @@ class Dispatcher
             // we have a match!
             if (preg_match_all('#^' . $route . '$#', $uri, $matches, PREG_SET_ORDER)) {
 
-                    //Extract the matched URL false seters (and only the false seters)
-                    $params = array_map(
-                        function ($match) {
-                            $var = explode('/', trim($match, '/'));
-                            return isset($var[0]) ? $var[0] : null;
-                        },
-                        array_slice(
-                            $matches[0],
-                            1
-                        )
-                    );
+                //Extract the matched URL false seters (and only the false seters)
+                $params = array_map(
+                    function ($match) {
+                        $var = explode('/', trim($match, '/'));
+                        return isset($var[0]) ? $var[0] : null;
+                    },
+                    array_slice(
+                        $matches[0],
+                        1
+                    )
+                );
 
-                    // call the handling function with the URL
-                    //call_user_func_array($route['fn'], $params);
-                    $routerArray['controllerPath'] = $val;
-                    $routerArray['params'] = $params;
-                    // yay!
-                    $numHandled++;
+                // call the handling function with the URL
+                //call_user_func_array($route['fn'], $params);
+                $routerArray['controllerPath'] = $val;
+                $routerArray['params'] = $params;
+                // yay!
+                $numHandled++;
 
-                    // If we need to quit, then quit
+                // If we need to quit, then quit
                 if ($quitAfterRun) {
                     break;
                 }
@@ -128,7 +129,7 @@ class Dispatcher
 
         // If no argument passed or single slash call default controller
         if ($this->router->getCurrentUri() == '/' ||
-            $this->router->getCurrentUri() == '/'.self::$indexPage
+            $this->router->getCurrentUri() == '/' . self::$indexPage
         ) {
 
             if ($this->default['controller'] != '') {
@@ -139,8 +140,7 @@ class Dispatcher
                     function () use ($dispatcher) {
 
                         return Application::instance(
-                            function($app) use($dispatcher)
-                            {
+                            function ($app) use ($dispatcher) {
                                 $controller = $app->getController($dispatcher->default['controller']);
                                 $action = $app->getActionName($dispatcher->default['action']);
 
@@ -158,7 +158,7 @@ class Dispatcher
 
             $newUrl = str_replace('/index.php', '', rtrim($this->router->getCurrentUri()));
 
-            $exp= array_filter(explode('/', $newUrl));
+            $exp = array_filter(explode('/', $newUrl));
             $matchedUrl = $this->matches($routeConfig);
 
             //Check with router configuration if matched then call defined controller
@@ -167,9 +167,8 @@ class Dispatcher
                 $requestUri = preg_split('/[\.\ ]/', $matchedUrl['controllerPath']);
 
                 // We are matching with static routing if match then dispatch it
-                $response  = Application::instance(
-                    function($app) use($requestUri, $matchedUrl, $dispatcher)
-                    {
+                $response = Application::instance(
+                    function ($app) use ($requestUri, $matchedUrl, $dispatcher) {
                         $controller = $app->getController($requestUri[0]);
                         $action = $app->getActionName($requestUri[1]);
 
@@ -188,9 +187,8 @@ class Dispatcher
 
             } else {
                 // Process user request provided in url
-                $response  = Application::instance(
-                    function($app) use($exp, $dispatcher)
-                    {
+                $response = Application::instance(
+                    function ($app) use ($exp, $dispatcher) {
                         $controller = $method = $param = $instance = null;
                         $controller = $exp[1];
 
@@ -201,9 +199,15 @@ class Dispatcher
                         $params = array_slice($exp, 2);
                         $controllerDir = '';
 
-                        if ( is_dir (CYGNITE_BASE.str_replace(
-                                '\\', DS, strtolower("\\".APPPATH.$app->namespace.$exp[1]
-                                )))
+                        if (is_dir(
+                            CYGNITE_BASE . str_replace(
+                                '\\',
+                                DS,
+                                strtolower(
+                                    "\\" . APPPATH . $app->namespace . $exp[1]
+                                )
+                            )
+                        )
                         ) {
 
                             $controllerDir = ucfirst($exp[1]);

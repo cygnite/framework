@@ -1,24 +1,12 @@
 <?php
-/**
- * This file is part of the Cygnite package.
- *
- * (c) Sanjoy Dey <dey.sanjoy0@gmail.com>
- *
- * For the full copyright and license information, please view the LICENSE
- * file that was distributed with this source code.
- */
 namespace Cygnite\Base;
 
-/**
- * Cygnite Router
- *
- * @author Sanjoy Dey <dey.sanjoy0@gmail.com>
- */
-
-use Cygnite\Foundation\Application;
-use Cygnite\Helpers\Helper;
-use Cygnite\Helpers\Inflector;
 use Exception;
+use Reflection;
+use ErrorException;
+use Cygnite\Foundation\Application as App;
+use Cygnite\Helpers\Inflector;
+use Cygnite\Helpers\Helper;
 
 if (!defined('CF_SYSTEM')) {
     exit('No External script access allowed');
@@ -26,12 +14,33 @@ if (!defined('CF_SYSTEM')) {
 
 class Router implements RouterInterface
 {
+
+    const MODULE_DIR = 'modules';
+    /**
+     * The current attributes being shared by routes.
+     */
+    public static $group;
     /**
      * @var base url
      */
     public $currentUrl;
     public $data = array();
     public $base;
+    /**
+     * The wildcard patterns supported by the router.
+     *
+     * @var array
+     */
+    public $patterns = array(
+        '(:num)' => '([0-9]+)',
+        '(:digit)' => '(\d+)',
+        '(:name)' => '(\w+)',
+        '(:any)' => '([a-zA-Z0-9\.\-_%]+)',
+        '(:all)' => '(.*)',
+        '(:module)' => '([a-zA-Z0-9_-]+)',
+        '(:namespace)' => '([a-zA-Z0-9_-]+)'
+    );
+    protected $resourceRoutes = array('index', 'new', 'create', 'show', 'edit', 'update', 'delete');
     /**
      * @var array The route patterns and their handling functions
      */
@@ -49,23 +58,33 @@ class Router implements RouterInterface
      */
     private $namespace = '\\Controllers\\';
     private $controller;
+    /*
+    * Available actions for resourceful controller
+    * @var array
+    */
     private $controllerWithNS;
     private $method;
     private $handledRoute;
-    /*
-	* Available actions for resourceful controller
-	* @var array
-	*/
-    protected $resourceRoutes = array('index', 'new', 'create', 'show', 'edit', 'update', 'delete');
-
     private $afterRouter;
+
+    /**
+     * @param $method
+     * @param $arguments
+     * @return mixed
+     */
+    public static function __callStatic($method, $arguments)
+    {
+        if ($method == 'call') {
+            return call_user_func_array(array(new self(), $method), $arguments);
+        }
+    }
 
     /**
      * Store a before middle-ware route and a handling function to be executed
      * when accessed using one of the specified methods
      *
      * @param string $methods Allowed methods, | delimited
-     * @param string $pattern A route pattern such as /admin/system
+     * @param string $pattern A route pattern such as /about/system
      * @param object $func    The handling function to be executed
      */
     public function before($methods, $pattern, $func)
@@ -78,28 +97,24 @@ class Router implements RouterInterface
                 'fn' => $func
             );
         }
+
+    }
+
+    public function setModuleDir($name)
+    {
+        static::$moduleDir = $name;
     }
 
     /**
-     * Store a route and a handling function to be executed when accessed using one of the specified methods
-     *
-     * @param string $methods Allowed methods, | delimited
-     * @param string $pattern A route pattern such as /about/system
-     * @param object $func    The handling function to be executed
-     * @return bool
+     * @param       $method
+     * @param array $arguments
+     * @return $this
      */
-    public function match($methods, $pattern, $func)
+    public function __call($method, $arguments = array())
     {
-        $pattern = '/' . trim($pattern, '/');
-
-        foreach (explode('|', $methods) as $method) {
-            $this->routes[$method][] = array(
-                'pattern' => $pattern,
-                'fn' => $func
-            );
+        if ($method == 'call') {
+            return $this->{$method . 'Controller'}($arguments);
         }
-
-        return true;
     }
 
     /**
@@ -115,6 +130,29 @@ class Router implements RouterInterface
     }
 
     /**
+     * Store a route and a handling function to be executed when accessed using one of the specified methods
+     *
+     * @param string $methods Allowed methods, | delimited
+     * @param string $pattern A route pattern such as /about/system
+     * @param object $func    The handling function to be executed
+     * @return bool
+     */
+    public function match($methods, $pattern, $func)
+    {
+
+        $pattern = '/' . trim($pattern, '/');
+
+        foreach (explode('|', $methods) as $method) {
+            $this->routes[$method][] = array(
+                'pattern' => $pattern,
+                'fn' => $func
+            );
+        }
+
+        return true;
+    }
+
+    /**
      * Shorthand for a route accessed using POST
      *
      * @param string $pattern A route pattern such as /about/system
@@ -122,18 +160,6 @@ class Router implements RouterInterface
      * @return bool
      */
     public function post($pattern, $func)
-    {
-        return $this->match(strtoupper(__FUNCTION__), $pattern, $func);
-    }
-
-    /**
-     * Shorthand for a route accessed using PUT
-     *
-     * @param string $pattern A route pattern such as /about/system
-     * @param object $func    The handling function to be executed
-     * @return bool
-     */
-    public function put($pattern, $func)
     {
         return $this->match(strtoupper(__FUNCTION__), $pattern, $func);
     }
@@ -151,6 +177,17 @@ class Router implements RouterInterface
     }
 
     /**
+     * Shorthand for a route accessed using PUT
+     *
+     * @param string $pattern A route pattern such as /about/system
+     * @param object $func    The handling function to be executed
+     */
+    public function put($pattern, $func)
+    {
+        return $this->match(strtoupper(__FUNCTION__), $pattern, $func);
+    }
+
+    /**
      * Shorthand for a route accessed using OPTIONS
      *
      * @param string $pattern A route pattern such as /about/system
@@ -163,16 +200,24 @@ class Router implements RouterInterface
     }
 
     /**
-     * We will handle any request either GET OR POST
      * @param $pattern
      * @param $func
      * @return bool
      */
     public function any($pattern, $func)
     {
-        return $this->match('GET|POST', $pattern, $func);
+        return $this->match('GET|POST|PUT|DELETE', $pattern, $func);
     }
 
+    /**
+     * Set the controller as Resource Controller
+     * Cygnite Router knows how to respond to resource controller
+     * request automatically
+     *
+     * @param $name
+     * @param $controller
+     * @return $this
+     */
     public function resource($name, $controller)
     {
         foreach ($this->resourceRoutes as $key => $action) {
@@ -197,10 +242,14 @@ class Router implements RouterInterface
      *
      * @param object $callback Function to be executed after a matching
      *                         route was handled (= after router middle-ware)
+     * @return mixed
      */
     public function run($callback = null)
     {
-        $this->afterRouter = is_null($callback) ?: $callback;
+        //$this->afterRouter = !is_null($callback) ?: $callback;
+        if (!is_null($callback) && $callback instanceof \Closure) {
+            $this->afterRouter = $callback;
+        }
 
         // Handle all before middle wares
         if (isset($this->before[$_SERVER['REQUEST_METHOD']])) {
@@ -210,14 +259,15 @@ class Router implements RouterInterface
         // Handle all routes
         $numHandled = 0;
         if (isset($this->routes[$_SERVER['REQUEST_METHOD']])) {
-            $numHandled = $this->handle($this->routes[$_SERVER['REQUEST_METHOD']], true);
+            $flag = (!is_null($this->afterRouter)) ? true : false;
+            $numHandled = $this->handle($this->routes[$_SERVER['REQUEST_METHOD']], $flag);
         }
 
         // If no route was handled, trigger the 404 (if any)
         if ($numHandled == 0) {
 
             if (!is_null($this->notFound) && is_callable($this->notFound)) {
-                call_user_func($this->notFound);
+                return call_user_func($this->notFound);
             }
         }
     }
@@ -243,9 +293,12 @@ class Router implements RouterInterface
         // Loop all routes
         foreach ($routes as $route) {
 
+            $routePattern = $this->hasNamedPattern($route['pattern']);
+            $pattern = ($routePattern == false) ? $route['pattern'] : $routePattern;
+
             // we have a match!
             if (preg_match_all(
-                '#^' . $route['pattern'] . '$#',
+                '#^' . $pattern . '$#',
                 $uri,
                 $matches,
                 PREG_SET_ORDER
@@ -263,9 +316,8 @@ class Router implements RouterInterface
                         1
                     )
                 );
-
                 array_unshift($params, $this);
-
+                //show($params);
                 // call the handling function with the URL
                 $this->handledRoute = call_user_func_array($route['fn'], $params);
 
@@ -273,9 +325,9 @@ class Router implements RouterInterface
 
                 // If we need to quit, then quit
                 if ($quitAfterRun) {
-                    $callback = $this->afterRouter;
+                    $func = $this->afterRouter;
                     // If a route was handled, perform the finish callback (if any)
-                    $callback ($this);
+                    $func($this);
                     exit;
                 }
             }
@@ -283,146 +335,6 @@ class Router implements RouterInterface
 
         // Return the number of routes handled
         return $numHandled;
-    }
-
-    /**
-     * @param $arguments
-     * @return object
-     * @throws \Exception
-     */
-    private function callController($arguments)
-    {
-        $params = array();
-        if (isset($arguments[1])) {
-            $params = $arguments[1];
-        }
-
-        $this->setUpControllerAndMethodName($arguments);
-
-        $file = (CYGNITE_BASE . strtolower(
-                str_replace('\\', DS, "\\" . ucfirst(APPPATH) . $this->namespace)
-            ) . $this->controller . EXT);
-
-        if (!is_readable($file)) {
-            throw new \Exception("Route " . array_pop($arguments) . " not found. ");
-        }
-
-        //include $file;
-        $router = $this;
-        // Get the instance of controller from Cygnite Container
-        // and inject all dependencies into controller dynamically
-        // It's cool. You can write powerful rest api using restful
-        // routing
-        return Application::instance(
-            function ($app) use ($router, $params) {
-                // make and return instance of controller
-                $instance = $app->make($router->controllerWithNS);
-                // inject all properties of controller defined in definition
-                $app->propertyInjection($instance, $router->controllerWithNS);
-                return $instance->{$router->method}($params);
-            }
-        );
-    }
-
-    /**
-     * Set controller and method name here
-     *
-     * @param $arguments
-     */
-    private function setUpControllerAndMethodName($arguments)
-    {
-        $expression = Helper::stringSplit($arguments[0]);
-        $this->controller = Inflector::instance()->classify($expression[0]) . 'Controller';
-        $this->controllerWithNS = "\\" . ucfirst(APPPATH) . $this->namespace . $this->controller;
-        $this->method = Inflector::instance()->toCameCase($expression[1]) . 'Action';
-    }
-
-    protected function setResourceIndex($name, $controller, $action, $options = array())
-    {
-        $me = $this;
-        return $this->match(
-            strtoupper('get'),
-            $name,
-            function () use ($me, $controller, $action) {
-                return $me->callController(array($controller . '.' . $action));
-            }
-        );
-    }
-
-    protected function setResourceNew($name, $controller, $action, $options = array())
-    {
-        $me = $this;
-        return $this->match(
-            strtoupper('get'),
-            $name . '/' . $action,
-            function () use ($me, $controller, $action) {
-                return $me->callController(array($controller . '.' . $action));
-            }
-        );
-    }
-
-    protected function setResourceCreate($name, $controller, $action, $options = array())
-    {
-        $me = $this;
-        return $this->match(
-            strtoupper('post'),
-            $name,
-            function () use ($me, $controller, $action) {
-                return $me->callController(array($controller . '.' . $action));
-            }
-        );
-    }
-
-    protected function setResourceShow($name, $controller, $action, $options = array())
-    {
-        $me = $this;
-        return $this->match(
-            strtoupper('get'),
-            $name . '/(\d+)',
-            function ($router, $id) use ($me, $controller, $action) {
-                return $me->callController(array($controller . '.' . $action, $id));
-            }
-        );
-    }
-
-    protected function setResourceEdit($name, $controller, $action, $options = array())
-    {
-        $me = $this;
-        return $this->match(
-            strtoupper('get'),
-            $name . '/(\d+)/edit',
-            function ($router, $id) use ($me, $controller, $action) {
-                return $me->callController(array($controller . '.' . $action, $id));
-            }
-        );
-    }
-
-    protected function setResourceUpdate($name, $controller, $action, $options = array())
-    {
-        $me = $this;
-        return $this->match(
-            'PUT|PATCH',
-            $name . '/(\d+)/',
-            function ($router, $id) use ($me, $controller, $action) {
-                return $me->callController(array($controller . '.' . $action, $id));
-            }
-        );
-    }
-
-    protected function setResourceDelete($name, $controller, $action, $options = array())
-    {
-        $me = $this;
-        return $this->match(
-            strtoupper('delete'),
-            $name . '/(\d+)/',
-            function ($router, $id) use ($me, $controller, $action) {
-                return $me->callController(array($controller . '.' . $action, $id));
-            }
-        );
-    }
-
-    public function getCalledRouter()
-    {
 
     }
 
@@ -463,7 +375,6 @@ class Router implements RouterInterface
         $uri = '/' . trim($uri, '/');
 
         return $uri;
-
     }
 
     /**
@@ -484,6 +395,28 @@ class Router implements RouterInterface
     }
 
     /**
+     * @param $pattern
+     * @return bool|mixed
+     */
+    private function hasNamedPattern($pattern)
+    {
+        return (Helper::strHas($pattern, '(') !== false) ? $this->replace($pattern) : false;
+    }
+
+    /**
+     * @param $string
+     * @return mixed
+     */
+    private function replace($string)
+    {
+        foreach ($this->patterns as $key => $value) {
+            $string = str_replace($key, $value, $string);
+        }
+
+        return $string;
+    }
+
+    /**
      * Set the 404 handling function
      *
      * @param object $func The function to be executed
@@ -494,29 +427,230 @@ class Router implements RouterInterface
     }
 
     /**
-     * @param $method
-     * @param $arguments
-     * @return mixed
+     * @param          $attributes
+     * @param callable $callback
      */
-    public static function __callStatic($method, $arguments)
+    public function group($attributes, \Closure $callback)
     {
-        if ($method == 'call') {
-            return call_user_func_array(
-                array(new Router(), $method),
-                $arguments
-            );
-        }
+        static::$group = $attributes;
+
+        call_user_func($callback($this));
+
+        static::$group = null;
     }
 
     /**
-     * @param       $method
-     * @param array $arguments
-     * @return $this
+     * @param       $name
+     * @param       $controller
+     * @param       $action
+     * @param array $options
+     * @return bool
      */
-    public function __call($method, $arguments = array())
+    protected function setResourceIndex($name, $controller, $action, $options = array())
     {
-        if ($method == 'call') {
-            return $this->{$method . 'Controller'}($arguments);
+        $me = $this;
+        return $this->match(
+            strtoupper('get'),
+            $name,
+            function () use ($me, $controller, $action) {
+                $args = array($controller . '.' . $action);
+                return $me->callController($args);
+            }
+        );
+    }
+
+    /**
+     * @param $arguments
+     * @return object
+     * @throws \Exception
+     */
+    private function callController($arguments)
+    {
+        $params = array();
+        $this->setUpControllerAndMethodName($arguments);
+
+        // Check if whether user trying to access module
+        if (Helper::strHas($arguments[0], '::')) {
+            $exp = Helper::stringSplit($arguments[0], '::');
+            $this->setModuleConfiguration($exp);
         }
+
+        if (isset($arguments[1])) {
+            $params = $arguments[1];
+        }
+
+        $file = CYGNITE_BASE . str_replace('\\', DS, $this->controllerWithNS) . EXT;
+
+        if (!is_readable($file)) {
+            throw new \Exception("Route " . $this->controllerWithNS . " not found. ");
+        }
+
+        $me = $this;
+        // Get the instance of controller from Cygnite Container
+        // and inject all dependencies into controller dynamically
+        // It's cool. You can write powerful rest api using restful
+        // routing
+        return App::instance(
+            function ($app) use ($me, $params) {
+                // make and return instance of controller
+                $instance = $app->make($me->controllerWithNS);
+                // inject all properties of controller defined in definition
+                $app->propertyInjection($instance, $me->controllerWithNS);
+                return call_user_func_array(array($instance, $me->method), $params);
+            }
+        );
+    }
+
+    /**
+     * Set controller and method name here
+     *
+     * @param $arguments
+     */
+    private function setUpControllerAndMethodName($arguments)
+    {
+        $expression = Helper::stringSplit($arguments[0]);
+
+        $this->controller = Inflector::instance()->classify($expression[0]) . 'Controller';
+        $this->controllerWithNS = "\\" . ucfirst(APPPATH) . $this->namespace . $this->controller;
+        $this->method = Inflector::instance()->toCameCase($expression[1]) . 'Action';
+    }
+
+    private function setModuleConfiguration($args)
+    {
+        $param = Helper::stringSplit($args[1]);
+        $this->controller = Inflector::instance()->classify($param[0]) . 'Controller';
+        $this->namespace = '\\' . ucfirst($this->getModuleDir()) . '\\' . $args[0] . '\\Controllers\\';
+        $this->controllerWithNS = "\\" . ucfirst(APPPATH) . $this->namespace . $this->controller;
+        $this->method = Inflector::instance()->toCameCase($param[1]) . 'Action';
+    }
+
+    public function getModuleDir()
+    {
+        return isset(static::$moduleDir) ? static::$moduleDir : static::MODULE_DIR;
+    }
+
+    /**
+     * @param       $name
+     * @param       $controller
+     * @param       $action
+     * @param array $options
+     * @return bool
+     */
+    protected function setResourceNew($name, $controller, $action, $options = array())
+    {
+        $me = $this;
+        return $this->match(
+            strtoupper('get'),
+            $name . '/' . $action,
+            function () use ($me, $controller, $action) {
+                $args = array($controller . '.' . $action);
+                return $me->callController($args);
+            }
+        );
+    }
+
+    /**
+     * @param       $name
+     * @param       $controller
+     * @param       $action
+     * @param array $options
+     * @return bool
+     */
+    protected function setResourceCreate($name, $controller, $action, $options = array())
+    {
+        $me = $this;
+        return $this->match(
+            strtoupper('post'),
+            $name,
+            function () use ($me, $controller, $action) {
+                $args = array($controller . '.' . $action);
+                return $me->callController($args);
+            }
+        );
+    }
+
+    /**
+     * @param       $name
+     * @param       $controller
+     * @param       $action
+     * @param array $options
+     * @return bool
+     */
+    protected function setResourceShow($name, $controller, $action, $options = array())
+    {
+        $me = $this;
+        return $this->match(
+            strtoupper('get'),
+            $name . '/(\d+)',
+            function ($router, $id) use ($me, $controller, $action) {
+                $args = array($controller . '.' . $action, $id);
+                return $me->callController($args);
+            }
+        );
+    }
+
+    /**
+     * @param       $name
+     * @param       $controller
+     * @param       $action
+     * @param array $options
+     * @return bool
+     */
+    protected function setResourceEdit($name, $controller, $action, $options = array())
+    {
+        $me = $this;
+        return $this->match(
+            strtoupper('get'),
+            $name . '/(\d+)/edit',
+            function ($router, $id) use ($me, $controller, $action) {
+                $args = array($controller . '.' . $action, $id);
+                return $me->callController($args);
+            }
+        );
+    }
+
+    /**
+     * @param       $name
+     * @param       $controller
+     * @param       $action
+     * @param array $options
+     * @return bool
+     */
+    protected function setResourceUpdate($name, $controller, $action, $options = array())
+    {
+        $me = $this;
+        return $this->match(
+            'PUT|PATCH',
+            $name . '/(\d+)/',
+            function ($router, $id) use ($me, $controller, $action) {
+                $args = array($controller . '.' . $action, $id);
+                return $me->callController($args);
+            }
+        );
+    }
+
+    /**
+     * @param       $name
+     * @param       $controller
+     * @param       $action
+     * @param array $options
+     * @return bool
+     */
+    protected function setResourceDelete($name, $controller, $action, $options = array())
+    {
+        $me = $this;
+        return $this->match(
+            strtoupper('delete'),
+            $name . '/(\d+)/',
+            function ($router, $id) use ($me, $controller, $action) {
+                $args = array($controller . '.' . $action, $id);
+                return $me->callController($args);
+            }
+        );
+    }
+
+    private function getCalledRouter()
+    {
+
     }
 }
