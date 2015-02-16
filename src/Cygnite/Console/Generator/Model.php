@@ -102,6 +102,7 @@ class Model
         );
 
         $primaryKey = $this->command->getPrimaryKey();
+        $content = str_replace('{%Apps%}', ucfirst(APP_PATH), $content);
         $content = str_replace('{%primaryKey%}', $primaryKey, $content);
         $content = str_replace('%modelName%', $this->inflector->tabilize($this->command->model), $content);
         $content = str_replace('%databaseName%', $this->command->database, $content);

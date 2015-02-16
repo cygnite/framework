@@ -22,7 +22,6 @@ use Cygnite\Helpers\Inflector;
 use Cygnite\Base\Dispatcher;
 use Cygnite\Helpers\Config;
 use Cygnite\Common\UrlManager\Url;
-use Apps\Configs\Definitions\DefinitionManager;
 use Cygnite\DependencyInjection\Container;
 
 if (!defined('CF_SYSTEM')) {
@@ -38,7 +37,7 @@ class Application extends Container
 
     public $aliases = array();
 
-    public $namespace = '\\Apps\\Controllers\\';
+    public $namespace = '\\Controllers\\';
     
     private static $version = 'v1.2';
 
@@ -221,7 +220,7 @@ class Application extends Container
         $dir = ($dir !== '') ? $dir.'\\' : '';
 
         return
-            $this->namespace.$dir.Inflector::instance()->classify(
+            "\\".ucfirst(APPPATH).$this->namespace.$dir.Inflector::instance()->classify(
                 $class
             ).'Controller';
     }
@@ -243,7 +242,8 @@ class Application extends Container
     public function getDefinition()
     {
         $this['config.definition'] = function() {
-            return new DefinitionManager;
+            $class = "\\".ucfirst(APPPATH)."\\Configs\\Definitions\\DefinitionManager";
+            return new $class;
         };
 
         return $this['config.definition'];

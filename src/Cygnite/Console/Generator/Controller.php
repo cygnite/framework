@@ -362,7 +362,7 @@ class Controller
         //fclose($tmp);
 
         $content = $this->replaceControllerName($content);
-
+        $content = str_replace('{%Apps%}', ucfirst(APP_PATH), $content);
         $primaryKey = $this->controllerCommand->getPrimaryKey();
 
         $content = str_replace('{%primaryKey%}', $primaryKey, $content);
@@ -409,7 +409,7 @@ class Controller
 
         $contentAppendWith = '';
         $contentAppendWith = '<?php '.PHP_EOL;
-
+        $formContent = str_replace('{%Apps%}', ucfirst(APP_PATH), $formContent);
         fwrite($writeTmp, $contentAppendWith .$formContent);
         fclose($writeTmp);
 

@@ -48,7 +48,7 @@ class Helper
 
         return $values;
     }
-   
+
     public static function logError($messege, $error_code = "", $line_num = "")
     {
 
@@ -70,14 +70,12 @@ class Helper
         return $d;
     }
 
-    public static function stringSplit($string)
+    public static function stringSplit($string, $needle = '.')
     {
-         $expression = array();
-         $expression = explode('.',$string);
-         return $expression;
+        $expression = array();
+        $expression = explode($needle,$string);
+        return $expression;
     }
-
-
 
     public static function getSingleton()
     {
@@ -92,5 +90,10 @@ class Helper
         echo $output;
         ob_end_flush();
         ob_get_flush();
+    }
+
+    public static function strHas($haystack, $needle)
+    {
+        return strpos($haystack, $needle) !== false;
     }
 }

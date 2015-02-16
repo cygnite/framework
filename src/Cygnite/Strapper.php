@@ -126,6 +126,6 @@ class Strapper
             return false;
         }
 
-        Application::import('apps.routes');
+        Application::import(APPPATH.'.routes');
     }
 }
