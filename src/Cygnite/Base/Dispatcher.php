@@ -65,14 +65,16 @@ class Dispatcher
      */
     public function matches($routes, $quitAfterRun = false)
     {
-        //$uri = $this->router->getCurrentUri();
         $uri = str_replace('/index.php', '', rtrim($this->router->getCurrentUri()));
         //Counter to keep track of the number of routes we've handled
         $numHandled = 0;
         foreach ($routes as $route => $val) {
 
+            $routePattern = $this->router->hasNamedPattern($route);
+            $pattern = ($routePattern == false) ? $route : $routePattern;
+
             // we have a match!
-            if (preg_match_all('#^' . $route . '$#', $uri, $matches, PREG_SET_ORDER)) {
+            if (preg_match_all('#^' . $pattern . '$#', $uri, $matches, PREG_SET_ORDER)) {
 
                 //Extract the matched URL false seters (and only the false seters)
                 $params = array_map(
@@ -103,7 +105,6 @@ class Dispatcher
 
         }
     }
-
     /**
      * Run user quest and call controller
      *
