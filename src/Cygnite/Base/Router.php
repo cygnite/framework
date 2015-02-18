@@ -1,4 +1,12 @@
 <?php
+/*
+ * This file is part of the Cygnite package.
+ *
+ * (c) Sanjoy Dey <dey.sanjoy0@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 namespace Cygnite\Base;
 
 use Exception;
@@ -7,6 +15,12 @@ use ErrorException;
 use Cygnite\Foundation\Application as App;
 use Cygnite\Helpers\Inflector;
 use Cygnite\Helpers\Helper;
+
+/*
+ * Cygnite Router
+ *
+ * @author Sanjoy Dey <dey.sanjoy0@gmail.com>
+ */
 
 if (!defined('CF_SYSTEM')) {
     exit('No External script access allowed');
@@ -32,13 +46,17 @@ class Router implements RouterInterface
      * @var array
      */
     public $patterns = array(
-        '(:num)' => '([0-9]+)',
-        '(:digit)' => '(\d+)',
-        '(:name)' => '(\w+)',
-        '(:any)' => '([a-zA-Z0-9\.\-_%]+)',
-        '(:all)' => '(.*)',
-        '(:module)' => '([a-zA-Z0-9_-]+)',
-        '(:namespace)' => '([a-zA-Z0-9_-]+)'
+        '{:num}' => '([0-9]+)',
+        '{:digit}' => '(\d+)',
+        '{:name}' => '(\w+)',
+        '{:any}' => '([a-zA-Z0-9\.\-_%]+)',
+        '{:all}' => '(.*)',
+        '{:module}' => '([a-zA-Z0-9_-]+)',
+        '{:namespace}' => '([a-zA-Z0-9_-]+)',
+        '{:year}' => '\d{4}',
+        '{:month}' => '\d{2}',
+        '{:day}' => '\d{2}(/[a-z0-9_-]+)'
+
     );
     protected $resourceRoutes = array('index', 'new', 'create', 'show', 'edit', 'update', 'delete');
     /**
@@ -181,6 +199,7 @@ class Router implements RouterInterface
      *
      * @param string $pattern A route pattern such as /about/system
      * @param object $func    The handling function to be executed
+     * @return bool
      */
     public function put($pattern, $func)
     {
@@ -398,9 +417,9 @@ class Router implements RouterInterface
      * @param $pattern
      * @return bool|mixed
      */
-    private function hasNamedPattern($pattern)
+    public function hasNamedPattern($pattern)
     {
-        return (Helper::strHas($pattern, '(') !== false) ? $this->replace($pattern) : false;
+        return (Helper::strHas($pattern, '{:') !== false) ? $this->replace($pattern) : false;
     }
 
     /**
@@ -496,7 +515,7 @@ class Router implements RouterInterface
                 $instance = $app->make($me->controllerWithNS);
                 // inject all properties of controller defined in definition
                 $app->propertyInjection($instance, $me->controllerWithNS);
-                return call_user_func_array(array($instance, $me->method), $params);
+                return call_user_func_array(array($instance, $me->method), array($params));
             }
         );
     }
@@ -509,7 +528,6 @@ class Router implements RouterInterface
     private function setUpControllerAndMethodName($arguments)
     {
         $expression = Helper::stringSplit($arguments[0]);
-
         $this->controller = Inflector::instance()->classify($expression[0]) . 'Controller';
         $this->controllerWithNS = "\\" . ucfirst(APPPATH) . $this->namespace . $this->controller;
         $this->method = Inflector::instance()->toCameCase($expression[1]) . 'Action';
@@ -538,15 +556,7 @@ class Router implements RouterInterface
      */
     protected function setResourceNew($name, $controller, $action, $options = array())
     {
-        $me = $this;
-        return $this->match(
-            strtoupper('get'),
-            $name . '/' . $action,
-            function () use ($me, $controller, $action) {
-                $args = array($controller . '.' . $action);
-                return $me->callController($args);
-            }
-        );
+        return $this->mapResource('get', $name . '/' . $action, $controller, $action);
     }
 
     /**
@@ -558,15 +568,7 @@ class Router implements RouterInterface
      */
     protected function setResourceCreate($name, $controller, $action, $options = array())
     {
-        $me = $this;
-        return $this->match(
-            strtoupper('post'),
-            $name,
-            function () use ($me, $controller, $action) {
-                $args = array($controller . '.' . $action);
-                return $me->callController($args);
-            }
-        );
+        return $this->mapResource('post', $name, $controller, $action);
     }
 
     /**
@@ -578,15 +580,7 @@ class Router implements RouterInterface
      */
     protected function setResourceShow($name, $controller, $action, $options = array())
     {
-        $me = $this;
-        return $this->match(
-            strtoupper('get'),
-            $name . '/(\d+)',
-            function ($router, $id) use ($me, $controller, $action) {
-                $args = array($controller . '.' . $action, $id);
-                return $me->callController($args);
-            }
-        );
+        return $this->mapResource('get', $name . '/(\d+)', $controller, $action, true);
     }
 
     /**
@@ -598,15 +592,7 @@ class Router implements RouterInterface
      */
     protected function setResourceEdit($name, $controller, $action, $options = array())
     {
-        $me = $this;
-        return $this->match(
-            strtoupper('get'),
-            $name . '/(\d+)/edit',
-            function ($router, $id) use ($me, $controller, $action) {
-                $args = array($controller . '.' . $action, $id);
-                return $me->callController($args);
-            }
-        );
+        return $this->mapResource('get', $name . '/(\d+)/edit', $controller, $action, true);
     }
 
     /**
@@ -618,15 +604,7 @@ class Router implements RouterInterface
      */
     protected function setResourceUpdate($name, $controller, $action, $options = array())
     {
-        $me = $this;
-        return $this->match(
-            'PUT|PATCH',
-            $name . '/(\d+)/',
-            function ($router, $id) use ($me, $controller, $action) {
-                $args = array($controller . '.' . $action, $id);
-                return $me->callController($args);
-            }
-        );
+        return $this->mapResource('PUT|PATCH', $name . '/(\d+)/', $controller, $action, true);
     }
 
     /**
@@ -638,12 +616,29 @@ class Router implements RouterInterface
      */
     protected function setResourceDelete($name, $controller, $action, $options = array())
     {
+        return $this->mapResource('delete', $name . '/(\d+)/', $controller, $action, true);
+    }
+
+    /**
+     * @param      $method
+     * @param      $pattern
+     * @param      $controller
+     * @param      $action
+     * @param bool $type
+     * @return bool
+     */
+    private function mapResource($method, $pattern, $controller, $action, $type = false)
+    {
         $me = $this;
         return $this->match(
-            strtoupper('delete'),
-            $name . '/(\d+)/',
-            function ($router, $id) use ($me, $controller, $action) {
-                $args = array($controller . '.' . $action, $id);
+            strtoupper($method),
+            $pattern,
+            function ($router, $id) use ($me, $controller, $action, $type) {
+
+                $args = array($controller . '.' . $action);
+                if ($type) {
+                    $args = array($controller . '.' . $action, $id);// delete, update
+                }
                 return $me->callController($args);
             }
         );

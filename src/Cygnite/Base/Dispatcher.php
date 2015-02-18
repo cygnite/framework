@@ -1,4 +1,12 @@
 <?php
+/*
+ * This file is part of the Cygnite package.
+ *
+ * (c) Sanjoy Dey <dey.sanjoy0@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 namespace Cygnite\Base;
 
 use Exception;
@@ -8,33 +16,12 @@ use Cygnite\Helpers\Helper;
 use Cygnite\Helpers\Config;
 
 /**
- *  Cygnite Framework
+ * Cygnite Dispatcher
  *
- *  An open source application development framework for PHP 5.3 or newer
+ * Handle all user request and send response to the user request.
  *
- *   License
- *
- *   This source file is subject to the MIT license that is bundled
- *   with this package in the file LICENSE.txt.
- *   http://www.cygniteframework.com/license.txt
- *   If you did not receive a copy of the license and are unable to
- *   obtain it through the world-wide-web, please send an email
- *   to sanjoy@hotmail.com so I can send you a copy immediately.
- *
- * @Package            :  Packages
- * @SubPackages        :  Base
- * @Filename           :  Dispatcher
- * @Description        :  Handle all user request and dispatch it.
- * @Copyright          :  Copyright (c) 2013 - 2014,
- * @Link               :  http://www.cygniteframework.com
- * @Since              :  Version 1.0
- *
- *
+ * @author Sanjoy Dey <dey.sanjoy0@gmail.com>
  */
-/**
- * @author   Sanjoy Dey
- */
-
 class Dispatcher
 {
     /**
@@ -78,14 +65,16 @@ class Dispatcher
      */
     public function matches($routes, $quitAfterRun = false)
     {
-        //$uri = $this->router->getCurrentUri();
         $uri = str_replace('/index.php', '', rtrim($this->router->getCurrentUri()));
         //Counter to keep track of the number of routes we've handled
         $numHandled = 0;
         foreach ($routes as $route => $val) {
 
+            $routePattern = $this->router->hasNamedPattern($route);
+            $pattern = ($routePattern == false) ? $route : $routePattern;
+
             // we have a match!
-            if (preg_match_all('#^' . $route . '$#', $uri, $matches, PREG_SET_ORDER)) {
+            if (preg_match_all('#^' . $pattern . '$#', $uri, $matches, PREG_SET_ORDER)) {
 
                 //Extract the matched URL false seters (and only the false seters)
                 $params = array_map(
@@ -116,7 +105,6 @@ class Dispatcher
 
         }
     }
-
     /**
      * Run user quest and call controller
      *
