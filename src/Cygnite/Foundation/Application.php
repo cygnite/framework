@@ -1,5 +1,4 @@
 <?php
-
 /**
  * This file is part of the Cygnite package.
  *
@@ -12,17 +11,14 @@
 namespace Cygnite\Foundation;
 
 use Closure;
-use Exception;
-use ReflectionClass;
-use Cygnite\Strapper;
-use Cygnite\Reflection;
-use ReflectionProperty;
-use Cygnite\Base\Router;
-use Cygnite\Helpers\Inflector;
 use Cygnite\Base\Dispatcher;
-use Cygnite\Helpers\Config;
+use Cygnite\Base\Router;
 use Cygnite\Common\UrlManager\Url;
 use Cygnite\DependencyInjection\Container;
+use Cygnite\Helpers\Config;
+use Cygnite\Helpers\Inflector;
+use Cygnite\Strapper;
+use Exception;
 
 if (!defined('CF_SYSTEM')) {
     exit('External script access not allowed');
@@ -30,16 +26,11 @@ if (!defined('CF_SYSTEM')) {
 
 class Application extends Container
 {
-
-    private static $instance;
-
     protected static $loader;
-
+    private static $instance;
+    private static $version = 'v1.2.6';
     public $aliases = array();
-
     public $namespace = '\\Controllers\\';
-    
-    private static $version = 'v1.2';
 
     /**
      * ---------------------------------------------------
@@ -54,10 +45,10 @@ class Application extends Container
      * @return \Cygnite\Foundation\Application
      */
 
-    protected function __construct(Inflector $inflection=null,Autoloader $loader=null)
+    protected function __construct(Inflector $inflection = null, Autoloader $loader = null)
     {
-        $inflection = $inflection ?: new Inflector();
-        self::$loader = $loader ? :new AutoLoader($inflection);
+        $inflection = $inflection ? : new Inflector();
+        self::$loader = $loader ? : new AutoLoader($inflection);
     }
 
     /**
@@ -66,6 +57,7 @@ class Application extends Container
      * ----------------------------------------------------
      *
      * Returns a Instance for a Closure Callback and general calls.
+     *
      * @param Closure $callback
      * @return Application
      */
@@ -73,8 +65,9 @@ class Application extends Container
     {
         if (!is_null($callback) && $callback instanceof Closure) {
 
-            if(static::$instance instanceof Application)
+            if (static::$instance instanceof Application) {
                 return $callback(static::$instance);
+            }
 
         } elseif (static::$instance instanceof Application) {
             return static::$instance;
@@ -95,38 +88,19 @@ class Application extends Container
      */
     public static function getInstance(Inflector $inflection = null, Autoloader $loader = null)
     {
-        if(static::$instance instanceof Application)
+        if (static::$instance instanceof Application) {
             return static::$instance;
+        }
 
-        $inflection = $inflection ?:new Inflector();
-        $loader = $loader ?:new AutoLoader($inflection);
+        $inflection = $inflection ? : new Inflector();
+        $loader = $loader ? : new AutoLoader($inflection);
 
-        return static::$instance = new Application($inflection,$loader);
+        return static::$instance = new Application($inflection, $loader);
     }
-
-    /**
-     * set all your configurations
-     * @param $configurations
-     * @return $this
-     */
-    public function setConfiguration($configurations)
-    {
-        $this->setValue('config', $configurations['app'])
-             ->setValue('event', $configurations['event'])
-             ->setValue('boot', new Strapper)
-             ->setValue('router', new Router);
-
-        return $this;
-    }
-
-    public function getAliases($key)
-    {
-        return isset($this->aliases) ? $this->aliases : null;
-    }
-
 
     /**
      * Get framework version
+     *
      * @access public
      */
     public static function version()
@@ -140,62 +114,44 @@ class Application extends Container
      */
     public static function poweredBy()
     {
-        return 'Cygnite Framework - '.static::$version.' Powered by -
-            Sanjoy Productions (<a href="http://www.cygniteframework.com">
+        return 'Cygnite Framework - ' . static::$version . ' (<a href="http://www.cygniteframework.com">
             http://www.cygniteframework.com
             </a>)';
     }
 
-    public function getDefaultConnection()
-    {
-
-    }
-
-    /**
-     * Start booting and handler all user request
-     * @return Dispatcher
-    */
-    public function boot()
-    {
-        Url::instance($this['router']);
-        //Set up configurations for your awesome application
-        Config::set('config.items', $this['config']);
-        //Set URL base path.
-        Url::setBase(
-        (Config::get('global.config', 'base_path') == '') ?
-            $this['router']->getBaseUrl()  :
-            Config::get('global.config', 'base_path')
-        );
-
-        //initialize framework
-        $this['boot']->initialize();
-        $this['boot']->terminate();
-
-      /**-------------------------------------------------------
-       * Booting completed. Lets handle user request!!
-       * Lets Go !!
-       * -------------------------------------------------------
-       */
-        return new Dispatcher($this['router']);
-    }
-
-    /**
-     * @param $directories
-     * @return mixed
-     */
-    public function registerDirectories($directories)
-    {
-        return self::$loader->registerDirectories($directories);
-}
-
     /**
      * Import files using import function
+     *
      * @param $path
      * @return bool
      */
     public static function import($path)
     {
         return self::$loader->import($path);
+    }
+
+    public static function service(Closure $callback)
+    {
+        if (!$callback instanceof Closure) {
+            throw new Exception("Application::service() accept only valid closure callback");
+        }
+
+        return $callback(static::$instance);
+    }
+
+    /**
+     * set all your configurations
+     *
+     * @param $config
+     * @return $this
+     */
+    public function setConfiguration($config)
+    {
+        $this->setValue('config', $config['app'])
+            ->setValue('boot', new Strapper)
+            ->setValue('router', new Router);
+
+        return $this;
     }
 
     /**
@@ -210,19 +166,42 @@ class Application extends Container
         return $this;
     }
 
+    public function getAliases($key)
+    {
+        return isset($this->aliases) ? $this->aliases : null;
+    }
+
+    public function setServices()
+    {
+        $this['service.provider'] = function () {
+            return include APPPATH . DS . 'configs' . DS . 'services' . EXT;
+        };
+
+        return $this;
+    }
+
+    /**
+     * @param $directories
+     * @return mixed
+     */
+    public function registerDirectories($directories)
+    {
+        return self::$loader->registerDirectories($directories);
+    }
+
     /**
      * @param      $class
-     * @param  $dir
+     * @param      $dir
      * @return string
      */
     public function getController($class, $dir = '')
     {
-        $dir = ($dir !== '') ? $dir.'\\' : '';
+        $dir = ($dir !== '') ? $dir . '\\' : '';
 
         return
-            "\\".ucfirst(APPPATH).$this->namespace.$dir.Inflector::instance()->classify(
+            "\\" . ucfirst(APPPATH) . $this->namespace . $dir . Inflector::instance()->classify(
                 $class
-            ).'Controller';
+            ) . 'Controller';
     }
 
     /**
@@ -233,7 +212,7 @@ class Application extends Container
     {
         return Inflector::instance()->toCameCase(
             (!isset($actionName)) ? 'index' : $actionName
-        ).'Action';
+        ) . 'Action';
     }
 
     /**
@@ -241,11 +220,85 @@ class Application extends Container
      */
     public function getDefinition()
     {
-        $this['config.definition'] = function() {
-            $class = "\\".ucfirst(APPPATH)."\\Configs\\Definitions\\DefinitionManager";
+        $this['config.definition'] = function () {
+            $class = "\\" . ucfirst(APPPATH) . "\Configs\Definitions\DefinitionManager";
             return new $class;
         };
 
         return $this['config.definition'];
+    }
+
+    public function registerServiceProvider($services = array())
+    {
+        foreach ($services as $key => $serviceProvider) {
+            $this->createProvider('\\' . $serviceProvider)->register($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Create a new provider instance.
+     *
+     * @param             $provider
+     * @return mixed
+     */
+    public function createProvider($provider)
+    {
+        return new $provider($this);
+    }
+
+    /**
+     * @param $key
+     * @param $class
+     */
+    public function setServiceController($key, $class)
+    {
+        $this[$key] = function () use ($class) {
+            $serviceController = $this->singleton('\Cygnite\Mvc\Controller\ServiceController');
+            $instance = new $class($serviceController, $this);
+            $serviceController->setController($class);
+
+            return $instance;
+        };
+    }
+
+    /**
+     * Start booting and handler all user request
+     *
+     * @return Dispatcher
+     */
+    public function boot()
+    {
+        Url::instance($this['router']);
+        //Set up configurations for your awesome application
+        Config::set('config.items', $this['config']);
+        //Set URL base path.
+        Url::setBase(
+            (Config::get('global.config', 'base_path') == '') ?
+                $this['router']->getBaseUrl() :
+                Config::get('global.config', 'base_path')
+        );
+
+        $this['service.provider']();
+        //initialize framework
+        $this['boot']->initialize($this);
+        $this['boot']->terminate();
+
+        return $this;
+    }
+
+    /**
+     * @return Dispatcher
+     */
+    public function run()
+    {
+        /**-------------------------------------------------------
+         * Booting completed. Lets handle user request!!
+         * Lets Go !!
+         * -------------------------------------------------------
+         */
+        $dispatcher = new Dispatcher($this['router']);
+        return $dispatcher->run();
     }
 }

@@ -11,14 +11,12 @@
 
 namespace Cygnite\Mvc\Controller;
 
+use Exception;
+use Cygnite\Base\Event;
 use Cygnite\Common\Encrypt;
 use Cygnite\Common\SessionManager\Session;
-use Cygnite\Common\SessionManager\Flash\FlashMessage;
-use Cygnite\DependencyInjection\Container;
+use Cygnite\Foundation\Application as App;
 use Cygnite\Helpers\Inflector;
-use Exception;
-use Cygnite\Foundation\Application;
-use Cygnite\Base\Event;
 use Cygnite\Mvc\View\CView;
 use Cygnite\Mvc\View\Template;
 
@@ -32,6 +30,8 @@ use Cygnite\Mvc\View\Template;
 abstract class AbstractBaseController extends CView
 {
     private $validFlashMessage = array('setFlash', 'hasFlash', 'getFlash', 'hasError');
+
+    private $class;
 
     /**
      * Constructor function
@@ -50,26 +50,38 @@ abstract class AbstractBaseController extends CView
 
     }
 
-    public function getContainer()
+    protected function getContainer()
     {
-        return new Container();
+        return App::instance();
     }
 
     /**
-     * Magic Method for handling errors.
+     * Magic Method for handling errors and undefined methods.
      *
+     * @param $method
+     * @param $arguments
+     * @return AbstractBaseController|mixed|void
+     * @throws \Exception
      */
     public function __call($method, $arguments)
     {
         if (in_array($method, $this->validFlashMessage)) {
-            $flashSession = $this->get('cygnite.common.session-manager.flash.flash-message');
-
-            $return = call_user_func_array(array($flashSession, $method), $arguments);
-
-            return ($method == 'setFlash') ? $this : $return;
+            return $this->setFlashMessage($method, $arguments);
         }
 
         throw new Exception("Undefined method [$method] called by ".get_class($this).' Controller');
+    }
+
+    /**
+     * @param $method
+     * @param $arguments
+     * @return AbstractBaseController|mixed
+     */
+    private function setFlashMessage($method, $arguments)
+    {
+        $flashSession = $this->get('cygnite.common.session-manager.flash.flash-message');
+
+        return ($method == 'setFlash') ? $this : $this->_call($flashSession, $method, $arguments);
     }
 
     /**
@@ -96,6 +108,11 @@ abstract class AbstractBaseController extends CView
         return $container->resolve($class);
     }
 
+    protected function _call($instance, $instance, $arguments = array())
+    {
+        return call_user_func_array(array($instance, $instance), $arguments);
+    }
+
     /**
     <code>
      * // Call the "index" method on the "user" controller
@@ -107,7 +124,6 @@ abstract class AbstractBaseController extends CView
      */
     public function call($resource, $arguments = array())
     {
-        //$expression = explode('@', $resource);
         list($name, $method) = explode('@', $resource);
 
         $method = $method.'Action';
@@ -116,6 +132,22 @@ abstract class AbstractBaseController extends CView
         $namespace = str_replace(end($class), '', $class);
         $class = '\\'.ucfirst(APPPATH).'\\'.implode('\\', $namespace).$className;
 
-        return call_user_func_array(array(new $class, $method), $arguments);
+        return $this->_call(new $class, $method, $arguments);
+    }
+
+    /**
+     * @param $name
+     */
+    public function setController($name)
+    {
+        $this->class = $name;
+}
+
+    /**
+     * @return string
+     */
+    public function getController()
+    {
+        return isset($this->class) ? $this->class : get_called_class();
     }
 }

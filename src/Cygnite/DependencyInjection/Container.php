@@ -1,14 +1,14 @@
 <?php
 namespace Cygnite\DependencyInjection;
 
-use Closure;
-use Exception;
 use ArrayAccess;
-use ReflectionClass;
-use Cygnite\Reflection;
-use InvalidArgumentException;
-use Cygnite\Helpers\Inflector;
+use Closure;
 use Cygnite\Foundation\Application;
+use Cygnite\Helpers\Inflector;
+use Cygnite\Reflection;
+use Exception;
+use InvalidArgumentException;
+use ReflectionClass;
 
 /**
  * Class Container
@@ -31,7 +31,6 @@ class Container extends DependencyExtension implements ContainerInterface, Array
     private $services;
 
 
-
     /**
      * Get a data by key
      *
@@ -51,7 +50,7 @@ class Container extends DependencyExtension implements ContainerInterface, Array
 
         //return $this->storage[$key];
         $return = $set &&
-            is_callable($this->storage[$key]) ?
+        is_callable($this->storage[$key]) ?
             $this->storage[$key]($this) :
             $this->storage[$key];
 
@@ -65,9 +64,9 @@ class Container extends DependencyExtension implements ContainerInterface, Array
      * @param mixed  The value to set
      * @access public
      */
-    public function __set($key,$value)
+    public function __set($key, $value)
     {
-       $this->storage[$key] = $value;
+        $this->storage[$key] = $value;
     }
 
     /**
@@ -198,7 +197,7 @@ class Container extends DependencyExtension implements ContainerInterface, Array
      */
     public function offsetGet($offset)
     {
-       return $this->offsetExists($offset) ? $this->storage[$offset] : null;
+        return $this->offsetExists($offset) ? $this->storage[$offset] : null;
     }
 
     public function extend($key, Closure $callable)
@@ -259,13 +258,13 @@ class Container extends DependencyExtension implements ContainerInterface, Array
      */
     public function singleton($class)
     {
-        static $instance;
+        static $instance = [];
 
-        if (is_null($instance)) {
-            $instance = new $class;
+        if (!isset($instance[$class])) {
+            $instance[$class] = new $class;
         }
 
-        return $instance;
+        return $instance[$class];
     }
 
     /**
@@ -298,7 +297,7 @@ class Container extends DependencyExtension implements ContainerInterface, Array
         if (false === $reflection->reflectionClass->isInstantiable()) {
             throw new DependencyException(
                 "Cannot instantiate " .
-                ($reflection->reflectionClass->isInterface()? 'interface' : 'class') . " '$class'"
+                ($reflection->reflectionClass->isInterface() ? 'interface' : 'class') . " '$class'"
             );
         }
 
@@ -306,7 +305,7 @@ class Container extends DependencyExtension implements ContainerInterface, Array
         $constructorArgsCount = '';
         if ($reflection->reflectionClass->hasMethod('__construct')) {
 
-            $constructor = $reflection->reflectionClass->getConstructor() ;
+            $constructor = $reflection->reflectionClass->getConstructor();
             $constructorArgsCount = $constructor->getNumberOfParameters();
             $constructor->setAccessible(true);
         }
@@ -318,6 +317,7 @@ class Container extends DependencyExtension implements ContainerInterface, Array
         } else {
             $dependencies = $constructor->getParameters();
 
+            $constructorArgs = array();
             foreach ($dependencies as $dependency) {
 
                 if (!is_null($dependency->getClass())) {
@@ -385,7 +385,7 @@ class Container extends DependencyExtension implements ContainerInterface, Array
      */
     public function has($key)
     {
-       return $this->offsetExists($key);
+        return $this->offsetExists($key);
     }
 
     /**
