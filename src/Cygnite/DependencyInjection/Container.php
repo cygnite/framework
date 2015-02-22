@@ -317,6 +317,7 @@ class Container extends DependencyExtension implements ContainerInterface, Array
         } else {
             $dependencies = $constructor->getParameters();
 
+            $constructorArgs = array();
             foreach ($dependencies as $dependency) {
 
                 if (!is_null($dependency->getClass())) {
