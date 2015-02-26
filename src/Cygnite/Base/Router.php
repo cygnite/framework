@@ -84,6 +84,8 @@ class Router implements RouterInterface
     private $method;
     private $handledRoute;
     private $afterRouter;
+    // route base path 
+    private $routeBasePath = '';
 
     /**
      * @param $method
@@ -107,7 +109,7 @@ class Router implements RouterInterface
      */
     public function before($methods, $pattern, $func)
     {
-        $pattern = '/' . trim($pattern, '/');
+        $pattern = $this->setBaseRoute($pattern);
 
         foreach (explode('|', $methods) as $method) {
             $this->before[$method][] = array(
@@ -115,7 +117,17 @@ class Router implements RouterInterface
                 'fn' => $func
             );
         }
+    }
 
+    /**
+     * @param $pattern
+     * @return string
+     */
+    private function setBaseRoute($pattern)
+    {
+        $pattern = $this->routeBasePath . '/' . trim($pattern, '/');
+
+        return $this->routeBasePath ? rtrim($pattern, '/') : $pattern;
     }
 
     public function setModuleDir($name)
@@ -157,8 +169,7 @@ class Router implements RouterInterface
      */
     public function match($methods, $pattern, $func)
     {
-
-        $pattern = '/' . trim($pattern, '/');
+        $pattern = $this->setBaseRoute($pattern);
 
         foreach (explode('|', $methods) as $method) {
             $this->routes[$method][] = array(
@@ -167,7 +178,7 @@ class Router implements RouterInterface
             );
         }
 
-        return true;
+        return $this;
     }
 
     /**
@@ -207,6 +218,17 @@ class Router implements RouterInterface
     }
 
     /**
+     * Shorthand for route accessed using patch
+     * @param $pattern
+     * @param $func
+     * @return bool
+     */
+    public function patch($pattern, $func)
+    {
+        return $this->match(strtoupper(__FUNCTION__), $pattern, $func);
+    }
+
+    /**
      * Shorthand for a route accessed using OPTIONS
      *
      * @param string $pattern A route pattern such as /about/system
@@ -225,7 +247,7 @@ class Router implements RouterInterface
      */
     public function any($pattern, $func)
     {
-        return $this->match('GET|POST|PUT|DELETE', $pattern, $func);
+        return $this->match('GET|POST|PUT|PATCH|DELETE', $pattern, $func);
     }
 
     /**
@@ -243,6 +265,64 @@ class Router implements RouterInterface
             $this->{'setResource' . ucfirst($action)}($name, $controller, $action);
         }
         return $this;
+    }
+
+    /**
+     * Customize the routing pattern using where
+     *
+     * @param $key
+     * @param $pattern
+     * @return $this
+     */
+    public function where($key, $pattern)
+    {
+        return $this->setPattern($key, $pattern);
+    }
+
+    /**
+     * @param $key
+     * @param $pattern
+     * @return $this
+     */
+    private function setPattern($key, $pattern)
+    {
+        $this->patterns[$key] = $pattern;
+
+        return $this;
+    }
+
+    /**
+     * @param $key
+     * @return string
+     */
+    public function getPattern($key)
+    {
+        return isset($this->patterns[$key]) ? $this->patterns[$key] : '';
+    }
+
+    /**
+     * Allow you to apply nested sub routing.
+     *
+     * @param          $groupRoute
+     * @param callable $callback
+     */
+    public function group($groupRoute, \Closure $callback)
+    {
+        // Track current base path
+        $curBaseRoute = $this->routeBasePath;
+        // Build new route base path string
+        $this->routeBasePath .= $groupRoute;
+
+        $me = $this;
+
+        // Call the Closure callback
+        call_user_func(function() use($callback, $me)
+        {
+            return $callback($me);
+        });
+
+        // Restore original route base path
+        $this->routeBasePath = $curBaseRoute;
     }
 
     /**
@@ -446,19 +526,6 @@ class Router implements RouterInterface
     }
 
     /**
-     * @param          $attributes
-     * @param callable $callback
-     */
-    public function group($attributes, \Closure $callback)
-    {
-        static::$group = $attributes;
-
-        call_user_func($callback($this));
-
-        static::$group = null;
-    }
-
-    /**
      * @param       $name
      * @param       $controller
      * @param       $action
@@ -528,23 +595,34 @@ class Router implements RouterInterface
     private function setUpControllerAndMethodName($arguments)
     {
         $expression = Helper::stringSplit($arguments[0]);
-        $this->controller = Inflector::instance()->classify($expression[0]) . 'Controller';
-        $this->controllerWithNS = "\\" . ucfirst(APPPATH) . $this->namespace . $this->controller;
-        $this->method = Inflector::instance()->toCameCase($expression[1]) . 'Action';
+        $this->setControllerConfig($arguments, $expression);
     }
 
     private function setModuleConfiguration($args)
     {
         $param = Helper::stringSplit($args[1]);
-        $this->controller = Inflector::instance()->classify($param[0]) . 'Controller';
-        $this->namespace = '\\' . ucfirst($this->getModuleDir()) . '\\' . $args[0] . '\\Controllers\\';
-        $this->controllerWithNS = "\\" . ucfirst(APPPATH) . $this->namespace . $this->controller;
-        $this->method = Inflector::instance()->toCameCase($param[1]) . 'Action';
+        $this->setControllerConfig($args, $param, true);
     }
 
     public function getModuleDir()
     {
         return isset(static::$moduleDir) ? static::$moduleDir : static::MODULE_DIR;
+    }
+
+    /**
+     * @param      $args
+     * @param      $param
+     * @param bool $module
+     */
+    private function setControllerConfig($args, $param, $module = false)
+    {
+        $this->controller = Inflector::instance()->classify($param[0]) . 'Controller';
+
+        if ($module) {
+            $this->namespace = '\\' . ucfirst($this->getModuleDir()) . '\\' . $args[0] . '\\Controllers\\';
+        }
+        $this->controllerWithNS = "\\" . ucfirst(APPPATH) . $this->namespace . $this->controller;
+        $this->method = Inflector::instance()->toCameCase($param[1]) . 'Action';
     }
 
     /**
