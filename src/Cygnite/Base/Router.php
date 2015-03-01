@@ -84,8 +84,9 @@ class Router implements RouterInterface
     private $method;
     private $handledRoute;
     private $afterRouter;
-    // route base path 
+    // route base path
     private $routeBasePath = '';
+    private $after = array();
 
     /**
      * @param $method
@@ -113,6 +114,21 @@ class Router implements RouterInterface
 
         foreach (explode('|', $methods) as $method) {
             $this->before[$method][] = array(
+                'pattern' => $pattern,
+                'fn' => $func
+            );
+        }
+    }
+
+    /**
+     * @param $func
+     */
+    public function after($func)
+    {
+        $pattern = $this->setBaseRoute('{:all}');
+
+        foreach (explode('|', 'GET|POST') as $method) {
+            $this->after[$method][] = array(
                 'pattern' => $pattern,
                 'fn' => $func
             );
@@ -148,18 +164,6 @@ class Router implements RouterInterface
     }
 
     /**
-     * Shorthand for a route accessed using GET
-     *
-     * @param string $pattern A route pattern such as /about/system
-     * @param object $func    The handling function to be executed
-     * @return bool
-     */
-    public function get($pattern, $func)
-    {
-        return $this->match(strtoupper(__FUNCTION__), $pattern, $func);
-    }
-
-    /**
      * Store a route and a handling function to be executed when accessed using one of the specified methods
      *
      * @param string $methods Allowed methods, | delimited
@@ -179,6 +183,18 @@ class Router implements RouterInterface
         }
 
         return $this;
+    }
+
+    /**
+     * Shorthand for a route accessed using GET
+     *
+     * @param string $pattern A route pattern such as /about/system
+     * @param object $func    The handling function to be executed
+     * @return bool
+     */
+    public function get($pattern, $func)
+    {
+        return $this->match(strtoupper(__FUNCTION__), $pattern, $func);
     }
 
     /**
@@ -345,15 +361,10 @@ class Router implements RouterInterface
      */
     public function run($callback = null)
     {
-        //$this->afterRouter = !is_null($callback) ?: $callback;
-        if (!is_null($callback) && $callback instanceof \Closure) {
-            $this->afterRouter = $callback;
-        }
-
-        // Handle all before middle wares
-        if (isset($this->before[$_SERVER['REQUEST_METHOD']])) {
-            $this->handle($this->before[$_SERVER['REQUEST_METHOD']]);
-        }
+        // Check before routing middle ware and trigger
+        $this->beforeRoutingMiddleware();
+        // Set after routing event
+        $this->setAfterRoutingMiddleWare();
 
         // Handle all routes
         $numHandled = 0;
@@ -371,6 +382,21 @@ class Router implements RouterInterface
         }
     }
 
+    private function beforeRoutingMiddleWare()
+    {
+        // Handle all before middle wares
+        if (isset($this->before[$_SERVER['REQUEST_METHOD']])) {
+            $this->handle($this->before[$_SERVER['REQUEST_METHOD']]);
+        }
+    }
+
+    private function setAfterRoutingMiddleWare()
+    {
+        if (isset($this->after[$_SERVER['REQUEST_METHOD']])) {
+            $this->afterRouter = $this->after[$_SERVER['REQUEST_METHOD']];
+        }
+    }
+
     /**
      * Handle a a set of routes: if a match is found, execute the relating handling function
      *
@@ -382,7 +408,6 @@ class Router implements RouterInterface
      */
     private function handle($routes, $quitAfterRun = false)
     {
-
         // Counter to keep track of the number of routes we've handled
         $numHandled = 0;
 
@@ -416,7 +441,6 @@ class Router implements RouterInterface
                     )
                 );
                 array_unshift($params, $this);
-                //show($params);
                 // call the handling function with the URL
                 $this->handledRoute = call_user_func_array($route['fn'], $params);
 
@@ -424,9 +448,8 @@ class Router implements RouterInterface
 
                 // If we need to quit, then quit
                 if ($quitAfterRun) {
-                    $func = $this->afterRouter;
                     // If a route was handled, perform the finish callback (if any)
-                    $func($this);
+                   $this->handle($this->afterRouter);
                     exit;
                 }
             }
@@ -582,7 +605,9 @@ class Router implements RouterInterface
                 $instance = $app->make($me->controllerWithNS);
                 // inject all properties of controller defined in definition
                 $app->propertyInjection($instance, $me->controllerWithNS);
-                return call_user_func_array(array($instance, $me->method), array($params));
+                $args = array();
+                $args = (!is_array($params)) ? array($params) : $params;
+                return call_user_func_array(array($instance, $me->method), $args);
             }
         );
     }

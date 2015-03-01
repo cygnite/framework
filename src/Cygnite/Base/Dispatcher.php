@@ -9,16 +9,15 @@
  */
 namespace Cygnite\Base;
 
-use Exception;
-use Cygnite\Helpers\Inflector;
 use Cygnite\Foundation\Application;
-use Cygnite\Helpers\Helper;
 use Cygnite\Helpers\Config;
+use Cygnite\Helpers\Inflector;
+use Exception;
 
 /**
  * Cygnite Dispatcher
  *
- * Handle all user request and send response to the user request.
+ * Handle all user request and send response to the browser.
  *
  * @author Sanjoy Dey <dey.sanjoy0@gmail.com>
  */
@@ -30,25 +29,24 @@ class Dispatcher
      * @var string
      */
     private static $indexPage = 'index.php';
-
-    private $router;
     /**
      * Define the router variable. default value set as false
      *
      * @var bool
      */
     private static $router_enabled = false;
-
     public $default = array();
-
+    private $router;
     private $routes = array();
 
     /**
-     * @param $route
+     * @param \Cygnite\Foundation\Application $app
+     * @internal param $route
      */
-    public function __construct($route)
+    public function __construct(Application $app)
     {
-        $this->router = $route;
+        $this->app = $app;
+        $this->router = $app['router'];
         $this->default['controller'] = lcfirst(
             Config::get('global.config', 'default_controller')
         );
@@ -56,6 +54,137 @@ class Dispatcher
             Config::get('global.config', 'default_method')
         );
 
+    }
+
+    /**
+     * Validate user request and send response to browser
+     *
+     * @throws \Exception
+     * @return mixed
+     */
+    public function run()
+    {
+        $dispatcher = null;
+        $dispatcher = $this;
+        // If no argument passed or single slash call default controller
+        if ($this->router->getCurrentUri() == '/' ||
+            $this->router->getCurrentUri() == '/' . self::$indexPage
+        ) {
+            if ($this->default['controller'] != '') {
+
+                list($controller, $action) = $this->getControllerAndAction(
+                    $dispatcher->default['controller'],
+                    $dispatcher->default['action']
+                );
+                $response = $this->handleControllerDependencies($controller, $action);
+            }
+        } else {
+
+            $routeConfig = Config::get('config.router');
+            $newUrl = str_replace('/index.php', '', rtrim($this->router->getCurrentUri()));
+            $exp = array_filter(explode('/', $newUrl));
+            $matchedUrl = $this->matches($routeConfig);
+
+            //Check with router configuration if matched then call defined controller
+            if (!is_null($matchedUrl)) {
+
+                $requestUri = preg_split('/[\.\ ]/', $matchedUrl['controllerPath']);
+                // We are matching with static routing if match then dispatch it
+                list($controller, $action) = $this->getControllerAndAction($requestUri[0], $requestUri[1]);
+
+                if (!class_exists($controller)) {
+                    throw new Exception('Unhandled Exception (404 Page)');
+                }
+
+                $params = (array)$matchedUrl['params'];
+                $response = $this->handleControllerDependencies($controller, $action, $params);
+
+            } else {
+                // Process user request provided in url
+                $controller = $method = $param = $instance = null;
+                $controller = $exp[1];
+
+                if (isset($exp[2])) {
+                    $method = $exp[2];
+                }
+
+                $params = array_slice($exp, 2);
+                $controllerDir = '';
+
+                if (is_dir(
+                    CYGNITE_BASE . str_replace(
+                        '\\',
+                        DS,
+                        strtolower(
+                            "\\" . APPPATH . $this->app->namespace . $exp[1]
+                        )
+                    )
+                )
+                ) {
+                    $controllerDir = ucfirst($exp[1]);
+                    $controller = $exp[2];
+                    $method = $exp[3];
+                    $params = array_slice($exp, 3);
+                }
+
+                $action = isset($method) ? $method : 'index';
+                list($controller, $action) = $this->getControllerAndAction($controller, $action, $controllerDir);
+
+                if (!class_exists($controller)) {
+                    throw new Exception('Unhandled Exception (404 Page)');
+                }
+
+                $response = $this->handleControllerDependencies($controller, $action, $params);
+            }
+        }
+
+        return $response;
+    }
+
+    /**
+     * @param        $controller
+     * @param        $action
+     * @param string $controllerDir
+     * @return array
+     */
+    private function getControllerAndAction($controller, $action, $controllerDir = '')
+    {
+        $controller = $this->app->getController($controller, $controllerDir);
+        $action = $this->app->getActionName($action);
+
+        return array($controller, $action);
+    }
+
+    /**
+     * @param       $controller
+     * @param       $action
+     * @param array $params
+     * @return mixed
+     */
+    private function handleControllerDependencies($controller, $action, $params = array())
+    {
+        $instance = $this->app->make($controller);
+        $this->app->propertyInjection($instance, $controller);
+        // Trigger Events for Action
+        $this->triggerActionEvent($instance, $action);
+        $response = call_user_func_array(array($instance, $action), $params);
+        $this->triggerActionEvent($instance, $action, 'after');
+
+        return $response;
+    }
+
+    /**
+     * Trigger controller action events
+     *
+     * @param        $instance
+     * @param        $action
+     * @param string $type
+     */
+    private function triggerActionEvent($instance, $action, $type = 'before')
+    {
+        if (method_exists($instance, $type.ucfirst($action))) {
+            call_user_func(array($instance, $type.ucfirst($action)));
+        }
     }
 
     /**
@@ -76,7 +205,7 @@ class Dispatcher
             // we have a match!
             if (preg_match_all('#^' . $pattern . '$#', $uri, $matches, PREG_SET_ORDER)) {
 
-                //Extract the matched URL false seters (and only the false seters)
+                //Extract the matched URL parameters (and only the parameters)
                 $params = array_map(
                     function ($match) {
                         $var = explode('/', trim($match, '/'));
@@ -88,11 +217,8 @@ class Dispatcher
                     )
                 );
 
-                // call the handling function with the URL
-                //call_user_func_array($route['fn'], $params);
                 $routerArray['controllerPath'] = $val;
                 $routerArray['params'] = $params;
-                // yay!
                 $numHandled++;
 
                 // If we need to quit, then quit
@@ -104,127 +230,6 @@ class Dispatcher
             }
 
         }
-    }
-    /**
-     * Run user quest and call controller
-     *
-     * @return mixed
-     */
-    public function run()
-    {
-        $dispatcher = null;
-        $dispatcher = $this;
-
-        // If no argument passed or single slash call default controller
-        if ($this->router->getCurrentUri() == '/' ||
-            $this->router->getCurrentUri() == '/' . self::$indexPage
-        ) {
-
-            if ($this->default['controller'] != '') {
-
-                //Static route: / (Default Home Page)
-                $response = $this->router->get(
-                    '/',
-                    function () use ($dispatcher) {
-
-                        return Application::instance(
-                            function ($app) use ($dispatcher) {
-                                $controller = $app->getController($dispatcher->default['controller']);
-                                $action = $app->getActionName($dispatcher->default['action']);
-
-                                $instance = $app->make($controller);
-                                $app->propertyInjection($instance, $controller);
-                                return call_user_func_array(array($instance, $action), array());
-                            }
-                        );
-                    }
-                );
-            }
-        } else {
-
-            $routeConfig = Config::get('config.router');
-
-            $newUrl = str_replace('/index.php', '', rtrim($this->router->getCurrentUri()));
-
-            $exp = array_filter(explode('/', $newUrl));
-            $matchedUrl = $this->matches($routeConfig);
-
-            //Check with router configuration if matched then call defined controller
-            if (!is_null($matchedUrl)) {
-
-                $requestUri = preg_split('/[\.\ ]/', $matchedUrl['controllerPath']);
-
-                // We are matching with static routing if match then dispatch it
-                $response = Application::instance(
-                    function ($app) use ($requestUri, $matchedUrl, $dispatcher) {
-                        $controller = $app->getController($requestUri[0]);
-                        $action = $app->getActionName($requestUri[1]);
-
-                        if (!class_exists($controller)) {
-                            throw new Exception('Unhandled Exception (404 Page)');
-                        }
-
-                        $params = (array)$matchedUrl['params'];
-
-                        $instance = $app->make($controller);
-                        $app->propertyInjection($instance, $controller);
-
-                        return call_user_func_array(array($instance, $action), $params);
-                    }
-                );
-
-            } else {
-                // Process user request provided in url
-                $response = Application::instance(
-                    function ($app) use ($exp, $dispatcher) {
-                        $controller = $method = $param = $instance = null;
-                        $controller = $exp[1];
-
-                        if (isset($exp[2])) {
-                            $method = $exp[2];
-                        }
-
-                        $params = array_slice($exp, 2);
-                        $controllerDir = '';
-
-                        if (is_dir(
-                            CYGNITE_BASE . str_replace(
-                                '\\',
-                                DS,
-                                strtolower(
-                                    "\\" . APPPATH . $app->namespace . $exp[1]
-                                )
-                            )
-                        )
-                        ) {
-
-                            $controllerDir = ucfirst($exp[1]);
-                            $controller = $exp[2];
-                            $method = $exp[3];
-                            $params = array_slice($exp, 3);
-                        }
-
-                        $controller = $app->getController($controller, $controllerDir);
-
-                        $action = isset($method) ? $method : 'index';
-                        $action = $app->getActionName($action);
-
-                        if (!class_exists($controller)) {
-                            throw new Exception('Unhandled Exception (404 Page)');
-                        }
-
-                        $instance = $app->make($controller);
-                        $app->propertyInjection($instance, $controller);
-
-                        return call_user_func_array(array($instance, $action), $params);
-                    }
-                );
-            }
-        }
-
-        $this->router->run();
-
-        return $response;
     }
 
 }//End of the class

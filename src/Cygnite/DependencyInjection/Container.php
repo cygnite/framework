@@ -81,6 +81,7 @@ class Container extends DependencyExtension implements ContainerInterface, Array
     {
         return function ($c) use ($callable) {
             static $object;
+            $c = $this;
 
             if (is_null($object)) {
 

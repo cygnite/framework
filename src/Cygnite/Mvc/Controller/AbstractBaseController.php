@@ -69,7 +69,9 @@ abstract class AbstractBaseController extends CView
             return $this->setFlashMessage($method, $arguments);
         }
 
-        throw new Exception("Undefined method [$method] called by ".get_class($this).' Controller');
+        if (!method_exists($this, $method)) {
+            throw new Exception("Undefined method [$method] called by ".get_class($this).' Controller');
+        }
     }
 
     /**
@@ -108,9 +110,9 @@ abstract class AbstractBaseController extends CView
         return $container->resolve($class);
     }
 
-    protected function _call($instance, $instance, $arguments = array())
+    protected function _call($instance, $method, $arguments = array())
     {
-        return call_user_func_array(array($instance, $instance), $arguments);
+        return call_user_func_array(array($instance, $method), $arguments);
     }
 
     /**

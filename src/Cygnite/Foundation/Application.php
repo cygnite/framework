@@ -11,14 +11,14 @@
 namespace Cygnite\Foundation;
 
 use Closure;
-use Cygnite\Base\Dispatcher;
+use Exception;
+use Cygnite\Strapper;
 use Cygnite\Base\Router;
-use Cygnite\Common\UrlManager\Url;
-use Cygnite\DependencyInjection\Container;
 use Cygnite\Helpers\Config;
 use Cygnite\Helpers\Inflector;
-use Cygnite\Strapper;
-use Exception;
+use Cygnite\Base\Dispatcher;
+use Cygnite\Common\UrlManager\Url;
+use Cygnite\DependencyInjection\Container;
 
 if (!defined('CF_SYSTEM')) {
     exit('External script access not allowed');
@@ -298,7 +298,7 @@ class Application extends Container
          * Lets Go !!
          * -------------------------------------------------------
          */
-        $dispatcher = new Dispatcher($this['router']);
+        $dispatcher = new Dispatcher($this);
         return $dispatcher->run();
     }
 }
