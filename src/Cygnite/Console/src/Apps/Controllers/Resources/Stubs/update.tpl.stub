@@ -1,0 +1,11 @@
+	
+    /**
+    * Update specific resource into database
+    *
+    * @param  int  $id
+    */
+    public function updateAction($id)
+    {
+        //
+
+    }

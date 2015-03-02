@@ -72,7 +72,7 @@ class Controller
      * for this class directly
      *
      * @access private
-     * @param $inflect instance of Inflector
+     * @param $inflect instance of Inflection
      * @param $columns array of columns
      * @return void
      */
@@ -453,5 +453,110 @@ class Controller
         if ($method == 'instance') {
             return new self($arguments[0], $arguments[1], $arguments[2], $arguments[3]);
         }
+    }
+
+    /**
+     * @return bool
+     */
+    public function makeController()
+    {
+        // We will check command type before generating controller class
+        // If --resource set then we will generate resource controller
+        if ($this->controllerCommand->getControllerType()) {
+            return $this->makeResourceController();
+}
+
+        // generate basic controller
+        return $this->generateBasicController();
+    }
+
+    /**
+     * @return bool
+     * @throws \Exception
+     */
+    private function generateBasicController()
+    {
+        $controllerClass = $this->applicationDir.DS.'controllers'.DS.$this->controller.'.php';
+
+        if (file_exists($controllerClass)) {
+            throw new \Exception("$controllerClass already exists!!");
+        }
+
+        /*write operation ->*/
+        $filePointer = fopen($controllerClass, "w") or die('Unable to generate controller');
+
+        $controllerContent = $this->getControllerTemplate();
+        $content = $this->getIndexStub();
+        $content = $this->replaceTemplate('{%methods%}', $content, $controllerContent);
+        return $this->writeContentToClass($filePointer, $content);
+    }
+
+    /**
+     * @param $filePointer
+     * @param $content
+     * @return bool
+     */
+    private function writeContentToClass($filePointer, $content)
+    {
+        fwrite($filePointer, $content);
+        fclose($filePointer);
+        return true;
+    }
+
+    /**
+     * @return mixed
+     */
+    private function getControllerTemplate()
+    {
+        $this->getControllerTemplatePath();
+        $content = file_get_contents($this->getControllerTemplatePath().'controller.tpl.stub', true);
+        $content = $this->replaceTemplate('{%Apps%}', ucfirst(APP_PATH), $content);
+        return $this->replaceTemplate('{%ControllerName%}', $this->controller, $content);
+    }
+
+    /**
+     * @return string
+     */
+    private function getIndexStub()
+    {
+        return file_get_contents($this->getControllerTemplatePath().'index.tpl.stub', true);
+    }
+
+    /**
+     * @param $key
+     * @param $replace
+     * @param $content
+     * @return mixed
+     */
+    private function replaceTemplate($key, $replace, $content)
+    {
+        return str_replace($key, $replace, $content);
+    }
+
+    /**
+     * @return bool
+     * @throws \Exception
+     */
+    private function makeResourceController()
+    {
+        $stubs = array('index', 'new', 'create', 'show', 'edit', 'update', 'delete');
+        $controllerClass = $this->applicationDir.DS.'controllers'.DS.$this->controller.'.php';
+
+        if (file_exists($controllerClass)) {
+            throw new \Exception("$controllerClass already exists!!");
+        }
+
+        /*write operation ->*/
+        $filePointer = fopen($controllerClass, "w") or die('Unable to generate controller');
+
+        $controllerContent = $this->getControllerTemplate();
+
+        $resourceContent = "";
+        foreach ($stubs as $key => $template) {
+            $resourceContent .= file_get_contents($this->getControllerTemplatePath().$template.'.tpl.stub', true).PHP_EOL;
+        }
+
+        $content = $this->replaceTemplate('{%methods%}', $resourceContent, $controllerContent);
+        return $this->writeContentToClass($filePointer, $content);
     }
 }
