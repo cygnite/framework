@@ -9,6 +9,7 @@ use Cygnite\Console\Command\MigrationCommand;
 use Symfony\Component\Console\Application;
 use Cygnite\Console\Command\FormGeneratorCommand;
 use Cygnite\Console\Command\ControllerGeneratorCommand;
+use Cygnite\Console\Command\ModelGeneratorCommand;
 use Symfony\Component\Console\Input\InputOption;
 
 require BASE_PATH.DS.APP_PATH.'/configs/database.php';
@@ -66,6 +67,9 @@ class CygniteApplication extends Application
         $formInstance->setSchema(new Table);
 
         $controllerInstance = ControllerGeneratorCommand::make();
+        $modelInstance = ModelGeneratorCommand::make();
+        $modelInstance->setSchema(new Table);
+
 
         $this->addCommands(
             array(
@@ -73,7 +77,8 @@ class CygniteApplication extends Application
                 $generateInstance,
                 $migrationInstance,
                 $controllerInstance,
-                $formInstance
+                $formInstance,
+                $modelInstance
             )
         );
     }

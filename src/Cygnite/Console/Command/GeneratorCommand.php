@@ -29,111 +29,46 @@ use Symfony\Component\Console\Formatter\OutputFormatterStyle;
  *   obtain it through the world-wide-web, please send an email
  *   to sanjoy@hotmail.com so that I can send you a copy immediately.
  *
- * @Package            :  Console
- * @Filename           :  GeneratorCommand.php
- * @Description        :  Generator Command class used to generate crud application using Cygnite CLI. 
- *                        Cygnite Cli driven by Symfony2 Console Component.
- * @Author             :  Sanjoy Dey
- * @Copyright          :  Copyright (c) 2013 - 2014,
- * @Link	           :  http://www.cygniteframework.com
- * @Since	           :  Version 1.0.6
- * @File Source
+ * @Package               :  Console
+ * @Filename              :  GeneratorCommand.php
+ * @Description           :  Generator Command class used to generate crud application using Cygnite CLI.
+ *                           Cygnite CLI driven by Symfony2 Console Component.
+ * @Author                :  Sanjoy Dey
+ * @Copyright             :  Copyright (c) 2013 - 2014,
+ * @Link                  :  http://www.cygniteframework.com
+ * @Since                 :  Version 1.0.6
+ * @File                     Source
  *
  */
 
 class GeneratorCommand extends Command
 {
 
-	private $tableSchema;
-
     public $applicationDir;
-
     public $controller;
-
     public $model;
-
     public $database;
-
+    private $tableSchema;
     private $inflect;
-
     private $columns;
-
     private $output;
-
     private $viewType;
-	
-	public static function __callStatic($method, $arguments = array())
-	{
-		if ($method == 'instance') {
-			return new self();
-		}
-	}
-	
-	public function setSchema($table)
-	{
-		$this->tableSchema = $table;
-	}
-	
-    protected function configure()
+
+    public static function __callStatic($method, $arguments = array())
     {
-        $this->setName('generate:crud')
-             ->setDescription('Generate Sample Crud Application Using Cygnite CLI')
-             ->addArgument('name', InputArgument::OPTIONAL, 'Your Controller Name ?')
-             ->addArgument('model', InputArgument::OPTIONAL, 'Your Model Name ?')
-             ->addArgument('database', InputArgument::OPTIONAL, '')
-             ->addOption('template', null, InputOption::VALUE_NONE, 'If set, will use twig template for view page.')
-        ;
+        if ($method == 'instance') {
+            return new self();
+        }
     }
 
-    /**
-     * We will get all column schema from database
-     * @return mixed
-     */
-    private function getColumns()
+    public function setSchema($table)
     {
-        return $this->tableSchema->connect(
-            $this->database,
-            $this->inflect->tabilize($this->model)
-        )->getColumns();
-    }
-
-    /**
-     * We will execute the crud command and generate files
-     * @param InputInterface  $input
-     * @param OutputInterface $output
-     */
-    protected function execute(InputInterface $input, OutputInterface $output)
-    {
-        $this->inflect = new Inflector;
-
-        // Your controller name
-        $this->controller = $this->inflect->classify($input->getArgument('name')).'Controller';
-        // Model name
-        $this->model = $this->inflect->classify($input->getArgument('model'));
-        /** Check for argument database name if not given we will use default
-         *  database connection
-         */
-        $this->database = (!is_null($input->getArgument('database'))) ?
-                           $input->getArgument('database') :
-                           $this->tableSchema->getDefaultDatabaseConnection();
-
-        // By default we will generate plain php layout and view pages
-        $this->viewType = ($input->getOption('template') == false) ? 'php' : 'twig';
-
-        $this->columns = $this->getColumns();
-
-        $this->applicationDir = BASE_PATH.DS.APP_PATH;
-        $this->output = $output;
-
-        $this->generateController();
-        $this->generateModel();
-        $this->generateViews();
-
-        $output->writeln("<info>Crud Generated Successfully By Cygnite Cli.</info>");
+        $this->tableSchema = $table;
     }
 
     /**
      * Get primary key of the table
+     *
      * @return null
      */
     public function getPrimaryKey()
@@ -152,6 +87,70 @@ class GeneratorCommand extends Command
         return $primaryKey;
     }
 
+    protected function configure()
+    {
+        $this->setName('generate:crud')
+            ->setDescription('Generate Sample Crud Application Using Cygnite CLI')
+            ->addArgument('name', InputArgument::OPTIONAL, 'Your Controller Name ?')
+            ->addArgument('model', InputArgument::OPTIONAL, 'Your Model Name ?')
+            ->addArgument('database', InputArgument::OPTIONAL, '')
+            ->addOption('template', null, InputOption::VALUE_NONE, 'If set, will use twig template for view page.');
+    }
+
+    /**
+     * We will execute the crud command and generate files
+     *
+     * @param InputInterface  $input
+     * @param OutputInterface $output
+     * @throws \Exception
+     */
+    protected function execute(InputInterface $input, OutputInterface $output)
+    {
+        $this->inflect = new Inflector;
+
+        // Your controller name
+        $this->controller = $this->inflect->classify($input->getArgument('name')) . 'Controller';
+        // Model name
+        $this->model = $this->inflect->classify($input->getArgument('model'));
+        /** Check for argument database name if not given we will use default
+         *  database connection
+         */
+        $this->database = (!is_null($input->getArgument('database'))) ?
+            $input->getArgument('database') :
+            $this->tableSchema->getDefaultDatabaseConnection();
+
+        // By default we will generate plain php layout and view pages
+        $this->viewType = ($input->getOption('template') == false) ? 'php' : 'twig';
+
+        $this->columns = $this->getColumns();
+
+        if (empty($this->columns)) {
+            throw new \Exception("Please provide valid table name. It seems doesn't exists in the database.");
+        }
+
+        $this->applicationDir = BASE_PATH . DS . APP_PATH;
+        $this->output = $output;
+
+        $this->generateController();
+        $this->generateModel();
+        $this->generateViews();
+
+        $output->writeln("<info>Crud Generated Successfully By Cygnite Cli.</info>");
+    }
+
+    /**
+     * We will get all column schema from database
+     *
+     * @return mixed
+     */
+    private function getColumns()
+    {
+        return $this->tableSchema->connect(
+            $this->database,
+            $this->inflect->tabilize($this->model)
+        )->getColumns();
+    }
+
     /**
      * We will generate Controller
      */
@@ -161,7 +160,7 @@ class GeneratorCommand extends Command
         $controllerInstance = Controller::instance($this->inflect, $this->columns, $this->viewType, $this);
 
         $controllerTemplateDir =
-            dirname(dirname(__FILE__)).DS.'src'.DS.ucfirst('apps').DS.ucfirst('controllers').DS;
+            dirname(dirname(__FILE__)) . DS . 'src' . DS . ucfirst('apps') . DS . ucfirst('controllers') . DS;
 
         $controllerInstance->setControllerTemplatePath($controllerTemplateDir);
         $controllerInstance->setApplicationDirectory($this->applicationDir);
@@ -183,7 +182,7 @@ class GeneratorCommand extends Command
     {
         $modelInstance = Model::instance($this->inflect, $this);
         $modelTemplateDir =
-            dirname(dirname(__FILE__)).DS.'src'.DS.ucfirst('apps').DS.ucfirst('models').DS;
+            dirname(dirname(__FILE__)) . DS . 'src' . DS . ucfirst('apps') . DS . ucfirst('models') . DS;
 
         $modelInstance->setModelTemplatePath($modelTemplateDir);
         $modelInstance->updateTemplate();
@@ -198,7 +197,7 @@ class GeneratorCommand extends Command
     {
         $viewInstance = View::instance($this->inflect, $this);
         $viewInstance->setLayoutType($this->viewType);
-        $viewTemplateDir = dirname(dirname(__FILE__)).DS.'src'.DS.ucfirst('apps').DS.ucfirst('views').DS;
+        $viewTemplateDir = dirname(dirname(__FILE__)) . DS . 'src' . DS . ucfirst('apps') . DS . ucfirst('views') . DS;
         $viewInstance->setTableColumns($this->columns);
         $viewInstance->setViewTemplatePath($viewTemplateDir);
 
@@ -212,6 +211,8 @@ class GeneratorCommand extends Command
 
         $viewInstance->generateViews();
 
-        $this->output->writeln("Views generated in ".str_replace("Controller", "", $this->controller)." directory..");
+        $this->output->writeln(
+            "Views generated in " . str_replace("Controller", "", $this->controller) . " directory.."
+        );
     }
 }
