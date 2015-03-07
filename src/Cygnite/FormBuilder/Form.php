@@ -13,7 +13,6 @@ namespace Cygnite\FormBuilder;
 
 use Closure;
 use Cygnite\Common\Input;
-use Cygnite\Proxy\StaticResolver;
 
 if (!defined('CF_SYSTEM')) {
     exit('No External script access allowed');
@@ -27,7 +26,7 @@ if (!defined('CF_SYSTEM')) {
  * @author Sanjoy Dey <dey.sanjoy0@gmail.com>
  */
 
-class Form extends StaticResolver implements FormInterface
+class Form implements FormInterface
 {
 
     private static $formHolder = array();
@@ -36,13 +35,13 @@ class Form extends StaticResolver implements FormInterface
 
     public static $formOpen;
 
-    public $attributes = array();
+    protected $attributes = array();
 
-    public  $elements = array();
+    protected  $elements = array();
 
-    public $value = array();
+    protected $value = array();
 
-    public  $element = array();
+    protected  $element = array();
 
     private static $object;
 
@@ -50,26 +49,36 @@ class Form extends StaticResolver implements FormInterface
 
     public $validator;
 
-    public $errorClass = 'error';
+    protected $errorClass = 'error';
+
+    private static $validMethod = array('make', 'instance');
 
     /**
-     * @param       $name
+     * @param       $method
      * @param array $arguments
      * @return mixed
      * @throws \Exception
      */
-     /*
-    public static function __callStatic($name, $arguments = array())
+    public static function __callStatic($method, $arguments = array())
     {
-        if ($name == 'instance' && empty($arguments)) {
-            return call_user_func_array(array(new self,'get'.ucfirst($name)), array());
-        } elseif ($name == 'instance' && $arguments[0] instanceof Closure) {
-            return call_user_func_array(array(new self,'get'.ucfirst($name)), $arguments);
+        // Check for valid function name
+        if (in_array($method, static::$validMethod)) {
+            if (empty($arguments)) {
+                return call_user_func_array(array(new self,'getInstance'), array());
+            } elseif ($arguments[0] instanceof Closure) {
+                return call_user_func_array(array(new self,'getInstance'), $arguments);
+        }
         }
 
-        throw new \Exception("Undefined $name method called.");
-    }*/
+        throw new \Exception("Undefined $method method called.");
+    }
 
+    /**
+     * Get the form builder instance to build form
+     *
+     * @param callable $callback
+     * @return Form
+     */
     protected function getInstance(Closure $callback = null)
     {
         if ($callback instanceof Closure) {

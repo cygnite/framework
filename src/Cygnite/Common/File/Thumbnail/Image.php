@@ -22,7 +22,8 @@ use Cygnite\Inflectors;
  * @example
  * <code>
  *    Example:
- *    $thumb = new \Apps\Components\Thumbnail\Image();
+ *    $thumb = new \Cygnite\Common\File\Thumbnail\Image();
+ *    $thumb->setRootDir(CYGNITE_BASE);
  *    $thumb->directory = 'Set your directory path';
  *    $thumb->fixedWidth  = 100;
  *    $thumb->fixedHeight = 100;
@@ -70,6 +71,15 @@ class Image
         }
     }
 
+    public function setRootDir($rootPath = false)
+    {
+        if ($rootPath) {
+            $this->rootDir = $rootPath.DS;
+        } else {
+            $this->rootDir = getcwd().DS;
+        }
+    }
+
     /**
      * Resize image as given configurations
      *
@@ -79,7 +89,7 @@ class Image
     public function resize()
     {
         $path = array();
-        $src = getcwd().DS.str_replace(array('/','\\'), DS, $this->directory);   /* read the source image */
+        $src = $this->rootDir.DS.str_replace(array('/','\\'), DS, $this->directory);   /* read the source image */
 
 
         if (file_exists($src)) {
@@ -141,7 +151,7 @@ class Image
      */
     private function imageCreateFrom($type, $src, $func = null)
     {
-        $func = Inflector::instance()s->changeToLower(__FUNCTION__.$type);
+        $func = strtolower(__FUNCTION__.$type);
 
         return (is_callable($func))
             ? $func($src)
@@ -161,13 +171,13 @@ class Image
      */
     private function image($type, $thumb, $name, $func = null)
     {
-        $func = Inflector::instance()s->changeToLower(__FUNCTION__.$type);
+        $func = strtolower(__FUNCTION__.$type);
 
         /** @var $func TYPE_NAME */
         //if (is_callable($func)) {
-        if ($func(
+        if ( $func(
                 $thumb,
-                getcwd().DS.str_replace(
+                $this->rootDir.DS.str_replace(
                     array(
                         '/',
                         '\\'
@@ -175,9 +185,9 @@ class Image
                     DS,
                     $this->thumbPath
                 ).$name
-            )
+             )
             ) {
-                chmod(getcwd().DS.str_replace(array('/', '\\'), DS, $this->thumbPath).$name, 0777);
+                chmod($this->rootDir.DS.str_replace(array('/', '\\'), DS, $this->thumbPath).$name, 0777);
         } else {
                 throw new \Exception("Unknown Exception  while generating thumb image");
         }
