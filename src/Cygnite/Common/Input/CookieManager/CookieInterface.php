@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Cygnite\Common\CookieManager;
+namespace Cygnite\Common\Input\CookieManager;
 
 interface CookieInterface
 {

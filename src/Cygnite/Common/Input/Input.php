@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Cygnite\Common;
+namespace Cygnite\Common\Input;
 
 use Closure;
 use Cygnite\Common\Security;
