@@ -1,0 +1,11 @@
+	
+    /**
+    * Delete specific resource from database
+    *
+    * @param  int  $id
+    */
+    public function deleteAction($id)
+    {
+        //
+
+    }

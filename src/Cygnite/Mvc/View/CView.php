@@ -65,6 +65,8 @@ class CView
 
     protected $autoReload = false;
 
+    public $twig;
+
     /**
      * @param Template $template
      */
@@ -80,6 +82,7 @@ class CView
 
             if ($template instanceof Template) {
                 $template->init($this, new Reflection);
+                $this->setTemplate($template);
 
                 $ns = $controller = null;
                 $ns = get_called_class();
@@ -101,6 +104,22 @@ class CView
         }
     }
 
+    /**
+     * @param $template
+     */
+    private function setTemplate($template)
+    {
+        $this->twig = $template;
+    }
+
+    /**
+     * Get Template instance
+     * @return null
+     */
+    public function getTemplate()
+    {
+        return isset($this->twig) ? $this->twig : null;
+    }
     /**
     * Magic Method for handling dynamic data access.
     * @param $key

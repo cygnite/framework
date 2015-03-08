@@ -72,6 +72,8 @@ class Query
      */
     private $bindings = array();
 
+    private $_values = array();
+
     /**
      * You can not instantiate the Query object directly
      *
@@ -427,7 +429,7 @@ class Query
     }
 
     /**
-     * Add an INNER JOIN souce to the query
+     * Add an INNER JOIN source to the query
      */
     public function leftJoin($table, $constraint, $tableAlias = null)
     {
@@ -435,7 +437,7 @@ class Query
     }
 
     /**
-     * Add an INNER JOIN souce to the query
+     * Add an INNER JOIN source to the query
      */
     public function innerJoin($table, $constraint, $tableAlias = null)
     {
@@ -450,7 +452,7 @@ class Query
     */
 
     /**
-     * Add a LEFT OUTER JOIN souce to the query
+     * Add a LEFT OUTER JOIN source to the query
      */
     public function leftOuterJoin($table, $constraint, $tableAlias = null)
     {
@@ -458,7 +460,7 @@ class Query
     }
 
     /**
-     * Add an RIGHT OUTER JOIN souce to the query
+     * Add an RIGHT OUTER JOIN source to the query
      */
     public function rightOuterJoin($table, $constraint, $tableAlias = null)
     {
@@ -466,7 +468,7 @@ class Query
     }
 
     /**
-     * Add an FULL OUTER JOIN souce to the query
+     * Add an FULL OUTER JOIN source to the query
      */
     public function fullOuterJoin($table, $constraint, $tableAlias = null)
     {

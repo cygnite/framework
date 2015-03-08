@@ -8,6 +8,8 @@ use Cygnite\Console\Command\GeneratorCommand;
 use Cygnite\Console\Command\MigrationCommand;
 use Symfony\Component\Console\Application;
 use Cygnite\Console\Command\FormGeneratorCommand;
+use Cygnite\Console\Command\ControllerGeneratorCommand;
+use Cygnite\Console\Command\ModelGeneratorCommand;
 use Symfony\Component\Console\Input\InputOption;
 
 require BASE_PATH.DS.APP_PATH.'/configs/database.php';
@@ -27,7 +29,7 @@ require BASE_PATH.DS.APP_PATH.'/configs/database.php';
  *
  * @Package            :  Console
  * @Filename           :  CygniteApplication.php
- * @Description        :  Cygnite Application is the middle ware of all your console command using Cygnite CLI. 
+ * @Description        :  Cygnite Application is the middle ware of all your console command using Cygnite CLI.
  *                        Cygnite Cli driven by Symfony2 Console Component.
  * @Author             :  Sanjoy Dey
  * @Copyright          :  Copyright (c) 2013 - 2014,
@@ -64,12 +66,19 @@ class CygniteApplication extends Application
         $formInstance = FormGeneratorCommand::instance();
         $formInstance->setSchema(new Table);
 
+        $controllerInstance = ControllerGeneratorCommand::make();
+        $modelInstance = ModelGeneratorCommand::make();
+        $modelInstance->setSchema(new Table);
+
+
         $this->addCommands(
             array(
                 $initInstance,
                 $generateInstance,
                 $migrationInstance,
-                $formInstance
+                $controllerInstance,
+                $formInstance,
+                $modelInstance
             )
         );
     }

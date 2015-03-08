@@ -10,11 +10,11 @@
  */
 namespace Cygnite;
 
-use Cygnite\Exception\Handler;
-use Cygnite\Foundation\Application;
+use Tracy\Debugger;
 use Cygnite\Helpers\Config;
 use Cygnite\Helpers\Profiler;
-use Tracy\Debugger;
+use Cygnite\Exception\Handler;
+use Cygnite\Foundation\Application;
 
 if (defined('CF_SYSTEM') === false) {
     exit('External script access not allowed');
@@ -22,11 +22,13 @@ if (defined('CF_SYSTEM') === false) {
 
 class Strapper
 {
+    private $app;
     /**
      * Initialize and do all configuration then start booting
      */
     public function initialize($app)
     {
+        $this->app = $app;
         /**
          * Set Environment for Application
          * Example:
@@ -88,7 +90,7 @@ class Strapper
                             controller in configs/application" . EXT
             );
         }
-
-        Application::import(APPPATH . '.routes');
+        Application::import(APPPATH.'.routes');
+        $this->app->router->run();
     }
 }

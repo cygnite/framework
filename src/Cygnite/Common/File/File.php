@@ -1,43 +1,33 @@
 <?php
-namespace Cygnite\Common;
+/**
+ * This file is part of the Cygnite package.
+ *
+ * (c) Sanjoy Dey <dey.sanjoy0@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
+namespace Cygnite\Common\File;
 
 if (!defined('CF_SYSTEM')) {
     exit('External script access not allowed');
 }
-/**
- *  Cygnite Framework
- *
- *  An open source application development framework for PHP 5.3x or newer
- *
- *   License
- *
- *   This source file is subject to the MIT license that is bundled
- *   with this package in the file LICENSE.txt.
- *   http://www.cygniteframework.com/license.txt
- *   If you did not receive a copy of the license and are unable to
- *   obtain it through the world-wide-web, please send an email
- *   to sanjoy@hotmail.com so I can send you a copy immediately.
- *
- * @Package                         :  Packages
- * @Sub Packages               :  Library
- * @Filename                       : CF_Downloader
- * @Description                   : This library used to download user requested file via path.
- * @Author                           : Cygnite dev team
- * @Copyright                     :  Copyright (c) 2013 - 2014,
- * @Link                      :  http://www.cygniteframework.com
- * @Since                     :  Version 1.0
- * @Filesource
- * @Warning                     :  Any changes in this library can cause abnormal behaviour of the framework
- *
- *
- */
 
-class Downloader
+class File
 {
 
     private $_mimeType;
-
     private $filePath;
+    private $rootDir;
+
+    /**
+     * @param null $rootPath
+     */
+    public function setRootDirectory($rootPath)
+    {
+        $this->rootDir = $rootPath.DS;
+    }
 
     /*
     |---------------------------
@@ -48,12 +38,30 @@ class Downloader
     | @return array - array
     |---------------------------
     */
-    private function getFileInfo($filePath)
+
+    public function download($filePath)
     {
-            $pathInfo = array();
-            $pathInfo = pathinfo($filePath);
-            //$pathInfo['dirname'];$pathInfo['basename'];$pathInfo['extension'];$pathInfo['filename'];
-            return $pathInfo;
+        $urlParts = parse_url($filePath);
+        $rootDir = null;
+
+        if (!is_null($this->rootDir)) {
+            $rootDir = $this->rootDir;
+        } else {
+            $rootDir = CYGNITE_BASE.DS;
+        }
+
+        $filePath = $rootDir . str_replace('/', DS, str_replace('/' . ROOTDIR . '/', '', $urlParts['path']));
+
+        if (is_null($this->filePath) && $filePath != "") {
+            $this->filePath = $filePath;
+        }
+
+        $isSetFileType = $this->setMimeType($this->filePath);
+
+        if ($isSetFileType) {
+            $this->setHeaders();
+        }
+        //$this->filePath
     }
 
     /*
@@ -65,31 +73,12 @@ class Downloader
     | @return string
     |---------------------------
     */
-    public function getMimeType()
-    {
-        if (is_null($this->_mimeType) || $this->_mimeType == "") {
-            throw new \InvalidArgumentException("Empty argument passed to ".__FUNCTION__);
-        }
 
-        if (isset($this->_mimeType)) {
-            return $this->_mimeType;
-        }
-    }
-
-    /*
-    |---------------------------
-    | This function is to set mime type of requested file
-    |
-    | @access private
-    | @false  string $file
-    | @return boolean
-    |---------------------------
-    */
     private function setMimeType($file = "")
     {
         $ext = explode(".", $file);
 
-        switch($ext[sizeof($ext)-1]) {
+        switch ($ext[sizeof($ext) - 1]) {
             case 'jpeg':
                 $this->_mimeType = "image/jpeg";
                 break;
@@ -244,22 +233,54 @@ class Downloader
         return true;
     }
 
-    public function download($filePath)
+    /*
+    |---------------------------
+    | This function is to set mime type of requested file
+    |
+    | @access private
+    | @false  string $file
+    | @return boolean
+    |---------------------------
+    */
+
+    private function setHeaders()
     {
-        $urlParts = parse_url($filePath);
+        /*Execution Time unlimited*/
+        set_time_limit(0);
 
-        $filePath =  CYGNITE_BASE.DS.str_replace('/', DS, str_replace('/'.ROOTDIR.'/', '', $urlParts['path']));
+        $fileSize = filesize($this->filePath);
 
-        if (is_null($this->filePath) && $filePath != "") {
-            $this->filePath = $filePath;
+        if ($fileSize === false) {
+            throw new \Exception("Invalid path exception");
         }
 
-        $isSetFileType= $this->setMimeType($this->filePath);
+        $_mimeType = $this->getMimeType();
 
-        if ($isSetFileType) {
-            $this->setHeaders();
+        ob_start();
+        header('Content-Description: File Transfer');
+        header('Content-Type: ' . $_mimeType);
+        //header("Content-type: ".mime_content_type($value));
+        header('Content-Disposition: attachment; filename=' . rawurlencode(basename($this->filePath)));
+        header('Content-Transfer-Encoding: binary');
+        header('Expires: 0');
+        header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
+        header('Pragma: public');
+        header('Content-Length: ' . $fileSize);
+        ob_clean();
+        ob_end_flush();
+        readfile($this->filePath);
+        exit;
+    }
+
+    public function getMimeType()
+    {
+        if (is_null($this->_mimeType) || $this->_mimeType == "") {
+            throw new \InvalidArgumentException("Empty argument passed to " . __FUNCTION__);
         }
-        //$this->filePath
+
+        if (isset($this->_mimeType)) {
+            return $this->_mimeType;
+        }
     }
 
     /*
@@ -271,32 +292,12 @@ class Downloader
     | @return void
     |---------------------------------------------------------
     */
-    private function setHeaders()
+
+    private function getFileInfo($filePath)
     {
-        /*Execution Time unlimited*/
-        set_time_limit(0);
-
-        $fileSize = filesize($this->filePath);
-
-        if ($fileSize === false) {
-            throw new \Exception("Invalid path exception");
-        }
-        
-        $_mimeType = $this->getMimeType();
-
-        ob_start();
-        header('Content-Description: File Transfer');
-        header('Content-Type: '.$_mimeType);
-        //header("Content-type: ".mime_content_type($value));
-        header('Content-Disposition: attachment; filename='.rawurlencode(basename($this->filePath)));
-        header('Content-Transfer-Encoding: binary');
-        header('Expires: 0');
-        header('Cache-Control: must-revalidate, post-check=0, pre-check=0');
-        header('Pragma: public');
-        header('Content-Length: '.$fileSize);
-        ob_clean();
-        ob_end_flush();
-        readfile($this->filePath);
-        exit;
+        $pathInfo = array();
+        $pathInfo = pathinfo($filePath);
+        //$pathInfo['dirname'];$pathInfo['basename'];$pathInfo['extension'];$pathInfo['filename'];
+        return $pathInfo;
     }
 }

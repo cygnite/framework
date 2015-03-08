@@ -1,5 +1,5 @@
 <?php
-namespace Cygnite\Common\CookieManager;
+namespace Cygnite\Common\Input\CookieManager;
 
 class InvalidCookieException extends \Exception
 {
