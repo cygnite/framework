@@ -30,15 +30,9 @@ class FlashMessage
     /**
      * Constructor
      *
-     * @param Inflector $inflection
      */
-    public function __construct(Inflector $inflection)
+    public function __construct()
     {
-        // Check whether $inflection is instance of Inflector
-        if ($inflection instanceof Inflector) {
-            $this->inflection = $inflection;
-        }
-
         if( !session_id() ) session_start();
 
         if (!isset($_SESSION['flashMessages'])) {
@@ -106,7 +100,7 @@ class FlashMessage
 
             $flash .= sprintf(
                 $this->flashWrapper,
-                strtolower($this->inflection->getClassName($this->class)),
+                strtolower(Inflector::getClassName($this->class)),
                 $key,
                 $messages
             );

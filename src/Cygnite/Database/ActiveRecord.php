@@ -91,10 +91,10 @@ abstract class ActiveRecord implements \ArrayAccess
 
     private function setModelAttributes($model)
     {
-        $this->setModelClass(Inflector::instance()->getClassNameFromNamespace($model));
+        $this->setModelClass(Inflector::getClassNameFromNamespace($model));
 
         if (!property_exists($model, 'tableName') || is_null($this->tableName)) {
-            $this->setTableName(Inflector::instance()->tabilize($this->getModelClass()));
+            $this->setTableName(Inflector::tabilize($this->getModelClass()));
         }
 
         if (!property_exists($model, 'database') || is_null($this->database)) {
@@ -200,7 +200,7 @@ abstract class ActiveRecord implements \ArrayAccess
                     return self::callFinderBy($method, $class, $arguments, 'Or'); // findByOr
                 }
 
-                $columnName = Inflector::instance()->tabilize(substr($method, 6));
+                $columnName = Inflector::tabilize(substr($method, 6));
                 $operator = (isset($arguments[1])) ? $arguments[1] : '=';
                 $params = array($columnName, $operator, $arguments[0]);
 
@@ -610,12 +610,12 @@ abstract class ActiveRecord implements \ArrayAccess
 
     protected function with($class, $arguments)
     {
-        $tableWith = Inflector::instance()->tabilize($arguments[0]);
+        $tableWith = Inflector::tabilize($arguments[0]);
 
         $params = array(
             $class->tableName . '.' . $class->primaryKey,
             '=',
-            $tableWith . '.' . Inflector::instance()->singularize($class->tableName) . '_id'
+            $tableWith . '.' . Inflector::singularize($class->tableName) . '_id'
         );
 
         if (isset($arguments[1])) {

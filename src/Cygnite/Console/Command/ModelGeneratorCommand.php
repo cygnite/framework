@@ -81,15 +81,16 @@ class ModelGeneratorCommand extends Command
 
     /**
      * We will execute the crud command and generate files
+     *
      * @param InputInterface  $input
      * @param OutputInterface $output
+     * @throws \Exception
      * @return int|null|void
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $this->inflection = new Inflector();
         // Your model name
-        $this->model = $this->inflection->classify($input->getArgument('name'));
+        $this->model = Inflector::classify($input->getArgument('name'));
 
         // Check for argument database name if not given we will use default
         // database connection
@@ -124,7 +125,7 @@ class ModelGeneratorCommand extends Command
      */
     private function generateModel()
     {
-        $modelInstance = Model::instance($this->inflection, $this);
+        $modelInstance = Model::instance($this);
         $modelTemplateDir =
             dirname(dirname(__FILE__)).DS.'src'.DS.ucfirst('apps').DS.ucfirst('models').DS;
 

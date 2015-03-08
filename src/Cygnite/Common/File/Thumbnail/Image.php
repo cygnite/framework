@@ -12,7 +12,7 @@
 namespace Cygnite\Common\File\Thumbnail;
 
 use Cygnite\Cygnite;
-use Cygnite\Inflectors;
+use Cygnite\Inflector;
 
 /**
  * Image Thumbnail.

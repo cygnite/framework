@@ -104,8 +104,8 @@ class Pagination
     {
        $numRecords = null;
 
-       $modelClass = Inflector::instance()->getClassNameFromNamespace(get_class($this->model));
-       $table = Inflector::instance()->tabilize($modelClass);
+       $modelClass = Inflector::getClassNameFromNamespace(get_class($this->model));
+       $table = Inflector::tabilize($modelClass);
 
        $numRecords = $this->model
                           ->query("SELECT ".$this->count()." as ".$this->numCount." FROM `".$table."`")

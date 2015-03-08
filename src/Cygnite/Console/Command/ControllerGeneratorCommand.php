@@ -45,9 +45,8 @@ class ControllerGeneratorCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $this->inflection = new Inflector();
         // Your controller name
-        $this->controller = $this->inflection->classify($input->getArgument('name')).'Controller';
+        $this->controller = Inflector::classify($input->getArgument('name')).'Controller';
 
         // By default we will generate basic controller, if resource set then we will generate
         // REST-ful Resource controller
@@ -85,7 +84,7 @@ class ControllerGeneratorCommand extends Command
     {
         $controller = null;
         // Create Controller instance
-        $controller = Controller::instance($this->inflection, array(), null, $this);
+        $controller = Controller::instance(array(), null, $this);
         $resourcePath = 'Resources'.DS.'Stubs'.DS;
         $controllerTemplateDir =
             dirname(dirname(__FILE__)).DS.'src'.DS.ucfirst('apps').DS.'Controllers'.DS.$resourcePath;

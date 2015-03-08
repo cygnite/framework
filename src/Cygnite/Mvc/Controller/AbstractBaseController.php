@@ -130,7 +130,7 @@ abstract class AbstractBaseController extends CView
 
         $method = $method.'Action';
         $class = array_map('ucfirst', explode('.', $name));
-        $className = Inflector::instance()->classify(end($class)).'Controller';
+        $className = Inflector::classify(end($class)).'Controller';
         $namespace = str_replace(end($class), '', $class);
         $class = '\\'.ucfirst(APPPATH).'\\'.implode('\\', $namespace).$className;
 

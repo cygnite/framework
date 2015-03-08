@@ -728,7 +728,7 @@ class Query
         if (count($condition) == count($arguments[0])) {
 
             foreach ($condition as $key => $value) {
-                $field = Inflector::instance()->tabilize($value);
+                $field = Inflector::tabilize($value);
                 $whrValue = isset($arguments[0][$key]) ?
                     trim($arguments[0][$key]) :
                     '';
@@ -907,7 +907,7 @@ class Query
     protected function addJoinSource($joinOperator, $table, $constraint, $tableAlias = null)
     {
         $joinOperator = trim("{$joinOperator} JOIN");
-        $table = Inflector::instance()->tabilize($this->quoteIdentifier(lcfirst($table)));
+        $table = Inflector::tabilize($this->quoteIdentifier(lcfirst($table)));
 
         // Add table alias if exists
         if (!is_null($tableAlias)) {
@@ -920,7 +920,7 @@ class Query
             $constraint = "{$firstColumn} {$operator} {$secondColumn}";
         }
 
-        //$table = Inflector::instance()->tabilize(lcfirst($table));
+        //$table = Inflector::tabilize(lcfirst($table));
         $this->hasJoin = true;
         $this->joinSources[] = "{$joinOperator} {$table} ON {$constraint}";
 
@@ -940,7 +940,7 @@ class Query
 
             return join(', ', $result);
         } else {
-            return Inflector::instance()->tabilize($this->quoteOneIdentifier(lcfirst($identifier)));
+            return Inflector::tabilize($this->quoteOneIdentifier(lcfirst($identifier)));
         }
     }
 

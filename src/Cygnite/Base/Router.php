@@ -641,13 +641,13 @@ class Router implements RouterInterface
      */
     private function setControllerConfig($args, $param, $module = false)
     {
-        $this->controller = Inflector::instance()->classify($param[0]) . 'Controller';
+        $this->controller = Inflector::classify($param[0]) . 'Controller';
 
         if ($module) {
             $this->namespace = '\\' . ucfirst($this->getModuleDir()) . '\\' . $args[0] . '\\Controllers\\';
         }
         $this->controllerWithNS = "\\" . ucfirst(APPPATH) . $this->namespace . $this->controller;
-        $this->method = Inflector::instance()->toCameCase($param[1]) . 'Action';
+        $this->method = Inflector::camelize($param[1]) . 'Action';
     }
 
     /**

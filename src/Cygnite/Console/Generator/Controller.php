@@ -37,8 +37,6 @@ class Controller
      *  #%StaticModelName%
      *  #%$validate->addRule%
      */
-    private $inflector;
-
     private $columns = array();
 
     public $controller;
@@ -76,11 +74,8 @@ class Controller
      * @param $columns array of columns
      * @return void
      */
-    private function __construct(Inflector $inflect, $columns = array(), $viewType = null, $generator = null)
+    private function __construct($columns = array(), $viewType = null, $generator = null)
     {
-        if ($inflect instanceof Inflector) {
-            $this->inflector = $inflect;
-        }
         $this->columns = $columns;
         $this->viewType = $viewType;
         $this->controllerCommand = $generator;
@@ -148,7 +143,7 @@ class Controller
     private function generateFormElements($value)
     {
         $form = $label = '';
-        $label = $this->inflector->underscoreToSpace($value->column_name);
+        $label = Inflector::underscoreToSpace($value->column_name);
         $form .= "\t\t".'->addElement("label", "'.$label.'", array("class" => "col-sm-2 control-label","style" => "width:100%;"))'.PHP_EOL;
 
         $form .= "\t\t".'->addElement("text", "'.$value->column_name.'", array("value" => (isset($this->model->'.$value->column_name.')) ? $this->model->'.$value->column_name.' : "", "class" => "form-control"))'.PHP_EOL;
@@ -179,7 +174,7 @@ class Controller
     {
         $code = '';
         $code .=
-            "\t".'$'.$this->inflector->tabilize($this->model).'->'.$value->column_name.' = $postArray["'.$value->column_name.'"];'.PHP_EOL;
+            "\t".'$'.Inflector::tabilize($this->model).'->'.$value->column_name.' = $postArray["'.$value->column_name.'"];'.PHP_EOL;
 
         return $code;
     }
@@ -284,7 +279,7 @@ class Controller
     {
         $content = str_replace(
             'class %ControllerName%',
-            'class '.$this->inflector->classify(str_replace("Controller", "", $this->controller)),
+            'class '.Inflector::classify(str_replace("Controller", "", $this->controller)),
             $content
         );
         $content = str_replace(
@@ -325,7 +320,7 @@ class Controller
             $content
         );
 
-        $newContent = str_replace('%modelName%', $this->inflector->tabilize($this->model), $content);
+        $newContent = str_replace('%modelName%', Inflector::tabilize($this->model), $content);
 
         return $newContent;
     }
@@ -368,7 +363,7 @@ class Controller
         $content = str_replace('{%primaryKey%}', $primaryKey, $content);
         $content = str_replace('%modelColumns%', $this->getDbCode().PHP_EOL, $content);
         $content = str_replace('%addRule%', $this->getValidationCode().PHP_EOL, $content);
-        $controllerNameOnly = $this->inflector->classify(str_replace('Controller', '', $this->controller));
+        $controllerNameOnly = Inflector::classify(str_replace('Controller', '', $this->controller));
         $content = str_replace('%ControllerName%Form', $controllerNameOnly.'Form', $content);
 
         $formTemplatePath = null;
@@ -401,7 +396,7 @@ class Controller
 
         /*write operation ->*/
         $writeTmp =fopen(
-            $this->applicationDir.DS.'components'.DS.'form'.DS.$this->inflector->classify(
+            $this->applicationDir.DS.'components'.DS.'form'.DS.Inflector::classify(
                 str_replace('Controller', '', $this->controller)
             ).'Form.php',
             "w"

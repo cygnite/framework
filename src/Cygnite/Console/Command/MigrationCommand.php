@@ -64,7 +64,7 @@ class MigrationCommand extends Command
 
         $migration = $migrationName = null;
 
-        $migration = Migrator::instance(new Inflector, $this);
+        $migration = Migrator::instance($this);
         $migration->getLatestMigration($this->migrationDir)
                   ->setMigrationClassName();
 

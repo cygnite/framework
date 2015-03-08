@@ -44,17 +44,12 @@ class Model
      * for this class directly
      *
      * @access private
-     * @param $inflect instance of Inflector
      * @param $columns array of columns
      * @return void
      */
-    private function __construct(Inflector $inflect, $command = null)
+    private function __construct($command = null)
     {
-        if ($inflect instanceof Inflector) {
-            $this->inflector = $inflect;
-        }
         $this->command = $command;
-
     }
 
     public static function __callStatic($method, $arguments = array())
@@ -104,7 +99,7 @@ class Model
         $primaryKey = $this->command->getPrimaryKey();
         $content = str_replace('{%Apps%}', ucfirst(APP_PATH), $content);
         $content = str_replace('{%primaryKey%}', $primaryKey, $content);
-        $content = str_replace('%modelName%', $this->inflector->tabilize($this->command->model), $content);
+        $content = str_replace('%modelName%', Inflector::tabilize($this->command->model), $content);
         $content = str_replace('%databaseName%', $this->command->database, $content);
 
         return $content;
