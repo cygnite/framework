@@ -142,9 +142,12 @@ class Application extends Container
      */
     public function setConfiguration($config)
     {
-        $this->setValue('config', $config['app'])
+        $this->importHelpers();
+
+        $this->setValue('config', $config)
             ->setValue('boot', new Strapper)
-            ->setValue('router', new Router);
+             ->setValue('router', new Router)
+             ->setServices();
 
         return $this;
     }
@@ -256,6 +259,11 @@ class Application extends Container
 
             return $instance;
         };
+    }
+
+    public function importHelpers()
+    {
+        return include '/../'.'Helpers/Support'.EXT;
     }
 
     /**
