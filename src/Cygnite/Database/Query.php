@@ -1187,7 +1187,7 @@ class Query
         return ($this->_selectColumns == '*') ?
             $this->quoteIdentifier(
                 self::getActiveRecord()->getTableName()
-            ) . ' ' . $this->_selectColumns : $this->_selectColumns;
+            ) . ' .' . $this->_selectColumns : $this->_selectColumns;
     }
 
     /**

@@ -88,4 +88,13 @@ if ( ! function_exists('string_has')) {
     }
 }
 
+if ( ! function_exists('app')) {
+    /*
+    * We will get the Application instance
+    */
+    function app($callback = null)
+    {
+        return Application::instance($callback);
+    }
+}
 
