@@ -98,3 +98,21 @@ if ( ! function_exists('app')) {
     }
 }
 
+if ( ! function_exists('compress')) {
+    /**
+     * We will remove comments and empty spaces from the resource
+     * and compress contents
+     *
+     * @param $content
+     * @return mixed
+     */
+    function compress($content)
+    {
+        // We will remove comments from the string content
+        $content = preg_replace('!/\*[^*]*\*+([^/][^*]*\*+)*/!', '', $content);
+        // We will remove tabs, spaces, newlines, etc. from the string
+        $content = str_replace(array("\r\n", "\r", "\n", "\t", '  ', '    ', '    '), '', $content);
+
+        return $content;
+    }
+}

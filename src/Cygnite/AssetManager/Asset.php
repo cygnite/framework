@@ -171,13 +171,13 @@ class Asset extends StaticResolver implements \ArrayAccess
      *       ->add('style', array('path' => ''))
      *       ->combine('style', 'final_css', 'assets/css/final.css');
      *
-     * @param $name
-     * @param $path
-     * @param $file
-     * @return string
-     * @throws AssetExistsException
+     * @param      $name
+     * @param      $path
+     * @param      $file
+     * @param bool $compress
+     * @return $this
      */
-    public function combine($name, $path, $file)
+    public function combine($name, $path, $file, $compress = false)
     {
         $this->combine = true;
 
@@ -185,7 +185,7 @@ class Asset extends StaticResolver implements \ArrayAccess
 
             $cssAsset = file_get_contents(CYGNITE_BASE . DS . $path . $file);
             if (string_has($cssAsset, '@generator')) {
-                return true;
+                return $this;
             }
         }
 
@@ -200,11 +200,10 @@ class Asset extends StaticResolver implements \ArrayAccess
         foreach ($this->paths[$this->tag[$this->where]][$name] as $key => $src) {
 
             if ($name == 'style') {
-                $content .= $this->combineStylesheets($src);
+                $content .= $this->combineStylesheets($src, $compress);
             } else if ($name == 'script') {
-                $content .= $this->combineScripts();
+                $content .= $this->combineScripts($src, $compress);
             }
-
         }
 
         fwrite($filePointer, $content);
@@ -219,23 +218,48 @@ class Asset extends StaticResolver implements \ArrayAccess
 
         $this->combinedAssets[$this->tag[$this->where]][$name . '.' . $assetName][] = (string)$styleTag;
 
-        return $this->combinedAssets[$this->tag[$this->where]][$name . '.' . $assetName];
+        return $this;
     }
 
     /**
      * We will combine stylesheets and return contents
      *
      * @param $src
+     * @param $compress
      * @return string
      */
-    private function combineStylesheets($src)
+    private function combineStylesheets($src, $compress)
     {
-        $content = '';
-        $path = $this->getNameFromPathInfo($src, 'dirname');
-        $file = $this->getNameFromPathInfo($src, 'basename');
-        $content .= "@import '$path/$file'; \n";
+        return $this->compressSource($src, $compress);
+    }
+
+    /**
+     * We will compress content is $compress = true else
+     * simply we will append content into the final resource
+     *
+     * @param $src
+     * @param $compress boolean
+     * @return string
+     */
+    private function compressSource($src, $compress)
+    {
+        $content = $assetContent = '';
+        $assetContent = @file_get_contents(CYGNITE_BASE . DS . $src);
+        $content .= ($compress) ?
+            compress($assetContent) . PHP_EOL :
+            $assetContent . PHP_EOL;
 
         return $content;
+    }
+
+    /**
+     * @param $src
+     * @param $compress
+     * @return string
+     */
+    private function combineScripts($src, $compress)
+    {
+        return $this->compressSource($src, $compress);
     }
 
     /**
@@ -257,11 +281,6 @@ class Asset extends StaticResolver implements \ArrayAccess
     public function getAssetDirName()
     {
         return isset($this->assetDirectory) ? $this->assetDirectory : static::$directoryName;
-    }
-
-    private function combineScripts()
-    {
-
     }
 
     /**
@@ -428,10 +447,11 @@ class Asset extends StaticResolver implements \ArrayAccess
     /**
      * Include all the stylesheets from the path
      *
-     * @param $href
-     * @param $attr
-     * @param $title
-     * @param $type
+     * @param        $href
+     * @param        $attr
+     * @param        $title
+     * @param string $type
+     * @return void
      */
     private function loadAssetsFromDir($href, $attr, $title, $type = 'style')
     {
@@ -449,6 +469,7 @@ class Asset extends StaticResolver implements \ArrayAccess
      * @param $media
      * @param $style
      * @param $title
+     * @return void
      */
     private function setStyle($media, $style, $title)
     {
