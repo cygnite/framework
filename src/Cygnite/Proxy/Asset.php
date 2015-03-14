@@ -4,7 +4,6 @@ namespace Cygnite\Proxy;
 use Cygnite\Proxy\Resolver;
 use Cygnite\DependencyInjection\Container;
 use Cygnite\Foundation\Application;
-use Cygnite\Helpers\Inflector;
 
 /**
  * Class Asset

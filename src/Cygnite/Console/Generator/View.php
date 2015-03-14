@@ -62,17 +62,12 @@ class View
      * for this class directly
      *
      * @access private
-     * @param $inflect instance of Inflector
      * @param $columns array of columns
      * @return void
      */
-    private function __construct(Inflector $inflect, $command = null)
+    private function __construct($command = null)
     {
-        if ($inflect instanceof Inflector) {
-            $this->inflector = $inflect;
-        }
         $this->command = $command;
-
     }
 
     public static function __callStatic($method, $arguments = array())
@@ -145,7 +140,7 @@ class View
      */
     public function generateLayout($layout)
     {
-        $layout = $this->inflector->toDirectorySeparator($layout);
+        $layout = Inflector::toDirectorySeparator($layout);
 
         $file = $this->getViewTemplatePath().$layout.DS.$this->viewLayoutName();
         $appViewPath = '';
@@ -287,7 +282,7 @@ class View
             if ($value->column_name !== 'id') {
 
                 if ($type == 'th') {
-                    $tableHead = $this->inflector->underscoreToSpace($value->column_name);
+                    $tableHead = Inflector::underscoreToSpace($value->column_name);
                     $column .= "\t\t\t".'<'.$type.'>'.$tableHead.'</'.$type.'>'.PHP_EOL;
                 } else{
                     $rowType = '';
@@ -341,7 +336,7 @@ class View
                 $column .=
                 "\t\t\t".'<div class="form-group">
                     <div class="form-label control-label">'.
-                    $this->inflector->underscoreToSpace($value->column_name).
+                    Inflector::underscoreToSpace($value->column_name).
                     '</div>
                     <div class="col-sm-10">
                         <p class="form-control-static"><span>'.$rowType.'</span></p>

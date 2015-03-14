@@ -72,7 +72,7 @@ class InitCommand extends Command
             dirname(dirname(__FILE__)).DS.'src'.DS.'apps'.DS.'database'.DS;
 
         $migrateInstance = null;
-        $migrateInstance = Migrator::instance(new Inflector, $this);
+        $migrateInstance = Migrator::instance($this);
         $this->table->makeMigration('migrations');
         $migrateInstance->setTemplateDir($migrateTemplateDir);
         $migrateInstance->replaceTemplateByInput();

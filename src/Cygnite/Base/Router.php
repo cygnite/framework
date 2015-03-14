@@ -522,7 +522,7 @@ class Router implements RouterInterface
      */
     public function hasNamedPattern($pattern)
     {
-        return (Helper::strHas($pattern, '{:') !== false) ? $this->replace($pattern) : false;
+        return (string_has($pattern, '{:')) ? $this->replace($pattern) : false;
     }
 
     /**
@@ -579,8 +579,8 @@ class Router implements RouterInterface
         $this->setUpControllerAndMethodName($arguments);
 
         // Check if whether user trying to access module
-        if (Helper::strHas($arguments[0], '::')) {
-            $exp = Helper::stringSplit($arguments[0], '::');
+        if (string_has($arguments[0], '::')) {
+            $exp = string_split($arguments[0], '::');
             $this->setModuleConfiguration($exp);
         }
 
@@ -619,13 +619,13 @@ class Router implements RouterInterface
      */
     private function setUpControllerAndMethodName($arguments)
     {
-        $expression = Helper::stringSplit($arguments[0]);
+        $expression = string_split($arguments[0]);
         $this->setControllerConfig($arguments, $expression);
     }
 
     private function setModuleConfiguration($args)
     {
-        $param = Helper::stringSplit($args[1]);
+        $param = string_split($args[1]);
         $this->setControllerConfig($args, $param, true);
     }
 
@@ -641,13 +641,13 @@ class Router implements RouterInterface
      */
     private function setControllerConfig($args, $param, $module = false)
     {
-        $this->controller = Inflector::instance()->classify($param[0]) . 'Controller';
+        $this->controller = Inflector::classify($param[0]) . 'Controller';
 
         if ($module) {
             $this->namespace = '\\' . ucfirst($this->getModuleDir()) . '\\' . $args[0] . '\\Controllers\\';
         }
         $this->controllerWithNS = "\\" . ucfirst(APPPATH) . $this->namespace . $this->controller;
-        $this->method = Inflector::instance()->toCameCase($param[1]) . 'Action';
+        $this->method = Inflector::camelize($param[1]) . 'Action';
     }
 
     /**

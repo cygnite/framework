@@ -1,64 +1,32 @@
 <?php
+/**
+ * This file is part of the Cygnite package.
+ *
+ * (c) Sanjoy Dey <dey.sanjoy0@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Cygnite\Base;
 
 use Closure;
 use Cygnite\Reflection;
 
 /**
- *  Cygnite Framework
+ * Class Event
  *
- *  An open source application development framework for PHP 5.3 or newer
- *
- *   License
- *
- *   This source file is subject to the MIT license that is bundled
- *   with this package in the file LICENSE.txt.
- *   http://www.cygniteframework.com/license.txt
- *   If you did not receive a copy of the license and are unable to
- *   obtain it through the world-wide-web, please send an email
- *   to sanjoy@hotmail.com so I can send you a copy immediately.
- *
- * @Package            :  Packages
- * @Sub Packages       :  Base
- * @Filename           :  Event
- * @Description        :  Create event and trigger it dynamically. Allow you
- *                        event driven programming.
- * @Copyright          :  Copyright (c) 2013 - 2014,
- * @Link               :  http://www.cygniteframework.com
- * @Since              :  Version 1.0
- *
- *
+ * @package Cygnite\Base
+ * @author  Sanjoy Dey
  */
 
-class Event
+class Event implements EventInterface
 {
     protected $events = array();
 
     /**
-     * @param       $method
-     * @param array $arguments
-     * @return $this
-     */
-    public function __call($method, $arguments = array())
-    {
-        if ($method == 'instance') {
-            return $this;
-        }
-    }
-
-    /**
-     * @param       $method
-     * @param array $arguments
-     * @return mixed
-     */
-    public static function __callStatic($method, $arguments = array())
-    {
-        if ($method == 'instance') {
-            return call_user_func_array(array(new self, $method), array($arguments));
-        }
-    }
-
-    /**
+     * Attach the new event to event stack
+     *
      * @param $eventName
      * @param $callback
      */
@@ -73,6 +41,9 @@ class Event
     }
 
     /**
+     * We will check whether event is registered,
+     * if so we will trigger the event.
+     *
      * @param       $eventName
      * @param array $data
      * @return mixed
@@ -86,36 +57,46 @@ class Event
             }
 
             if (strpos($callback, '@')) {
-                $exp = explode('@', $callback);
-
-                if (method_exists($obj = new $exp[0], $exp[1])) {
-                    return call_user_func_array(array(new $exp[0], $exp[1]), array($data));
+                return $this->callFunction($callback, $data);
                 }
 
-            }
-
             if (strpos($callback, '::')) {
-                $class = null;
-                $expression = array();
-                $expression = explode('::', $callback);
-                //show($expression);
-                $class = '\\'.str_replace('_', '\\', $expression[0]);
-                call_user_func(array(new $class, $expression[1]));
+                return $this->callUserFunctionEvent($callback);
             }
 
             if (is_string($callback) && strpos($callback, '@') == false) {
-
                 call_user_func($callback, $data);
             }
         }
     }
 
+    private function callFunction($callback, $data)
+    {
+        $exp = explode('@', $callback);
+
+        if (method_exists($instance = new $exp[0], $exp[1])) {
+            return call_user_func_array(array($instance, $exp[1]), array($data));
+        }
+    }
+
     /**
+     * @param $callback
+     */
+    private function callUserFunctionEvent($callback)
+    {
+        $class = null; $expression = array();
+        $expression = explode('::', $callback);
+        $class = '\\'.str_replace('_', '\\', $expression[0]);
+        call_user_func(array(new $class, $expression[1]));
+    }
+    /**
+     * Flush the event
+     *
      * @param string $event
      */
-    public function flush($event = "")
+    public function flush($event = null)
     {
-        if ($event !== "") {
+        if (!is_null($event)) {
             unset($this->events[$event]);
         } else {
             unset($this->events);

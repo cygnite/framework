@@ -40,15 +40,13 @@ class Application extends Container
      * instance method will dynamically return you instance of
      * Application
      *
-     * @param Inflector  $inflection
      * @param Autoloader $loader
      * @return \Cygnite\Foundation\Application
      */
 
-    protected function __construct(Inflector $inflection = null, Autoloader $loader = null)
+    protected function __construct(Autoloader $loader = null)
     {
-        $inflection = $inflection ? : new Inflector();
-        self::$loader = $loader ? : new AutoLoader($inflection);
+        self::$loader = $loader ? : new AutoLoader();
     }
 
     /**
@@ -81,21 +79,18 @@ class Application extends Container
      * Return instance of Application
      * ----------------------------------------------------
      *
-     * @param Inflector  $inflection
-     * @param Autoloader $loader object
-     * @internal param \Cygnite\Inflector $inflector object
+     * @param Autoloader $loader
      * @return Application object
      */
-    public static function getInstance(Inflector $inflection = null, Autoloader $loader = null)
+    public static function getInstance(Autoloader $loader = null)
     {
         if (static::$instance instanceof Application) {
             return static::$instance;
         }
 
-        $inflection = $inflection ? : new Inflector();
-        $loader = $loader ? : new AutoLoader($inflection);
+        $loader = $loader ? : new AutoLoader();
 
-        return static::$instance = new Application($inflection, $loader);
+        return static::$instance = new Application($loader);
     }
 
     /**
@@ -147,9 +142,12 @@ class Application extends Container
      */
     public function setConfiguration($config)
     {
-        $this->setValue('config', $config['app'])
+        $this->importHelpers();
+
+        $this->setValue('config', $config)
             ->setValue('boot', new Strapper)
-            ->setValue('router', new Router);
+             ->setValue('router', new Router)
+             ->setServices();
 
         return $this;
     }
@@ -199,7 +197,7 @@ class Application extends Container
         $dir = ($dir !== '') ? $dir . '\\' : '';
 
         return
-            "\\" . ucfirst(APPPATH) . $this->namespace . $dir . Inflector::instance()->classify(
+            "\\" . ucfirst(APPPATH) . $this->namespace . $dir . Inflector::classify(
                 $class
             ) . 'Controller';
     }
@@ -210,7 +208,7 @@ class Application extends Container
      */
     public function getActionName($actionName)
     {
-        return Inflector::instance()->toCameCase(
+        return Inflector::camelize(
             (!isset($actionName)) ? 'index' : $actionName
         ) . 'Action';
     }
@@ -261,6 +259,11 @@ class Application extends Container
 
             return $instance;
         };
+    }
+
+    public function importHelpers()
+    {
+        return include '/../'.'Helpers/Support'.EXT;
     }
 
     /**

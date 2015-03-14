@@ -34,8 +34,6 @@ class Migrator
 {
     private $command;
 
-    private $inflector;
-
     private $content;
 
     private $default;
@@ -65,13 +63,9 @@ class Migrator
      * @param $columns array of columns
      * @return void
      */
-    private function __construct(Inflector $inflect, $command = null)
+    private function __construct($command = null)
     {
-        if ($inflect instanceof Inflector) {
-            $this->inflector = $inflect;
-        }
         $this->command = $command;
-
     }
 
     public static function __callStatic($method, $arguments = array())
@@ -119,7 +113,7 @@ class Migrator
         $fileContent = file_get_contents($file);
 
         $content = str_replace('{%className%}',
-            $this->inflector->classify(strtolower($this->command->input)),
+            Inflector::classify(strtolower($this->command->input)),
             $fileContent
         );
 
@@ -144,7 +138,7 @@ class Migrator
         $this->hasDirectory($appMigrationPath);
 
         $filePath =  $appMigrationPath.strtolower(
-                $this->inflector->changeToLower(
+                Inflector::changeToLower(
                     $date->format('YmdHis').'_'.$this->command->input.self::EXTENSION
                 )
             );
@@ -215,7 +209,7 @@ class Migrator
 
         if (is_readable($file)) {
             include_once $file;
-            $class = $this->inflector->classify($this->getMigrationClass());
+            $class = Inflector::classify($this->getMigrationClass());
         }
 
         if ($type == 'down') {

@@ -94,7 +94,7 @@ class FormGeneratorCommand extends Command
     {
         return $this->tableSchema->connect(
             $this->database,
-            $this->inflect->tabilize($this->table)
+            Inflector::tabilize($this->table)
         )->getColumns();
     }
 
@@ -105,7 +105,6 @@ class FormGeneratorCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $this->inflect = new Inflector;
         /** Check for argument database name if not given we will use default
          *  database connection
          */
@@ -121,7 +120,7 @@ class FormGeneratorCommand extends Command
         $this->applicationDir = BASE_PATH.DS.APP_PATH;
         $this->generateForm();
 
-        $output->writeln("<info>Form apps/components/form/".$this->inflect->classify($this->table)."Form Generated Successfully By Cygnite Cli.</info>");
+        $output->writeln("<info>Form apps/components/form/".Inflector::classify($this->table)."Form Generated Successfully By Cygnite Cli.</info>");
     }
 
 
@@ -131,7 +130,7 @@ class FormGeneratorCommand extends Command
     private function generateForm()
     {
         // Generate Form Component class
-        $controllerInstance = Controller::instance($this->inflect, $this->columns, $this->viewType, $this);
+        $controllerInstance = Controller::instance($this->columns, $this->viewType, $this);
 
         $formTemplateDir =
             dirname(dirname(__FILE__)).DS.'src'.DS.ucfirst('apps').DS.ucfirst('components').DS.'Form'.DS;

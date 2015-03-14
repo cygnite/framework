@@ -29,7 +29,7 @@ class DependencyExtension extends SplObjectStorage
         foreach ($propertyInjections as $controller => $properties) {
 
             foreach ($properties as $key => $value) {
-                $classInstance = Inflector::instance()->toNamespace($value);
+                $classInstance = Inflector::toNamespace($value);
                 $this->definitions["\\".ucfirst(APPPATH).$this->namespace.$controller][$key] = new $classInstance;
             }
         }

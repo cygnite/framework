@@ -106,12 +106,10 @@ class GeneratorCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $this->inflect = new Inflector;
-
         // Your controller name
-        $this->controller = $this->inflect->classify($input->getArgument('name')) . 'Controller';
+        $this->controller = Inflector::classify($input->getArgument('name')) . 'Controller';
         // Model name
-        $this->model = $this->inflect->classify($input->getArgument('model'));
+        $this->model = Inflector::classify($input->getArgument('model'));
         /** Check for argument database name if not given we will use default
          *  database connection
          */
@@ -147,7 +145,7 @@ class GeneratorCommand extends Command
     {
         return $this->tableSchema->connect(
             $this->database,
-            $this->inflect->tabilize($this->model)
+            Inflector::tabilize($this->model)
         )->getColumns();
     }
 
@@ -157,7 +155,7 @@ class GeneratorCommand extends Command
     private function generateController()
     {
         // Generate Controller class
-        $controllerInstance = Controller::instance($this->inflect, $this->columns, $this->viewType, $this);
+        $controllerInstance = Controller::instance($this->columns, $this->viewType, $this);
 
         $controllerTemplateDir =
             dirname(dirname(__FILE__)) . DS . 'src' . DS . ucfirst('apps') . DS . ucfirst('controllers') . DS;
@@ -180,7 +178,7 @@ class GeneratorCommand extends Command
      */
     private function generateModel()
     {
-        $modelInstance = Model::instance($this->inflect, $this);
+        $modelInstance = Model::instance($this);
         $modelTemplateDir =
             dirname(dirname(__FILE__)) . DS . 'src' . DS . ucfirst('apps') . DS . ucfirst('models') . DS;
 
@@ -195,7 +193,7 @@ class GeneratorCommand extends Command
      */
     private function generateViews()
     {
-        $viewInstance = View::instance($this->inflect, $this);
+        $viewInstance = View::instance($this);
         $viewInstance->setLayoutType($this->viewType);
         $viewTemplateDir = dirname(dirname(__FILE__)) . DS . 'src' . DS . ucfirst('apps') . DS . ucfirst('views') . DS;
         $viewInstance->setTableColumns($this->columns);

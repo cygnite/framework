@@ -18,21 +18,13 @@ if (!defined('CF_SYSTEM')) {
 abstract class Resolver
 {
     /**
-     * @return Inflector
-     */
-    private static function getInflection()
-    {
-        return new Inflector();
-    }
-
-    /**
      * We will return proxy objects from container
      *
      * @return Container
      */
     protected static function getContainer()
     {
-        return new Container();
+        return Application::instance();
     }
 
 
@@ -45,10 +37,9 @@ abstract class Resolver
      */
     public static function __callStatic($method, $arguments = array())
     {
-        $accessor = $inflection = $instance = null;
+        $accessor = $instance = null;
         $accessor = static::getResolver();
-        $inflection = self::getInflection();
-        $accessor = $inflection->toNamespace($accessor);
+        $accessor = Inflector::toNamespace($accessor);
         $instance = new $accessor();
 
         // calling the method directly is faster then call_user_func_array() !
@@ -72,7 +63,7 @@ abstract class Resolver
     /**
      * Get the object instance for this Facade
      *
-     * @since  1.2.1
+     * @since  1.2
      */
     public static function getInstance()
     {

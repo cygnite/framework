@@ -33,8 +33,6 @@ class Form
 
     const EXTENSION = '.php';
 
-    private $inflector;
-
     private $formTemplatePath;
 
     /*
@@ -42,18 +40,13 @@ class Form
      * for this class directly
      *
      * @access public
-     * @param $inflect instance of Inflector
      * @param $columns array of columns
      * @return void
      */
-    public function __construct($controller, $formCommand = null, $inflect = null)
+    public function __construct($controller, $formCommand = null)
     {
         $this->controller = $controller;
         $this->formCommand = $formCommand;
-        if ($inflect instanceof Inflector) {
-            $this->inflector = $inflect;
-        }
-
     }
 
     /**
@@ -91,7 +84,7 @@ class Form
     public function generate()
     {
         $filePath = '';
-        $formName = $this->inflector->classify($this->formCommand->table);
+        $formName = Inflector::classify($this->formCommand->table);
 
         if (file_exists($this->getFormTemplatePath().'Form.php')) {
            //We will generate Form Component

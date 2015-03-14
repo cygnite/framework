@@ -60,7 +60,7 @@ class Schema
     {
         if ($method == 'instance' && !empty($arguments)) {
 
-            $schema = new self($arguments[0], new Inflector);
+            $schema = new self($arguments[0]);
 
             if (is_callable(array($schema, 'init'))) {
 
@@ -81,12 +81,10 @@ class Schema
      * directly
      *
      * @param $model
-     * @param \Cygnite\Helpers\Inflector $inflection
      */
-    private function __construct($model, Inflector $inflection)
+    private function __construct($model)
     {
         $this->_pointer = $model;
-        $this->inflector = $inflection;
 
         if (class_exists(get_class($this->_pointer))) {
 
@@ -110,7 +108,7 @@ class Schema
             $this->setConn($this->database);
 
             if (!property_exists($this->_pointer, 'tableName')) {
-                $this->tableName = $this->inflector->tabilize(get_class($this->_pointer));
+                $this->tableName = Inflector::tabilize(get_class($this->_pointer));
             }
         }
 

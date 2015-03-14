@@ -29,13 +29,11 @@ class AutoLoader
     private $inflection;
 
     /**
-     * @param $inflection
+     * Autoloader Constructor
      */
-    public function __construct($inflection)
+    public function __construct()
     {
-        $this->inflection = $inflection;
         $this->init();
-
     }
 
     /**
