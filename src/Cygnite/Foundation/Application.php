@@ -96,7 +96,7 @@ class Application extends Container
     /**
      * Get framework version
      *
-     * @access public
+     * @return string
      */
     public static function version()
     {
@@ -125,6 +125,12 @@ class Application extends Container
         return self::$loader->import($path);
     }
 
+    /**
+     * Service Closure callback
+     * @param callable $callback
+     * @return mixed
+     * @throws \Exception
+     */
     public static function service(Closure $callback)
     {
         if (!$callback instanceof Closure) {
@@ -135,7 +141,7 @@ class Application extends Container
     }
 
     /**
-     * set all your configurations
+     * Set up all required configurations
      *
      * @param $config
      * @return $this
@@ -145,7 +151,7 @@ class Application extends Container
         $this->importHelpers();
 
         $this->setValue('config', $config)
-            ->setValue('boot', new Strapper)
+             ->setValue('boot', new Strapper)
              ->setValue('router', new Router)
              ->setServices();
 
@@ -169,6 +175,10 @@ class Application extends Container
         return isset($this->aliases) ? $this->aliases : null;
     }
 
+    /**
+     * We will include services
+     * @return $this
+     */
     public function setServices()
     {
         $this['service.provider'] = function () {
@@ -226,6 +236,12 @@ class Application extends Container
         return $this['config.definition'];
     }
 
+    /**
+     * We will register all service providers into application
+     *
+     * @param array $services
+     * @return $this
+     */
     public function registerServiceProvider($services = array())
     {
         foreach ($services as $key => $serviceProvider) {
@@ -249,6 +265,7 @@ class Application extends Container
     /**
      * @param $key
      * @param $class
+     * @return void
      */
     public function setServiceController($key, $class)
     {
@@ -261,6 +278,10 @@ class Application extends Container
         };
     }
 
+    /**
+     * We will include Supporting Helpers
+     * @return mixed
+     */
     public function importHelpers()
     {
         return include '/../'.'Helpers/Support'.EXT;
@@ -273,7 +294,6 @@ class Application extends Container
      */
     public function boot()
     {
-        Url::instance($this['router']);
         //Set up configurations for your awesome application
         Config::set('config.items', $this['config']);
         //Set URL base path.
