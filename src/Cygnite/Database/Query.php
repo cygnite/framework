@@ -142,16 +142,11 @@ class Query
         $sql = $ar = null;
         $ar = self::getActiveRecord();
         $this->triggerEvent('beforeCreate');
-        $sql = $this->getInsertQuery(strtoupper(__FUNCTION__));
-
+        $sql = $this->getInsertQuery(strtoupper(__FUNCTION__), $ar, $arguments);
         try {
             $statement = $this->getDatabaseConnection()->prepare($sql);
-            // we will bind all parameters into the statement
-            foreach ($arguments as $key => $val) {
-                $statement->bindParam(":$key", $val);
-            }
-
-            if ($bool = $statement->execute()) {
+            // we will bind all parameters into the statement using execute method
+            if ($bool = $statement->execute($arguments)) {
                 $ar->{$ar->getPrimaryKey()} = (int)$this->getDatabaseConnection()->lastInsertId();
                 $this->triggerEvent('afterCreate');
 
@@ -1016,17 +1011,17 @@ class Query
      *
      * @access   private
      * @param $function
-     * @internal param Array $attributes
+     * @param $ar
+     * @param $arguments
      * @return string
      */
-    private function getInsertQuery($function)
+    private function getInsertQuery($function, $ar, $arguments)
     {
-        $ar = static::getActiveRecord();
-        $keys = array_keys($ar->attributes);
+        $keys = array_keys($arguments);
 
         return $function . " INTO `" . $ar->getDatabase() . "`.`" . $ar->getTableName() .
-        "` (" . implode(",", $keys) . ")" .
-        " VALUES(:" . implode(",:", $keys) . ")";
+        "` (" . implode(", ", $keys) . ")" .
+        " VALUES(:" . implode(", :", $keys) . ")";
     }
 
     /**
