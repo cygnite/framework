@@ -74,10 +74,10 @@ class Apc implements StorageInterface
     * @false $default_lifeTime null
     *@return  boolean
     */
-    public function setLifeTime($defaultLifeTime = "")
+    public function setLifeTime($lifeTime = "")
     {
-         $this->lifeTime = ($defaultLifeTime == "" || is_null($defaultLifeTime))
-             ? $this->defaultTime : $defaultLifeTime;
+         $this->lifeTime = ($lifeTime == "" || is_null($lifeTime))
+             ? $this->defaultTime : $lifeTime;
 
          return true;
     }

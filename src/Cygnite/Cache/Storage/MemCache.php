@@ -83,6 +83,8 @@ class MemCache implements StorageInterface
                 }
             }
         }
+
+        return $this;
     }
     /*
      * Prevent cloning

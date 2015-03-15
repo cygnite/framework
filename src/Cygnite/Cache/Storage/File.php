@@ -93,8 +93,8 @@ class File implements StorageInterface
     public function isCached($key)
     {
         if ($this->getCache() != false) {
-            $cachedData = $this->getCache();
-            return isset($cachedData[$key]['data']);
+            $cached = $this->getCache();
+            return isset($cached[$key]['data']);
         }
     }
 
@@ -145,6 +145,22 @@ class File implements StorageInterface
 
         return $this;
 
+    }
+
+    /**
+     * Checking cache existence
+     *
+     * @param $key
+     * @return bool
+     */
+    public function has($key)
+    {
+        if ($this->where == true) {
+            $this->setCache($key);
+        }
+
+        $cached = $this->getCache();
+        return !empty($cached[$key]) ? true : false;
     }
 
     /**
@@ -323,7 +339,7 @@ class File implements StorageInterface
         $result = false;
         if ($expiration !== 0) {
             $timeDiff = time() - $timestamp;
-            ($timeDiff > $expiration) ? $result = true : $result = false;
+            $result =($timeDiff > $expiration) ? true :  false;
         }
 
         return $result;
