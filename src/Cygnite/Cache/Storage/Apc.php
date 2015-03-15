@@ -9,10 +9,9 @@
  */
 namespace Cygnite\Cache\Storage;
 
-use Exception;
-use Cygnite\Proxy\StaticResolver;
-use Cygnite\Cache\StorageInterface;
 use Cygnite\Cache\Exceptions\ApcExtensionNotFoundException;
+use Cygnite\Cache\StorageInterface;
+use Exception;
 
 if (!defined('CF_SYSTEM')) {
     exit('External script access not allowed');
@@ -36,7 +35,7 @@ class Apc implements StorageInterface
 
     private $defaultTime = 600; //default time is set 600
 
-    private $is_enable = false;   // is apc enabled
+    private $is_enable = false; // is apc enabled
 
     private $option = false; // flag set false
 
@@ -76,16 +75,17 @@ class Apc implements StorageInterface
     */
     public function setLifeTime($lifeTime = "")
     {
-         $this->lifeTime = ($lifeTime == "" || is_null($lifeTime))
-             ? $this->defaultTime : $lifeTime;
+        $this->lifeTime = ($lifeTime == "" || is_null($lifeTime))
+            ? $this->defaultTime : $lifeTime;
 
-         return true;
+        return true;
     }
 
     /**
-    * This function is used to get life time of apc cache
-    * @return  boolean
-    */
+     * This function is used to get life time of apc cache
+     *
+     * @return  boolean
+     */
 
     public function getLifeTime()
     {
@@ -105,11 +105,11 @@ class Apc implements StorageInterface
     public function store($key, $value)
     {
         if (is_null($key) || $key == "") {
-            throw new \InvalidArgumentException("Empty key passed ".__FUNCTION__);
+            throw new \InvalidArgumentException("Empty key passed " . __FUNCTION__);
         }
 
         if (is_null($value) || $value == "") {
-            throw new \InvalidArgumentException("Empty value passed ".__FUNCTION__);
+            throw new \InvalidArgumentException("Empty value passed " . __FUNCTION__);
         }
 
         return (apc_store($key, $value, $this->getLifeTime()))
@@ -140,11 +140,11 @@ class Apc implements StorageInterface
     public function destroy($key)
     {
         if (is_null($key) || $key == "") {
-            throw new \InvalidArgumentException("Empty key passed ".__FUNCTION__);
+            throw new \InvalidArgumentException("Empty key passed " . __FUNCTION__);
         }
 
         apc_fetch($key, $this->option);
 
         return ($this->option) ? apc_delete($key) : true;
     }
-    }
+}
