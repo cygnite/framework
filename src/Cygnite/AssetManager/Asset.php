@@ -23,18 +23,19 @@ if (!defined('CF_SYSTEM')) {
  *
  * @author Sanjoy Dey <dey.sanjoy0@gmail.com>
  * <code>
-$asset = AssetCollection::make(function($asset)
-{
-$asset->add('style', array('path' => 'css.cygnite.css', 'media' => '', 'title' => ''))
-->add('style', array('path' => 'css.*', 'media' => '', 'title' => ''))
-->add('script', array('path' => 'js.*', 'attributes' => ''))
-->add('link', array('path' => '', 'name' => '', 'attributes' => array()));
-
-return $asset;
-});
-$asset->dump('style');
-$asset->dump('script');
-$asset->dump('link');
+ *  $asset = AssetCollection::make(function($asset)
+ *  {
+ *   $asset->add('style', array('path' => 'css.cygnite.css', 'media' => '', 'title' => ''))
+ *   ->add('style', array('path' => 'css.*', 'media' => '', 'title' => ''))
+ *   ->add('script', array('path' => 'js.*', 'attributes' => ''))
+ *   ->add('link', array('path' => '', 'name' => '', 'attributes' => array()));
+ *
+ *   return $asset;
+ *  });
+ *
+ *  $asset->dump('style');
+ *  $asset->dump('script');
+ *  $asset->dump('link');
  * </code>
  */
 
