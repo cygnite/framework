@@ -21,6 +21,7 @@ use Exception;
 use PDOException;
 use Cygnite\Helpers\Inflector;
 use Cygnite\Common\Pagination;
+use Cygnite\Foundation\Collection;
 
 //extends Connection
 class Query
@@ -473,15 +474,15 @@ class Query
     /**
      * Add a RAW JOIN source to the query
      */
-    public function rawJoin($table, $constraint, $tableAlias, $parameters = array())
+    public function rawJoin($query, $constraint, $tableAlias)
     {
+        $this->hasJoin = true;
+
         // Add table alias if present
         if (!is_null($tableAlias)) {
             $tableAlias = $this->quoteIdentifier($tableAlias);
-            $table .= " {$tableAlias}";
+            $query .= " {$tableAlias}";
         }
-
-        $this->_values = array_merge($this->_values, $parameters);
 
         // Build the constraint
         if (is_array($constraint)) {
@@ -491,7 +492,7 @@ class Query
             $constraint = "{$firstColumn} {$operator} {$secondColumn}";
         }
 
-        $this->joinSources[] = "{$table} ON {$constraint}";
+        $this->joinSources[] = "{$query} ON {$constraint}";
 
         return $this;
     }
@@ -1229,7 +1230,7 @@ class Query
                 ) . '.*';
         } else {
 
-            if (strpos($column, 'AS') !== false || strpos($column, 'as') !== false) {
+            if (stripos($column, 'AS') !== false) {
                 return $this->selectExpr($column);
             }
 
