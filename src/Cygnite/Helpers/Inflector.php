@@ -177,7 +177,7 @@ class Inflector extends StaticResolver
     /**
      * Class name - ClassName
      */
-    protected static function camelize($word)
+    protected function camelize($word)
     {
         return self::toCamelCase($word);
     }

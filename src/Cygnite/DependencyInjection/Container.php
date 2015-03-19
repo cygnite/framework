@@ -78,17 +78,14 @@ class Container extends DependencyExtension implements ContainerInterface, Array
      */
     public function share(Closure $callable)
     {
-        return function ($c) use ($callable) {
+        return function () use ($callable) {
             static $object;
             $c = $this;
-
             if (is_null($object)) {
-
                 if ($callable instanceof Closure) {
                     $object = $callable($c);
                 }
             }
-
             return $object;
         };
     }
@@ -256,17 +253,29 @@ class Container extends DependencyExtension implements ContainerInterface, Array
      *
      *
      */
-    public function singleton($class)
+    public function singleton($key, $callback = null)
     {
-        static $instance = [];
+        static $instance = array();
 
-        if (!isset($instance[$class])) {
-            $instance[$class] = new $class;
+        // if closure callback given we will create a singleton instance of class
+        // and return it to user
+        if ($callback instanceof Closure) {
+
+            if (!isset($instance[$key])) {
+                $instance[$key] = $callback($this);
         }
 
-        return $instance[$class];
+            return $this->stack[$key] = $instance[$key];
     }
 
+        //| If callback is not instance of closure then we will simply
+        //| create a singleton instance and return it
+        if (!isset($instance[$key])) {
+            $instance[$key] = new $callback();
+        }
+
+        return $instance[$key];
+    }
     /**
      * Resolve the class. We will create and return instance if already
      * not exists.
@@ -375,8 +384,7 @@ class Container extends DependencyExtension implements ContainerInterface, Array
         if (!class_exists($resolvedClass)) {
             throw new DependencyException(sprintf('Class "%s" not exists.', $resolvedClass));
         }
-
-        return new $resolvedClass;
+        return $this->stack[$resolvedClass] = new $resolvedClass;
     }
 
     /**

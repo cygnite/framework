@@ -304,6 +304,16 @@ abstract class ActiveRecord implements \ArrayAccess
         }
     }
 
+    /**
+     * Get attributes array
+     *
+     * @return array|null
+     */
+    public function getAttributes()
+    {
+        return isset($this->attributes) ? $this->attributes : null;
+    }
+
     public function __get($key)
     {
         try {

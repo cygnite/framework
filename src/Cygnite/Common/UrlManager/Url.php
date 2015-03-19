@@ -11,15 +11,15 @@
 
 namespace Cygnite\Common\UrlManager;
 
-use InvalidArgumentException;
-use Cygnite\Base\Router;
-use Cygnite\Foundation\Application as App;
-
 /*
  * Url Manager
  *
  * @author Sanjoy Dey <dey.sanjoy0@gmail.com>
  */
+use Cygnite\Base\Router;
+use Cygnite\Foundation\Application as App;
+use InvalidArgumentException;
+
 class Url
 {
 

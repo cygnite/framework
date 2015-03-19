@@ -2,9 +2,7 @@
 namespace Cygnite\AssetManager;
 
 use Closure;
-use Cygnite\AssetManager\Html;
 use Cygnite\Common\UrlManager\Url;
-use InvalidArgumentException;
 
 if (!defined('CF_SYSTEM')) {
     exit('External script access not allowed');
@@ -24,7 +22,7 @@ if (!defined('CF_SYSTEM')) {
  *   to sanjoy@hotmail.com so I can send you a copy immediately.
  *
  * @Package                    :  Packages
- * @Sub Packages               :
+ * @Sub                        Packages               :
  * @Filename                   :  AssetCollection
  * @Description                :  Used to get the Asset object and mange all assets
  *

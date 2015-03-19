@@ -64,8 +64,6 @@ class Dispatcher
      */
     public function run()
     {
-        $dispatcher = null;
-        $dispatcher = $this;
         // If no argument passed or single slash call default controller
         if ($this->router->getCurrentUri() == '/' ||
             $this->router->getCurrentUri() == '/' . self::$indexPage
@@ -73,8 +71,8 @@ class Dispatcher
             if ($this->default['controller'] != '') {
 
                 list($controller, $action) = $this->getControllerAndAction(
-                    $dispatcher->default['controller'],
-                    $dispatcher->default['action']
+                    $this->default['controller'],
+                    $this->default['action']
                 );
                 $response = $this->handleControllerDependencies($controller, $action);
             }

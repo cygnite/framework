@@ -32,17 +32,15 @@ class Apc implements StorageInterface
 
     // default life time
     private $lifeTime;
-
     private $defaultTime = 600; //default time is set 600
-
     private $is_enable = false; // is apc enabled
-
     private $option = false; // flag set false
 
     /*
     * Constructor function to check availability of apc, throw exception if not available
     *
     */
+
     public function __construct()
     {
         if (extension_loaded('apc')) {
@@ -55,10 +53,6 @@ class Apc implements StorageInterface
     /*
     * Prevent cloning
     */
-    final private function __clone()
-    {
-
-    }
 
     /**
      * @return Apc
@@ -66,30 +60,6 @@ class Apc implements StorageInterface
     public static function make()
     {
         return new self();
-    }
-
-    /*
-    * This function is used to set default life time
-    * @false $default_lifeTime null
-    *@return  boolean
-    */
-    public function setLifeTime($lifeTime = "")
-    {
-        $this->lifeTime = ($lifeTime == "" || is_null($lifeTime))
-            ? $this->defaultTime : $lifeTime;
-
-        return true;
-    }
-
-    /**
-     * This function is used to get life time of apc cache
-     *
-     * @return  boolean
-     */
-
-    public function getLifeTime()
-    {
-        return (!is_null($this->lifeTime)) ? $this->lifeTime : $this->defaultTime;
     }
 
     /**
@@ -114,6 +84,31 @@ class Apc implements StorageInterface
 
         return (apc_store($key, $value, $this->getLifeTime()))
             ? true : false;
+    }
+
+    /*
+    * This function is used to set default life time
+    * @false $default_lifeTime null
+    *@return  boolean
+    */
+
+    /**
+     * This function is used to get life time of apc cache
+     *
+     * @return  boolean
+     */
+
+    public function getLifeTime()
+    {
+        return (!is_null($this->lifeTime)) ? $this->lifeTime : $this->defaultTime;
+    }
+
+    public function setLifeTime($lifeTime = "")
+    {
+        $this->lifeTime = ($lifeTime == "" || is_null($lifeTime))
+            ? $this->defaultTime : $lifeTime;
+
+        return true;
     }
 
     /**
@@ -146,5 +141,10 @@ class Apc implements StorageInterface
         apc_fetch($key, $this->option);
 
         return ($this->option) ? apc_delete($key) : true;
+    }
+
+    final private function __clone()
+    {
+
     }
 }

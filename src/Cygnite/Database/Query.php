@@ -528,7 +528,7 @@ class Query
             if ($statement->rowCount() > 0) {
                 return new Collection($data);
             } else {
-                return null;
+                return new Collection(array());
             }
         } catch (PDOException $ex) {
             throw new \Exception("Database exceptions: Invalid query x" . $ex->getMessage());
@@ -1103,7 +1103,7 @@ class Query
     private function buildQuery()
     {
         // Ignore columns while selecting from database
-        if (method_exists(self::getActiveRecord(), 'exceptColumns')) {
+        if (method_exists(self::getActiveRecord(), 'skip')) {
             $this->prepareExceptColumns();
         }
 
@@ -1131,7 +1131,7 @@ class Query
         $columns = $this->query($select->schema)->getAll();
 
         // Get all column name which need to remove from the result set
-        $exceptColumns = $ar->exceptColumns();
+        $exceptColumns = $ar->skip();
         $columnArray = array();
         foreach ($columns as $key => $value) {
 
