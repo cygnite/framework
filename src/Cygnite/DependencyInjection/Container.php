@@ -263,10 +263,10 @@ class Container extends DependencyExtension implements ContainerInterface, Array
 
             if (!isset($instance[$key])) {
                 $instance[$key] = $callback($this);
-        }
+            }
 
             return $this->stack[$key] = $instance[$key];
-    }
+        }
 
         //| If callback is not instance of closure then we will simply
         //| create a singleton instance and return it

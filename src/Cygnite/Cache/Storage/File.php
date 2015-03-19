@@ -185,7 +185,7 @@ class File implements StorageInterface
      */
     private function getPath()
     {
-        return $this->cachePath;
+        return str_replace(array('.', '/'), DS, $this->cachePath);
     }
 
     /**
@@ -237,7 +237,7 @@ class File implements StorageInterface
         );
 
         if ($this->where == true) {
-            $this->setCache($key);
+            $this->setCache($key)->setPath(APPPATH.DS.'temp.cache'.DS);
         }
 
         if (is_array($this->getCache())) {
@@ -261,12 +261,13 @@ class File implements StorageInterface
      * Checking cache existence
      *
      * @param $key
+     * @param $key
      * @return bool
      */
     public function has($key)
     {
         if ($this->where == true) {
-            $this->setCache($key);
+            $this->setCache($key)->setPath(APPPATH.DS.'temp.cache'.DS);
         }
 
         $cached = $this->getCache();
@@ -285,7 +286,7 @@ class File implements StorageInterface
     public function get($key, $timestamp = false)
     {
         if ($this->where == true) {
-            $this->setCache($key);
+            $this->setCache($key)->setPath(APPPATH.DS.'temp.cache'.DS);
         }
 
         $cached = array();
