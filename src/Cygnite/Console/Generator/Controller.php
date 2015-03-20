@@ -446,7 +446,7 @@ class Controller
     public static function __callStatic($method, $arguments = array())
     {
         if ($method == 'instance') {
-            return new self($arguments[0], $arguments[1], $arguments[2], $arguments[3]);
+            return new self($arguments[0], $arguments[1], $arguments[2]);
         }
     }
 

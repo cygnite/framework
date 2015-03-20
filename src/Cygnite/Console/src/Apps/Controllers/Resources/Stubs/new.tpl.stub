@@ -3,7 +3,7 @@
     * Display the form for creating new resource.
     *
     */
-    public function newAction()
+    public function getNewAction()
     {
         //
 

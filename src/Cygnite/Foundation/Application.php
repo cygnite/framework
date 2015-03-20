@@ -13,10 +13,10 @@ namespace Cygnite\Foundation;
 use Closure;
 use Exception;
 use Cygnite\Strapper;
-use Cygnite\Base\Router;
+use Cygnite\Base\Router\Router;
 use Cygnite\Helpers\Config;
 use Cygnite\Helpers\Inflector;
-use Cygnite\Base\Dispatcher;
+use Cygnite\Base\Request\Dispatcher;
 use Cygnite\Common\UrlManager\Url;
 use Cygnite\DependencyInjection\Container;
 

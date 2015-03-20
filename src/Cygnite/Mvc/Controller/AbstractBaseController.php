@@ -12,7 +12,7 @@
 namespace Cygnite\Mvc\Controller;
 
 use Exception;
-use Cygnite\Base\Event;
+use Cygnite\Base\EventHandler\Event;
 use Cygnite\Common\Encrypt;
 use Cygnite\Common\SessionManager\Session;
 use Cygnite\Foundation\Application as App;

@@ -4,7 +4,7 @@
     *
     * @param  int  $id
     */
-    public function showAction($id)
+    public function getShowAction($id)
     {
         //
 

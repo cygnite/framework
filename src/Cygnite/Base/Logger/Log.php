@@ -1,40 +1,10 @@
 <?php
-namespace Cygnite\Base;
+namespace Cygnite\Base\Logger;
 
 use Config;
 use Cygnite\Exception;
 
-/**
- *  Cygnite Framework
- *
- *  An open source application development framework for PHP 5.3x or newer
- *
- *   License
- *
- *   This source file is subject to the MIT license that is bundled
- *   with this package in the file LICENSE.txt.
- *   http://www.cygniteframework.com/license.txt
- *   If you did not receive a copy of the license and are unable to
- *   obtain it through the world-wide-web, please send an email
- *   to sanjoy@hotmail.com so I can send you a copy immediately.
- *
- * @Package          :  Packages
- * @Sub Packages     :  Base
- * @Filename         :  CF_Logger
- * @Description      :  This class is used to handle error logs of the cygnite framework
- * @Author           :  Sanjoy Dey
- * @Copyright        :  Copyright (c) 2013 - 2014,
- * @Link             :  http://www.cygniteframework.com
- * @Since            :  Version 1.0
- * @Filesource
- * @Warning          :  Any changes in this library can cause abnormal behaviour of the framework
- *
- *
- */
-
-//AppLogger::writeLog('Logger Initialized By Sanjay',__FILE__);
-
-class Logger
+class Log
 {
     public $log_errors = '';
     protected $logDateFormat =  'Y-m-d H:i:s';
@@ -56,7 +26,7 @@ class Logger
         } else {
             $this->log_path  = APPPATH.'temp/logs/';
         }
-        // var_dump($this->config['ERROR_CONFIG']['log_file_name']);
+
         $this->fileName  = ($this->config['log_file_name'] !="") ?
             $this->config['log_file_name']  :
             'cf_error_logs';
@@ -64,7 +34,7 @@ class Logger
 
     public function read()
     {
-        //var_dump( $this->config);
+
     }
 
     private function open($logFilePath)
@@ -111,13 +81,14 @@ class Logger
             $this->open($this->logPath);
         }
 
-        /*   if (file_exists($logFilePath)):
-            if (filesize($logFilePath) > $this->logSize):
+        /*
+        if (file_exists($logFilePath)) {
+            if (filesize($logFilePath) > $this->logSize) {
                     $this->fp = fopen($logFilePath, 'w') or die("can't open file file!");
                     fclose($this->fp);
                     unlink($logFilePath);
-           endif;
-        endif;
+           }
+        }
         */
 
         switch ($logLevel) {

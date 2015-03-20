@@ -2,7 +2,7 @@
     * List all data of resource.
     *
     */
-    public function indexAction()
+    public function getIndexAction()
     {
         //
 

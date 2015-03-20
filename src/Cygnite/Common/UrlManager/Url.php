@@ -16,7 +16,7 @@ namespace Cygnite\Common\UrlManager;
  *
  * @author Sanjoy Dey <dey.sanjoy0@gmail.com>
  */
-use Cygnite\Base\Router;
+use Cygnite\Base\Router\Router;
 use Cygnite\Foundation\Application as App;
 use InvalidArgumentException;
 

@@ -3,7 +3,7 @@
     * Creating a resource and save into database.
     *
     */
-    public function createAction()
+    public function postCreateAction()
     {
         //
 

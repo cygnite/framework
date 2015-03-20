@@ -8,15 +8,14 @@
  * file that was distributed with this source code.
  */
 
-namespace Cygnite\Base;
+namespace Cygnite\Base\EventHandler;
 
 use Closure;
-use Cygnite\Reflection;
 
 /**
  * Class Event
  *
- * @package Cygnite\Base
+ * @package Cygnite\Base\EventHandler
  * @author  Sanjoy Dey
  */
 
@@ -25,40 +24,55 @@ class Event implements EventInterface
     protected $events = array();
 
     /**
-     * Attach the new event to event stack
-     *
-     * @param $eventName
-     * @param $callback
+     * @param Closure $callback
+     * @return static
      */
-    public function attach($eventName, $callback)
+    public static function create(Closure $callback = null)
     {
-
-        if (!isset($this->events[$eventName])) {
-            $this->events[$eventName] = array();
+        // Check if $callback is instance of Closure we return callback
+        if (!is_null($callback) && $callback instanceof Closure) {
+            return $callback(new Static);
         }
 
-        $this->events[$eventName][] = $callback;
+        // Return instance of the Event Handler
+        return new Static;
+    }
+
+    /**
+     * Attach the new event to event stack
+     *
+     * @param $name
+     * @param $callback
+     */
+    public function attach($name, $callback)
+    {
+
+        if (!isset($this->events[$name])) {
+            $this->events[$name] = array();
+        }
+
+        $this->events[$name][] = $callback;
     }
 
     /**
      * We will check whether event is registered,
      * if so we will trigger the event.
      *
-     * @param       $eventName
+     * @param       $name
      * @param array $data
      * @return mixed
      */
-    public function trigger($eventName, $data = array())
+    public function trigger($name, $data = array())
     {
-        foreach ($this->events[$eventName] as $callback) {
+        foreach ($this->events[$name] as $callback) {
 
             if (is_object($callback) && ($callback instanceof Closure)) {
-                $callback($eventName, $data);
+                $callback($name, $data);
             }
 
             if (strpos($callback, '@')) {
                 return $this->callFunction($callback, $data);
-                }
+            }
 
             if (strpos($callback, '::')) {
                 return $this->callUserFunctionEvent($callback);
@@ -84,15 +98,18 @@ class Event implements EventInterface
      */
     private function callUserFunctionEvent($callback)
     {
-        $class = null; $expression = array();
+        $class = null;
+        $expression = array();
         $expression = explode('::', $callback);
-        $class = '\\'.str_replace('_', '\\', $expression[0]);
+        $class = '\\' . str_replace('_', '\\', $expression[0]);
         call_user_func(array(new $class, $expression[1]));
     }
+
     /**
      * Flush the event
      *
      * @param string $event
+     * @return mixed|void
      */
     public function flush($event = null)
     {

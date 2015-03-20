@@ -7,7 +7,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-namespace Cygnite\Base;
+namespace Cygnite\Base\Router\Router;
 
 use Exception;
 use Reflection;
@@ -81,7 +81,7 @@ class Router implements RouterInterface
     * @var array
     */
     private $controllerWithNS;
-    private $method;
+    public $method;
     private $handledRoute;
     private $afterRouter;
     // route base path
@@ -107,6 +107,7 @@ class Router implements RouterInterface
      * @param string $methods Allowed methods, | delimited
      * @param string $pattern A route pattern such as /about/system
      * @param object $func    The handling function to be executed
+     * @return mixed|void
      */
     public function before($methods, $pattern, $func)
     {
@@ -126,8 +127,7 @@ class Router implements RouterInterface
     public function after($func)
     {
         $pattern = $this->setBaseRoute('{:all}');
-
-        foreach (explode('|', 'GET|POST') as $method) {
+        foreach (explode('|', 'GET|POST|PUT|PATCH|DELETE') as $method) {
             $this->after[$method][] = array(
                 'pattern' => $pattern,
                 'fn' => $func
@@ -562,7 +562,7 @@ class Router implements RouterInterface
             strtoupper('get'),
             $name,
             function () use ($me, $controller, $action) {
-                $args = array($controller . '.' . $action);
+                $args = array($controller . '.' .'get'.ucfirst($action));
                 return $me->callController($args);
             }
         );
@@ -659,7 +659,7 @@ class Router implements RouterInterface
      */
     protected function setResourceNew($name, $controller, $action, $options = array())
     {
-        return $this->mapResource('get', $name . '/' . $action, $controller, $action);
+        return $this->mapResource('get', $name . '/' . $action, $controller, 'get'.ucfirst($action));
     }
 
     /**
@@ -671,7 +671,7 @@ class Router implements RouterInterface
      */
     protected function setResourceCreate($name, $controller, $action, $options = array())
     {
-        return $this->mapResource('post', $name, $controller, $action);
+        return $this->mapResource('post', $name, $controller, 'post'.ucfirst($action));
     }
 
     /**
@@ -683,7 +683,7 @@ class Router implements RouterInterface
      */
     protected function setResourceShow($name, $controller, $action, $options = array())
     {
-        return $this->mapResource('get', $name . '/(\d+)', $controller, $action, true);
+        return $this->mapResource('get', $name . '/(\d+)', $controller, 'get'.ucfirst($action), true);
     }
 
     /**
@@ -695,7 +695,7 @@ class Router implements RouterInterface
      */
     protected function setResourceEdit($name, $controller, $action, $options = array())
     {
-        return $this->mapResource('get', $name . '/(\d+)/edit', $controller, $action, true);
+        return $this->mapResource('get', $name . '/(\d+)/edit', $controller, 'get'.ucfirst($action), true);
     }
 
     /**
@@ -707,7 +707,7 @@ class Router implements RouterInterface
      */
     protected function setResourceUpdate($name, $controller, $action, $options = array())
     {
-        return $this->mapResource('PUT|PATCH', $name . '/(\d+)/', $controller, $action, true);
+        return $this->mapResource('put|patch', $name . '/(\d+)/', $controller, 'put'.ucfirst($action), true);
     }
 
     /**
