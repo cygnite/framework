@@ -1,14 +1,14 @@
 {% extends 'layout/main/base.html.twig' %}
 
 {% block title %}
-    Cygnite Framework - Simple Crud Operation
+    {{ title }}
 {% endblock %}
 
 {% block content %}
 
     {# dump(records) #}
 
-    {{ flashMessage }}
+    {{ flashMessage | raw }}
 
     <div class="page-header">
     	<h3>CRUD Application

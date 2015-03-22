@@ -109,7 +109,7 @@ class %ControllerName%Controller extends AbstractBaseController
 
                 // Save form details
                 if ($%modelName%->save()) {
-                    $this->setFlash('success', '%ControllerName% saved successfully!')
+                    $this->setFlash('success', '%ControllerName% added successfully!')
                         ->redirectTo('%controllerName%/index/'.Url::segment(3));
                 } else {
                     $this->setFlash('error', 'Error occured while saving %ControllerName%!')
@@ -161,7 +161,7 @@ class %ControllerName%Controller extends AbstractBaseController
 
                 // Save form information
                 if ($%modelName%->save()) {
-                    $this->setFlash('success', '%ControllerName% saved successfully!')
+                    $this->setFlash('success', '%ControllerName% updated successfully!')
                         ->redirectTo('%controllerName%/index/'.Url::segment(3));
                 } else {
                     $this->setFlash('error', 'Error occured while saving %ControllerName%!')
