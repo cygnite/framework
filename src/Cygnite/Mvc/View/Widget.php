@@ -27,7 +27,7 @@ class Widget extends StaticResolver implements \ArrayAccess
             $views = $expression[0];
             $moduleViews = DS.'Views'.DS;
         } else {
-            $moduleViews = '';
+            $moduleViews = DS;
             $views = 'views'.DS.$expression[0];
         }
 

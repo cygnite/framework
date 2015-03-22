@@ -1,0 +1,24 @@
+{% extends 'layout/main/base.html.twig' %}
+
+{% block title %}
+    {{ title }}
+{% endblock %}
+
+{% block content %}
+
+    <div class="pull-right">
+            {{  link('#controllerName#/', 'Back',{'class': 'btn btn-default btn-small btn-inverse'}) | raw }}
+    </div>
+
+    <div class="form-horizontal">
+        <h2>Showing #controllerName# #{{ record.id }}</h2>
+
+        {#recordDivElements#}
+
+    </div>
+
+{% endblock %}
+
+{% block footer %}
+
+{% endblock %}

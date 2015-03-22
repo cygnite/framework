@@ -1,33 +1,22 @@
 <?php
+/*
+ * This file is part of the Cygnite package.
+ *
+ * (c) Sanjoy Dey <dey.sanjoy0@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 namespace Cygnite\Console\Generator;
 
 use Cygnite\Helpers\Inflector;
-
 /**
- *  Cygnite Framework
+ * Cygnite View Generator
  *
- *  An open source application development framework for PHP 5.3 or newer
- *
- *   License
- *
- *   This source file is subject to the MIT license that is bundled
- *   with this package in the file LICENSE.txt.
- *   http://www.cygniteframework.com/license.txt
- *   If you did not receive a copy of the license and are unable to
- *   obtain it through the world-wide-web, please send an email
- *   to sanjoy@hotmail.com so that I can send you a copy immediately.
- *
- * @Package            :  Console
- * @Filename           :  View.php
- * @Description        :  This class is used to generate view pages of your application using Cygnite console
- * @Author             :  Sanjoy Dey
- * @Copyright          :  Copyright (c) 2013 - 2014,
- * @Link	           :  http://www.cygniteframework.com
- * @Since	           :  Version 1.0.6
- * @File Source
+ * This class used to generate views
+ * @author Sanjoy Dey <dey.sanjoy0@gmail.com>
  *
  */
-
 class View
 {
     private $command;
@@ -48,12 +37,7 @@ class View
     // Twig layout extension
     const TWIG_EXTENSION = '.html.twig';
 
-    private $views = array(
-                        'index',
-                        'create',
-                        'update',
-                        'view',
-    );
+    private $views = array('index', 'create', 'update', 'show');
 
     private $fields = array();
 
@@ -201,7 +185,7 @@ class View
             case 'update':
                 $content = $this->replaceCreateOrUpdateTemplateContents($content);
                 break;
-            case 'view':
+            case 'show':
                 $content = $this->replaceViewTemplateContents($content);
                 break;
         }
@@ -246,8 +230,9 @@ class View
             $content
         );
 
-        $content = str_replace('#ControllerName#',
-            ucfirst($this->command->controller),
+        $content = str_replace(
+            '#ControllerName#',
+            Inflector::classify(str_replace("Controller", "", $this->command->controller)),
             $content
         );
 
@@ -313,6 +298,12 @@ class View
             $content
         );
 
+        $content = str_replace(
+            '#Controller#',
+            Inflector::classify(str_replace("Controller", "", $this->command->controller)),
+            $content
+        );
+
         return $content;
     }
 
@@ -335,9 +326,9 @@ class View
 
                 $column .=
                 "\t\t\t".'<div class="form-group">
-                    <div class="form-label control-label">'.
+                    <label class="col-sm-2 control-label">'.
                     Inflector::underscoreToSpace($value->column_name).
-                    '</div>
+                    '</label>
                     <div class="col-sm-10">
                         <p class="form-control-static"><span>'.$rowType.'</span></p>
                     </div>

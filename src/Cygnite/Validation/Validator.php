@@ -5,7 +5,7 @@ use Closure;
 use Cygnite\Proxy\StaticResolver;
 use Cygnite\Foundation\Application;
 use Cygnite\Helpers\Inflector;
-use Cygnite\Common\Input;
+use Cygnite\Common\Input\Input;
 
 /**
  *  Cygnite Framework

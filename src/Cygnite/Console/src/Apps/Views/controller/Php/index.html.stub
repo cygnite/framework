@@ -1,58 +1,58 @@
 <?php
 use Cygnite\AssetManager\Asset;
-use Cygnite\Common\UrlManager\Url; 
-?>
-<?php
+use Cygnite\Common\UrlManager\Url;
+
 if ($this->hasFlash('success')) {
     echo $this->getFlash('success');
 } elseif ($this->hasError()) {
     echo $this->getFlash('error');
 }
 ?>
-<div style="margin-left: 79%;margin-bottom: 10px;margin-top: 10px;">
-    <?php echo Asset::link('#controllerName#/type', 'Add #ControllerName#', array('class' => 'btn btn btn-info')); ?>
+<div class="page-header">
+	<h3>CRUD Application
+        <div class="pull-right">
+        <!--<span class="glyphicon glyphicon-plus-sign">-->
+        <?php echo Asset::link('#controllerName#/add', 'Add #ControllerName#', array('class' => 'btn btn-small btn-info cboxElement')); ?>
+        </div>
+	</h3>
 </div>
 
-<table cellspacing="0" id="dataTable" cellpadding="0" style="width:890px;margin:0px auto;" class="tablesorter data-grid">
+<table  id="dataGrid" class="table table-striped table-hover">
     <thead>
-    <tr>
-        <th>Sl No.</th>
-        {#thColumns#}
-        <th class="sorter-false">Action</th>
-    </tr>
+        <tr>
+            <th>Sl No.</th>
+            {#thColumns#}
+            <th class="sorter-false">Action</th>
+        </tr>
     </thead>
-
     <tbody>
     <?php
     if (count($this->records) > 0) {
-        
-		//$i = 1;
-		if (Url::segment(2) == '' || Url::segment(3) == '' || Url::segment(3) == 1 ) { 
-			$i =1; 
-		} else { 
-			$i = (Url::segment(3) - 1) * $this->records[0]->perPage + 1; 
-		}
-		
-		
+        //$i = 1;
+        if (Url::segment(2) == '' || Url::segment(3) == '' || Url::segment(3) == 1 ) {
+            $i =1;
+        } else {
+            $i = (Url::segment(3) - 1) * $this->records[0]->perPage + 1;
+        }
+
         $rowType = null;
         foreach ($this->records as $key => $value) {
 
             $rowType = ($i % 2 == 0) ? 'even' : 'odd';
-            ?>
-            <tr class='<?php echo $rowType; ?>'>
-                <td> <?php echo $i; ?></td>
-                {#tdColumns#}
-                <td>
-                    <?php
-                    echo Asset::link('#controllerName#/show/' . $value->{%primaryKey%}, 'View', array('class' => 'btn btn btn-info'));
-                    echo Asset::link('#controllerName#/type/' . $value->{%primaryKey%}, 'Edit', array('class' => 'btn btn btn-info'));
-                    echo Asset::link('#controllerName#/delete/' . $value->{%primaryKey%}, 'Delete', array('class' => 'btn btn-danger'));
-                    ?>
+    ?>
+        <tr class='<?php echo $rowType; ?>'>
+            <td> <?php echo $i; ?></td>
+            {#tdColumns#}
+            <td>
+                <?php
+                echo Asset::link('#controllerName#/show/' . $value->{%primaryKey%}, 'View', array('class' => 'btn btn btn-info btn-xs'));
+                echo Asset::link('#controllerName#/edit/' . $value->{%primaryKey%}, 'Edit', array('class' => 'btn btn-default btn-xs'));
+                echo Asset::link('#controllerName#/delete/' . $value->{%primaryKey%}, 'Delete', array('class' => 'btn btn-danger btn-xs' ));
+                ?>
 
-                </td>
-            </tr>
-            <?php
-            $i++;
+            </td>
+        </tr>
+    <?php $i++;
         }
     } else {
         echo 'No records found !';
@@ -60,7 +60,6 @@ if ($this->hasFlash('success')) {
     ?>
     </tbody>
 
-
 </table>
 
-<div ><?php echo $this->links; ?> </div>
+<nav > <?php //echo $this->links; ?> </nav>

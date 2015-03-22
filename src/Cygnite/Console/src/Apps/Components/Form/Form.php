@@ -22,6 +22,9 @@ class %controllerName%Form extends Form
     //set validator object
     public $validation;
 
+    // We will set action url
+    public $action = 'add';
+
     public function __construct($object = null, $segment = null)
     {
         // your model object

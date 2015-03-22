@@ -1,6 +1,7 @@
 <?php
 namespace Cygnite\Mvc\View;
 
+use Cygnite\Common\UrlManager\Url;
 use Cygnite\Reflection;
 use Cygnite\AssetManager\Asset;
 
@@ -44,6 +45,12 @@ class Template
 
     private $reflection;
 
+    // Set default functions to twig engine
+    private $functions;
+
+    private $validProperties = array(
+        'twigLoader', 'autoReload', 'twigDebug', 'layout', 'templateExtension'
+    );
     /**
      * @param            $view
      * @param Reflection $reflection
@@ -59,23 +66,12 @@ class Template
             $this->reflection->setClass($this->view);
         }
 
-        if (property_exists($this->view, 'twigLoader')) {
-            $this->setPropertyAccessible('twigLoader');
-        }
-        if (property_exists($this->view, 'autoReload')) {
-            $this->setPropertyAccessible('autoReload');
-        }
+        // we will make accessible all valid properties
+        foreach ($this->validProperties as $key=> $property) {
 
-        if (property_exists($this->view, 'twigDebug')) {
-            $this->setPropertyAccessible('twigDebug');
-        }
-
-        if (property_exists($this->view, 'layout')) {
-            $this->setPropertyAccessible('layout');
-        }
-
-        if (property_exists($this->view, 'templateExtension')) {
-            $this->setPropertyAccessible('templateExtension');
+            if (property_exists($this->view, $property)) {
+                $this->setPropertyAccessible($property);
+            }
         }
     }
 
@@ -100,15 +96,47 @@ class Template
             'debug' => $this->properties['twigDebug'],
         ));
 
-        $function = new \Twig_SimpleFunction('link',
+        $this->setDefaultFunctions();
+
+        return $this->template;
+    }
+
+    public function getTwigSimpleFunctionInstance($name, $callback)
+    {
+        return new \Twig_SimpleFunction($name, $callback);
+    }
+
+    public function setDefaultFunctions()
+    {
+        $this->setLink() // set link() function
+             ->setTwigBaseUrl(); // set baseUrl() function
+
+        foreach ($this->functions as $key => $func) {
+            $this->template->addFunction($func);
+        }
+    }
+
+    private function setLink()
+    {
+        // We will set default function to twig engine
+        $this->functions[] = $this->getTwigSimpleFunctionInstance('link',
             function ($link, $name = null, $attributes = array()) {
                 return Asset::link(str_replace('.', '/', $link), $name, $attributes);
             }
         );
 
-        $this->template->addFunction($function);
+        return $this;
+    }
 
-        return $this->template;
+    private function setTwigBaseUrl()
+    {
+        // We will set baseUrl as default function to twig engine
+        $this->functions[] = $this->getTwigSimpleFunctionInstance('baseUrl', function ()
+        {
+            return Url::getBase();
+        });
+
+        return $this;
     }
 
     /**

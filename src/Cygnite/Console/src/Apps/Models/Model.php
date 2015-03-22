@@ -20,15 +20,18 @@ class %StaticModelName% extends ActiveRecord
 
     protected $primaryKey = '{%primaryKey%}';
 
-    public $perPage = 5;
+    //public $perPage = 5; // used to create pagination links
 
     public function __construct()
     {
         parent::__construct();
     }
 
+    /*
+    // Used to set pagination limit
     public function pageLimit()
     {
         return Url::segment(3);
     }
+    */
 }// End of the %StaticModelName% Model

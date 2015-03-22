@@ -1,42 +1,24 @@
 <?php
+/*
+ * This file is part of the Cygnite package.
+ *
+ * (c) Sanjoy Dey <dey.sanjoy0@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 namespace Cygnite\Console\Generator;
 
 use Cygnite\Helpers\Inflector;
-
 /**
- *  Cygnite Framework
+ * Cygnite Controller Generator
  *
- *  An open source application development framework for PHP 5.3 or newer
- *
- *   License
- *
- *   This source file is subject to the MIT license that is bundled
- *   with this package in the file LICENSE.txt.
- *   http://www.cygniteframework.com/license.txt
- *   If you did not receive a copy of the license and are unable to
- *   obtain it through the world-wide-web, please send an email
- *   to sanjoy@hotmail.com so that I can send you a copy immediately.
- *
- * @Package           :  Console
- * @Filename          :  Controller.php
- * @Description       :  This class is used to create your controller code using cygnite console
- * @Author            :  Sanjoy Dey
- * @Copyright         :  Copyright (c) 2013 - 2014,
- * @Link	          :  http://www.cygniteframework.com
- * @Since	          :  Version 1.0.6
- * @File Source
+ * This class used to generate controller code
+ * @author Sanjoy Dey <dey.sanjoy0@gmail.com>
  *
  */
 class Controller
 {
-    /**
-     * Controller template replacement
-     *  #controllerName
-     *	#modelName
-     *	#%model Columns%
-     *  #%StaticModelName%
-     *  #%$validate->addRule%
-     */
     private $columns = array();
 
     public $controller;
@@ -125,13 +107,12 @@ class Controller
     private function buildFormOpen()
     {
         return '$this->open("'.$this->controller.'", array(
-                            "method" => "post", "id"     => "uniform", "role"   => "form",
-                            "action" => Url::sitePath("'.
+        "method" => "post", "id"     => "uniform", "role"   => "form", "action" => Url::sitePath("'.
         strtolower(
             str_replace('Controller', '', $this->controller)
-        ).'/type/$id/$this->segment"),
-                            "style" => "width:500px;margin-top:35px;float:left;" )
-                            )';
+        ).'/$this->action/$id/"),
+        "style" => "width:500px;margin-top:35px;float:left;" )
+        )';
     }
 
     /**
@@ -280,6 +261,11 @@ class Controller
         $content = str_replace(
             'class %ControllerName%',
             'class '.Inflector::classify(str_replace("Controller", "", $this->controller)),
+            $content
+        );
+        $content = str_replace(
+            '%ControllerName%',
+            Inflector::classify(str_replace("Controller", "", $this->controller)),
             $content
         );
         $content = str_replace(

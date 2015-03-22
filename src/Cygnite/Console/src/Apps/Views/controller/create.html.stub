@@ -1,24 +1,23 @@
 {% extends 'layout/main/base.html.twig' %}
 
 {% block title %}
-    Cygnite Framework - Simple Crud Operation
+    {{ title }}
 {% endblock %}
 
 {% block content %}
 
-
     {# dump(#controllerName#) #}
 
-    <div style="float:right;margin-right:47px; margin-bottom: 10px;margin-top: 10px;">
-    {{ link('#controllerName#', 'Back', buttonAttributes.primary) | raw }}
+    <div class="pull-right">
+        {{  link('#controllerName#/', 'Back',{'class': 'btn btn-default btn-small btn-inverse'}) | raw }}
     </div>
 
-    <div style="color:#FF0000;">
+    <div class="error" style="color:#FF0000;">
         {{ validation_errors | raw }}
     </div>
 
     <div style="float:left;">
-        {{ createForm | raw }}
+        {{ form | raw }}
     </div>
 
 
