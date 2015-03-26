@@ -28,7 +28,7 @@ class Application extends Container
 {
     protected static $loader;
     private static $instance;
-    private static $version = 'v1.2.6';
+    private static $version = 'v1.3.1';
     public $aliases = array();
     public $namespace = '\\Controllers\\';
 

@@ -208,7 +208,7 @@ class Query
      * @internal  param \Cygnite\Database\the $string table to retrieve the results from
      * @return object
      */
-    public function trash($where, $multiple = false)
+    public function trash($where = null, $multiple = false)
     {
         $whr = array();
         $statement = $affectedRows = null;

@@ -96,7 +96,7 @@ class Collection implements Countable, IteratorAggregate, ArrayAccess, Serializa
      */
     public function offsetGet($offset)
     {
-        return $this->data[$offset];
+        return $this->offsetExists($offset) ? $this->data[$offset] : null;
     }
 
     /**

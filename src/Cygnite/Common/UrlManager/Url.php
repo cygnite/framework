@@ -237,9 +237,9 @@ class Url
     public function isSecure()
     {
         if (
-            isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on' ||
-            stripos($_SERVER['REQUEST_SCHEME'], 'https') ||
-            stripos($_SERVER['SERVER_PROTOCOL'], 'https')
+            (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') ||
+            stripos(@$_SERVER['REQUEST_SCHEME'], 'https') ||
+            stripos(@$_SERVER['SERVER_PROTOCOL'], 'https')
         ) {
             // SSL connection
             return true;
