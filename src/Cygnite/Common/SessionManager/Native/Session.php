@@ -14,8 +14,9 @@ class Session extends Manager implements SessionInterface
      *
      * @param string $sessionName
      * @param string $cacheLimiter
+     * @param null   $wrapperInstance
      */
-    public function __construct($sessionName = '', $cacheLimiter = '')
+    public function __construct($sessionName = null, $cacheLimiter = null, $wrapperInstance = null)
     {
         /*
          |We will set session name.
@@ -27,6 +28,7 @@ class Session extends Manager implements SessionInterface
          |We will set cache limiter
          */
         $this->cacheLimiter($cacheLimiter);
+        $this->setWrapperInstance($wrapperInstance);
 
         /*
          |Check if session started if not we will start new session

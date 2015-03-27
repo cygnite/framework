@@ -51,6 +51,8 @@ class Session
          | driver
          */
         $this->config = $config['config.session'];
+
+        $this->setName($this->config['session_name']);
     }
 
     /**
@@ -83,7 +85,7 @@ class Session
     /**
      * @return null
      */
-    public function getCacheLimiter()
+    public function cacheLimiter()
     {
         return isset($this->cacheLimiter) ? $this->cacheLimiter : null;
     }
@@ -122,10 +124,10 @@ class Session
 
         $name = $this->getName();
         if ($name != 'cygnite-session' && !is_null($this->cacheLimiter())) {
-            $session = new $class($name, $this->cacheLimiter());
+            $session = new $class($name, $this->cacheLimiter(), $this);
+        } else {
+            $session = new $class($this->name, null, $this);
         }
-
-        $session = new $class($this->name);
 
         return call_user_func_array(array($session, $method), $args);
     }

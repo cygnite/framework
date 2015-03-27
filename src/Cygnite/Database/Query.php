@@ -56,7 +56,7 @@ class Query
     private $_groupBy;
     private $distinct;
     private $sqlQuery;
-    private $closed;
+    private $closed = false;
     // Join sources
     private $hasJoin = false;
     private $fromTable;
