@@ -189,6 +189,15 @@ class Input
     }
 
     /**
+     * @return mixed
+     */
+    public function json()
+    {
+        $data = file_get_contents("php://input");
+        return json_decode($data);
+    }
+
+    /**
      * Sets or returns the cookie variable value.
      *
      */

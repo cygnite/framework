@@ -30,9 +30,8 @@ interface AuthInterface
     public function logout();
 
     /**
-     * Abstract function isLoggedIn($key); implemented in child class
-     * @param $key
+     * Abstract function Auth::isLoggedIn(); implemented in child class
      * @return mixed
      */
-    public function isLoggedIn($key);
+    public function isLoggedIn();
 }

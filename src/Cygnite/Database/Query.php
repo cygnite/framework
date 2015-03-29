@@ -56,7 +56,7 @@ class Query
     private $_groupBy;
     private $distinct;
     private $sqlQuery;
-    private $closed = false;
+    private $closed;
     // Join sources
     private $hasJoin = false;
     private $fromTable;
@@ -215,18 +215,8 @@ class Query
         $ar = self::getActiveRecord();
         $this->triggerEvent('beforeDelete');
 
-        if (is_array($where) && $multiple == false) {
-            $whr = array_keys($where);
-            $this->where($this->quoteIdentifier($whr[0]), '=', $where[$whr[0]]);
-        } else {
-            if (is_array($where) && $multiple == true) {
-                $this->whereIn($this->quoteIdentifier($ar->getPrimaryKey()), 'IN', implode(',', $where));
-            }
-        }
-
-        if (is_string($where) || is_int($where)) {
-            $this->where($this->quoteIdentifier($ar->getPrimaryKey()), '=', $where);
-        }
+        // Bind where conditions
+        $this->bindWhereClause($where, $multiple, $ar);
 
         $sql = self::DELETE .
             " FROM " . $this->quoteIdentifier($ar->getDatabase()) . '.' . $this->quoteIdentifier($ar->getTableName())
@@ -244,6 +234,39 @@ class Query
             throw new \Exception($ex->getMessage());
         }
     }
+
+    /**
+     * <code>
+     * $user->trash(1);
+     * $user->trash(array(1,4,6,33,54), true)
+     * $user->trash(array('id' => 23))
+     * $user->where('name', '=', 'application')->trash();
+     * </code>
+     * @param $where
+     * @param $multiple
+     * @param $ar
+     */
+    private function bindWhereClause($where, $multiple, $ar)
+    {
+        /*
+         | Check if array given as where parameter, then
+         | we will bind parameters into whereIn conditions
+         */
+        if (is_array($where) && $multiple == false) {
+            $whr = array_keys($where);
+            $this->where($this->quoteIdentifier($whr[0]), '=', $where[$whr[0]]);
+        } else if (is_array($where) && $multiple == true) {
+            $this->whereIn($this->quoteIdentifier($ar->getPrimaryKey()), 'IN', implode(',', $where));
+        }
+
+        /*
+         | Check if string | int given as where parameter
+         */
+        if (is_string($where) || is_int($where)) {
+            $this->where($this->quoteIdentifier($ar->getPrimaryKey()), '=', $where);
+        }
+    }
+
 
     /**
      * Adding an element in the where array with the value
