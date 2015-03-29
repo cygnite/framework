@@ -16,13 +16,13 @@ if (!defined('CF_SYSTEM')) {
 }
 
 /**
- * Cygnite Radis Cache Wrapper Class
+ * Cygnite Redis Cache Wrapper Class
  *
  * @author Sanjoy Dey <dey.sanjoy0@gmail.com>
  *
  */
 
-class Radis implements StorageInterface
+class Redis implements StorageInterface
 {
     public function store($key, $value)
     {

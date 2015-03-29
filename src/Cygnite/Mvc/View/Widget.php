@@ -27,13 +27,15 @@ class Widget extends StaticResolver implements \ArrayAccess
             $views = $expression[0];
             $moduleViews = DS.'Views'.DS;
         } else {
-            $moduleViews = DS;
+            $moduleViews = '';
             $views = 'views'.DS.$expression[0];
         }
 
         $path = getcwd().DS.APPPATH.DS.$views.DS.$expression[1].$moduleViews;
 
-        $view = $path.str_replace('.', DS, $expression[2]).'.view'.EXT;
+        $v = isset($expression[2]) && string_has($expression[2], '.') ? str_replace('.', DS, $expression[2]) : '';
+
+        $view = $path.$v.'.view'.EXT;
 
         Output::load($view, $arguments);
         $output = Output::endBuffer();

@@ -58,12 +58,6 @@ class Strapper
         ) {
             define('CF_ENCRYPT_KEY', Config::get('global.config', 'cf_encryption_key'));
         }
-
-        /**----------------------------------------------------------------
-         * Get Session config and set it here
-         * ----------------------------------------------------------------
-         */
-        define('SECURE_SESSION', Config::get('config.session', 'cf_session'));
     }
 
     /**
@@ -71,14 +65,6 @@ class Strapper
      */
     public function terminate()
     {
-        /**----------------------------------------------------------------
-         * Auto load Session library based on user configurations
-         * ----------------------------------------------------------------
-         */
-        if (SECURE_SESSION === true) {
-            Session::instance();
-        }
-
         /**------------------------------------------------------------------
          * Throw Exception is default controller
          * has not been set in configuration
@@ -91,6 +77,5 @@ class Strapper
             );
         }
         Application::import(APPPATH.'.routes');
-        $this->app->router->run();
     }
 }

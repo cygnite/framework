@@ -23,9 +23,12 @@ abstract class AuthManager
      * Set the model class name to authenticate user
      * @param $model
      */
-    public static function setModel($model)
+    public static function model($model)
     {
         static::$model = $model;
+        $class = '\\'.get_called_class();
+
+        return $class::make();
     }
 
     /**
@@ -50,7 +53,7 @@ abstract class AuthManager
      * Get the model object to check user existance against database
      * @return object
      */
-    public function model()
+    public function user()
     {
         $app = self::getContainer();
         return $app->make(static::getModel());
