@@ -28,7 +28,7 @@ class Application extends Container
 {
     protected static $loader;
     private static $instance;
-    private static $version = 'v1.3.1';
+    private static $version = 'v1.3.2';
     public $aliases = array();
     public $namespace = '\\Controllers\\';
 
@@ -284,7 +284,7 @@ class Application extends Container
      */
     public function importHelpers()
     {
-        return include '/../'.'Helpers/Support'.EXT;
+        return include dirname(dirname(__FILE__)).DS.'Helpers/Support'.EXT;
     }
 
     /**

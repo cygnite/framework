@@ -1,6 +1,7 @@
 <?php
 namespace Cygnite\Common\SessionManager\Native;
 
+use Cygnite\Helpers\Config;
 use Cygnite\Common\SessionManager\Manager;
 use Cygnite\Common\SessionManager\SessionInterface;
 use Cygnite\Common\SessionManager\Session as SessionManager;
@@ -29,6 +30,11 @@ class Session extends Manager implements SessionInterface
          */
         $this->cacheLimiter($cacheLimiter);
         $this->setWrapperInstance($wrapperInstance);
+        /*
+         | We will check is http referrer if it is not same as current url, meaning fake session
+         | We will destroy the fake session
+         */
+        $this->checkReferer();
 
         /*
          |Check if session started if not we will start new session
@@ -40,6 +46,46 @@ class Session extends Manager implements SessionInterface
 
         $this->storage = & $_SESSION;
     }
+
+    /**
+     * @param $instance
+     */
+    public function setWrapperInstance($instance)
+    {
+        $this->wrapper = $instance;
+    }
+
+    /**
+     * Get the instance of session manager
+     *
+     * @return null
+     */
+    public function getWrapper()
+    {
+        return isset($this->wrapper) ? $this->wrapper : null;
+    }
+
+    public function setSessionConfig()
+    {
+        /*
+         | Get user configuration
+         */
+        $configItem = array();
+        $configItem = Config::getConfigItems('config.items');
+        $config = $configItem['config.session'];
+        $sessionManager = $this->getWrapper();
+        $sessionManager->setHash(); // set session hash
+
+        // We will use session cookie if configured
+        if ($config['use_session_cookie']) {
+            $sessionManager->useOnlyCookie(); // use cookie
+        }
+
+        // Make sure the session cookie is not accessible via javascript.
+        $sessionManager->setCookieParams($config['secure'], $config['httponly']);
+    }
+
+
     /**
      * Starts session
      *
@@ -54,6 +100,8 @@ class Session extends Manager implements SessionInterface
         if (ini_get('session.use_cookies') && headers_sent($file, $line)) {
             throw new SessionNotStartedException(sprintf('Unable to start session, headers already sent by "%s" at line %d.', $file, $line));
         }
+
+        $this->setSessionConfig();
 
         /*
          | We will start session, if fails
@@ -73,11 +121,6 @@ class Session extends Manager implements SessionInterface
     {
         unset($this->storage);
         $_SESSION = array();
-
-        $sessionManager = SessionManager::getInstance();
-        // set session hash
-        $sessionManager->setHash(); // set session hash function
-        $this->checkReferer(); // check url refferer
 
         /*
          |We will destroy existing session and start
