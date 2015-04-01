@@ -31,8 +31,8 @@ class Session extends Manager implements SessionInterface
         $this->cacheLimiter($cacheLimiter);
         $this->setWrapperInstance($wrapperInstance);
         /*
-         | We will check is http referrer if it is not same as current url, meaning fake session
-         | We will destroy the fake session
+         | We will check is http referrer if it is not same as current url, 
+         | meaning fake session. We will destroy the fake session
          */
         $this->checkReferer();
 
