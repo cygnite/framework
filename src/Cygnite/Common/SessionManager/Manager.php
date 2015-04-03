@@ -85,7 +85,7 @@ class Manager extends AbstractPacket implements PacketInterface
      * @param string $key attribute to remove from
      * @return $this
      */
-    public function remove($key = null)
+    public function delete($key = null)
     {
         if ($key === null) {
             $this->reset();

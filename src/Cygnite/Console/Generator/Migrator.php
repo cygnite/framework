@@ -1,35 +1,25 @@
 <?php
+/*
+ * This file is part of the Cygnite package.
+ *
+ * (c) Sanjoy Dey <dey.sanjoy0@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 namespace Cygnite\Console\Generator;
 
 use Cygnite\Database\Configurations;
 use Cygnite\Database\Connection;
 use Cygnite\Helpers\Inflector;
 
-/**
- *  Cygnite Framework
+/*
+ * Console Migration
  *
- *  An open source application development framework for PHP 5.3 or newer
+ * Handle database migrations
  *
- *   License
- *
- *   This source file is subject to the MIT license that is bundled
- *   with this package in the file LICENSE.txt.
- *   http://www.cygniteframework.com/license.txt
- *   If you did not receive a copy of the license and are unable to
- *   obtain it through the world-wide-web, please send an email
- *   to sanjoy@hotmail.com so that I can send you a copy immediately.
- *
- * @Package           :  Console
- * @Filename          :  Migrator.php
- * @Description       :  This class is used to take care of your migration using console
- * @Author            :  Sanjoy Dey
- * @Copyright         :  Copyright (c) 2013 - 2014,
- * @Link	          :  http://www.cygniteframework.com
- * @Since	          :  Version 1.0.6
- * @File Source
- *
+ * @author Sanjoy Dey <dey.sanjoy0@gmail.com>
  */
- 
 class Migrator
 {
     private $command;
@@ -212,23 +202,12 @@ class Migrator
             $class = Inflector::classify($this->getMigrationClass());
         }
 
-        if ($type == 'down') {
-            call_user_func_array(
-                array(
-                    new $class,
-                    $type
-                ),
-                array()
-            );
-        } else {
-            call_user_func_array(
-                array(
-                    new $class,
-                    $type
-                ),
-                array()
-            );
+        if (trim($type) !== 'down') {
+            $type = 'up';
         }
+
+        call_user_func_array(array(new $class, $type), array());
+
         $this->updateMigrationTable();
 
     }

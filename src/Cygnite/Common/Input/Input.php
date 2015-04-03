@@ -198,6 +198,23 @@ class Input
     }
 
     /**
+     * Check if ajax request
+     * @return bool
+     */
+    public function isAjax()
+    {
+        // check is ajax
+        if (!empty($_SERVER['HTTP_X_REQUESTED_WITH']) &&
+            strtolower($_SERVER['HTTP_X_REQUESTED_WITH']) == 'xmlhttprequest'
+        ) {
+            // I'm AJAX!
+            return true;
+        }
+
+        return false;
+    }
+
+    /**
      * Sets or returns the cookie variable value.
      *
      */
