@@ -42,7 +42,7 @@ interface PacketInterface extends \ArrayAccess, \Iterator, \Countable
      *
      * @return $this
      */
-    public function remove($offset = null);
+    public function delete($offset = null);
 
     /**
      * Returns all elements
