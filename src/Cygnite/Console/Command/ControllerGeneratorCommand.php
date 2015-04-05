@@ -58,7 +58,7 @@ class ControllerGeneratorCommand extends Command
             throw $e;
         }
 
-        $output->writeln('<info>Controller Generated Successfully By Cygnite Cli.</info>');
+        $output->writeln('<info>Controller '.$this->controller.' Generated Successfully By Cygnite Cli.</info>');
     }
 
     /**

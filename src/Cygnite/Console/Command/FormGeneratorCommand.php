@@ -120,7 +120,7 @@ class FormGeneratorCommand extends Command
         $this->applicationDir = BASE_PATH.DS.APP_PATH;
         $this->generateForm();
 
-        $output->writeln("<info>Form apps/components/form/".Inflector::classify($this->table)."Form Generated Successfully By Cygnite Cli.</info>");
+        $output->writeln("<info>Form ".APP_PATH."/components/form/".Inflector::classify($this->table)."Form.php Generated Successfully By Cygnite Cli.</info>");
     }
 
 
