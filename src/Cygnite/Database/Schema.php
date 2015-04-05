@@ -131,7 +131,7 @@ class Schema
     public function init(Closure $callback = null, $schema = null)
     {
         if ($callback instanceof Closure) {
-           return $callback($schema);
+            return $callback($schema);
         } else {
             return $callback;
         }

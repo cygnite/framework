@@ -181,15 +181,15 @@ class Session extends ActiveRecord implements PacketInterface
                     $table->create(
                         array(
                             array(
-                                'name' => 'id',
+                                'column' => 'id',
                                 'type' => 'int',
                                 'length' => 11,
                                 'increment' => true,
                                 'key' => 'primary'
                             ),
-                            array('name' => 'access', 'type' => 'int', 'length' => 11),
-                            array('name' => 'data', 'type' => 'text'),
-                            array('name' => 'session_id', 'type' => 'string', 'length' => 128),
+                            array('column' => 'access', 'type' => 'int', 'length' => 11),
+                            array('column' => 'data', 'type' => 'text'),
+                            array('column' => 'session_id', 'type' => 'string', 'length' => 128),
                         ),
                         'InnoDB',
                         'latin1'
