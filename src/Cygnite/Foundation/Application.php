@@ -281,10 +281,11 @@ class Application extends Container
     /**
      * We will include Supporting Helpers
      * @return mixed
+     * @issue Path Issue Fixed And Code Suggested By Peter Moulding https://www.linkedin.com/profile/view?id=1294355
      */
     public function importHelpers()
     {
-        return include dirname(dirname(__FILE__)).DS.'Helpers/Support'.EXT;
+        return include __DIR__ . '/../'.'Helpers/Support'.EXT;
     }
 
     /**
