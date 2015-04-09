@@ -164,5 +164,4 @@ class Template
             $this->view->tpl->{__FUNCTION__}($funcName, $callback);
         }
     }
-
 }

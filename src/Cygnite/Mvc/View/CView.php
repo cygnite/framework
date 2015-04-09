@@ -11,6 +11,7 @@ namespace Cygnite\Mvc\View;
 
 use Cygnite\Reflection;
 use Cygnite\Helpers\Inflector;
+use Cygnite\Mvc\View\Exceptions\ViewNotFoundException;
 
 if (!defined('CF_SYSTEM')) {
     exit('External script access not allowed');
@@ -162,7 +163,7 @@ class CView
     /*
     * This function is to load requested view file
     * @false string (view name)
-    *
+    * @throws ViewNotFoundException
     */
     public function render($view, $params = array())
     {
@@ -196,7 +197,7 @@ class CView
         if (!file_exists($viewPage) &&
             !is_readable($viewPage)
         ) {
-            throw new \Exception('The Path ' . $path . $view . '.view' . EXT . ' is invalid.');
+            throw new ViewNotFoundException;('The Path ' . $path . $view . '.view' . EXT . ' is invalid.');
         }
 
             $this->layout = Inflector::toDirectorySeparator($this->layout);
@@ -207,10 +208,10 @@ class CView
                 }
 
         $this->viewPath = $viewPage;
-                $this->loadView();
+        $this->loadView();
 
-            return $this;
-        }
+        return $this;
+    }
 
     /**
      * @param $controller
@@ -238,7 +239,7 @@ class CView
         );
 
         return $this;
-            }
+    }
 
     /**
      * @param $viewPage
@@ -265,7 +266,7 @@ class CView
         ob_get_clean();
 
         echo $output;
-        }
+    }
 
     /**
      * @param $name
@@ -274,7 +275,7 @@ class CView
     private function makeOutput($name)
     {
         return new Output($name);
-        }
+    }
 
     /**
      * @param $params
@@ -291,25 +292,28 @@ class CView
         }
 
         return $this->loadView();
-
     }
 
     /**
      * @return string
-     * @throws \Exception
+     * @throws ViewNotFoundException
      */
     private function loadView()
     {
         $params = array();
-        $params = array_merge($this->params, $this->data['parameters']);
+        $params = array_merge($this->params, $this->__get('parameters'));
 
         try {
-            echo $this->makeOutput($this->widgetName)
-                ->buffer($this->viewPath, $params)
-                ->clean();
+            ob_start();
+            extract($params);
+            include $this->viewPath;
+            $output = ob_get_contents();
+            ob_get_clean();
+
+            echo $output;
 
         } catch (\Exception $ex) {
-            throw new \Exception('The view path ' . $this->viewPath . ' is invalid.' . $ex->getMessage());
+            throw new ViewNotFoundException('The view path ' . $this->viewPath . ' is invalid.' . $ex->getMessage());
         }
     }
 
@@ -333,4 +337,4 @@ class CView
             return call_user_func_array(array($view, 'render'), array($params));
         }
     }
-    }
+}
