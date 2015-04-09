@@ -9,6 +9,8 @@ use Cygnite\Common\SessionManager\Exceptions\SessionNotStartedException;
 
 class Session extends Manager implements SessionInterface
 {
+    private $wrapper;
+
     /**
      * We will create instance of session wrapper and
      * validate existing session - if session is invalid, we will resets it
@@ -31,7 +33,7 @@ class Session extends Manager implements SessionInterface
         $this->cacheLimiter($cacheLimiter);
         $this->setWrapperInstance($wrapperInstance);
         /*
-         | We will check is http referrer if it is not same as current url, 
+         | We will check is http referrer if it is not same as current url,
          | meaning fake session. We will destroy the fake session
          */
         $this->checkReferer();

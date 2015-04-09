@@ -1,5 +1,4 @@
 <?php
-
 /*
  * This file is part of the Cygnite Framework package.
  *
@@ -11,14 +10,13 @@
 namespace Cygnite\Mvc\View;
 
 use Cygnite\Reflection;
-use Cygnite\AssetManager\Assets;
 use Cygnite\Helpers\Inflector;
 
 if (!defined('CF_SYSTEM')) {
     exit('External script access not allowed');
 }
 /**
- * Form.
+ * View Class.
  *
  * Render your view page or template
  *
@@ -31,23 +29,15 @@ class CView
 
     protected $controllerView;
 
-    private $view_path;
+    private $viewPath;
 
-    private $results =array();
-
-    public $requestedController;
-
-    public $model;
+    private $params = array();
 
     public $views;
 
     private static $name = array();
 
-    private static $uiContent;
-
-    public $content;
-
-    public $data =array();
+    public $data = array();
 
     protected $template;
 
@@ -67,28 +57,46 @@ class CView
 
     public $twig;
 
+    protected $widgetName;
+
     /**
      * @param Template $template
      */
     public function __construct(Template $template)
     {
-        $viewPath = (strpos($this->viewsFilePath, '.') == true)?
+        $this->setViewPath();
+
+        if ($this->templateEngine !== false && $this->templateEngine == 'twig') {
+            $this->setTwigEnvironment($template);
+        }
+    }
+
+    /**
+     * We will set the view directory path
+     */
+    private function setViewPath()
+    {
+        $viewPath = (strpos($this->viewsFilePath, '.') == true) ?
             str_replace('.', DS, $this->viewsFilePath) :
             $this->viewsFilePath;
 
-        $this->views = getcwd().DS.APPPATH.DS.$viewPath.DS;
+        $this->views = CYGNITE_BASE . DS . APPPATH . DS . $viewPath . DS;
+    }
 
-        if ($this->templateEngine !== false && $this->templateEngine == 'twig') {
-
+    /**
+     * We will set Twig Template Environment
+     *
+     * @param $template
+     */
+    private function setTwigEnvironment($template)
+    {
             if ($template instanceof Template) {
                 $template->init($this, new Reflection);
                 $this->setTemplate($template);
 
                 $ns = $controller = null;
                 $ns = get_called_class();
-
                 $controller = str_replace('Controller', '', Inflector::getClassNameFromNamespace($ns));
-
                 $this->layout = Inflector::toDirectorySeparator($this->layout);
 
                 if ($this->layout == '') {
@@ -102,7 +110,6 @@ class CView
                 }
             }
         }
-    }
 
     /**
      * @param $template
@@ -114,14 +121,17 @@ class CView
 
     /**
      * Get Template instance
+     *
      * @return null
      */
     public function getTemplate()
     {
         return isset($this->twig) ? $this->twig : null;
     }
+
     /**
     * Magic Method for handling dynamic data access.
+     *
     * @param $key
     */
     public function __get($key)
@@ -131,6 +141,7 @@ class CView
 
     /**
     * Magic Method to save data into array.
+     *
     * @param $key
     * @param $value
     */
@@ -145,7 +156,7 @@ class CView
      */
     public function __call($method, $arguments)
     {
-        throw new \Exception("Undefined method called by ".get_class($this).' Controller');
+        throw new \Exception("Undefined method called by " . get_class($this) . ' Controller');
     }
 
     /*
@@ -153,225 +164,130 @@ class CView
     * @false string (view name)
     *
     */
-    public function render($view, $values = array(), $ui_content = false)
+    public function render($view, $params = array())
     {
+        $controller = $viewPage = null;
+        $this->widgetName = $view;
+        $this->__set('parameters', $params);
 
-        $controller = Inflector::getClassNameFromNamespace(get_called_class());
+        $controller = Inflector::getClassNameFromNamespace($this->getController());
+        $controller = strtolower(str_replace('Controller', '', $controller));
 
-        $controller =
-            strtolower(str_replace('Controller' , '', $controller)
-        );
+        list($viewPath, $path) = $this->getPath($controller);
 
-        $viewPath = null;
-
-        $viewPath = (strpos($this->viewsFilePath, '.') == true)?
-            str_replace('.', DS, $this->viewsFilePath) :
-            $this->viewsFilePath;
-
-        $path= getcwd().DS.APPPATH.DS.$viewPath.DS.$controller.DS;
-
-        if (is_object($this->tpl) &&
-            is_file($path.$view.$this->templateExtension
+        /*
+         | We will check if tpl is holding the object of
+         | twig, then we will set twig template
+         | environment
+         */
+        if (
+            is_object($this->tpl) &&
+            is_file(
+                $path . $view . $this->templateExtension
             )
         ) {
-            $this->template = $this->tpl->loadTemplate(
-                $controller.DS.$view.$this->templateExtension
-            );
-
-            return $this;
+            return $this->setTwigTemplateInstance($controller, $view);
         }
 
-        if (!file_exists($path.$view.'.view'.EXT) &&
-            !is_readable($path.$view.'.view'.EXT)
+        $viewPage = $path . $view . '.view' . EXT;
+        /*
+         | Throw exception is file is not readable
+         */
+        if (!file_exists($viewPage) &&
+            !is_readable($viewPage)
         ) {
-            throw new \Exception('The Path '.$path.$view.'.view'.EXT.' is invalid.');
+            throw new \Exception('The Path ' . $path . $view . '.view' . EXT . ' is invalid.');
         }
-
-        self::$name[strtolower($view)] = $view;
-        $viewPage = '';
-        $viewPage = $path.self::$name[$view].'.view'.EXT;
-
-        if (is_readable($viewPage)) {
 
             $this->layout = Inflector::toDirectorySeparator($this->layout);
 
                 if ($this->layout !== '') { // render view page into the layout
-                    $layout = getcwd().DS.APPPATH.DS.$viewPath.DS.$this->layout.'.view'.EXT;
-                    //$this->view_path = $path.self::$name[$view].'.view'.EXT; // $layout;
-
-                    $this->assignToProperties($values);
-
-                    ob_start();
-                    include $viewPage;
-
-                    $data = array();
-                    $data['yield'] = ob_get_contents();
-                    ob_get_clean();
-                    extract($data);
-
-                    include $layout;
-                    $data = array();
-                    $content = null;
-
-                    $output = ob_get_contents();
-                    ob_get_clean();
-
-                    echo $output;
-
+                $this->renderViewLayout($viewPage, $viewPath, $params);
                     return $this;
                 }
 
-
-
-            if ($ui_content == true) {
-                self::$uiContent =$ui_content;
-                $this->view_path = $viewPage;
+        $this->viewPath = $viewPage;
                 $this->loadView();
-                return $this->content;
-            }
-
-            $this->view_path = $viewPage;
-            $this->loadView();
 
             return $this;
         }
 
-    }
-
     /**
-     * @param array $sections
-     */
-    protected function createSections(array $sections)
-    {
-        $this->assignToProperties($sections);
-    }
-
-    /**
-     * @param $resultArray
-     * @throws \Exception
-     */
-    private function assignToProperties($resultArray)
-    {
-        try {
-            $path = "";
-            foreach ($resultArray as $key => $value) {
-                if (is_string($value)) {
-                    $path = str_replace(':', DS, $value);
-                }
-
-                $this->{$key} = $path;
-                $this->__set($key, $value);
-                //$this->layout[$key] = $path;
-            }
-        } catch (\InvalidArgumentException $ex) {
-            throw new \Exception($ex->getMessage());
-        }
-    }
-
-    /**
-     * @param       $layout
-     * @param array $results
+     * @param $controller
      * @return string
      */
-    public function setLayout($layout, array $results)
+    private function getPath($controller)
     {
-        $trace = debug_backtrace();
+        $viewPath = null;
+        $viewPath = (strpos($this->viewsFilePath, '.') == true) ?
+            str_replace('.', DS, $this->viewsFilePath) :
+            $this->viewsFilePath;
 
-        $this->requestedController = strtolower(
-            str_replace(
-                'Apps\\Controllers\\',
-                '',
-                $trace[1]['class']
-            )
+        return array($viewPath, CYGNITE_BASE . DS . APPPATH . DS . $viewPath . DS . $controller . DS);
+    }
+
+    /**
+     * @param $controller
+     * @param $view
+     * @return $this
+     */
+    private function setTwigTemplateInstance($controller, $view)
+    {
+        $this->template = $this->tpl->loadTemplate(
+            $controller . DS . $view . $this->templateExtension
         );
 
-        $this->assignToProperties($results);
-        $this->layoutParams = $results;
-
-        if (is_readable(
-            $this->views.rtrim(
-                str_replace(
-                    array(
-                        '.',
-                        '/',
-                        ':'
-                    ),
-                    DS,
-                    $layout
-                ).'.layout'
-            ).EXT
-        )
-        ) {
-
-
-            $this->view_path =
-                $this->views.rtrim(
-                    str_replace(
-                        array(
-                            '.',
-                            '/',
-                            ':'
-                        ),
-                        DS,
-                        $layout
-                    ).'.layout'
-                ).EXT;
-        }
-
-        return $this->loadView();
-
-    }
+        return $this;
+            }
 
     /**
-     * @param $page
-     * @return string
-     * @throws \Exception
+     * @param $viewPage
+     * @param $viewPath
+     * @param $params
      */
-    public function renderPartial($page)
+    private function renderViewLayout($viewPage, $viewPath, $params)
     {
-        //$this->requestedController.
-        $path = null;
+        $layout = CYGNITE_BASE . DS . APPPATH . DS . $viewPath . DS . $this->layout . '.view' . EXT;
 
-        if (is_string($page) && strstr($page, '@')) {
-            $page = str_replace('@', '', $page);
-            $page = $this->{$page};
-            $path= str_replace(array('//', '\\\\'), array('/', '\\'), $this->views.DS.$page).EXT;
-        } else {
-            $path= str_replace(
-                array(
-                    '//',
-                    '\\\\'
-                ),
-                array(
-                    '/',
-                    '\\'
-                ),
-                $this->views.DS.$page
-            ).EXT;
+        ob_start();
+        // Render the view page
+        extract($params);
+        include $viewPage;
+
+        $data = array();
+        $data['yield'] = ob_get_contents();
+        ob_get_clean();
+
+        // Render the layout page
+        extract($data);
+        include $layout;
+        $output = ob_get_contents();
+        ob_get_clean();
+
+        echo $output;
         }
-
-        if (is_readable($path)) {
-            include_once $path;
-        } else {
-            throw new \Exception('The Path '.$path.' is invalid.');
-        }
-
-        return $this->bufferOutput();
-    }
 
     /**
-     * @param $arrayResult
+     * @param $name
+     * @return Output
+     */
+    private function makeOutput($name)
+    {
+        return new Output($name);
+        }
+
+    /**
+     * @param $params
      * @return string
      */
-    public function with($arrayResult)
+    public function with($params)
     {
         if (is_object($this->tpl) && is_object($this->template)) {
-            return $this->template->display($arrayResult);
+            return $this->template->display($params);
         }
 
-        if (is_array($arrayResult)) {
-            $this->results = (array) $arrayResult;
-            $this->assignToProperties($arrayResult);
+        if (is_array($params)) {
+            $this->params = (array)$params;
         }
 
         return $this->loadView();
@@ -384,35 +300,37 @@ class CView
      */
     private function loadView()
     {
+        $params = array();
+        $params = array_merge($this->params, $this->data['parameters']);
+
         try {
-            $output = Output::load($this->view_path);
-            //include $this->view_path;
+            echo $this->makeOutput($this->widgetName)
+                ->buffer($this->viewPath, $params)
+                ->clean();
+
         } catch (\Exception $ex) {
-            throw new \Exception('The Path '.$this->view_path.' is invalid.'.$ex->getMessage());
+            throw new \Exception('The view path ' . $this->viewPath . ' is invalid.' . $ex->getMessage());
         }
-
-        return $this->bufferOutput();
-    }
-
-    /**
-     * @return string
-     */
-    private function bufferOutput()
-    {
-        ob_start();
-        $output = ob_get_contents();
-        ob_get_clean();
-
-        if (isset(self::$uiContent) && self::$uiContent == true) {
-            $this->content =  $output;
-        } else {
-            return $output;
-        }
-        //ob_end_flush();
     }
 
     public function __destruct()
     {
-        unset($this->results);
+        unset($this->params);
     }
-}
+
+    /**
+     * If user want to access render function statically
+     * CView::create('view-name', $params);
+     *
+     * @param $method
+     * @param $params
+     * @return mixed
+     */
+    public static function __callStatic($method, $params)
+    {
+        if ($method == 'create') {
+            $view = new CView(new Template);
+            return call_user_func_array(array($view, 'render'), array($params));
+        }
+    }
+    }

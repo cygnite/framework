@@ -27,16 +27,16 @@ if ($this->hasFlash('success')) {
     </thead>
     <tbody>
     <?php
-    if (count($this->records) > 0) {
+    if (count($records) > 0) {
         //$i = 1;
         if (Url::segment(2) == '' || Url::segment(3) == '' || Url::segment(3) == 1 ) {
             $i =1;
         } else {
-            $i = (Url::segment(3) - 1) * $this->records[0]->perPage + 1;
+            $i = (Url::segment(3) - 1) * $records[0]->perPage + 1;
         }
 
         $rowType = null;
-        foreach ($this->records as $key => $value) {
+        foreach ($records as $key => $row) {
 
             $rowType = ($i % 2 == 0) ? 'even' : 'odd';
     ?>
@@ -45,17 +45,15 @@ if ($this->hasFlash('success')) {
             {#tdColumns#}
             <td>
                 <?php
-                echo Asset::link('#controllerName#/show/' . $value->{%primaryKey%}, 'View', array('class' => 'btn btn btn-info btn-xs'));
-                echo Asset::link('#controllerName#/edit/' . $value->{%primaryKey%}, 'Edit', array('class' => 'btn btn-default btn-xs'));
-                echo Asset::link('#controllerName#/delete/' . $value->{%primaryKey%}, 'Delete', array('class' => 'btn btn-danger btn-xs' ));
+                echo Asset::link('#controllerName#/show/' . $row->{%primaryKey%}, 'View', array('class' => 'btn btn btn-info btn-xs'));
+                echo Asset::link('#controllerName#/edit/' . $row->{%primaryKey%}, 'Edit', array('class' => 'btn btn-default btn-xs'));
+                echo Asset::link('#controllerName#/delete/' . $row->{%primaryKey%}, 'Delete', array('class' => 'btn btn-danger btn-xs' ));
                 ?>
 
             </td>
         </tr>
     <?php $i++;
         }
-    } else {
-        echo 'No records found !';
     }
     ?>
     </tbody>

@@ -5,7 +5,7 @@
 </div>
 
 <div class="form-horizontal">
-    <h2>Showing #controllerName# #<?php echo $this->record->id; ?></h2>
+    <h2>Showing #controllerName# #<?php echo $record->id; ?></h2>
 
     {#recordDivElements#}
 

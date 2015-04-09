@@ -83,7 +83,12 @@ abstract class AbstractBaseController extends CView
     {
         $flashSession = $this->get('cygnite.common.session-manager.flash.flash-message');
 
-        return ($method == 'setFlash') ? $this : $this->_call($flashSession, $method, $arguments);
+        if ($method == 'setFlash') {
+            $this->_call($flashSession, $method, $arguments);
+            return $this;
+        } else {
+            return $this->_call($flashSession, $method, $arguments);
+        }
     }
 
     /**
@@ -102,7 +107,7 @@ abstract class AbstractBaseController extends CView
 
     /**
      * @param $class
-     * @return object @instance instance of your class
+     * @return object
      */
     protected function get($class)
     {
@@ -110,13 +115,19 @@ abstract class AbstractBaseController extends CView
         return $container->resolve($class);
     }
 
+    /**
+     * @param       $instance
+     * @param       $method
+     * @param array $arguments
+     * @return mixed
+     */
     protected function _call($instance, $method, $arguments = array())
     {
         return call_user_func_array(array($instance, $method), $arguments);
     }
 
     /**
-    <code>
+     * <code>
      * // Call the "index" method on the "user" controller
      *  $response = $this->call('admin::user@index');
      *
@@ -143,7 +154,7 @@ abstract class AbstractBaseController extends CView
     public function setController($name)
     {
         $this->class = $name;
-}
+    }
 
     /**
      * @return string

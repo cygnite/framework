@@ -36,7 +36,7 @@ $asset = AssetCollection::make(function ($asset)
         <!-- Always force latest IE rendering engine (even in intranet) & Chrome Frame -->
         <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 
-        <title><?php echo $this->title; ?></title>
+        <title><?php echo $title; ?></title>
         <meta name="keywords" content="CRUD Application" />
         <meta name="author" content="Cygnite Framework Bootstrap Starter Site." />
         <!-- Google will often use this as its description of your page/site. Make it good. -->
@@ -61,7 +61,7 @@ $asset = AssetCollection::make(function ($asset)
     <div class='container'>
 
         <!-- Navbar -->
-        <?php Widget::make('layout::widget::navbar'); ?>
+        <?php echo Widget::make('layout:widget:navbar'); ?>
         <!-- ./ Navbar -->
 
         <!-- Content -->

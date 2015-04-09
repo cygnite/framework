@@ -16,8 +16,8 @@ use {%Apps%}\Models\%StaticModelName%;
 
 class %ControllerName%Controller extends AbstractBaseController
 {
-
-    //protected $layout = 'layout.twig';
+    /* If you are using twig template you don't require to set layout here*/
+    //protected $layout = 'layout.main.twig';
 
     protected $templateEngine = true;
 

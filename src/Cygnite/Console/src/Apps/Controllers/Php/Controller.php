@@ -1,4 +1,3 @@
-
 namespace {%Apps%}\Controllers;
 
 use Cygnite\Common\Input\Input;
