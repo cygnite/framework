@@ -113,7 +113,7 @@ class Model
             DS.'models'.
             DS.
             $this->command->model
-            .'.php';
+            .self::EXTENSION;
 
         /*write operation ->*/
         $writeTmp =fopen(
@@ -127,5 +127,4 @@ class Model
         fclose($writeTmp);
         fclose($this->filePointer);
     }
-
 }

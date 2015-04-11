@@ -28,6 +28,8 @@ class ModelGeneratorCommand extends Command
 
     private $columns;
 
+    const EXTENSION = '.php';
+
     public static function make()
     {
         return new ModelGeneratorCommand();
@@ -46,7 +48,7 @@ class ModelGeneratorCommand extends Command
     {
         return $this->tableSchema->connect(
                     $this->database,
-                    $this->inflection->tabilize($this->model)
+                    Inflector::tabilize($this->model)
                 )->getColumns();
     }
 
@@ -105,7 +107,7 @@ class ModelGeneratorCommand extends Command
         $this->applicationDir = BASE_PATH.DS.APP_PATH;
         $this->generateModel();
 
-        $modelPath = $this->applicationDir.DS.'models'.DS.$this->model.EXT;
+        $modelPath = $this->applicationDir.DS.'models'.DS.$this->model.self::EXTENSION;
         $output->writeln("Model $this->model generated successfully into ".$modelPath);
     }
 
