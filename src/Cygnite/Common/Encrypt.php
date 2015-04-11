@@ -45,10 +45,11 @@ class Encrypt
         $encryptKey = Config::get('global.config', 'cf_encryption_key');
 
         if (is_null($encryptKey)) {
-            $this->setSaltKey($this->defaultKey);
+            $config = include_once CYGNITE_BASE.DS.APPPATH.DS.'configs'.DS.'application'.EXT;
+            $this->setSaltKey($config['cf_encryption_key']);
+        } else {
+            $this->setSaltKey($encryptKey);
         }
-
-        $this->setSaltKey($encryptKey);
     }
 
     /**
