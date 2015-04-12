@@ -208,8 +208,8 @@ class Schema
                     list($type, $length) = $this->columnType($value['type'], $value['length'], '10,2');
                     break;
                 case 'enum':
-                    $len = implode('","', $value['length']);
-                    list($type, $length) = $this->columnType($value['type'], $len, "'0', '1'");
+                    $length = implode('","', $value['length']);
+                    $type = strtoupper($value['type']).'("'.$length.'")';
                     break;
                 case 'date':
                     $type = 'date';

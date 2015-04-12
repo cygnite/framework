@@ -48,7 +48,7 @@ class Migration extends ActiveRecord
     public function insert($table, $attributes = array())
     {
         $this->tableName = $table;
-        $this->attributes = $attributes;
+        $this->setAttributes($attributes);
 
         if ($this->save()) {
             return true;
