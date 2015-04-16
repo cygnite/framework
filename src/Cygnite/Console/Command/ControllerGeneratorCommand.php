@@ -90,7 +90,7 @@ class ControllerGeneratorCommand extends Command
             dirname(dirname(__FILE__)).DS.'src'.DS.ucfirst('apps').DS.'Controllers'.DS.$resourcePath;
 
         $controller->setControllerTemplatePath($controllerTemplateDir);
-        $controller->setApplicationDirectory(BASE_PATH.DS.APP_PATH);
+        $controller->setApplicationDirectory(CYGNITE_BASE.DS.APPPATH);
         $controller->setControllerName($this->controller);
         return $controller->{__FUNCTION__}();
     }

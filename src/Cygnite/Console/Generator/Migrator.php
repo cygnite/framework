@@ -38,8 +38,6 @@ class Migrator
 
     private $migrationClass;
 
-    const EXTENSION = '.php';
-
     private $latestFile;
 
     private $migrationDir;
@@ -94,7 +92,7 @@ class Migrator
                 array('apps', 'database'),
                 array('Apps', 'Database'),
                 $this->getTemplatePath()
-            ).$template.self::EXTENSION;
+            ).$template.EXT;
 
         file_exists($file) or die("Base template doesn't exists");
 
@@ -129,7 +127,7 @@ class Migrator
 
         $filePath =  $appMigrationPath.strtolower(
                 Inflector::changeToLower(
-                    $date->format('YmdHis').'_'.$this->command->input.self::EXTENSION
+                    $date->format('YmdHis').'_'.$this->command->input.EXT
                 )
             );
 
@@ -165,10 +163,10 @@ class Migrator
     public function setMigrationClassName($file = '')
     {
         if (pathinfo($this->latestFile, PATHINFO_EXTENSION) !== 'php') {
-            throw new \Exception("apps/database/migrations/ must contain only {xxxx_table_name.php} file types");
+            throw new \Exception(APPPATH."/database/migrations/ must contain only {xxxx_table_name.php} file types");
         }
 
-        $file = str_replace('.php', '',$this->latestFile);
+        $file = str_replace(EXT, '',$this->latestFile);
         $exp = '';
         $exp =  preg_split('((\d+|\D+))', $file, -1, PREG_SPLIT_DELIM_CAPTURE|PREG_SPLIT_NO_EMPTY);
 
@@ -195,7 +193,7 @@ class Migrator
     {
         $file = $class = null;
 
-        $file = $this->migrationDir.$this->getVersion().$this->getMigrationClass().self::EXTENSION;
+        $file = $this->migrationDir.$this->getVersion().$this->getMigrationClass().EXT;
 
         if (is_readable($file)) {
             include_once $file;

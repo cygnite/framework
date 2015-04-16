@@ -1,37 +1,26 @@
 <?php
+/*
+ * This file is part of the Cygnite package.
+ *
+ * (c) Sanjoy Dey <dey.sanjoy0@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 namespace Cygnite\Console\Generator;
 
 use Cygnite\Helpers\Inflector;
 
 /**
- *  Cygnite Framework
+ * Cygnite Model Generator
  *
- *  An open source application development framework for PHP 5.3 or newer
- *
- *   License
- *
- *   This source file is subject to the MIT license that is bundled
- *   with this package in the file LICENSE.txt.
- *   http://www.cygniteframework.com/license.txt
- *   If you did not receive a copy of the license and are unable to
- *   obtain it through the world-wide-web, please send an email
- *   to sanjoy@hotmail.com so that I can send you a copy immediately.
- *
- * @Package            :  Console
- * @Filename           :  Form.php
- * @Description        :  This class is used to generate your Form code using cygnite console
- * @Author             :  Sanjoy Dey
- * @Copyright          :  Copyright (c) 2013 - 2014,
- * @Link	           :  http://www.cygniteframework.com
- * @Since	           :  Version 1.0.6
- * @File Source
+ * This class is used to generate your Form class using cygnite console
+ * @author Sanjoy Dey <dey.sanjoy0@gmail.com>
  *
  */
 class Form
 {
     private $formCommand;
-
-    const EXTENSION = '.php';
 
     private $formTemplatePath;
 
@@ -75,7 +64,7 @@ class Form
      */
     private function formTemplateName()
     {
-        return 'Form'.self::EXTENSION;
+        return 'Form'.EXT;
     }
 
     /**
@@ -86,17 +75,17 @@ class Form
         $filePath = '';
         $formName = Inflector::classify($this->formCommand->table);
 
-        if (file_exists($this->getFormTemplatePath().'Form.php')) {
+        if (file_exists($this->getFormTemplatePath().'Form'.EXT)) {
            //We will generate Form Component
-            $formContent = file_get_contents($this->getFormTemplatePath().'Form.php');
+            $formContent = file_get_contents($this->getFormTemplatePath().'Form'.EXT);
         } else{
-           die("Form template doesn't exists in ".$this->getFormTemplatePath().'Form.php'." directory.");
+           die("Form template doesn't exists in ".$this->getFormTemplatePath().'Form'.EXT." directory.");
         }
 
         $this->controller->isFormGenerator = true;
         $this->controller->updateTemplate();
         $this->controller->controller = $formName;
-        $this->controller->applicationDir = BASE_PATH.DS.APP_PATH;
+        $this->controller->applicationDir = CYGNITE_BASE.DS.APPPATH;
         $formContent = str_replace('%controllerName%', $formName, $formContent);
         $formContent = str_replace('{%formElements%}', $this->controller->getForm().PHP_EOL, $formContent);
         $this->controller->generateFormComponent($formContent);

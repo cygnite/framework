@@ -1,4 +1,12 @@
 <?php
+/*
+ * This file is part of the Cygnite package.
+ *
+ * (c) Sanjoy Dey <dey.sanjoy0@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 namespace Cygnite\Console;
 
 use Cygnite\Database;
@@ -12,30 +20,15 @@ use Cygnite\Console\Command\ControllerGeneratorCommand;
 use Cygnite\Console\Command\ModelGeneratorCommand;
 use Symfony\Component\Console\Input\InputOption;
 
-require BASE_PATH.DS.APP_PATH.'/configs/database.php';
+require CYGNITE_BASE.DS.APPPATH.'/configs/database.php';
+
 /**
- *  Cygnite Framework
+ * Cygnite Console Application
  *
- *  An open source application development framework for PHP 5.3 or newer
- *
- *   License
- *
- *   This source file is subject to the MIT license that is bundled
- *   with this package in the file LICENSE.txt.
- *   http://www.cygniteframework.com/license.txt
- *   If you did not receive a copy of the license and are unable to
- *   obtain it through the world-wide-web, please send an email
- *   to sanjoy@hotmail.com so that I can send you a copy immediately.
- *
- * @Package            :  Console
- * @Filename           :  CygniteApplication.php
- * @Description        :  Cygnite Application is the middle ware of all your console command using Cygnite CLI.
- *                        Cygnite Cli driven by Symfony2 Console Component.
- * @Author             :  Sanjoy Dey
- * @Copyright          :  Copyright (c) 2013 - 2014,
- * @Link	           :  http://www.cygniteframework.com
- * @Since	           :  Version 1.0.6
- * @File Source
+ * This class is the entry point of Console component. It is the
+ * a middle ware of all your console commands.
+ * Cygnite CLI powered by Symfony2 Console Component.
+ * @author Sanjoy Dey <dey.sanjoy0@gmail.com>
  *
  */
 
@@ -86,6 +79,6 @@ class CygniteApplication extends Application
     // Get the Application directory
     private function getApplicationDirectory()
     {
-        return BASE_PATH.DS.APP_PATH;
+        return CYGNITE_BASE.DS.APPPATH;
     }
 }

@@ -139,7 +139,7 @@ class View
         $layoutFile = $appViewPath.$layout.DS.$this->viewLayoutName();
 
         if ($this->layoutType == 'php') {
-            $layoutFile = str_replace('.stub', '.php', $layoutFile);
+            $layoutFile = str_replace('.stub', EXT, $layoutFile);
         } else {
             $layoutFile = str_replace('.stub', '.twig', $layoutFile);
         }
@@ -358,7 +358,7 @@ class View
         $appViewPath = $this->getApplicationViewPath();
 
         if ($this->layoutType == 'php') {
-           $viewName = str_replace('.stub', '.php', $viewName);
+           $viewName = str_replace('.stub', EXT, $viewName);
         } else {
            $viewName = str_replace('.stub', '.twig', $viewName);
         }

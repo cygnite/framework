@@ -324,7 +324,7 @@ class Controller
     public function generateControllerTemplate()
     {
         $controllerTemplate = ($this->viewType == 'php') ?
-            'Php'.DS.'Controller.php' :
+            'Php'.DS.'Controller'.EXT :
             $this->controllerTemplateName();
         $file = $this->getControllerTemplatePath().$controllerTemplate;
 
@@ -343,7 +343,7 @@ class Controller
         //fclose($tmp);
 
         $content = $this->replaceControllerName($content);
-        $content = str_replace('{%Apps%}', ucfirst(APP_PATH), $content);
+        $content = str_replace('{%Apps%}', ucfirst(APPPATH), $content);
         $primaryKey = $this->controllerCommand->getPrimaryKey();
 
         $content = str_replace('{%primaryKey%}', $primaryKey, $content);
@@ -355,11 +355,11 @@ class Controller
         $formTemplatePath = null;
         $formTemplatePath = str_replace('Controllers', '', $this->formPath);
 
-        if (file_exists($formTemplatePath.'Form.php')) {
+        if (file_exists($formTemplatePath.'Form'.EXT)) {
             //We will generate Form Component
-            $formContent = file_get_contents($formTemplatePath.'Form.php', true);
+            $formContent = file_get_contents($formTemplatePath.'Form'.EXT, true);
         } else{
-            die("Form template doesn't exists in ".$formTemplatePath.'Form.php'." directory.");
+            die("Form template doesn't exists in ".$formTemplatePath.'Form'.EXT." directory.");
         }
 
         $formContent = str_replace('%controllerName%', $controllerNameOnly, $formContent);
@@ -384,13 +384,13 @@ class Controller
         $writeTmp =fopen(
             $this->applicationDir.DS.'components'.DS.'form'.DS.Inflector::classify(
                 str_replace('Controller', '', $this->controller)
-            ).'Form.php',
+            ).'Form'.EXT,
             "w"
         ) or die('Unable to generate controller');
 
         $contentAppendWith = '';
         $contentAppendWith = '<?php '.PHP_EOL;
-        $formContent = str_replace('{%Apps%}', ucfirst(APP_PATH), $formContent);
+        $formContent = str_replace('{%Apps%}', ucfirst(APPPATH), $formContent);
         fwrite($writeTmp, $contentAppendWith .$formContent);
         fclose($writeTmp);
 
@@ -413,7 +413,7 @@ class Controller
     {
         /*write operation ->*/
         $writeTmp =fopen(
-            $this->applicationDir.DS.'controllers'.DS.$this->controller.'.php',
+            $this->applicationDir.DS.'controllers'.DS.$this->controller.EXT,
             "w"
         ) or die('Unable to generate controller');
 
@@ -457,7 +457,7 @@ class Controller
      */
     private function generateBasicController()
     {
-        $controllerClass = $this->applicationDir.DS.'controllers'.DS.$this->controller.'.php';
+        $controllerClass = $this->applicationDir.DS.'controllers'.DS.$this->controller.EXT;
 
         if (file_exists($controllerClass)) {
             throw new \Exception("$controllerClass already exists!!");
@@ -491,7 +491,7 @@ class Controller
     {
         $this->getControllerTemplatePath();
         $content = file_get_contents($this->getControllerTemplatePath().'controller.tpl.stub', true);
-        $content = $this->replaceTemplate('{%Apps%}', ucfirst(APP_PATH), $content);
+        $content = $this->replaceTemplate('{%Apps%}', ucfirst(APPPATH), $content);
         return $this->replaceTemplate('{%ControllerName%}', $this->controller, $content);
     }
 
@@ -521,7 +521,7 @@ class Controller
     private function makeResourceController()
     {
         $stubs = array('index', 'new', 'create', 'show', 'edit', 'update', 'delete');
-        $controllerClass = $this->applicationDir.DS.'controllers'.DS.$this->controller.'.php';
+        $controllerClass = $this->applicationDir.DS.'controllers'.DS.$this->controller.EXT;
 
         if (file_exists($controllerClass)) {
             throw new \Exception("$controllerClass already exists!!");
