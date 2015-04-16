@@ -38,15 +38,14 @@ class InitCommand extends Command
 
     private $table;
 
-
-	/**
+    /**
      * {@inheritdoc}
      */
     protected function configure()
     {
         $this->setName($this->name)
             ->setDescription('Initializing Cygnite CLI..')
-            ->addArgument('name', null, InputArgument::OPTIONAL, 'Migration Name ?')
+            ->addArgument('name', null, InputArgument::OPTIONAL, null)
             ->setHelp("<<<EOT
                 The <info>init</info> command creates a skeleton file and a migrations directory
                 <info>cygnite migrate:init</info>
@@ -63,22 +62,37 @@ class InitCommand extends Command
 
         $migrateInstance = null;
         $migrateInstance = Migrator::instance($this);
-        $this->table->makeMigration('migrations');
-        $migrateInstance->setTemplateDir($migrateTemplateDir);
-        $migrateInstance->replaceTemplateByInput();
-        $status = $migrateInstance->generate(new \DateTime('now', new \DateTimeZone('Europe/London')));
+        $this->getSchema()->makeMigration('migrations');
 
-        if ($status) {
-            $output->writeln("Your migration class generated in $status");
+        // We will generate migration class only if class name provided in command
+        if (!is_null($this->input)) {
+
+            $migrateInstance->setTemplateDir($migrateTemplateDir);
+            $migrateInstance->replaceTemplateByInput();
+            $status = $migrateInstance->generate(new \DateTime('now', new \DateTimeZone('Europe/London')));
+
+            if ($status) {
+                $output->writeln("Your migration class generated in $status");
+            }
         }
     }
 
+    /**
+     * @param Table $table
+     */
     public function setSchema(Table $table)
     {
         if ($table instanceof Table) {
             $this->table = $table;
         }
+    }
 
+    /**
+     * @return null
+     */
+    public function getSchema()
+    {
+        return isset($this->table) ? $this->table : null;
     }
 
     public static function __callStatic($method, $arguments = array())
