@@ -116,3 +116,15 @@ if ( ! function_exists('compress')) {
         return $content;
     }
 }
+
+if ( ! function_exists('isCli')) {
+
+    /**
+     * Check if code is running via command line interface or web
+     * @return bool
+     */
+    function isCli()
+    {
+        return (php_sapi_name() == 'cli' && empty($_SERVER['REMOTE_ADDR'])) ? true : false;
+    }
+}
