@@ -5,50 +5,23 @@ if (!defined('CF_SYSTEM')) {
     exit('External script access not allowed');
 }
 /*
- *  Cygnite Framework
- *
- *  An open source application development framework for PHP 5.3x or newer
- *
- *   License
- *
- *   This source file is subject to the MIT license that is bundled
- *   with this package in the file LICENSE.txt.
- *   http://www.cygniteframework.com/license.txt
- *   If you did not receive a copy of the license and are unable to
- *   obtain it through the world-wide-web, please send an email
- *   to sanjoy@hotmail.com so I can send you a copy immediately.
- *
- * @Package                :  Packages
- * @Sub Packages           :  Library
- * @Filename               :  CF_Parser
- * @Description            :  This library will be available with all features in next version.
- * @Author                 :  Cygnite Dev Team
- * @Copyright              :  Copyright (c) 2013 - 2014,
- * @Link                   :  http://www.cygniteframework.com
- * @Since                  :  Version 1.0
- * @Filesource
- * @Warning                :  Any changes in this library can cause abnormal behaviour of the framework
- *
- *
- */
-
-/*
  $sampleData = array(
-                'first' => array(
-                    'first-1' => 1,
-                    'first-2' => 2,
-                    'first-3' => 3,
-                    'first-4' => 4,
-                    'first-5' => 5,
-                ),
-                'second' => array(
-                    'second-1' => 1,
-                    'second-2' => 2,
-                    'second-3' => 3,
-                    'second-4' => 4,
-                    'second-5' => 5,
-                ));
-write_ini($sampleData, './data.ini', true);
+    'first' => array(
+        'first-1' => 1,
+        'first-2' => 2,
+        'first-3' => 3,
+        'first-4' => 4,
+        'first-5' => 5,
+    ),
+    'second' => array(
+        'second-1' => 1,
+        'second-2' => 2,
+        'second-3' => 3,
+        'second-4' => 4,
+        'second-5' => 5,
+    ));
+
+$parser->writeIni($sampleData, './data.ini', true);
  */
 
 

@@ -12,32 +12,6 @@
 namespace Cygnite\Common;
 
 use Closure;
-
-/**
- *  Cygnite Framework
- *
- *  An open source application development framework for PHP 5.3x or newer
- *
- *   License
- *
- *   This source file is subject to the MIT license that is bundled
- *   with this package in the file LICENSE.txt.
- *   http://www.cygniteframework.com/license.txt
- *   If you did not receive a copy of the license and are unable to
- *   obtain it through the world-wide-web, please send an email
- *   to sanjoy@hotmail.com so I can send you a copy immediately.
- *
- * @Package             :  Packages
- * @Sub Packages        :  Cygnite
- * @Filename            :  Security
- * @Description         :  Security package : GLOBAL variables will be accessed securely through Security package.
- *                         This package provides necessary in built validation for users data.
- * @Author              :  Sanjoy Dey
- * @Copyright           :  Copyright (c) 2013 - 2014,
- * @Link                :  http://www.cygniteframework.com
- * @Since               :  Version 1.0
- * @FileSource
- */
 /**
  * Security.
  *
@@ -47,10 +21,10 @@ use Closure;
  * This package provides necessary in built validation for users data.
  *
  * <code>
- *  $this->instance = Security::instance(function ($instance) {
+ *  $instance = Security::instance(function ($instance) {
  *               return $instance;
  *  });
- *  $this->instance->sanitize($string);
+ *  $instance->sanitize($string);
  * </code>
  * Inspired by TravianZ and Kohana security library http://kohanaphp.com/
  *

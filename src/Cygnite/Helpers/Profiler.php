@@ -4,35 +4,10 @@ namespace Cygnite\Helpers;
 if (!defined('CF_SYSTEM')) {
     exit('External script access not allowed');
 }
-/*
- *  Cygnite Framework
- *
- *  An open source application development framework for PHP 5.3  or newer.
- *
- *   License
- *
- *   This source file is subject to the MIT license that is bundled
- *   with this package in the file LICENSE.txt.
- *   http://www.cygniteframework.com/license.txt
- *   If you did not receive a copy of the license and are unable to
- *   obtain it through the world-wide-web, please send an email
- *   to sanjoy@hotmail.com so I can send you a copy immediately.
- *
- * @Package                    :  Packages
- * @Sub Packages               :  Helpers
- * @Filename                   :  Profiler
- * @Description                :  This library used to benchmark the code.
- * @Author                     :  Cygnite Dev Team
- * @Copyright                  :  Copyright (c) 2013 - 2014,
- * @Link                       :  http://www.cygniteframework.com
- * @Since                      :  Version 1.0
- * @Filesource
- * @Warning                    :  Any changes in this library can cause abnormal behaviour of the framework
- *
- *
+/**
+ * Class Profiler - Tiny class to benchmark code
+ * @package Cygnite\Helpers
  */
-
-
 class Profiler
 {
     private static $blocks = array();
@@ -43,11 +18,11 @@ class Profiler
     * @access   public
     * @false    string
     */
-    public static function start($starttoken = 'cygnite_start')
+    public static function start($startToken = 'cygnite_start')
     {
         if(!defined('MEMORY_START_POINT')):
             define('MEMORY_START_POINT', self::getMemorySpace());
-            self::$blocks[$starttoken] = self::getTime();
+            self::$blocks[$startToken] = self::getTime();
         endif;
     }
 
@@ -88,7 +63,7 @@ class Profiler
     }
 
     /**
-    *  This funtion is to calculate the total memory usage by the running script
+    *  This function is to calculate the total memory usage by the running script
     *
     * @access   public
     * @false    string

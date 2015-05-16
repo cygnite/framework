@@ -41,10 +41,11 @@ class Widget implements \ArrayAccess
             return $callback(new Widget($var, $data));
         }
 
+        $widget = new Widget($var, $data);
         /*
          | return object
          */
-        return (new Widget($var, $data))->render();
+        return $widget->render();
     }
 
     /**
@@ -111,7 +112,8 @@ class Widget implements \ArrayAccess
             }
         }
 
-        $output = (new Output($this->widgetName))->buffer($path, $this->data)->clean();
+        $outputInstance = new Output($this->widgetName);
+        $output = $outputInstance->buffer($path, $this->data)->clean();
         $this->setWidget($this->widgetName, $output);
 
         return $this->getWidget($this->widgetName);

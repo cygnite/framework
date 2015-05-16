@@ -7,5 +7,4 @@ namespace Cygnite\DependencyInjection;
  */
 class DependencyException extends \Exception
 {
-
 }

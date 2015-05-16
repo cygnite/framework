@@ -1,5 +1,6 @@
 <?php
 use Cygnite\Foundation\Application as App;
+use Cygnite\AssetManager\Html;
 
 if ( ! function_exists('clear_sanity')) {
     /*
@@ -11,14 +12,13 @@ if ( ! function_exists('clear_sanity')) {
     {
         $values = (is_array($values)) ?
             array_map("clear_sanity", $values) :
-            htmlentities($values, ENT_QUOTES, 'UTF-8');
+            Html::santize($values);
 
         return $values;
     }
 }
 
 if ( ! function_exists('days_diff')) {
-
     /**
      * @param $date
      * @return int
@@ -41,7 +41,6 @@ if ( ! function_exists('days_diff')) {
 }
 
 if ( ! function_exists('show')) {
-
     /**
      * @param array $data
      * @param bool  $hasExit
@@ -51,7 +50,6 @@ if ( ! function_exists('show')) {
         echo '<pre>';
         print_r($data);
         echo '</pre>';
-
         if ($hasExit) {
             exit;
         }
@@ -60,7 +58,6 @@ if ( ! function_exists('show')) {
 
 
 if ( ! function_exists('string_split')) {
-
     /**
      * @param        $string
      * @param string $needle
@@ -69,14 +66,12 @@ if ( ! function_exists('string_split')) {
     function string_split($string, $needle = '.')
     {
         $expression = array();
-        $expression = explode($needle,$string);
+        $expression = explode($needle, $string);
         return $expression;
     }
-
 }
 
 if ( ! function_exists('string_has')) {
-
     /**
      * @param $haystack
      * @param $needle
@@ -118,7 +113,6 @@ if ( ! function_exists('compress')) {
 }
 
 if ( ! function_exists('isCli')) {
-
     /**
      * Check if code is running via command line interface or web
      * @return bool
@@ -126,5 +120,18 @@ if ( ! function_exists('isCli')) {
     function isCli()
     {
         return (php_sapi_name() == 'cli' && empty($_SERVER['REMOTE_ADDR'])) ? true : false;
+    }
+}
+
+if ( ! function_exists('e')) {
+    /**
+     * Escape HTML entities in a string.
+     *
+     * @param  string  $value
+     * @return string
+     */
+    function e($value)
+    {
+        return Html::entities($value);
     }
 }
