@@ -28,7 +28,7 @@ if (!defined('CF_SYSTEM')) {
  *   $asset->add('style', array('path' => 'css.cygnite.css', 'media' => '', 'title' => ''))
  *   ->add('style', array('path' => 'css.*', 'media' => '', 'title' => ''))
  *   ->add('script', array('path' => 'js.*', 'attributes' => ''))
- *   ->add('link', array('path' => '', 'name' => '', 'attributes' => array()));
+ *   ->add('link', array('path' => '', 'name' => '', 'attributes' => []));
  *
  *   return $asset;
  *  });
@@ -44,15 +44,15 @@ class Asset extends StaticResolver implements \ArrayAccess
     public static $directoryName = 'assets';
     private static $stylesheet = '<link rel="stylesheet" type="text/css"';
     private static $script = '<script type="text/javascript"';
-    protected $assets = array();
-    protected $combinedAssets = array();
-    protected $tag = array();
+    protected $assets = [];
+    protected $combinedAssets = [];
+    protected $tag = [];
     private $where = 'default';
     private $baseUrl;
     private $assetDirectory;
     private $external = false;
     private $combine = false;
-    private $paths = array();
+    private $paths = [];
 
     /**
      * We will check if external true,
@@ -78,7 +78,7 @@ class Asset extends StaticResolver implements \ArrayAccess
      * @param array $arguments
      * @return $this
      */
-    public function add($type, $arguments = array())
+    public function add($type, $arguments = [])
     {
         /*
          | By default we will tag all assets to 'default' index
@@ -89,13 +89,13 @@ class Asset extends StaticResolver implements \ArrayAccess
 
         switch ($type) {
             case 'style':
-                call_user_func_array(array($this, $type), $arguments);
+                call_user_func_array([$this, $type], $arguments);
                 break;
             case 'script':
-                call_user_func_array(array($this, $type), $arguments);
+                call_user_func_array([$this, $type], $arguments);
                 break;
             case 'link':
-                call_user_func_array(array($this, $type), $arguments);
+                call_user_func_array([$this, $type], $arguments);
                 break;
         }
 
@@ -133,7 +133,10 @@ class Asset extends StaticResolver implements \ArrayAccess
     public function dump($name)
     {
         // Check {style.final} and display only combined asset into browser
-        if ($this->combine && string_has($name, '.') && isset($this->combinedAssets[$this->tag[$this->where]][$name])) {
+        if (
+            $this->combine && string_has($name, '.') &&
+            isset($this->combinedAssets[$this->tag[$this->where]][$name])
+        ) {
             $this->render($this->combinedAssets[$this->tag[$this->where]][$name]);
 
         } else {
@@ -512,7 +515,7 @@ class Asset extends StaticResolver implements \ArrayAccess
      * @param array $html
      * @return string
      */
-    public function addAttributes($attributes, $html = array())
+    public function addAttributes($attributes, $html = [])
     {
         if (!empty($attributes)) {
             foreach ($attributes as $key => $value) {
@@ -563,7 +566,7 @@ class Asset extends StaticResolver implements \ArrayAccess
      * @param array $attributes
      * @return string
      */
-    protected function script($url, $attributes = array())
+    protected function script($url, $attributes = [])
     {
         $this->setLocation($url, strtolower(__FUNCTION__));
 
@@ -606,7 +609,7 @@ class Asset extends StaticResolver implements \ArrayAccess
      * @param array $attributes
      * @return string
      */
-    protected function link($url, $name = null, $attributes = array())
+    protected function link($url, $name = null, $attributes = [])
     {
         $name = (is_null($name)) ? $url : $name;
         $this->setLocation($url, strtolower(__FUNCTION__));

@@ -27,7 +27,7 @@ abstract class ActiveRecord implements \ArrayAccess
     public static $defaultPrimaryKey = 'id';
 
     //set closed property as true is set else false
-    private static $events = array(
+    private static $events = [
         'beforeCreate',
         'afterCreate',
         'beforeUpdate',
@@ -36,10 +36,10 @@ abstract class ActiveRecord implements \ArrayAccess
         'afterSelect',
         'beforeDelete',
         'afterDelete'
-    );
+    ];
 
     //Hold all your table fields in attributes
-    private static $validFinders = array(
+    private static $validFinders = [
         'first',
         'last',
         'find',
@@ -49,7 +49,7 @@ abstract class ActiveRecord implements \ArrayAccess
         'findByAnd',
         'findByOr',
         'save'
-    );
+    ];
 
     //set user defined database name into it.
     public $id;
@@ -59,9 +59,9 @@ abstract class ActiveRecord implements \ArrayAccess
 
     //set user defined table primary key
     public $closed;
-    public $attributes = array();
+    public $attributes = [];
     public $paginationUri;
-    public $paginator = array();
+    public $paginator = [];
     public $paginationOffset;
     public $pageNumber;
     public $modelClassNs;
@@ -186,7 +186,7 @@ abstract class ActiveRecord implements \ArrayAccess
                 return static::$ar->fluentQuery()->callFinder($method, $arguments);
                 break;
             case 'find':
-                return static::callDynamicMethod(array($class, $method), $arguments);
+                return static::callDynamicMethod([$class, $method], $arguments);
                 break;
             case (substr($method, 0, 6) == 'findBy') :
 
@@ -202,7 +202,7 @@ abstract class ActiveRecord implements \ArrayAccess
 
                 $columnName = Inflector::tabilize(substr($method, 6));
                 $operator = (isset($arguments[1])) ? $arguments[1] : '=';
-                $params = array($columnName, $operator, $arguments[0]);
+                $params = [$columnName, $operator, $arguments[0]];
 
                 return static::$ar->fluentQuery()->callFinder('findBy', $params);
                 break;
@@ -212,7 +212,7 @@ abstract class ActiveRecord implements \ArrayAccess
             case 'createLinks' :
                 $model = get_called_class();
                 $pagination = null;
-                $pagination = Pagination::instance(new $model());
+                $pagination = Pagination::make(new $model());
 
                 return $pagination->{$method}();
                 break;
@@ -223,7 +223,7 @@ abstract class ActiveRecord implements \ArrayAccess
 
         //Use the power of PDO methods directly via static functions
         return static::callDynamicMethod(
-            array(static::$ar->fluentQuery()->getDatabaseConnection(), $method),
+            [static::$ar->fluentQuery()->getDatabaseConnection(), $method],
             $arguments
         );
     }
@@ -244,14 +244,14 @@ abstract class ActiveRecord implements \ArrayAccess
         }
     }
 
-    public static function callDynamicMethod($callback, $arguments = array())
+    public static function callDynamicMethod($callback, $arguments = [])
     {
         return call_user_func_array($callback, $arguments);
     }
 
     private static function callFinderBy($method, $class, $arguments, $type = 'And')
     {
-        $params = array();
+        $params = [];
 
         if (strpos($method, $type) !== false) {
             $query = static::$ar->fluentQuery()->buildFindersWhereCondition($method, $arguments, $type);
@@ -297,7 +297,7 @@ abstract class ActiveRecord implements \ArrayAccess
     /**
      * @param array $attributes
      */
-    public function setAttributes($attributes = array())
+    public function setAttributes($attributes = [])
     {
         foreach ($attributes as $key => $value) {
             $this->__set($key, $value);
@@ -441,7 +441,7 @@ abstract class ActiveRecord implements \ArrayAccess
      * return mixed
      *
      */
-    public function __call($method, $arguments = array())
+    public function __call($method, $arguments = [])
     {
         // save attributes into table
         if (in_array($method, self::$validFinders) && $method == 'save') {
@@ -455,7 +455,7 @@ abstract class ActiveRecord implements \ArrayAccess
 
         // try calling method against Query if exists
         if (method_exists($this->fluentQuery(), $method)) {
-            return static::callDynamicMethod(array($this->fluentQuery(), $method), $arguments);
+            return static::callDynamicMethod([$this->fluentQuery(), $method], $arguments);
         }
 
         if (!method_exists($this->fluentQuery()->getDatabaseConnection(), $method) ||
@@ -467,7 +467,7 @@ abstract class ActiveRecord implements \ArrayAccess
         //|-----------------------------------------------
         //| If method not found we will check against the PDO.
         //| call PDO method directly via model object and return result set
-        return call_user_func_array(array($this->fluentQuery()->getDatabaseConnection(), $method), $arguments);
+        return call_user_func_array([$this->fluentQuery()->getDatabaseConnection(), $method], $arguments);
     }
 
     private function _save($arguments)
@@ -499,7 +499,7 @@ abstract class ActiveRecord implements \ArrayAccess
             } else {
                 $arguments[$this->getPrimaryKey()] = $this->index[$this->getPrimaryKey()];
             }
-            return call_user_func_array(array($this->fluentQuery(), $method), array($arguments));
+            return call_user_func_array([$this->fluentQuery(), $method], [$arguments]);
         }
     }
 
@@ -515,10 +515,10 @@ abstract class ActiveRecord implements \ArrayAccess
 
     private function findByPK($method, $arguments)
     {
-        $args = array(
+        $args = [
             'primaryKey' => $this->getPrimaryKey(),
             'args' => $arguments
-        );
+        ];
 
         $fetch = $this->fluentQuery()->find($method, $args);
         $this->setId($this->getPrimaryKey(), array_shift($arguments));
@@ -567,7 +567,7 @@ abstract class ActiveRecord implements \ArrayAccess
      *
      * @param array $attributes
      */
-    protected function assignPropertiesToModel($attributes = array())
+    protected function assignPropertiesToModel($attributes = [])
     {
         $model = null;
         $model = self::getDynamicInstance();
@@ -614,7 +614,7 @@ abstract class ActiveRecord implements \ArrayAccess
             $number = $this->setPageLimit();
         }
 
-        $pagination = Pagination::instance();
+        $pagination = Pagination::make();
         $pagination->setPerPage($number);
     }
 
@@ -622,11 +622,11 @@ abstract class ActiveRecord implements \ArrayAccess
     {
         $tableWith = Inflector::tabilize($arguments[0]);
 
-        $params = array(
+        $params = [
             $class->tableName . '.' . $class->primaryKey,
             '=',
             $tableWith . '.' . Inflector::singularize($class->tableName) . '_id'
-        );
+        ];
 
         if (isset($arguments[1])) {
             $params = $arguments[1];

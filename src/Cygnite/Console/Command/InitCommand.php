@@ -95,7 +95,7 @@ class InitCommand extends Command
         return isset($this->table) ? $this->table : null;
     }
 
-    public static function __callStatic($method, $arguments = array())
+    public static function __callStatic($method, $arguments = [])
     {
         if ($method == 'instance') {
             return new self();

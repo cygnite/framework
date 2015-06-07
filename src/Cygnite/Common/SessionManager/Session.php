@@ -22,13 +22,13 @@ class Session
      * Available drivers for session storage
      * @var array
      */
-    protected $drivers = array(
+    protected $drivers = [
         'native' => 'Native\\Session',
         'database' => 'Database\\Session',
-        'redis' => 'Memory\\Redis',
-    );
+        'redis' => 'Memory\\Redis'
+    ];
 
-    protected $config = array();
+    protected $config = [];
 
     // Default session name
     public $name = 'cygnite-session';
@@ -42,7 +42,7 @@ class Session
      */
     public function __construct()
     {
-        $config = array();
+        $config = [];
         $config =  Config::getConfigItems('config.items');
 
         /*
@@ -106,7 +106,7 @@ class Session
     {
         $arguments['method'] = $method;
         self::$instance = new Static;
-        return call_user_func_array(array(self::$instance, 'factory'), array($arguments));
+        return call_user_func_array([self::$instance, 'factory'], [$arguments]);
     }
 
     /**

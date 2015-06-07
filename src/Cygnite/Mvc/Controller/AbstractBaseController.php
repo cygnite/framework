@@ -17,7 +17,7 @@ use Cygnite\Common\Encrypt;
 use Cygnite\Common\SessionManager\Session;
 use Cygnite\Foundation\Application as App;
 use Cygnite\Helpers\Inflector;
-use Cygnite\Mvc\View\CView;
+use Cygnite\Mvc\View\View;
 use Cygnite\Mvc\View\Template;
 
 /**
@@ -27,9 +27,9 @@ use Cygnite\Mvc\View\Template;
  *
  * @author Sanjoy Dey <dey.sanjoy0@gmail.com>
  */
-abstract class AbstractBaseController extends CView
+abstract class AbstractBaseController extends View
 {
-    private $validFlashMessage = array('setFlash', 'hasFlash', 'getFlash', 'hasError');
+    private $validFlashMessage = ['setFlash', 'hasFlash', 'getFlash', 'hasError'];
 
     private $class;
 
@@ -121,9 +121,9 @@ abstract class AbstractBaseController extends CView
      * @param array $arguments
      * @return mixed
      */
-    protected function _call($instance, $method, $arguments = array())
+    protected function _call($instance, $method, $arguments = [])
     {
-        return call_user_func_array(array($instance, $method), $arguments);
+        return call_user_func_array([$instance, $method], $arguments);
     }
 
     /**
@@ -135,7 +135,7 @@ abstract class AbstractBaseController extends CView
      *   $response = $this->call('modules.admin.user@profile', $arguments);
      * </code>
      */
-    public function call($resource, $arguments = array())
+    public function call($resource, $arguments = [])
     {
         list($name, $method) = explode('@', $resource);
 

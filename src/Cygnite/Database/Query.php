@@ -33,14 +33,14 @@ class Query
     const LIMIT_STYLE_TOP_N = "top";
     const LIMIT_STYLE_LIMIT = "limit";
     public static $query;
-    private static $debugQuery = array();
+    private static $debugQuery = [];
     private static $activeRecord;
-    private static $cacheData = array();
+    private static $cacheData = [];
     private static $dataSource = false;
-    public $data = array();
+    public $data = [];
     protected $_tableAlias;
-    protected $joinSources = array();
-    protected $pdo = array();
+    protected $joinSources = [];
+    protected $pdo = [];
     private $_statement;
 
     // set query builder query into property
@@ -64,16 +64,16 @@ class Query
      * @access private
      * @var Array $where
      */
-    private $where = array();
+    private $where = [];
     /**
      * Bindings for where sql statement
      *
      * @access private
      * @var Array $bindings
      */
-    private $bindings = array();
+    private $bindings = [];
 
-    private $_values = array();
+    private $_values = [];
 
     /**
      * You can not instantiate the Query object directly
@@ -138,7 +138,7 @@ class Query
      * @return mixed
      * @throws \RuntimeException
      */
-    public function insert($arguments = array())
+    public function insert($arguments = [])
     {
         $sql = $ar = null;
         $ar = self::getActiveRecord();
@@ -182,7 +182,7 @@ class Query
         try {
             $statement = $this->getDatabaseConnection()->prepare($sql);
             //Bind all values to query statement
-            foreach (array_merge($ar->attributes, array($column => $value)) as $key => $val) {
+            foreach (array_merge($ar->attributes, [$column => $value]) as $key => $val) {
                 $statement->bindValue(":$key", $val);
             }
 
@@ -210,7 +210,7 @@ class Query
      */
     public function trash($where = null, $multiple = false)
     {
-        $whr = array();
+        $whr = [];
         $statement = $affectedRows = null;
         $ar = self::getActiveRecord();
         $this->triggerEvent('beforeDelete');
@@ -238,8 +238,8 @@ class Query
     /**
      * <code>
      * $user->trash(1);
-     * $user->trash(array(1,4,6,33,54), true)
-     * $user->trash(array('id' => 23))
+     * $user->trash([1,4,6,33,54], true)
+     * $user->trash(['id' => 23])
      * $user->where('name', '=', 'application')->trash();
      * </code>
      * @param $where
@@ -534,7 +534,7 @@ class Query
      */
     public function findAll($fetchMode = "")
     {
-        $data = array();
+        $data = [];
         $ar = self::getActiveRecord();
         $this->triggerEvent('beforeSelect');
 
@@ -551,7 +551,7 @@ class Query
             if ($statement->rowCount() > 0) {
                 return new Collection($data);
             } else {
-                return new Collection(array());
+                return new Collection([]);
             }
         } catch (PDOException $ex) {
             throw new \Exception("Database exceptions: Invalid query x" . $ex->getMessage());
@@ -560,7 +560,7 @@ class Query
 
     public function fetchAs($statement, $fetchMode = null)
     {
-        $data = array();
+        $data = [];
 
         if (static::$dataSource) {
             $fetchMode = 'class';
@@ -646,7 +646,7 @@ class Query
      * @throws \Exception|\PDOException
      * @return object                   pointer $this
      */
-    public function query($sql, $attributes = array())
+    public function query($sql, $attributes = [])
     {
         try {
             $this->_statement = $this->getDatabaseConnection()->prepare($sql);
@@ -741,7 +741,7 @@ class Query
      */
     public function buildFindersWhereCondition($method, $arguments, $type = 'And')
     {
-        $condition = array();
+        $condition = [];
         $condition = explode($type, str_replace('findBy', '', $method));
 
         if (count($condition) == count($arguments[0])) {
@@ -805,7 +805,7 @@ class Query
      */
     public function findBySql($arguments)
     {
-        $results = array();
+        $results = [];
         $statement = $this->getDatabaseConnection()->prepare(trim($arguments[0]));
         $statement->execute();
         $results = $this->fetchAs($statement);
@@ -866,7 +866,7 @@ class Query
      * @param array $options
      * @return mixed
      */
-    public function find($method, $options = array())
+    public function find($method, $options = [])
     {
         if (isset($options['primaryKey']) && $method == __FUNCTION__) {
 
@@ -915,7 +915,7 @@ class Query
      *
      * firstColumn, operator, secondColumn
      *
-     * Example: array('user.id', '=', 'profile.user_id')
+     * Example: ['user.id', '=', 'profile.user_id']
      *
      * will compile to
      *
@@ -955,7 +955,7 @@ class Query
     protected function quoteIdentifier($identifier)
     {
         if (is_array($identifier)) {
-            $result = array_map(array($this, 'quoteOneIdentifier'), $identifier);
+            $result = array_map([$this, 'quoteOneIdentifier'], $identifier);
 
             return join(', ', $result);
         } else {
@@ -971,7 +971,7 @@ class Query
     protected function quoteOneIdentifier($identifier)
     {
         $parts = explode('.', $identifier);
-        $parts = array_map(array($this, 'quoteIdentifierSection'), $parts);
+        $parts = array_map([$this, 'quoteIdentifierSection'], $parts);
 
         return join('.', $parts);
     }
@@ -1155,7 +1155,7 @@ class Query
 
         // Get all column name which need to remove from the result set
         $exceptColumns = $ar->skip();
-        $columnArray = array();
+        $columnArray = [];
         foreach ($columns as $key => $value) {
 
             if (!in_array($value->column_name, $exceptColumns)) {
@@ -1272,7 +1272,7 @@ class Query
     private function all($arguments)
     {
         if (isset($arguments[0]['orderBy'])) {
-            $exp = array();
+            $exp = [];
             $exp = explode(' ', $arguments[0]['orderBy']);
             $this->orderBy($this->quoteIdentifier($exp[0]), (isset($exp[1])) ? strtoupper($exp[1]) : 'ASC');
         } else {

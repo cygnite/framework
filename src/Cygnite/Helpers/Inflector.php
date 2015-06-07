@@ -46,7 +46,7 @@ class Inflector extends StaticResolver
         $s = preg_replace('#([._])(?=[a-z])#', '$1 ', $s);
         $s = ucwords($s);
         $s = str_replace('. ', ':', $s);
-        return $s = str_replace(array('_ ', '- '), '', $s);
+        return $s = str_replace(['_ ', '- '], '', $s);
     }
 
     /**
@@ -198,7 +198,7 @@ class Inflector extends StaticResolver
      */
     protected function toDirectorySeparator($string)
     {
-        return str_replace(array('.', '\\'), DS, $string);
+        return str_replace(['.', '\\'], DS, $string);
     }
 
     /**
@@ -279,7 +279,7 @@ class Inflector extends StaticResolver
     protected function uncountableWords()
     {
         #:doc
-        return array( 'equipment', 'information', 'rice', 'money', 'species', 'series', 'fish' );
+        return [ 'equipment', 'information', 'rice', 'money', 'species', 'series', 'fish' ];
     }
 
     /**
@@ -288,7 +288,7 @@ class Inflector extends StaticResolver
     protected function pluralRules()
     {
         #:doc:
-        return array(
+        return [
             '/^(ox)$/'                => '\1\2en',     # ox
             '/([m|l])ouse$/'          => '\1ice',      # mouse, louse
             '/(matr|vert|ind)ix|ex$/' => '\1ices',     # matrix, vertex, index
@@ -309,7 +309,7 @@ class Inflector extends StaticResolver
             '/(ax|cri|test)is$/'      => '\1es',       # axis, crisis
             '/s$/'                    => 's',          # no change (compatibility)
             '/$/'                     => 's'
-        );
+        ];
     }
 
     /**
@@ -318,7 +318,7 @@ class Inflector extends StaticResolver
     protected function singularRules()
     {
         #:doc:
-        return array(
+        return [
             '/(matr)ices$/'         =>'\1ix',
             '/(vert|ind)ices$/'     => '\1ex',
             '/^(ox)en/'             => '\1',
@@ -346,6 +346,6 @@ class Inflector extends StaticResolver
             '/(c)hildren$/'         => '\1\2hild',
             '/(n)ews$/'             => '\1\2ews',
             '/s$/'                  => ''
-        );
+        ];
     }
 }

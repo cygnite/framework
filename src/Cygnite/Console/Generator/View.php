@@ -37,9 +37,9 @@ class View
     // Twig layout extension
     const TWIG_EXTENSION = '.html.twig';
 
-    private $views = array('index', 'create', 'update', 'show');
+    private $views = ['index', 'create', 'update', 'show'];
 
-    private $fields = array();
+    private $fields = [];
 
     /*
      * Since constructor is private you cannot create object
@@ -54,7 +54,7 @@ class View
         $this->command = $command;
     }
 
-    public static function __callStatic($method, $arguments = array())
+    public static function __callStatic($method, $arguments = [])
     {
         if ($method == 'instance') {
             return new self($arguments[0]);

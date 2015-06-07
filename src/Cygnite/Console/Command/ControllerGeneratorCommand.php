@@ -84,7 +84,7 @@ class ControllerGeneratorCommand extends Command
     {
         $controller = null;
         // Create Controller instance
-        $controller = Controller::instance(array(), null, $this);
+        $controller = Controller::instance([], null, $this);
         $resourcePath = 'Resources'.DS.'Stubs'.DS;
         $controllerTemplateDir =
             dirname(dirname(__FILE__)).DS.'src'.DS.ucfirst('apps').DS.'Controllers'.DS.$resourcePath;

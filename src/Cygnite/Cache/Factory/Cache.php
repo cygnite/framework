@@ -7,15 +7,13 @@ if (!defined('CF_SYSTEM')) {
 
 class Cache
 {
-
     // Cache Drivers
-    public static $drivers = array(
+    public static $drivers = [
         'file' => "\\Cygnite\\Cache\\Storage\\File",
         'apc' => "\\Cygnite\\Cache\\Storage\\Apc",
         'memcache' => "\\Cygnite\\Cache\\Storage\\MemCache",
-        'radis' => "\\Cygnite\\Cache\\Storage\\Radis",
-
-    );
+        'redis' => "\\Cygnite\\Cache\\Storage\\Redis"
+    ];
 
     /**
      * Factory Method to return appropriate driver instance

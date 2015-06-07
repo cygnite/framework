@@ -7,7 +7,7 @@ if (!defined('CF_SYSTEM')) {
 
 class Output
 {
-    private $output = array();
+    private $output = [];
 
     private $name;
 
@@ -24,7 +24,7 @@ class Output
      * @param array $data
      * @return $this
      */
-    public function buffer($file, $data = array())
+    public function buffer($file, $data = [])
     {
         ob_start();
 

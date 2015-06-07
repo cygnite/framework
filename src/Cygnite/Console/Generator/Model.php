@@ -41,7 +41,7 @@ class Model
         $this->command = $command;
     }
 
-    public static function __callStatic($method, $arguments = array())
+    public static function __callStatic($method, $arguments = [])
     {
         if ($method == 'instance') {
             return new self($arguments[0]);

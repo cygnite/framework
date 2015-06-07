@@ -127,11 +127,11 @@ class Encrypt
         return $this->value;
     }
 
-    public function __call($method, $arguments = array())
+    public function __call($method, $arguments = [])
     {
     }
 
-    public static function __callStatic($method, $arguments = array())
+    public static function __callStatic($method, $arguments = [])
     {
         if ($method == 'create') {
 
@@ -139,7 +139,7 @@ class Encrypt
                 self::$instance = new self();
             }
             // we will return $this for method chaining
-            return call_user_func_array(array(self::$instance, 'getInstance'), array($arguments));
+            return call_user_func_array([self::$instance, 'getInstance'], [$arguments]);
         }
     }
 

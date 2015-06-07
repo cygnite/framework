@@ -10,7 +10,7 @@ if (!defined('CF_SYSTEM')) {
  */
 class Profiler
 {
-    private static $blocks = array();
+    private static $blocks = [];
 
     /**
     * Profiler starting point

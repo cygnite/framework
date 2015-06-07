@@ -13,7 +13,7 @@ class Log
     protected $logPath;
     protected $logSize;
     protected $logExt = ".log";
-    protected $config = array();
+    protected $config = [];
 
     private function getLogConfig()
     {

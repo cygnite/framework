@@ -24,7 +24,7 @@ if (!defined('CF_SYSTEM')) {
  * @author Sanjoy Dey <dey.sanjoy0@gmail.com>
  */
 
-class CView
+class View
 {
     protected $layout;
 
@@ -32,13 +32,13 @@ class CView
 
     private $viewPath;
 
-    private $params = array();
+    private $params = [];
 
     public $views;
 
-    private static $name = array();
+    private static $name = [];
 
-    public $data = array();
+    public $data = [];
 
     protected $template;
 
@@ -165,7 +165,7 @@ class CView
     * @false string (view name)
     * @throws ViewNotFoundException
     */
-    public function render($view, $params = array())
+    public function render($view, $params = [])
     {
         $controller = $viewPage = null;
         $this->widgetName = $view;
@@ -255,7 +255,7 @@ class CView
         extract($params);
         include $viewPage;
 
-        $data = array();
+        $data = [];
         $data['yield'] = ob_get_contents();
         ob_get_clean();
 
@@ -300,7 +300,7 @@ class CView
      */
     private function loadView()
     {
-        $params = array();
+        $params = [];
         $params = array_merge($this->params, $this->__get('parameters'));
 
         try {
@@ -324,7 +324,7 @@ class CView
 
     /**
      * If user want to access render function statically
-     * CView::create('view-name', $params);
+     * View::compose('view-name', $params);
      *
      * @param $method
      * @param $params
@@ -332,9 +332,8 @@ class CView
      */
     public static function __callStatic($method, $params)
     {
-        if ($method == 'create') {
-            $view = new CView(new Template);
-            return call_user_func_array(array($view, 'render'), array($params));
+        if ($method == 'compose') {
+            return call_user_func_array([new CView(new Template), 'render'], [$params]);
         }
     }
 }

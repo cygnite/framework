@@ -31,9 +31,9 @@ if (!defined('CF_SYSTEM')) {
  */
 interface FormInterface
 {
-    public function  addElement($type, $key, $values = array());
+    public function  addElement($type, $key, $values = []);
 
-    public function addElements($elements = array());
+    public function addElements($elements = []);
 
     public function getForm();
 }

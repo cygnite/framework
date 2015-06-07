@@ -7,9 +7,9 @@ use Cygnite\Helpers\Inflector;
 
 class DependencyExtension extends SplObjectStorage
 {
-    public $definitions = array();
+    public $definitions = [];
 
-    public $factory = array();
+    public $factory = [];
 
     public $controller = false;
 
@@ -67,7 +67,7 @@ class DependencyExtension extends SplObjectStorage
         if (!is_null($key)) {
             return isset($this->definitions[$key]) ? $this->definitions[$key] : null ;
         } else {
-            return !empty($this->definitions) ? $this->definitions : array();
+            return !empty($this->definitions) ? $this->definitions : [];
         }
     }
 

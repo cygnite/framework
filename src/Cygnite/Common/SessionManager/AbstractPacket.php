@@ -3,7 +3,7 @@ namespace Cygnite\Common\SessionManager;
 
 abstract class AbstractPacket
 {
-    protected $storage = array();
+    protected $storage = [];
 
     /**
      * Removes all data and reset the storage to empty array
@@ -12,7 +12,7 @@ abstract class AbstractPacket
      */
     public function reset()
     {
-        $this->storage = array();
+        $this->storage = [];
 
         return $this;
     }

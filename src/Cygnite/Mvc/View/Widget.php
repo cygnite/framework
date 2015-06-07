@@ -7,9 +7,9 @@ if (!defined('CF_SYSTEM')) {
 
 class Widget implements \ArrayAccess
 {
-    public $widget = array();
+    public $widget = [];
 
-    public $data = array();
+    public $data = [];
 
     protected $module = false;
 
@@ -19,7 +19,7 @@ class Widget implements \ArrayAccess
      * @param       $name
      * @param array $data
      */
-    public function __construct($name, $data= array())
+    public function __construct($name, $data= [])
     {
         $this->widgetName = $name;
         $this->data = $data;
@@ -31,7 +31,7 @@ class Widget implements \ArrayAccess
      * @param array    $data
      * @return mixed
      */
-    public static function make($var, \Closure $callback = null, $data = array())
+    public static function make($var, \Closure $callback = null, $data = [])
     {
         /*
          | If second param given as closure then we will
@@ -40,12 +40,10 @@ class Widget implements \ArrayAccess
         if ($callback instanceof \Closure && !is_null($callback)) {
             return $callback(new Widget($var, $data));
         }
-
-        $widget = new Widget($var, $data);
         /*
          | return object
          */
-        return $widget->render();
+        return (new Widget($var, $data))->render();
     }
 
     /**
@@ -88,11 +86,11 @@ class Widget implements \ArrayAccess
              */
             if (string_has($this->widgetName, ':')) {
 
-                $exp = array();
+                $exp = [];
                 $exp = explode(':', $this->widgetName);
                 $moduleName = $exp[0];
                 $view = $exp[1];
-                $path = getcwd().DS.APPPATH.DS.'modules'.DS.$moduleName.DS.'Views'.DS.$view.'.view'.EXT;
+                $path = CYGNITE_BASE.DS.APPPATH.DS.'modules'.DS.$moduleName.DS.'Views'.DS.$view.'.view'.EXT;
 
                 $this->widgetName= null;
                 $this->module = false;
@@ -108,12 +106,12 @@ class Widget implements \ArrayAccess
             if (string_has($this->widgetName, ':')) {
                 $widget = null;
                 $widget = str_replace(':', DS, $this->widgetName);
-                $path = getcwd().DS.APPPATH.DS.'views'.DS.$widget.'.view'.EXT;
+                $path = CYGNITE_BASE.DS.APPPATH.DS.'views'.DS.$widget.'.view'.EXT;
             }
         }
 
-        $outputInstance = new Output($this->widgetName);
-        $output = $outputInstance->buffer($path, $this->data)->clean();
+
+        $output = (new Output($this->widgetName))->buffer($path, $this->data)->clean();
         $this->setWidget($this->widgetName, $output);
 
         return $this->getWidget($this->widgetName);

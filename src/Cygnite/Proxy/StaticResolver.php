@@ -7,9 +7,9 @@ if (!defined('CF_SYSTEM')) {
 
 abstract class StaticResolver
 {
-    public static $cached = array();
+    public static $cached = [];
 
-    public static function __callStatic($method, $arguments = array())
+    public static function __callStatic($method, $arguments = [])
     {
         $class = '\\'.get_called_class();
 
@@ -34,6 +34,6 @@ abstract class StaticResolver
          * Access all your protected method directly using facade
          * and return value
          */
-        return self::$cached[$class] = call_user_func_array(array(new $class(), $method), $arguments);
+        return self::$cached[$class] = call_user_func_array([new $class(), $method], $arguments);
     }
 }

@@ -1,6 +1,7 @@
 <?php
 use Cygnite\Foundation\Application as App;
 use Cygnite\AssetManager\Html;
+use Cygnite\Translation\Translator;
 
 if ( ! function_exists('clear_sanity')) {
     /*
@@ -45,7 +46,7 @@ if ( ! function_exists('show')) {
      * @param array $data
      * @param bool  $hasExit
      */
-    function show($data = array(), $hasExit = false)
+    function show($data = [], $hasExit = false)
     {
         echo '<pre>';
         print_r($data);
@@ -65,7 +66,7 @@ if ( ! function_exists('string_split')) {
      */
     function string_split($string, $needle = '.')
     {
-        $expression = array();
+        $expression = [];
         $expression = explode($needle, $string);
         return $expression;
     }
@@ -133,5 +134,32 @@ if ( ! function_exists('e')) {
     function e($value)
     {
         return Html::entities($value);
+    }
+}
+
+if (!function_exists('trans')) {
+    /**
+     *    trans('Hello, :user', array(':user' => $username));
+     *
+     * The target language is defined by [Translator::$lang].
+     *
+     * @uses    Translator::get()
+     * @param   string $string text to translate
+     * @param   array  $replace values to replace in the translated text
+     * @param   string $lang   source language
+     * @return  string
+     */
+    function trans($key, array $replace = null, $locale = 'en-us')
+    {
+        return Translator::make(function ($trans) use ($key, $replace, $locale)
+        {
+            if ($locale !== $trans->locale()) {
+                // The message and target languages are different
+                // Get the translation for this message
+                $key = $trans->get($key);
+            }
+
+            return empty($replace) ? $key : strtr($key, $replace);
+        });
     }
 }

@@ -9,7 +9,7 @@ if (!defined('CF_SYSTEM')) {
 
 class Zip
 {
-    private $zip = null;
+    private $zip;
 
     private $path = "";
 
@@ -39,41 +39,29 @@ class Zip
 
     }
 
-    /*
-
-    $array = array(
-    'file_name'            => '',
-    'file_location'    => '' ,
-    'zip_file_name'   => ''
-    );
-
-    */
-
-
-    public function make($filename, $pathlocation, $new_location = "", $zip_name = "")
+    public function make($filename, $pathLocation, $new_location = "", $zip_name = "")
     {
-        $this->open_zip_archive($pathlocation . $filename);
+        $this->open_zip_archive($pathLocation . $filename);
 
-        $dir_handler = opendir($pathlocation);
+        $dir_handler = opendir($pathLocation);
 
         if (true == $dir_handler) {
             $file = readdir($dir_handler);
-            //  var_dump($file);
 
             while (true == ($file = readdir($dir_handler))) {
-                if (is_file($pathlocation . $file)) {
-                    $this->add_file($pathlocation . $filename, $new_location . $file);
+                if (is_file($pathLocation . $file)) {
+                    $this->add_file($pathLocation . $filename, $new_location . $file);
                 } else {
-                    if ($file != '.' && $file != '..' and is_dir($directory . $file)) {
+                    if ($file != '.' && $file != '..' and is_dir($pathLocation . $file)) {
                         $this->add_dir($new_location . $file . DS);
-                        $this->make_zip($pathlocation . $file . DS, $new_location . $file . DS);
+                        $this->make_zip($pathLocation . $file . DS, $new_location . $file . DS);
                     }
                 }
             }
         }
         closedir($dir_handler);
         $this->close_zip_archive(); // echo $file;exit;
-        $this->makeZip($zip_name, $pathlocation . $file);
+        $this->makeZip($zip_name, $pathLocation . $file);
 
     }
 
@@ -109,7 +97,7 @@ class Zip
         if (!file_exists($zip_name) || $zip_name == "")
             throw new Exception("The zip archive file not specified to download.");
 
-        $downloader = new Downloader;
+        $downloader = new \Cygnite\Common\File\File();
         $downloader->download($file_path);
 
         header("Pragma: public");
@@ -123,17 +111,17 @@ class Zip
         readfile("$zip_name");
     }
 
-    protected function parseDirectory($rootPath, $seperator = "/")
+    protected function parseDirectory($rootPath, $separator = "/")
     {
-        $fileArray = array();
+        $fileArray = [];
         $handle = opendir($rootPath);
         while (($file = @readdir($handle)) !== false) {
             if ($file != '.' && $file != '..') {
-                if (is_dir($rootPath . $seperator . $file)) {
-                    $array = $this->parseDirectory($rootPath . $seperator . $file);
+                if (is_dir($rootPath . $separator . $file)) {
+                    $array = $this->parseDirectory($rootPath . $separator . $file);
                     $fileArray = array_merge($array, $fileArray);
                 } else {
-                    $fileArray[] = $rootPath . $seperator . $file;
+                    $fileArray[] = $rootPath . $separator . $file;
                 }
             }
         }

@@ -35,8 +35,7 @@ if (!defined('CF_SYSTEM')) {
 
 class Pagination
 {
-
-    private $perPage = '15';
+    protected $perPage = '15';
 
     public $model;
 
@@ -74,7 +73,7 @@ class Pagination
      * @param callable $callback
      * @return Pagination
      */
-    public static function instance($args = array(), Closure $callback = null)
+    public static function make($args = [], Closure $callback = null)
     {
         if ($callback instanceof Closure) {
             return $callback(new self($args));

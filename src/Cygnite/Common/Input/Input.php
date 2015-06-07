@@ -13,11 +13,8 @@ namespace Cygnite\Common\Input;
 
 use Closure;
 use Cygnite\Common\Security;
-use Cygnite\Proxy\StaticResolver;
 use InvalidArgumentException;
-use Cygnite\Common\Singleton;
 use Cygnite\Common\CookieManager\Cookie;
-use Cygnite\Common\CookieManager\CookieInterface;
 
 /**
  * Input.
@@ -30,14 +27,7 @@ class Input
 
     private $security;
 
-    public $request = array();
-
-    private static $instance;
-
-    private $cookieInstance;
-
-    private $cookie;
-
+    public $request = [];
 
     /**
      *
@@ -55,20 +45,18 @@ class Input
      */
     public static function make(Closure $callback = null)
     {
-        $security = new Security;
-
         if ($callback instanceof Closure) {
-            return $callback(new self($security));
-        } else {
-            return new self($security);
+            return $callback(new Static(new Security()));
         }
+
+        return new Static(new Security());
     }
 
     /**
      * @param $input
      * @return bool
      */
-    public function hasPost($input)
+    public function isPost($input)
     {
         return  filter_has_var(INPUT_POST, $input) ?
             true :
@@ -181,11 +169,7 @@ class Input
      */
     protected function getRequest()
     {
-        return array(
-            'get'       => $_GET,
-            'post'      => $_POST,
-            'cookie'    => $_COOKIE
-        );
+        return [ 'get' => $_GET, 'post' => $_POST, 'cookie' => $_COOKIE ];
     }
 
     /**
@@ -225,6 +209,5 @@ class Input
         }
 
         return Cookie::create();
-
     }
 }

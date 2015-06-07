@@ -13,7 +13,7 @@ class Session extends ActiveRecord implements PacketInterface
     protected $tableName = 'cf_sessions';
     protected $storage;
     protected $database;
-    private $config = array();
+    private $config = [];
     private $wrapper;
     private $name;
 
@@ -28,7 +28,7 @@ class Session extends ActiveRecord implements PacketInterface
         /*
          | Get user configuration
          */
-        $config = array();
+        $config = [];
         $config = Config::getConfigItems('config.items');
         $this->config = $config['config.session'];
 
@@ -59,12 +59,12 @@ class Session extends ActiveRecord implements PacketInterface
     public function sessionSaveHandler()
     {
         @session_set_save_handler(
-            array($this, 'open'),
-            array($this, 'close'),
-            array($this, 'read'),
-            array($this, 'write'),
-            array($this, 'destroy'),
-            array($this, 'gc_session')
+            [$this, 'open'],
+            [$this, 'close'],
+            [$this, 'read'],
+            [$this, 'write'],
+            [$this, 'destroy'],
+            [$this, 'gc_session']
         );
     }
 
@@ -165,12 +165,10 @@ class Session extends ActiveRecord implements PacketInterface
      */
     public function createTableIfNotExists()
     {
-        $me = $this;
-
         Schema::instance(
             $this,
-            function ($table) use ($me) {
-                $table->tableName = $me->getTable();
+            function ($table) {
+                $table->tableName = $this->getTable();
 
                 /**
                 | Check if table already exists
@@ -179,18 +177,18 @@ class Session extends ActiveRecord implements PacketInterface
                 if (!$table->hasTable()->run()) {
 
                     $table->create(
-                        array(
-                            array(
+                        [
+                            [
                                 'column' => 'id',
                                 'type' => 'int',
                                 'length' => 11,
                                 'increment' => true,
                                 'key' => 'primary'
-                            ),
-                            array('column' => 'access', 'type' => 'int', 'length' => 11),
-                            array('column' => 'data', 'type' => 'text'),
-                            array('column' => 'session_id', 'type' => 'string', 'length' => 128),
-                        ),
+                            ],
+                            ['column' => 'access', 'type' => 'int', 'length' => 11],
+                            ['column' => 'data', 'type' => 'text'],
+                            ['column' => 'session_id', 'type' => 'string', 'length' => 128],
+                        ],
                         'InnoDB',
                         'latin1'
                     )->run();
@@ -229,7 +227,7 @@ class Session extends ActiveRecord implements PacketInterface
      */
     public function read($id)
     {
-        $items = array();
+        $items = [];
         $items = $this->select('data')->where('session_id', '=', $id)
             ->limit('1')
             ->findAll('assoc');
@@ -303,7 +301,7 @@ class Session extends ActiveRecord implements PacketInterface
      * @param array $array overwrites values
      * @return array
      */
-    public function all($array = array())
+    public function all($array = [])
     {
         if (!empty($array)) {
             $this->storage = $array;
@@ -363,7 +361,7 @@ class Session extends ActiveRecord implements PacketInterface
      */
     public function reset()
     {
-        $this->storage = array();
+        $this->storage = [];
 
         return $this;
     }

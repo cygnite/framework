@@ -19,7 +19,7 @@ use Cygnite\Helpers\Inflector;
  */
 class Controller
 {
-    private $columns = array();
+    private $columns = [];
 
     public $controller;
 
@@ -56,7 +56,7 @@ class Controller
      * @param $columns array of columns
      * @return void
      */
-    private function __construct($columns = array(), $viewType = null, $generator = null)
+    private function __construct($columns = [], $viewType = null, $generator = null)
     {
         $this->columns = $columns;
         $this->viewType = $viewType;
@@ -429,7 +429,7 @@ class Controller
      * @param array $arguments
      * @return Controller
      */
-    public static function __callStatic($method, $arguments = array())
+    public static function __callStatic($method, $arguments = [])
     {
         if ($method == 'instance') {
             return new self($arguments[0], $arguments[1], $arguments[2]);

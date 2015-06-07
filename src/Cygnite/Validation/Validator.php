@@ -2,62 +2,32 @@
 namespace Cygnite\Validation;
 
 use Closure;
-use Cygnite\Proxy\StaticResolver;
-use Cygnite\Foundation\Application;
 use Cygnite\Helpers\Inflector;
 use Cygnite\Common\Input\Input;
+use Cygnite\Foundation\Application;
 
-/*
- * class Validator
- * Used to validate form inputs
+/**
+ * Class Validator
  *
- * @example
-<code>
-    $input = Input::getInstance(
-            function ($instance) {
-                return $instance;
-            }
-        );
-    $validator = Validator::instance(
-        $input,
-        function ($validate) {
-            $validate->addRule('username', 'required|min:3|max:5')
-                ->addRule('password', 'required|is_int|valid_date')
-                ->addRule('phone', 'phone|is_string')
-                ->addRule('email', 'valid_email');
-
-            return $validate;
-        }
-    );
-
-
-    if ($validator->run()) {
-        echo 'valid';
-    } else {
-        show($validator->getErrors());
-    }
-</code>
-*/
-
-
-class Validator
+ * Validator use to validate user inputs
+ *
+ * @package Cygnite\Validation
+ */
+class Validator implements ValidatorInterface
 {
+    const ERROR = '_error';
+    public $errors= [];
+    public $columns = [];
+    protected $glue = "<br />";
+    protected $errorElementStart = '<span class="error">';
+    protected $errorElementEnd = '</span>';
     /**
     * POST
     * @var array
     */
     private $param;
-
-    private $rules = array();
-
-    public $errors= array();
-
-    public $columns = array();
-
-    private $validPhoneNumbers = array(10,11,13,14,91,81);
-
-    const ERROR = '_error';
-
+    private $rules = [];
+    private $validPhoneNumbers = [10,11,13,14,91,81];
 
     /*
      * Constructor to set as private.
@@ -68,6 +38,7 @@ class Validator
      * @param  $var post values
      *
      */
+
     private function __construct(Input $var)
     {
         if ($var instanceof Input) {
@@ -76,16 +47,31 @@ class Validator
     }
 
     /*
-     * Get the validator instance with closure callback
+     * Create validator to set rules
+     * <code>
+     *  $input = Input::make();
+     *  $validator = Validator::create($input, function ($validator)
+     *  {
+     *       $validator->addRule('username', 'required|min:3|max:5')
+     *                 ->addRule('password', 'required|is_int|valid_date')
+     *                 ->addRule('phone', 'phone|is_string')
+     *                 ->addRule('email', 'valid_email');
      *
+     *       return $validator;
+     *   });
+     *
+     * </code>
      * @param  $var post values
      * @param  Closure callback
      * @return object
-     *
      */
-    public static function instance($var, Closure $callback)
+    public static function create($var, Closure $callback = null)
     {
-        return $callback(new self($var));
+        if ($callback instanceof Closure) {
+            return $callback(new Static($var));
+        }
+
+        return new Static($var);
     }
 
     /*
@@ -101,6 +87,128 @@ class Validator
         $this->rules[$key] = $rule;
 
         return $this;
+    }
+
+    /**
+     * If you are willing to display custom error message
+     * you can simple pass the field name with _error prefix and
+     * set the message for it.
+     *
+     * @param $key
+     * @param $value
+     */
+    public function setCustomError($key, $value)
+    {
+        $this->errors[$key] = $value;
+    }
+
+    /**
+     * Get error string
+     *
+     * <code>
+     *   if ($validator->run()) {
+     *       echo 'valid';
+     *   } else {
+     *       show($validator->getErrors());
+     *   }
+     * </code>
+     * @param null $column
+     * @return null|string
+     */
+    public function getErrors($column = null)
+    {
+        if (is_null($column)) {
+            return implode($this->glue, array_values($this->errors));
+        }
+
+        return isset($this->errors[$column.self::ERROR]) ? $this->errors[$column.self::ERROR] : null;
+    }
+
+    /**
+     * Run validation rules and catch errors
+     *
+     * @return bool
+     * @throws \Exception
+     */
+    public function run()
+    {
+        $isValid = true;
+
+        if (empty($this->rules)) {
+            return true;
+        }
+
+        foreach ($this->rules as $key => $val) {
+
+            $rules = explode('|', $val);
+
+            foreach ($rules as $rule) {
+
+                if (!strstr($rule, 'max') &&
+                    !strstr($rule, 'min')
+                ) {
+                    $isValid = $this->doValidateData($rule, $key, $isValid);
+                    //$isValid = call_user_func([$this, $rule[0]], [$key]);
+                } else {
+                    $isValid = $this->doValidateMinMax($rule, $key, $isValid);
+
+                }
+            }
+        }
+
+        return $isValid;
+    }
+
+    /**
+     * @param $rule
+     * @param $key
+     * @param $isValid
+     * @return mixed
+     * @throws \Exception
+     */
+    private function doValidateData($rule, $key, $isValid)
+    {
+        $method = Inflector::camelize($rule);
+
+        if (!is_callable([$this, $method])) {
+            throw new \Exception('Undefined method '.__CLASS__.' '.$method.' called.');
+        }
+
+        if ($isValid === false) {
+            $this->setErrors($key.self::ERROR, Inflector::camelize((str_replace('_', ' ', $key))));
+        }
+
+        return $this->{$method}($key);
+    }
+
+    private function setErrors($name, $value)
+    {
+        $this->columns[$name] =
+            $this->errorElementStart.$value.' doesn\'t match validation rules'.$this->errorElementEnd;
+    }
+
+    /**
+     * @param $rule
+     * @param $key
+     * @param $isValid
+     * @return mixed
+     * @throws \Exception
+     */
+    private function doValidateMinMax($rule, $key, $isValid)
+    {
+        $rule = explode(':', $rule);
+
+        $method = Inflector::camelize($rule[0]);
+
+        if (is_callable([$this, $method]) === false) {
+            throw new \Exception('Undefined method '.__CLASS__.' '.$method.' called.');
+        }
+
+        if ($isValid === false) {
+            $this->setErrors($key.self::ERROR, Inflector::camelize(str_replace('_', ' ', $key)));
+        }
+
+        return $this->$method($key, $rule[1]);
     }
 
     /*
@@ -124,11 +232,19 @@ class Validator
         return true;
     }
 
+    /**
+     * @param $key
+     * @return string
+     */
     private function convertToFieldName($key)
     {
         return Inflector::underscoreToSpace($key);
     }
 
+    /**
+     * @param $key
+     * @return bool
+     */
     private function validEmail($key)
     {
         $sanitize_email = filter_var($this->param[$key], FILTER_SANITIZE_EMAIL);
@@ -141,7 +257,10 @@ class Validator
         return true;
     }
 
-
+    /**
+     * @param $key
+     * @return bool
+     */
     private function isIp($key)
     {
         if (filter_var($this->param[$key], FILTER_VALIDATE_IP) === false) {
@@ -155,6 +274,10 @@ class Validator
         return true;
     }
 
+    /**
+     * @param $key
+     * @return bool
+     */
     private function isInt($key)
     {
         $conCate =  '';
@@ -174,6 +297,10 @@ class Validator
         return true;
     }
 
+    /**
+     * @param $key
+     * @return bool
+     */
     private function isString($key)
     {
         $conCate =  '';
@@ -193,6 +320,11 @@ class Validator
         return true;
     }
 
+    /**
+     * @param $key
+     * @param $length
+     * @return bool
+     */
     private function min($key, $length)
     {
         $conCate = (isset($this->errors[$key.self::ERROR])) ?
@@ -213,7 +345,11 @@ class Validator
         }
     }
 
-
+    /**
+     * @param $key
+     * @param $length
+     * @return bool
+     */
     private function max($key, $length)
     {
         $conCate =  '';
@@ -233,7 +369,10 @@ class Validator
         }
     }
 
-
+    /**
+     * @param $key
+     * @return bool
+     */
     private function validUrl($key)
     {
         $sanitize_url = filter_var($this->param[$key], FILTER_SANITIZE_URL);
@@ -248,29 +387,6 @@ class Validator
         if (filter_var($sanitize_url, FILTER_VALIDATE_URL) === false) {
             $this->errors[$key.self::ERROR] = $conCate.$columnName.' valid url.';
             return false;
-        }
-
-        return true;
-    }
-
-
-    /**
-     *
-     * @param $key
-     * @return bool
-     */
-    public function validDate($key)
-    {
-        $conCate =  '';
-        $columnName =  ucfirst($this->convertToFieldName($key)).' should be ';
-        if (isset($this->errors[$key.self::ERROR])) {
-            $conCate = str_replace('.', '', $this->errors[$key.self::ERROR]).' and ';
-            $columnName = 'must be ';
-        }
-
-        if (strtotime($this->param[$key]) !== true) {
-            $this->errors[$key.self::ERROR] =
-                $conCate.$columnName.'valid date.';
         }
 
         return true;
@@ -300,97 +416,34 @@ class Validator
         return true;
     }
 
+    /**
+     *
+     * @param $key
+     * @return bool
+     */
+    public function validDate($key)
+    {
+        $conCate =  '';
+        $columnName =  ucfirst($this->convertToFieldName($key)).' should be ';
+        if (isset($this->errors[$key.self::ERROR])) {
+            $conCate = str_replace('.', '', $this->errors[$key.self::ERROR]).' and ';
+            $columnName = 'must be ';
+        }
 
+        if (strtotime($this->param[$key]) !== true) {
+            $this->errors[$key.self::ERROR] =
+                $conCate.$columnName.'valid date.';
+        }
+
+        return true;
+    }
+
+    /**
+     * @param $key
+     * @return bool
+     */
     public function notEmptyFile($key)
     {
         return empty($_FILES[$key]['name']) !== true;
-    }
-
-    private function setErrors($name, $value)
-    {
-        $this->columns[$name] = '<span class="error">'.$value.' doesn\'t match validation rules </span>';
-    }
-
-    /**
-     * If you are willing to display custom error message
-     * you can simple pass the field name with _error prefix and
-     * set the message for it.
-     *
-     * @param $key
-     * @param $value
-     */
-    public function setCustomError($key, $value)
-    {
-        $this->errors[$key] = $value;
-    }
-
-    public function getErrors($column = null)
-    {
-        if ($column === null) {
-            return implode("<br />", array_values($this->errors));
-        }
-
-        return isset($this->errors[$column.self::ERROR]) ? $this->errors[$column.self::ERROR] : null;
-    }
-
-    /**
-     * Run validation rules and catch errors
-     *
-     * @return bool
-     * @throws \Exception
-     */
-    public function run()
-    {
-        $isValid = true;
-
-        if (empty($this->rules)) {
-            return true;
-        }
-
-        foreach ($this->rules as $key => $val) {
-
-            $rules = explode('|', $val);
-
-            foreach ($rules as $rule) {
-
-                if (!strstr($rule, 'max') &&
-                    !strstr($rule, 'min')
-                ) {
-
-                    $method = Inflector::camelize($rule);
-
-                    if (is_callable(array($this, $method)) === false) {
-                        throw new \Exception('Undefined method '.__CLASS__.' '.$method.' called.');
-                    }
-                    //echo $key."<br>";
-                    if ($isValid === false) {
-                        $this->setErrors($key.self::ERROR, Inflector::camelize((str_replace('_', ' ', $key))));
-                    }
-
-                    $isValid = $this->$method($key);
-                    //$isValid = call_user_func(array($this, $rule[0]), array($key));
-
-                } else {
-
-                    $rule = explode(':', $rule);
-
-                    $method = Inflector::camelize($rule[0]);
-
-                    if (is_callable(array($this, $method)) === false) {
-                        throw new \Exception('Undefined method '.__CLASS__.' '.$method.' called.');
-                    }
-
-                    if ($isValid === false) {
-                        $this->setErrors($key.self::ERROR, Inflector::camelize(str_replace('_', ' ', $key)));
-                    }
-
-                    //$isValid = call_user_func_array(array($this, $rule[0]), array($key,$rule[1]));
-                    $isValid = $this->$method($key, $rule[1]);
-                }
-            }
-        }
-
-        return $isValid;
-
     }
 }

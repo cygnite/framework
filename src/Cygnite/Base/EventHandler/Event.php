@@ -21,7 +21,7 @@ use Closure;
 
 class Event implements EventInterface
 {
-    protected $events = array();
+    protected $events = [];
 
     /**
      * @param Closure $callback
@@ -43,12 +43,13 @@ class Event implements EventInterface
      *
      * @param $name
      * @param $callback
+     * @return mixed|void
      */
     public function attach($name, $callback)
     {
 
         if (!isset($this->events[$name])) {
-            $this->events[$name] = array();
+            $this->events[$name] = [];
         }
 
         $this->events[$name][] = $callback;
@@ -62,7 +63,7 @@ class Event implements EventInterface
      * @param array $data
      * @return mixed
      */
-    public function trigger($name, $data = array())
+    public function trigger($name, $data = [])
     {
         foreach ($this->events[$name] as $callback) {
 
@@ -89,7 +90,7 @@ class Event implements EventInterface
         $exp = explode('@', $callback);
 
         if (method_exists($instance = new $exp[0], $exp[1])) {
-            return call_user_func_array(array($instance, $exp[1]), array($data));
+            return call_user_func_array([$instance, $exp[1]], [$data]);
         }
     }
 
@@ -99,10 +100,10 @@ class Event implements EventInterface
     private function callUserFunctionEvent($callback)
     {
         $class = null;
-        $expression = array();
+        $expression = [];
         $expression = explode('::', $callback);
         $class = '\\' . str_replace('_', '\\', $expression[0]);
-        call_user_func(array(new $class, $expression[1]));
+        call_user_func([new $class, $expression[1]]);
     }
 
     /**

@@ -72,7 +72,7 @@ class Session extends Manager implements SessionInterface
         /*
          | Get user configuration
          */
-        $configItem = array();
+        $configItem = [];
         $configItem = Config::getConfigItems('config.items');
         $config = $configItem['config.session'];
         $sessionManager = $this->getWrapper();
@@ -122,7 +122,7 @@ class Session extends Manager implements SessionInterface
     public function destroy()
     {
         unset($this->storage);
-        $_SESSION = array();
+        $_SESSION = [];
 
         /*
          |We will destroy existing session and start
@@ -234,6 +234,6 @@ class Session extends Manager implements SessionInterface
      */
     public function __call($method, $args)
     {
-        return call_user_func_array(array(new Manager(), $method), array($args));
+        return call_user_func_array([new Manager(), $method], [$args]);
     }
 }

@@ -25,7 +25,7 @@ class Container extends DependencyExtension implements ContainerInterface, Array
      * @var array
      * @access private
      */
-    private $stack = array();
+    private $stack = [];
 
     private $services;
 
@@ -255,7 +255,7 @@ class Container extends DependencyExtension implements ContainerInterface, Array
      */
     public function singleton($key, $callback = null)
     {
-        static $instance = array();
+        static $instance = [];
 
         // if closure callback given we will create a singleton instance of class
         // and return it to user
@@ -326,7 +326,7 @@ class Container extends DependencyExtension implements ContainerInterface, Array
         } else {
             $dependencies = $constructor->getParameters();
 
-            $constructorArgs = array();
+            $constructorArgs = [];
             foreach ($dependencies as $dependency) {
 
                 if (!is_null($dependency->getClass())) {
@@ -379,7 +379,7 @@ class Container extends DependencyExtension implements ContainerInterface, Array
      * @return mixed
      * @throws DependencyException
      */
-    private function makeInstance($resolvedClass)
+    protected function makeInstance($resolvedClass)
     {
         if (!class_exists($resolvedClass)) {
             throw new DependencyException(sprintf('Class "%s" not exists.', $resolvedClass));

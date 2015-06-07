@@ -18,9 +18,9 @@ if (defined('CF_SYSTEM') == false) {
 class Config extends StaticResolver
 {
 
-    private static $_config = array();
+    private static $_config = [];
 
-    private $configuration = array();
+    private $configuration = [];
 
 
     /**
@@ -35,7 +35,7 @@ class Config extends StaticResolver
      */
     protected function get($arrKey, $keyValue = false)
     {
-        $config = array();
+        $config = [];
 
         $config = $this->getConfigItems('config.items');
 
@@ -62,7 +62,7 @@ class Config extends StaticResolver
      * @param       $name
      * @param array $values
      */
-    protected function set($name, $values = array())
+    protected function set($name, $values = [])
     {
         self::$_config[$name] = $values;
 
@@ -92,13 +92,12 @@ class Config extends StaticResolver
      */
     protected function load()
     {
-        $config = array();
+        $config = [];
 
         $this->importConfigurations('global.config', 'application');
         $this->importConfigurations('config.database', 'database');
         $this->importConfigurations('config.session', 'session');
         $this->importConfigurations('config.autoload', 'autoload');
-        $this->importConfigurations('config.router', 'routerconfig', '');
 
         return $this->configuration;
     }

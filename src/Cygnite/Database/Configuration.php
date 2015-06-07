@@ -6,7 +6,7 @@ use Cygnite\Common\Singleton;
 
 class Configuration extends Singleton
 {
-    public static $config = array();
+    public static $config = [];
 
     private static $defaultConnection;
 
@@ -24,7 +24,7 @@ class Configuration extends Singleton
      * @param  array           $config
      * @throws ConfigException
      */
-    public function setConfig($config = array())
+    public function setConfig($config = [])
     {
         if (!is_array($config)) {
             throw new ConfigException("Connection must be an array");

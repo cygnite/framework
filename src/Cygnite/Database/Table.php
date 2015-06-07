@@ -46,12 +46,11 @@ class Table extends Connection
     public function getColumns()
     {
         $conn = null;
-        $me = $this;
         $conn = $this->_connection;
         $schema = Schema::instance(
             $this,
-            function($table) use ($me) {
-                $table->tableName = $me->tableName;
+            function($table) {
+                $table->tableName = $this->tableName;
                 $columns = null;
                 //$table->setDbConnection($this->_connection, $this->database);
                 $table->setTableSchema();
@@ -116,13 +115,11 @@ class Table extends Connection
             $tableName
         );
 
-        $me = $this;
-
         //Create migration table in order to save migrations information
         Schema::instance($this,
-            function($table) use ($tableName, $me){
+            function($table) use ($tableName){
                 $table->tableName = $tableName;
-                $table->database = trim($me->getDefaultDatabaseConnection());
+                $table->database = trim($this->getDefaultDatabaseConnection());
                 $table->create(
                     array(
                         array('column'=> 'id', 'type' => 'int', 'length' => 11,

@@ -12,6 +12,7 @@
 namespace Cygnite\Common;
 
 use Closure;
+
 /**
  * Security.
  *
@@ -21,7 +22,7 @@ use Closure;
  * This package provides necessary in built validation for users data.
  *
  * <code>
- *  $instance = Security::instance(function ($instance) {
+ *  $instance = Security::create(function ($instance) {
  *               return $instance;
  *  });
  *  $instance->sanitize($string);
@@ -33,50 +34,36 @@ use Closure;
 class Security
 {
     // Instance of the security class.
+    const PREG_PROPERTIES = '/^\pL$/u';
+    public static $cleaned;
     private static $instance;
 
+    // Hold cleaned input
+    public $post = [];
+    public $get = [];
+    public $cookie = [];
     private $magicQuotesGpc = false;
 
-    const PREG_PROPERTIES = '/^\pL$/u';
-
-    // Hold cleaned input
-    public static $cleaned;
-
-    public $post = array();
-
-    public $get = array();
-
-    public $cookie = array();
-
     // The following globals are standard and shouldn't really be removed
-    private $_superGlobals = array('GLOBALS', '_REQUEST', '_GET', '_POST',
-        '_FILES', '_COOKIE', '_SERVER', '_ENV', '_SESSION'
-    );
-
-    private $sqlReplace = array(
-        '/[\']/', '/--/', '/\bdrop\b/i', '/\bdelete\b/i', '/\binsert\b/i', '/\bupdate\b/i'
-    );
-
-    /**
-     * Gets the instance of the Security class.
-     *
-     * @param callable| Closure $callback
-     * @return object Instance of Security
-     */
-    protected function create(Closure $callback = null)
-    {
-        if (self::$instance === null) {
-            self::$instance = new self();
-        }
-
-        if ($callback instanceof Closure) {
-            return $callback(self::$instance);
-        }
-
-        return self::$instance;
-
-    }
-
+    private $_superGlobals = [
+        'GLOBALS',
+        '_REQUEST',
+        '_GET',
+        '_POST',
+        '_FILES',
+        '_COOKIE',
+        '_SERVER',
+        '_ENV',
+        '_SESSION'
+    ];
+    private $sqlReplace = [
+        '/[\']/',
+        '/--/',
+        '/\bdrop\b/i',
+        '/\bdelete\b/i',
+        '/\binsert\b/i',
+        '/\bupdate\b/i'
+    ];
 
     /**
      * Constructor. Sanitizes global data GET, POST and COOKIE data.
@@ -104,13 +91,13 @@ class Security
             }
 
             // Get rid of REQUEST
-            $_REQUEST = array();
+            $_REQUEST = [];
             $this->disableGlobals();
         }
 
-        $this->post = $this->cleanPostArray();
-        $this->get = $this->cleanGetArray();
-        $this->cookie = $this->cleanCookieArray();
+        $this->post = $this->cleanPost();
+        $this->get = $this->cleanGet();
+        $this->cookie = $this->cleanCookie();
 
         //Merge POST and GET to REQUEST.
         $_REQUEST = array_merge($this->get, $this->post);
@@ -146,7 +133,7 @@ class Security
     /**
      * @return array
      */
-    private function cleanPostArray()
+    private function cleanPost()
     {
         $this->post = $_POST;
         // Sanitize global data
@@ -155,45 +142,58 @@ class Security
                 $_POST[$this->cleanKeys($key)] = $this->sanitize($value);
             }
         } else {
-            $_POST = array();
+            $_POST = [];
         }
 
         return $_POST;
-
     }
 
     /**
-     * @return array
+     * Enforces W3C specifications to prevent malicious exploitation.
+     *
+     * @param  string Key to clean
+     * @throws \Exception
+     * @return string
      */
-    private function cleanGetArray()
+    protected function cleanKeys($data)
     {
-        if (is_array($_GET)) {
-            foreach ($_GET as $key => $value) {
-                $_GET[$this->cleanKeys($key)] = $this->sanitize($value);
-            }
-        } else {
-            $_GET = array();
+        $pregMatches = (bool)preg_match(self::PREG_PROPERTIES, '?');
+        $chars = '';
+        $chars = $pregMatches ? '\pL' : 'a-zA-Z';
+
+
+        if (!preg_match('#^[' . $chars . '0-9:_.-]++$#uD', $data)) {
+            throw new \Exception('Illegal key characters in global data');
         }
 
-        return $_GET;
-
+        return $data;
     }
 
     /**
-     * @return array
+     * Escapes data.
+     *
+     * @param  mixed Data to clean
+     * @return mixed
      */
-    private function cleanCookieArray()
+    public function sanitize($data)
     {
-        if (is_array($_COOKIE)) {
-            foreach ($_COOKIE as $key => $value) {
-                $_COOKIE[$this->cleanKeys($key)] = $this->sanitize($value);
+        if (is_array($data)) {
+            $new_array = [];
+            foreach ($data as $key => $value) {
+                $new_array[$this->cleanKeys($key)] = $this->sanitize($value);
             }
-        } else {
-            $_COOKIE = array();
+
+            return $new_array;
         }
 
-        return $_COOKIE;
+        if ($this->magicQuotesGpc === true) {
+            // Get rid of those pesky magic quotes!
+            $data = stripslashes($data);
+        }
 
+        $data = $this->xssClean($data);
+
+        return $data;
     }
 
     /**
@@ -260,7 +260,7 @@ class Security
 
     private function fixEntity($data)
     {
-        $data = str_replace(array('&','<','>'), array('&','<','>'), $data);
+        $data = str_replace(['&', '<', '>'], ['&', '<', '>'], $data);
         $data = preg_replace('/(&#*\w+)[\x00-\x20]+;/u', '$1;', $data);
         $data = preg_replace('/(&#x*[0-9A-F]+);*/iu', '$1;', $data);
         header('Content-Type: text/html; charset=utf-8');
@@ -320,13 +320,75 @@ class Security
         );
     }
 
+    /**
+     * @return array
+     */
+    private function cleanGet()
+    {
+        if (is_array($_GET)) {
+            foreach ($_GET as $key => $value) {
+                $_GET[$this->cleanKeys($key)] = $this->sanitize($value);
+            }
+        } else {
+            $_GET = [];
+        }
+
+        return $_GET;
+
+    }
+
+    /**
+     * @return array
+     */
+    private function cleanCookie()
+    {
+        if (is_array($_COOKIE)) {
+            foreach ($_COOKIE as $key => $value) {
+                $_COOKIE[$this->cleanKeys($key)] = $this->sanitize($value);
+            }
+        } else {
+            $_COOKIE = [];
+        }
+
+        return $_COOKIE;
+
+    }
+
+    public static function decode($matches)
+    {
+        if (!is_int($matches[1]{0})) {
+            $val = '0' . $matches[1] + 0;
+        } else {
+            $val = (int)$matches[1];
+        }
+
+        if ($val > 255) {
+            return '&#' . $val . ';';
+        }
+
+        if ($val >= 65 && $val <= 90 //A-Z
+            || $val >= 97 && $val <= 122 // a-z
+            || $val >= 48 && $val <= 57
+        ) { // 0-9
+
+            return chr($val);
+        }
+
+        return $matches[0];
+    }
+
+    public static function clean($item, $key)
+    {
+        self::_xssClean($item, $key);
+    }
+
     public static function _xssClean(&$item, &$key)
     {
 
         $item = htmlspecialchars($item, ENT_QUOTES);
         $item = preg_replace_callback(
             '!&amp;#((?:[0-9]+)|(?:x(?:[0-9A-F]+)));?!i',
-            array(__CLASS__, 'decode'),
+            [__CLASS__, 'decode'],
             $item
         );
         // PERL
@@ -341,93 +403,6 @@ class Security
         self::$cleaned = $item;
     }
 
-    public static function decode($matches)
-    {
-        if (!is_int($matches[1]{0})) {
-            $val = '0'.$matches[1]+0;
-        } else {
-            $val = (int) $matches[1];
-        }
-
-        if ($val > 255) {
-            return '&#'.$val.';';
-        }
-
-        if ($val >= 65 && $val <= 90  //A-Z
-            || $val >= 97 && $val <= 122 // a-z
-            || $val >= 48 && $val <= 57
-        ) {// 0-9
-
-            return chr($val);
-        }
-
-        return $matches[0];
-    }
-
-    public function doValidation($key, $value)
-    {
-        if (is_array($key)) {
-            array_walk_recursive($key, array(__CLASS__,'clean'));
-        } else {
-            self::_xssClean($key, $value);
-        }
-
-        return (self::$cleaned !== null) ? self::$cleaned : null;
-    }
-
-    public static function clean($item, $key)
-    {
-        self::_xssClean($item, $key);
-    }
-
-    /**
-     * Enforces W3C specifications to prevent malicious exploitation.
-     *
-     * @param  string Key to clean
-     * @throws \Exception
-     * @return string
-     */
-    protected function cleanKeys($data)
-    {
-        $pregMatches = (bool) preg_match(self::PREG_PROPERTIES, '?');
-        $chars = '';
-        $chars = $pregMatches ? '\pL' : 'a-zA-Z';
-
-
-        if (!preg_match('#^[' . $chars . '0-9:_.-]++$#uD', $data)) {
-            throw new \Exception('Illegal key characters in global data');
-        }
-
-        return $data;
-    }
-
-    /**
-     * Escapes data.
-     *
-     * @param  mixed Data to clean
-     * @return mixed
-     */
-    public function sanitize($data)
-    {
-        if (is_array($data)) {
-            $new_array = array();
-            foreach ($data as $key => $value) {
-                $new_array[$this->cleanKeys($key)] = $this->sanitize($value);
-            }
-
-            return $new_array;
-        }
-
-        if ($this->magicQuotesGpc === true) {
-            // Get rid of those pesky magic quotes!
-            $data = stripslashes($data);
-        }
-
-        $data = $this->xssClean($data);
-
-        return $data;
-    }
-
     public function msEscapeString($data)
     {
         if (!isset($data) && empty($data)) {
@@ -438,14 +413,15 @@ class Security
             return $data;
         }
 
-        $nonDisplayable = array(
+        $nonDisplayable = [
             '/%0[0-8bcef]/',
             '/%1[0-9a-f]/',
             '/[\x00-\x08]/',
             '/\x0b/',
             '/\x0c/',
             '/[\x0e-\x1f]/'
-        );
+        ];
+
         foreach ($nonDisplayable as $regex) {
             $data = preg_replace($regex, '', $data);
         }
@@ -457,5 +433,36 @@ class Security
     public function validate($key, $value)
     {
         return $this->doValidation($key, $value);
+    }
+
+    public function doValidation($key, $value)
+    {
+        if (is_array($key)) {
+            array_walk_recursive($key, [__CLASS__, 'clean']);
+        } else {
+            self::_xssClean($key, $value);
+        }
+
+        return (self::$cleaned !== null) ? self::$cleaned : null;
+    }
+
+    /**
+     * Gets the instance of the Security class.
+     *
+     * @param callable| Closure $callback
+     * @return object Instance of Security
+     */
+    public function create(Closure $callback = null)
+    {
+        if (self::$instance === null) {
+            self::$instance = new self();
+        }
+
+        if ($callback instanceof Closure) {
+            return $callback(self::$instance);
+        }
+
+        return self::$instance;
+
     }
 }

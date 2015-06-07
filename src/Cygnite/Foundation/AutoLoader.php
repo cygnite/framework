@@ -20,11 +20,11 @@ if (!defined('CF_SYSTEM')) {
 
 class AutoLoader
 {
-    private $instance = array();
+    private $instance = [];
 
-    private $directories = array();
+    private $directories = [];
 
-    public $loadedClass = array();
+    public $loadedClass = [];
 
     private $inflection;
 
@@ -69,7 +69,6 @@ class AutoLoader
 
         $path  = $rootDir ='';
         //$exp = explode('\\', $className);
-        //show(end($exp));
         //$fileName = $this->psr0AutoLoader($className);
 
         if (array_key_exists($className, $this->directories)) {
@@ -77,10 +76,9 @@ class AutoLoader
                 if (is_readable($this->directories[$className])) {
 
                     return include CYGNITE_BASE.DS.str_replace(
-                            array(
-                                '\\\\',
-                                '\\'
-                            ), DS, str_replace('/', DS, $this->directories[$className])
+                            ['\\\\', '\\'],
+                            DS,
+                            str_replace('/', DS, $this->directories[$className])
                         );
                 } else {
                     throw new \Exception("Requested file $this->directories[$className] not found!!");
@@ -124,7 +122,7 @@ class AutoLoader
     public function __call($method, $args)
     {
         if ($method == 'registerDirectories') {
-            return call_user_func_array(array($this, 'setDirectories'), $args);
+            return call_user_func_array([$this, 'setDirectories'], $args);
         } else {
             throw new \Exception("Invalid method $method");
         }
@@ -209,13 +207,9 @@ class AutoLoader
         }
 
         $class = self::$_classNames[ucfirst($key)];
-        $libPath = getcwd().DS.CF_SYSTEM.strtolower(
+        $libPath = CYGNITE_BASE.DS.strtolower(
             str_replace(
-                array(
-                     '\\',
-                     '.',
-                     '>'
-                ),
+                ['\\', '.','>'],
                 DS,
                 $class
             )

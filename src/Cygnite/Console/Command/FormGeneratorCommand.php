@@ -52,7 +52,7 @@ class FormGeneratorCommand extends Command
 
     private $viewType;
 
-    public static function __callStatic($method, $arguments = array())
+    public static function __callStatic($method, $arguments = [])
     {
         if ($method == 'instance') {
             return new self();

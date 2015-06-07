@@ -19,18 +19,17 @@ if ( ! defined('CF_SYSTEM')) exit('External script access not allowed');
  * Mailer
  * Swiftmailer wrapper class to handle email functionality
  *
- *  Mailer::instance(function($mailer) {
+ *  Mailer::compose(function($mailer) {
  *
  *      $mailer->setDriver('SMTP');
  *      $mailer->setHost('smtp.example.org');
  *      $mailer->setPort('25');
  *     //$mailer->setEncryption('25');
  *      $mailer->setCredentials(array(
-                                    'username' => 'Your Username',
- *                                  'password' => 'Your Password'
+             'username' => 'Your Username',
+ *           'password' => 'Your Password'
  *
  *      ));
- *
  *
  *     $mailMessage = $mailer->setPriority($priority)
                 ->setSubject($subject)
@@ -42,8 +41,6 @@ if ( ! defined('CF_SYSTEM')) exit('External script access not allowed');
                 ->addPart('<q>Here is the message itself</q>', 'text/html')
  *              ->getMessage();
  *
- *
- *
  *      $mailer->send($mailMessage);
  * });
  *
@@ -53,7 +50,7 @@ class Mailer
 {
 
     // email configuration
-    private $emailConfig = array();
+    private $emailConfig = [];
 
     private $transportInstance;
 
@@ -83,8 +80,8 @@ class Mailer
      */
     public static function __callStatic($method, $arguments)
     {
-        if ($method == 'instance') {
-            return call_user_func_array(array(new self,'get'.ucfirst($method)), $arguments);
+        if ($method == 'compose') {
+            return call_user_func_array([new self,'get'.ucfirst($method)], $arguments);
         }
     }
 

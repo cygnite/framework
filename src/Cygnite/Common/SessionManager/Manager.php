@@ -5,13 +5,13 @@ namespace Cygnite\Common\SessionManager;
 class Manager extends AbstractPacket implements PacketInterface
 {
     // Storage property to store session values
-    protected $storage = array();
+    protected $storage = [];
 
     /**
      * Constructor of Session Manager
      * @param array $storage
      */
-    public function __construct(array $storage = array())
+    public function __construct(array $storage = [])
     {
         $this->all($storage);
     }
@@ -109,7 +109,7 @@ class Manager extends AbstractPacket implements PacketInterface
      * @param array $array overwrites values
      * @return array
      */
-    public function all($array = array())
+    public function all($array = [])
     {
         if (!empty($array)) {
             $this->storage = $array;

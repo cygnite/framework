@@ -56,7 +56,7 @@ class Migrator
         $this->command = $command;
     }
 
-    public static function __callStatic($method, $arguments = array())
+    public static function __callStatic($method, $arguments = [])
     {
         if ($method == 'instance') {
             return new self($arguments[0]);
@@ -89,8 +89,8 @@ class Migrator
         #replace with table name - {%className%}
 
         $file =  str_replace(
-                array('apps', 'database'),
-                array('Apps', 'Database'),
+                ['apps', 'database'],
+                ['Apps', 'Database'],
                 $this->getTemplatePath()
             ).$template.EXT;
 
@@ -204,7 +204,7 @@ class Migrator
             $type = 'up';
         }
 
-        call_user_func_array(array(new $class, $type), array());
+        call_user_func_array([new $class, $type], []);
 
         $this->updateMigrationTable();
 

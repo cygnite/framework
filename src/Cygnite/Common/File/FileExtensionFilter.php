@@ -29,10 +29,9 @@ class FileExtensionFilter extends FilterIterator
 
     public function __construct($dirOrIterator)
     {
+        $iterator = $dirOrIterator;
         if ($dirOrIterator instanceof \RecursiveIterator) {
             $iterator = new \RecursiveIteratorIterator($dirOrIterator);
-        } else {
-            $iterator = $dirOrIterator;
         }
 
         parent::__construct($iterator);

@@ -27,7 +27,7 @@ class ServiceController extends AbstractBaseController implements ServiceControl
      * @var array
      * @access private
      */
-    private $service = array();
+    private $service = [];
 
     public function __construct()
     {

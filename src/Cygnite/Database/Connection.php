@@ -17,7 +17,7 @@ use Cygnite\Database\Configurations;
 
 abstract class Connection
 {
-    public static $connections = array();
+    public static $connections = [];
 
     public static $instance;
 
@@ -25,7 +25,7 @@ abstract class Connection
 
     public static $connectionObject;
 
-    public static $connectionConfig = array();
+    public static $connectionConfig = [];
 
     /**
      * @var array
@@ -51,20 +51,20 @@ abstract class Connection
     /**
      * @param $config
      * @throws \Exception
-     * @return array()
+     * @return array
      */
     public static function parseUrl($config)
     {
-        $info = array();
+        $info = [];
 
         $info['driver']   = $config['driver'];
-        $info['hostname']     = $config['host'];
+        $info['hostname'] = $config['host'];
         $info['port']     = isset($config['port']) ? $config['port'] : '';
         $info['username'] = isset($config['username']) ? $config['username'] : null;
         $info['password'] = isset($config['password']) ? $config['password'] : null;
         $info['database'] = isset($config['database']) ? $config['database'] : null;
         $info['charset']  = (isset($config['charset'])) ? $config['charset'] : '' ;
-        $config = array();
+        $config = [];
 
         if ($info['hostname'] == 'unix(') {
             $socketDb = null;
@@ -171,7 +171,7 @@ abstract class Connection
             return self::$connectionObject[$connKey];
         }
 
-        $config = array();
+        $config = [];
 
         $config = Configuration::getDatabaseConfiguration();
 

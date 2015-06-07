@@ -15,7 +15,7 @@ use Cygnite\Helpers\Inflector;
 class FlashMessage
 {
     // Valid Flash Types
-    private $validFlashTypes = array('help', 'info', 'success', 'error', 'warning');
+    private $validFlashTypes = ['help', 'info', 'success', 'error', 'warning'];
     private $class = __CLASS__;
     private $flashWrapper = "<div class='%s %s'><a href='#' class='closeFlash'></a>\n%s</div>\n";
     private $inflection;
@@ -27,7 +27,7 @@ class FlashMessage
     public function __construct()
     {
         if (!Session::has('flashMessages')) {
-            Session::set('flashMessages', array());
+            Session::set('flashMessages', []);
         }
     }
 
@@ -56,10 +56,10 @@ class FlashMessage
 
         // If the flash session array doesn't exist, make it
         if (!array_key_exists($key, Session::get('flashMessages'))) {
-            Session::set('flashMessages', array($key => array()));
+            Session::set('flashMessages', [$key => []]);
         }
 
-        Session::set('flashMessages', array($key => array($message)));
+        Session::set('flashMessages', [$key => [$message]]);
 
         return true;
     }
@@ -165,8 +165,8 @@ class FlashMessage
         $flashArray = Session::get('flashMessages');
 
         if (!is_null($key)) {
-            if (@isset($flashArray[$key])) {
-                return @$flashArray[$key];
+            if (isset($flashArray[$key])) {
+                return $flashArray[$key];
             }
         }
 

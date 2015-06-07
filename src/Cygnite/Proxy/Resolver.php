@@ -35,14 +35,14 @@ abstract class Resolver
      * @param array $arguments
      * @return mixed
      */
-    public static function __callStatic($method, $arguments = array())
+    public static function __callStatic($method, $arguments = [])
     {
         $accessor = $instance = null;
         $accessor = static::getResolver();
         $accessor = Inflector::toNamespace($accessor);
         $instance = new $accessor();
 
-        // calling the method directly is faster then call_user_func_array() !
+        // calling the method directly is faster then call_user_func_[] !
         switch (count($arguments))
         {
             case 0:

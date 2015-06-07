@@ -18,7 +18,9 @@ use Cygnite\Helpers\Config;
 use Cygnite\Helpers\Inflector;
 use Cygnite\Base\Request\Dispatcher;
 use Cygnite\Common\UrlManager\Url;
+use Cygnite\Translation\Translator;
 use Cygnite\DependencyInjection\Container;
+use Cygnite\Exception\Handler as ExceptionHandler;
 
 if (!defined('CF_SYSTEM')) {
     exit('External script access not allowed');
@@ -29,7 +31,7 @@ class Application extends Container
     protected static $loader;
     private static $instance;
     private static $version = 'v1.3.2';
-    public $aliases = array();
+    public $aliases = [];
     public $namespace = '\\Controllers\\';
 
     /**
@@ -140,23 +142,6 @@ class Application extends Container
         return $callback(static::$instance);
     }
 
-    /**
-     * Set up all required configurations
-     *
-     * @param $config
-     * @return $this
-     */
-    public function setConfiguration($config)
-    {
-        $this->importHelpers();
-
-        $this->setValue('config', $config)
-             ->setValue('boot', new Strapper)
-             ->setValue('router', new Router)
-             ->setServices();
-
-        return $this;
-    }
 
     /**
      * @param $key
@@ -173,6 +158,22 @@ class Application extends Container
     public function getAliases($key)
     {
         return isset($this->aliases) ? $this->aliases : null;
+    }
+
+    /**
+     * Set language to the translator
+     *
+     * @return locale
+     */
+    public function setLocale()
+    {
+        $locale = Config::get('global.config', 'locale');
+        $fallbackLocale = Config::get('global.config', 'fallback.locale');
+
+        return Translator::make(function ($trans) use ($locale, $fallbackLocale)
+        {
+            return $trans->setFallback($fallbackLocale)->locale($locale);
+        });
     }
 
     /**
@@ -198,38 +199,12 @@ class Application extends Container
     }
 
     /**
-     * @param      $class
-     * @param      $dir
-     * @return string
-     */
-    public function getController($class, $dir = '')
-    {
-        $dir = ($dir !== '') ? $dir . '\\' : '';
-
-        return
-            "\\" . ucfirst(APPPATH) . $this->namespace . $dir . Inflector::classify(
-                $class
-            ) . 'Controller';
-    }
-
-    /**
-     * @param $actionName
-     * @return string
-     */
-    public function getActionName($actionName)
-    {
-        return Inflector::camelize(
-            (!isset($actionName)) ? 'index' : $actionName
-        ) . 'Action';
-    }
-
-    /**
      * @return callable
      */
     public function getDefinition()
     {
         $this['config.definition'] = function () {
-            $class = "\\" . ucfirst(APPPATH) . "\Configs\Definitions\DefinitionManager";
+            $class = "\\" . ucfirst(APPPATH) . "\\Configs\\Definitions\\DefinitionManager";
             return new $class;
         };
 
@@ -242,7 +217,7 @@ class Application extends Container
      * @param array $services
      * @return $this
      */
-    public function registerServiceProvider($services = array())
+    public function registerServiceProvider($services = [])
     {
         foreach ($services as $key => $serviceProvider) {
             $this->createProvider('\\' . $serviceProvider)->register($this);
@@ -289,27 +264,70 @@ class Application extends Container
     }
 
     /**
-     * Start booting and handler all user request
+     * Set up all required configurations
      *
-     * @return Dispatcher
+     * @param $config
+     * @return $this
      */
-    public function boot()
+    public function configure()
     {
-        //Set up configurations for your awesome application
-        Config::set('config.items', $this['config']);
-        //Set URL base path.
-        Url::setBase(
-            (Config::get('global.config', 'base_path') == '') ?
-                $this['router']->getBaseUrl() :
-                Config::get('global.config', 'base_path')
-        );
+        $this->importHelpers();
+        $config = [];
+        $config =\Cygnite\Helpers\Config::load();
 
-        $this['service.provider']();
-        //initialize framework
-        $this['boot']->initialize($this);
-        $this['boot']->terminate();
+        //Set up configurations for your awesome application
+        Config::set('config.items', $config);
+        $this->setServices();
 
         return $this;
+    }
+
+    /**
+     * Set all configurations and boot application
+     *
+     * @return $this
+     */
+    public function bootApplication()
+    {
+        $this->registerCoreAlias();
+        $this->setEnvironment();
+        $this['service.provider']();
+
+        return $this;
+    }
+
+    public function getCoreAlias()
+    {
+        return [
+            'router'     => 'Cygnite\Base\Router\Router',
+            'debugger'   => 'Cygnite\Exception\ExceptionHandler',
+            'event'      => 'Cygnite\Base\EventHandler\Event',
+        ];
+    }
+
+
+    private function compose($class)
+    {
+        return $this->makeInstance($class);
+    }
+
+    /**
+     * We will register all core class into container
+     * @return $this
+     */
+    public function registerCoreAlias()
+    {
+        foreach ($this->getCoreAlias() as $key => $class) {
+            $this->setValue($key, $this->compose("\\".$class));
+        }
+
+        return $this;
+    }
+
+    private function setEnvironment()
+    {
+        $app = $this;
+        return include __DIR__ . '/../'.'BootStrap'.EXT;
     }
 
     /**
@@ -317,12 +335,35 @@ class Application extends Container
      */
     public function run()
     {
+        try {
+            return $this->handle();
+
+        } catch (\Exception $e) {
+
+            $this['debugger']->handleException($this);
+
+            if (ENV == 'development') {
+                throw $e;
+            }
+
+            if ($this['debugger']->isLoggerEnabled() == true) {
+                $this['debugger']->log($e);
+            }
+
+            $this['debugger']->renderErrorPage($e);
+        }
+    }
+
+    /**
+     * @return mixed
+     */
+    public function handle()
+    {
         /**-------------------------------------------------------
          * Booting completed. Lets handle user request!!
          * Lets Go !!
          * -------------------------------------------------------
          */
-        $dispatcher = new Dispatcher($this);
-        return $dispatcher->run();
+        return (new Dispatcher($this))->run();
     }
 }

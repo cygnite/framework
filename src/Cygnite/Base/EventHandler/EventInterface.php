@@ -15,7 +15,7 @@ interface EventInterface
      * @param array $data
      * @return mixed
      */
-    public function trigger($eventName, $data = array());
+    public function trigger($eventName, $data = []);
 
     /**
      * @param null $event

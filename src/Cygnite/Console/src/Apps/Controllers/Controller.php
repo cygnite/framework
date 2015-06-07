@@ -44,7 +44,7 @@ class %ControllerName%Controller extends AbstractBaseController
     */
     public function indexAction()
     {
-        $%controllerName% = array();
+        $%controllerName% = [];
         $%controllerName% = %StaticModelName%::all(array('orderBy' => '{%primaryKey%} desc',
                 /*'paginate' => array(
                     'limit' => Url::segment(3)
@@ -143,7 +143,7 @@ class %ControllerName%Controller extends AbstractBaseController
      */
     public function editAction($id)
     {
-        $validator = null; $%controllerName% = array();
+        $validator = null; $%controllerName% = [];
         $%controllerName% = %StaticModelName%::find($id);
         $form = new %ControllerName%Form($%controllerName%, Url::segment(3));
         $form->action = 'edit';

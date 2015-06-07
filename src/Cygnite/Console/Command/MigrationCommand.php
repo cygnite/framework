@@ -73,7 +73,7 @@ class MigrationCommand extends Command
 
     }
 
-    public static function __callStatic($method, $arguments = array())
+    public static function __callStatic($method, $arguments = [])
     {
         if ($method == 'instance') {
             return new self();

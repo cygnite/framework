@@ -8,6 +8,6 @@ class Redis
 {
     protected $storage;
 
-    private $config = array();
+    private $config = [];
 
 }

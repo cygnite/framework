@@ -2,11 +2,11 @@
 namespace Cygnite\Exception;
 
 use Closure;
-use Cygnite\Foundation\Application;
 use Exception;
 use Tracy\Helpers;
 use Tracy\Debugger;
 use Cygnite\Helpers\Config;
+use Cygnite\Foundation\Application;
 
 
 if (!defined('CF_SYSTEM')) {
@@ -18,7 +18,7 @@ if (!defined('CF_SYSTEM')) {
  * Tracy debugger component to handle exceptions or to debug app
  * @package Cygnite\Exception
  */
-class Handler implements ExceptionInterface
+class ExceptionHandler implements ExceptionInterface
 {
 
     public $name = 'Cygnite Framework';
@@ -29,16 +29,21 @@ class Handler implements ExceptionInterface
 
     protected $enableMode;
 
+    public $enableLogger = false;
+
+    public $logPath;
+
     /**
      * @param $configurations
      * @return $this
      */
-    public function enable($configurations)
+    public function enable($enableLogger, $loggerDir)
     {
-        if (MODE == 'development') {
-            $this->enableDebuggerWith(Debugger::DEVELOPMENT, $configurations);
+        if (ENV == 'development') {
+            $this->enableDebuggerWith(Debugger::DEVELOPMENT, $loggerDir);
         } else {
-            $this->enableDebuggerWith(Debugger::PRODUCTION, $configurations);
+            $this->setLogConfig($enableLogger, $loggerDir)
+                 ->enableDebuggerWith(Debugger::PRODUCTION, $loggerDir);
         }
 
         return $this;
@@ -48,16 +53,27 @@ class Handler implements ExceptionInterface
      * @param       $enableMode
      * @param array $config
      */
-    private function enableDebuggerWith($enableMode, $config = array())
+    private function enableDebuggerWith($enableMode, $loggerDir = "")
     {
-        $this->enableLogging = $config['enable_logging'];
-
-        if ($config['enable_logging'] == true) {
-            $logPath = str_replace('.', '/', $config['log_path']).'/';
+        if ($this->isLoggerEnabled() == true) {
+            $logPath = str_replace('.', '/', $loggerDir).'/';
             Debugger::enable($enableMode, $logPath);
         } else {
             Debugger::enable($enableMode);
         }
+    }
+
+    public function setLogConfig($enableLogger, $logPath)
+    {
+        $this->enableLogger = $enableLogger;
+        $this->logPath = $logPath;
+
+        return $this;
+    }
+
+    public function isLoggerEnabled()
+    {
+        return $this->enableLogger;
     }
 
     /**
@@ -75,9 +91,9 @@ class Handler implements ExceptionInterface
      * @param bool $enableEmailing
      * @return $this
      */
-    public function setEmailAddress($email, $enableEmailing = false)
+    public function setEmailAddress($email, $isSetEmail = false)
     {
-        if ($enableEmailing == true) {
+        if ($isSetEmail == true) {
             Debugger::$email = $email;
         }
 
@@ -153,10 +169,10 @@ class Handler implements ExceptionInterface
 
                 if (!is_null($e)) {
 
-                    if ($handler->enableLogging == true) {
-                        $this->log($e);
+                    if ($handler->isLoggerEnabled()) {
+                        $handler->log($e);
                     }
-                    return array(
+                    return [
                         'tab' => $handler->name,
                         'panel' => '<h1>
                         <span class="heading-blue">
@@ -165,7 +181,7 @@ class Handler implements ExceptionInterface
                         </h1>
                         <p> Version : '.Application::version().' </p>
                         <style type="text/css" class="tracy-debug">'.$contents.'</style>'
-                    );
+                    ];
                 }
             }
         );
@@ -179,10 +195,7 @@ class Handler implements ExceptionInterface
                     $sql = $e->queryString;
                 }
 
-                return isset($sql) ? array(
-                    'tab' => 'SQL',
-                    'panel' => $sql,
-                ) : NULL;
+                return isset($sql) ? ['tab' => 'SQL', 'panel' => $sql] : NULL;
 
             }
         );
@@ -225,7 +238,7 @@ class Handler implements ExceptionInterface
      */
     public function includeAssets($path)
     {
-        $vendor = dirname(dirname(dirname(dirname(dirname(dirname(__FILE__))))));
+        $vendor = CYGNITE_BASE.DS.'vendor';
         $stylePath = $vendor."/tracy/tracy/src/Tracy/templates/bluescreen.css";
 
         if (!file_exists($stylePath)) {
@@ -255,31 +268,26 @@ class Handler implements ExceptionInterface
      * Event will Trigger this method on runtime when any exception
      * occurs
      */
-    public function handleException()
+    public function handleException($app)
     {
+        /*
+        | Exception handler registered here. So it will handle all
+        | exceptions and thrown as pretty format
+        |-----------------------------------
+        | Enable pretty exception handler and
+        | do necessary configuration
+        |-----------------------------------
+        */
         $config = Config::get('global.config');
 
-        // Exception handler registered here. So it will handle all your exception
-        // and throw you pretty format
-        Handler::register(
-            function($exception) use ($config){
-                /*
-                |-----------------------------------
-                | Enable pretty exception handler and
-                | do necessary configuration
-                |-----------------------------------
-                */
-                $exception->enable($config)
-                    ->setTitle()
-                    ->setDebugger(Debugger::getBlueScreen())
-                    ->setEmailAddress(
-                        $config['params']['log_email'],
-                        $config['enable_error_emailing']
-                    )
-                    ->run();
-                unset($config);
-            }
-        );
+        $app['debugger']
+            ->enable($config['enable_logging'], $config['log_path'])
+            ->setTitle()
+            ->setDebugger(Debugger::getBlueScreen())
+            ->setEmailAddress(
+                $config['params']['log_email'],
+                $config['enable_error_emailing']
+            )->run();
     }
 
     /**
@@ -289,5 +297,28 @@ class Handler implements ExceptionInterface
     public function dump($data, $type)
     {
         Debugger::barDump($data, $type);
+    }
+
+    /**
+     * We will display custom error page in production mode
+     * @param $e
+     * @return mixed
+     */
+    private function importCustomErrorPage($e)
+    {
+        if (file_exists(APPPATH.'/views/errors/'.$e->getStatusCode().'.view'.EXT)) {
+            $error = ['error.code' => $e->getMessage(), 'error.message' => $e->getMessage()];
+            extract($error);
+            return include APPPATH.'/views/errors/'.$e->getStatusCode().'.view'.EXT;
+        }
+    }
+
+    /**
+     * @param $e
+     * @return mixed
+     */
+    public function renderErrorPage($e)
+    {
+        return $this->importCustomErrorPage($e);
     }
 }

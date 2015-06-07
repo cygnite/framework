@@ -29,29 +29,29 @@ if (!defined('CF_SYSTEM')) {
 class Form implements FormInterface
 {
 
-    private static $formHolder = array();
+    private static $formHolder = [];
 
     public static $formName;
 
     public static $formOpen;
 
-    protected $attributes = array();
+    protected $attributes = [];
 
-    protected  $elements = array();
+    protected  $elements = [];
 
-    protected $value = array();
+    protected $value = [];
 
-    protected  $element = array();
+    protected  $element = [];
 
     private static $object;
 
-    private $validArray = array('text', 'button', 'select', 'textarea');
+    private $validArray = ['text', 'button', 'select', 'textarea'];
 
     public $validator;
 
     protected $errorClass = 'error';
 
-    private static $validMethod = array('make', 'instance');
+    private static $validMethod = ['make', 'instance'];
 
     /**
      * @param       $method
@@ -59,14 +59,14 @@ class Form implements FormInterface
      * @return mixed
      * @throws \Exception
      */
-    public static function __callStatic($method, $arguments = array())
+    public static function __callStatic($method, $arguments = [])
     {
         // Check for valid function name
         if (in_array($method, static::$validMethod)) {
             if (empty($arguments)) {
-                return call_user_func_array(array(new self,'getInstance'), array());
+                return call_user_func_array([new self,'getInstance'], []);
             } elseif ($arguments[0] instanceof Closure) {
-                return call_user_func_array(array(new self,'getInstance'), $arguments);
+                return call_user_func_array([new self,'getInstance'], $arguments);
         }
         }
 
@@ -95,7 +95,7 @@ class Form implements FormInterface
      * @param array $attributes
      * @return $this
      */
-    public function open($formName, $attributes = array())
+    public function open($formName, $attributes = [])
     {
         self::$formName = $formName;
         self::$formHolder[$formName] = $formName;
@@ -114,7 +114,7 @@ class Form implements FormInterface
     * @return $this
     *
     */
-    public function addElement($type, $key, $values = array())
+    public function addElement($type, $key, $values = [])
     {
         $values['type'] = $type;
         $this->value[$key] = $values;
@@ -137,7 +137,7 @@ class Form implements FormInterface
      * @param array $elements
      * @return $this
      */
-    public function addElements($elements = array())
+    public function addElements($elements = [])
     {
         $this->value = array_shift($elements);
 
@@ -259,7 +259,7 @@ class Form implements FormInterface
     private function select($key, $values)
     {
         $select = $selectValue = '';
-        $attributes = array();
+        $attributes = [];
 
         $selectOptions = $values['options'];
         $selected = $values['selected'];
@@ -330,7 +330,9 @@ class Form implements FormInterface
     //Have to work on this.
     public function __toString()
     {
-        return $this->element[@self::$formHolder[self::$formName]];
+        return isset($this->element[self::$formHolder[self::$formName]]) ?
+            $this->element[self::$formHolder[self::$formName]]
+            : "";
     }
 
     /**

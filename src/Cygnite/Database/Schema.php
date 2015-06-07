@@ -30,7 +30,7 @@ class Schema
     public $database;
     public $primaryKey;
     public $tableName;
-    public $schema = array();
+    public $schema = [];
     protected $_connection;
     private $_pointer;
     private $inflection;
@@ -108,13 +108,13 @@ class Schema
      * @return callable|void
      * @throws \Exception
      */
-    public static function __callStatic($method, $arguments = array())
+    public static function __callStatic($method, $arguments = [])
     {
         if ($method == 'instance' && !empty($arguments)) {
 
             $schema = new self($arguments[0]);
 
-            if (is_callable(array($schema, 'init'))) {
+            if (is_callable([$schema, 'init'])) {
 
                 if ($arguments[1] instanceof Closure) {
                     return $schema->init($arguments[1], $schema);
@@ -254,7 +254,7 @@ class Schema
         $length = (isset($length) && $length !== '') ? $length : $default;
         $type = strtoupper($type) . '(' . $length . ')';
 
-        return array($type, $length);
+        return [$type, $length];
     }
 
     /**
@@ -283,7 +283,7 @@ class Schema
      * @return this pointer
      *
      */
-    public function rename($tableNames = array())
+    public function rename($tableNames = [])
     {
         $schema = '';
 
@@ -366,7 +366,7 @@ class Schema
 
             if (!empty($arguments)) {
                 if (method_exists($this, 'column')) {
-                    return call_user_func_array(array($this, 'column'), $arguments);
+                    return call_user_func_array([$this, 'column'], $arguments);
                 }
             }
         }

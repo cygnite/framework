@@ -67,9 +67,9 @@ class File implements StorageInterface
     /**
      * @param array $config
      */
-    public function initialize($config = array())
+    public function initialize($config = [])
     {
-        $path = str_replace(array('.', '/'), DS, $config['path']);
+        $path = str_replace(['.', '/'], DS, $config['path']);
 
         if (isset($config) === true) {
             if (is_string($config)) {
@@ -185,7 +185,7 @@ class File implements StorageInterface
      */
     private function getPath()
     {
-        return str_replace(array('.', '/'), DS, $this->cachePath);
+        return str_replace(['.', '/'], DS, $this->cachePath);
     }
 
     /**
@@ -244,7 +244,7 @@ class File implements StorageInterface
             $dataArray = $this->getCache();
             $dataArray[$key] = $data;
         } else {
-            $dataArray = array($key => $data);
+            $dataArray = [$key => $data];
         }
 
         $cacheData = json_encode($dataArray);
@@ -289,7 +289,7 @@ class File implements StorageInterface
             $this->setCache($key)->setPath(APPPATH.DS.'temp.cache'.DS);
         }
 
-        $cached = array();
+        $cached = [];
         $cached = $this->getCache();
 
         if ($timestamp === false) {
@@ -319,7 +319,7 @@ class File implements StorageInterface
     public function __call($method, $arguments)
     {
         if ($method == 'as') {
-            return call_user_func_array(array($this, 'where'), array($arguments));
+            return call_user_func_array([$this, 'where'], [$arguments]);
         }
 
         throw new \BadMethodCallException("Invalid method called File::$method");

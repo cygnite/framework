@@ -131,7 +131,7 @@ class MemCache implements StorageInterface
      */
     public function get($key)
     {
-        $data = array();
+        $data = [];
         $data = $this->memory->get($key);
         return (false === $data) ? null : $data;
     }
