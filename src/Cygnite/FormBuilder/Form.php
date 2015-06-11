@@ -67,7 +67,7 @@ class Form implements FormInterface
                 return call_user_func_array([new self,'getInstance'], []);
             } elseif ($arguments[0] instanceof Closure) {
                 return call_user_func_array([new self,'getInstance'], $arguments);
-        }
+            }
         }
 
         throw new \Exception("Undefined $method method called.");

@@ -68,7 +68,6 @@ class AutoLoader
     {
 
         $path  = $rootDir ='';
-        //$exp = explode('\\', $className);
         //$fileName = $this->psr0AutoLoader($className);
 
         if (array_key_exists($className, $this->directories)) {
@@ -102,7 +101,7 @@ class AutoLoader
                 $namespace
             )
             ) {
-                $fileName  = strtolower(str_replace('\\', DS, $namespace) . DS);
+                $fileName  = str_replace('\\', DS, $namespace) . DS;
             } else {
                 $fileName  = 'vendor'.DS.'cygnite'.DS.'src'.DS.str_replace('\\', DS, $namespace) . DS;
             }
@@ -135,27 +134,30 @@ class AutoLoader
     private function setDirectories($paths)
     {
 
-        foreach ($paths as $key => $dir) {
-            $path = str_replace(".", DS, $dir);
+        if (!empty ($paths)) {
 
-            //Iterate through all paths and filter with extension provided
-            $recursiveExtensionFilter = new FileExtensionFilter(
-                new \RecursiveDirectoryIterator($path)
-            );
+            foreach ($paths as $key => $dir) {
+                $path = str_replace(".", DS, $dir);
 
-            // loop through the directory listing
-            // we need to create a RecursiveIteratorIterator instance
-            foreach ($recursiveExtensionFilter as $item) {
-               $alias = str_replace('.php', '', $item->getPathName());
+                //Iterate through all paths and filter with extension provided
+                $recursiveExtensionFilter = new FileExtensionFilter(
+                    new \RecursiveDirectoryIterator($path)
+                );
 
-               $alias = implode("\\", array_map("ucfirst", explode(DS, $alias)));
-               if (!isset($this->directories[$alias])) {
-                   $this->directories[$alias] = str_replace('\\', '/', $item->getPathName());
-               }
+                // loop through the directory listing
+                // we need to create a RecursiveIteratorIterator instance
+                foreach ($recursiveExtensionFilter as $item) {
+                    $alias = str_replace('.php', '', $item->getPathName());
 
+                    $alias = implode("\\", array_map("ucfirst", explode(DS, $alias)));
+                    if (!isset($this->directories[$alias])) {
+                        $this->directories[str_replace('Src', '', $alias)] = str_replace('\\', '/', $item->getPathName());
+                    }
+
+                }
             }
-        }
 
+        }
     }
 
 
@@ -187,48 +189,6 @@ class AutoLoader
     }
 
     /**
-    * ----------------------------------------------------------
-    * Request a object of the class
-    * ----------------------------------------------------------
-    * This method is used to request classes from
-    * Cygnite Engine and  return library object
-    *
-    * @param $key string
-    * @param $val NULL
-    * @throws \Exception
-    * @return object
-    */
-    public function request($key, $val = null)
-    {
-        $class = $libPath = "";
-
-        if (!array_key_exists(ucfirst($key), self::$_classNames)) {
-            throw new \Exception("Requested $class Library not exists !!");
-        }
-
-        $class = self::$_classNames[ucfirst($key)];
-        $libPath = CYGNITE_BASE.DS.strtolower(
-            str_replace(
-                ['\\', '.','>'],
-                DS,
-                $class
-            )
-        ).EXT;
-
-        if (is_readable($libPath) && class_exists($class)) {
-            if (!isset(self::$instance[$class])) {
-                self::$instance[$class] = new $class($val);
-            }
-
-            return self::$instance[$class];
-            // You cannot pass parameters to constructor of the class
-        } else {
-            throw new \Exception("Requested class not available on $libPath");
-        }
-    }
-
-
-    /**
     * -----------------------------------------------------------------
     * Get all loaded classes
     * -----------------------------------------------------------------
@@ -239,36 +199,5 @@ class AutoLoader
     public function registeredClasses()
     {
         return $this->instance;
-    }
-
-    /**
-     * -------------------------------------------------------------------
-     * Load models and return model object
-     * -------------------------------------------------------------------
-     * This method is used to load all models dynamically
-     * and return model object
-     *
-     * @param $key string
-     * @param $val string
-     * @throws \Exception
-     * @return object
-     */
-    public function model($key, $val = null)
-    {
-        $class = $libPath = "";
-        $class = ucfirst(trim($key));
-
-        if (!array_key_exists($class, self::$_classNames)) {
-            throw new \Exception("Requested $class Library not exists !!");
-        }
-
-        $libPath = strtolower(APPPATH).DS.'models'.DS;
-
-        if (is_readable($libPath) && class_exists($class)) {
-            return new $class();
-        } else {
-            throw new \Exception("Path not readable $libPath");
-        }
-
     }
 }

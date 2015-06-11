@@ -5,6 +5,11 @@ if (!defined('CF_SYSTEM')) {
     exit('External script access not allowed');
 }
 
+/**
+ * Class Widget
+ *
+ * @package Cygnite\Mvc\View
+ */
 class Widget implements \ArrayAccess
 {
     public $widget = [];
@@ -15,14 +20,26 @@ class Widget implements \ArrayAccess
 
     protected $widgetName;
 
+    protected $moduleDir = 'Modules';
+
     /**
      * @param       $name
      * @param array $data
      */
     public function __construct($name, $data= [])
     {
-        $this->widgetName = $name;
+        $this->setWidgetName($name);
         $this->data = $data;
+    }
+
+    private function setWidgetName($name)
+    {
+        $this->widgetName = $name;
+    }
+
+    private function getWidgetName()
+    {
+        return (isset($this->widgetName)) ? $this->widgetName : null;
     }
 
     /**
@@ -49,9 +66,62 @@ class Widget implements \ArrayAccess
     /**
      * @param $bool
      */
-    public function isModule($bool)
+    public function setModule($bool)
     {
         $this->module = $bool;
+    }
+
+    public function module()
+    {
+        return ($this->module) ? true : false;
+    }
+
+    /**
+     * We will setup module view path
+     * @return string
+     */
+    protected function setupModule()
+    {
+        if (string_has($this->getWidgetName(), ':')) {
+
+            $exp = [];
+            $exp = explode(':', $this->getWidgetName());
+            $moduleName = $exp[0]; $view = $exp[1];
+            $path = $this->getWidgetPath($view, true);
+            $this->setWidgetName(null);
+            $this->setModule(false);
+
+            return $path;
+        }
+    }
+
+    /**
+     * Set up widget view path
+     * @return string
+     */
+    protected function setupWidget()
+    {
+        /*
+         | If widget not belongs to HMVC modules and
+         | has ":" in the view name, we will convert name as path
+         */
+
+        if (string_has($this->getWidgetName(), ':')) {
+            $widget = null;
+            $widget = str_replace(':', DS, $this->getWidgetName());
+            return $this->getWidgetPath($widget);
+        }
+    }
+
+    private function getWidgetPath($widget, $isModule = false)
+    {
+        $moduleName = '';
+        $modulePath = 'Views';
+        if ($isModule) {
+            $modulePath = $this->moduleDir.DS.$moduleName.DS.'Views';
+        }
+
+        return CYGNITE_BASE.DS.str_replace('src/', 'src'.DS, APPPATH).DS.$modulePath.DS.$widget.'.view'.EXT;
     }
 
     /**
@@ -66,60 +136,38 @@ class Widget implements \ArrayAccess
          | so that we will understand you are trying to invoke module view
          */
         if ($isModule) {
-            $this->isModule($isModule);
+            $this->setModule($isModule);
         }
 
         /*
-         | We will check if widget is cached, return if already cached
+         | We will return if widget already cached
          */
-        if ($this->has($this->widgetName)) {
-           return $this->getWidget($this->widgetName);
+        if ($this->has($this->getWidgetName())) {
+           return $this->getWidget($this->getWidgetName());
         }
 
         $path = null;
 
-        if ($this->module) {
+        if ($this->module()) {
             /*
              | If widget belongs to HMVC modules and
              | has ":" in the view name, we will think first param
              | as module name and second param as view name
              */
-            if (string_has($this->widgetName, ':')) {
-
-                $exp = [];
-                $exp = explode(':', $this->widgetName);
-                $moduleName = $exp[0];
-                $view = $exp[1];
-                $path = CYGNITE_BASE.DS.APPPATH.DS.'modules'.DS.$moduleName.DS.'Views'.DS.$view.'.view'.EXT;
-
-                $this->widgetName= null;
-                $this->module = false;
-            }
-
-
+            $path = $this->setupModule();
         } else {
-
-            /*
-             | If widget not belongs to HMVC modules and
-             | has ":" in the view name, we will convert name as path
-             */
-            if (string_has($this->widgetName, ':')) {
-                $widget = null;
-                $widget = str_replace(':', DS, $this->widgetName);
-                $path = CYGNITE_BASE.DS.APPPATH.DS.'views'.DS.$widget.'.view'.EXT;
-            }
+            $path = $this->setupWidget();
         }
 
+        $output = (new Output($this->getWidgetName()))->buffer($path, $this->data)->clean();
+        $this->setWidget($this->getWidgetName(), $output);
 
-        $output = (new Output($this->widgetName))->buffer($path, $this->data)->clean();
-        $this->setWidget($this->widgetName, $output);
-
-        return $this->getWidget($this->widgetName);
+        return $this->getWidget($this->getWidgetName());
     }
 
     public function __toString()
     {
-        return $this->getWidget($this->widgetName);
+        return $this->getWidget($this->getWidgetName());
     }
 
     /**

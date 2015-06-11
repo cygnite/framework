@@ -85,8 +85,8 @@ class Template
 
     public function setDefaultFunctions()
     {
-        $this->setLink() // set link() function
-            ->setTwigBaseUrl(); // set baseUrl() function
+        $this->setLink() //set link() function
+             ->setTwigBaseUrl(); //set baseUrl() function
 
         foreach ($this->functions as $key => $func) {
             $this->template->addFunction($func);

@@ -32,7 +32,7 @@ class Router implements RouterInterface
 {
     use RouteController, ResourceController;
 
-    const MODULE_DIR = 'modules';
+    const MODULE_DIR = 'Modules';
     /**
      * The current attributes being shared by routes.
      */
@@ -50,7 +50,7 @@ class Router implements RouterInterface
      */
     public $patterns = array(
         '{:num}' => '([0-9]+)',
-        '{:digit}' => '(\d+)',
+        '{:id}' => '(\d+)',
         '{:name}' => '(\w+)',
         '{:any}' => '([a-zA-Z0-9\.\-_%]+)',
         '{:all}' => '(.*)',

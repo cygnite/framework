@@ -31,7 +31,7 @@ if (!defined('CF_SYSTEM')) {
 
 trait ResourceController
 {
-    protected $resourceRoutes = array('index', 'new', 'create', 'show', 'edit', 'update', 'delete');
+    protected $resourceRoutes = ['index', 'new', 'create', 'show', 'edit', 'update', 'delete'];
 
     public $router;
 

@@ -77,13 +77,12 @@ class Dispatcher
                     $this->default['controller'],
                     $this->default['action']
                 );
+
                 $response = $this->router->handleControllerDependencies($controller, $action);
             }
         } else {
-            //$this->router->findControllerByUrlSegment();
-            //Application::import(APPPATH.'.routes');
             $routes = $this->getRoutes();
-            $routes();
+            $response = $routes();
         }
 
         return $response;
@@ -92,7 +91,7 @@ class Dispatcher
     public function getRoutes()
     {
         return function () {
-            return require APPPATH.DS.'routes'.EXT;
+            return require APPPATH.DS.'Routing'.DS.'Routes'.EXT;
         };
     }
 

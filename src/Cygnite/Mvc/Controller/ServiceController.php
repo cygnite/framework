@@ -47,12 +47,11 @@ class ServiceController extends AbstractBaseController implements ServiceControl
             throw new InvalidArgumentException(sprintf('Value "%s" is not defined.', $key));
         }
 
-        $return = isset($this->service[$key]) &&
-        is_callable($this->service[$key]) ?
-            $this->service[$key]($this) :
-            $this->service[$key];
-
-        return $return;
+        return
+            isset($this->service[$key]) &&
+            is_callable($this->service[$key]) ?
+                $this->service[$key]($this) :
+                $this->service[$key];
     }
 
     /**
@@ -66,5 +65,4 @@ class ServiceController extends AbstractBaseController implements ServiceControl
     {
         $this->service[$key] = $value;
     }
-
 }

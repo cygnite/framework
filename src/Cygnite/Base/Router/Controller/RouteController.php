@@ -110,7 +110,7 @@ trait RouteController
             $params = $arguments[1];
         }
 
-        $file = CYGNITE_BASE . str_replace('\\', DS, $this->controllerWithNS) . EXT;
+        $file = CYGNITE_BASE . str_replace('\\', DS, '\\src\\'.$this->controllerWithNS) . EXT;
 
         if (!is_readable($file)) {
             throw new \Exception("Route " . $this->controllerWithNS . " not found. ");
@@ -167,7 +167,7 @@ trait RouteController
         if ($module) {
             $this->namespace = '\\' . ucfirst($this->getModuleDir()) . '\\' . $args[0] . '\\Controllers\\';
         }
-        $this->controllerWithNS = "\\" . ucfirst(APPPATH) . $this->namespace . $this->controller;
+        $this->controllerWithNS = "\\" . str_replace('src/', '', APPPATH) . $this->namespace . $this->controller;
         $this->method = Inflector::camelize($param[1]) . 'Action';
     }
 
@@ -213,7 +213,8 @@ trait RouteController
         $dir = ($dir !== '') ? $dir . '\\' : '';
 
         return
-            "\\" . ucfirst(APPPATH) . $this->namespace . $dir . Inflector::classify(
+            "\\" . str_replace('src/', '', APPPATH) . $this->namespace . $dir .
+            Inflector::classify(
                 $class
             ) . 'Controller';
     }

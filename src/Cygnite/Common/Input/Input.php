@@ -56,7 +56,7 @@ class Input
      * @param $input
      * @return bool
      */
-    public function isPost($input)
+    public function hasPost($input)
     {
         return  filter_has_var(INPUT_POST, $input) ?
             true :

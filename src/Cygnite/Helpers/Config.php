@@ -17,11 +17,18 @@ if (defined('CF_SYSTEM') == false) {
  */
 class Config extends StaticResolver
 {
+    private static $config = [];
 
-    private static $_config = [];
+    protected $configuration = [];
 
-    private $configuration = [];
+    public static $paths = [];
 
+    public $files = [
+        'global.config' => 'application',
+        'config.database' => 'database',
+        'config.session' => 'session',
+        'config.view' => 'view',
+    ];
 
     /**
      * Get the configuration.
@@ -64,8 +71,27 @@ class Config extends StaticResolver
      */
     protected function set($name, $values = [])
     {
-        self::$_config[$name] = $values;
+        self::$config[$name] = $values;
 
+    }
+
+    /**
+     * @param $paths
+     * @return $this
+     */
+    protected function setPaths($paths)
+    {
+        static::$paths = $paths;
+
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    protected function getPaths()
+    {
+        return isset(static::$paths) ? static::$paths : [];
     }
 
     /**
@@ -81,8 +107,8 @@ class Config extends StaticResolver
             );
         }
 
-        return isset(self::$_config[strtolower($key)]) ?
-            self::$_config[strtolower($key)] :
+        return isset(self::$config[strtolower($key)]) ?
+            self::$config[strtolower($key)] :
             null
             ;
 
@@ -92,32 +118,44 @@ class Config extends StaticResolver
      */
     protected function load()
     {
-        $config = [];
-
-        $this->importConfigurations('global.config', 'application');
-        $this->importConfigurations('config.database', 'database');
-        $this->importConfigurations('config.session', 'session');
-        $this->importConfigurations('config.autoload', 'autoload');
+        $this->importConfigurations();
 
         return $this->configuration;
     }
 
     /**
-     * @param        $name
-     * @param        $fileName
-     * @param string $configDir
-     * @return mixed
+     * @return array
      * @throws \Exception
      */
-    private function importConfigurations($name, $fileName, $configDir = 'configs')
+    private function importConfigurations()
     {
         $configPath = "";
-        $configPath = strtolower(APPPATH).DS.$configDir.DS;
+        $configPath = static::$paths['app.path'].static::$paths['app.config']['directory'];
+        $files = [];
+        $files = array_merge($this->files, static::$paths['app.config']['files']);
 
-        if (file_exists($configPath.$fileName.EXT)) {
-           $this->configuration[$name] = include_once $configPath.$fileName.EXT;
-        } else {
-            throw new Exception("File not exists on the path ".$configPath.$fileName.EXT);
+        if (isset(
+            $this->configuration['global.config'],
+            $this->configuration['config.database'],
+            $this->configuration['config.session']
+        )) {
+            return $this->configuration;
+        }
+
+        foreach ($files as $key => $file) {
+
+            if (file_exists($configPath.$file.EXT)) {
+                /**
+                 | We will include configuration file into array only first time
+                 |
+                 */
+                if (!isset($this->configuration[$key])){
+                    $this->configuration[$key] = include $configPath.$file.EXT;
+                }
+
+            } else {
+                throw new Exception("File not exists on the path ".$configPath.$file.EXT);
+            }
         }
     }
 }

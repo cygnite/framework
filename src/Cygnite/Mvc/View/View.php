@@ -46,7 +46,7 @@ class View
 
     protected $templateExtension = '.html.twig';
 
-    protected $viewsFilePath = 'views';
+    protected $viewsFilePath = 'Views';
 
     public $twigLoader;
 
@@ -183,9 +183,7 @@ class View
          */
         if (
             is_object($this->tpl) &&
-            is_file(
-                $path . $view . $this->templateExtension
-            )
+            is_file($path . $view . $this->templateExtension)
         ) {
             return $this->setTwigTemplateInstance($controller, $view);
         }
@@ -200,12 +198,13 @@ class View
             throw new ViewNotFoundException;('The Path ' . $path . $view . '.view' . EXT . ' is invalid.');
         }
 
-            $this->layout = Inflector::toDirectorySeparator($this->layout);
+        $this->layout = Inflector::toDirectorySeparator($this->layout);
 
-                if ($this->layout !== '') { // render view page into the layout
-                $this->renderViewLayout($viewPage, $viewPath, $params);
-                    return $this;
-                }
+        if ($this->layout !== '') { // render view page into the layout
+            $this->renderViewLayout($viewPage, $viewPath, $params);
+
+            return $this;
+        }
 
         $this->viewPath = $viewPage;
         $this->loadView();
@@ -248,7 +247,7 @@ class View
      */
     private function renderViewLayout($viewPage, $viewPath, $params)
     {
-        $layout = CYGNITE_BASE . DS . APPPATH . DS . $viewPath . DS . $this->layout . '.view' . EXT;
+        $layout = CYGNITE_BASE . DS . str_replace('src/', 'src'.DS, APPPATH) . DS . $viewPath . DS . $this->layout . '.view' . EXT;
 
         ob_start();
         // Render the view page

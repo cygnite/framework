@@ -183,7 +183,8 @@ class Application extends Container
     public function setServices()
     {
         $this['service.provider'] = function () {
-            return include APPPATH . DS . 'configs' . DS . 'services' . EXT;
+            $paths = Config::getPaths();
+            return include $paths['app.path']. $paths['app.config']['directory'] .'services' . EXT;
         };
 
         return $this;
@@ -204,7 +205,7 @@ class Application extends Container
     public function getDefinition()
     {
         $this['config.definition'] = function () {
-            $class = "\\" . ucfirst(APPPATH) . "\\Configs\\Definitions\\DefinitionManager";
+            $class = "\\" . str_replace('src/', '', APPPATH) . "\\Configs\\Definitions\\DefinitionManager";
             return new $class;
         };
 
@@ -266,18 +267,26 @@ class Application extends Container
     /**
      * Set up all required configurations
      *
-     * @param $config
+     * @internal param $config
      * @return $this
      */
     public function configure()
     {
         $this->importHelpers();
+        $this->setPaths(CYGNITE_BASE.DS.CF_BOOTSTRAP.DS.'config.paths'.EXT);
         $config = [];
-        $config =\Cygnite\Helpers\Config::load();
+        $config = \Cygnite\Helpers\Config::load();
 
         //Set up configurations for your awesome application
         Config::set('config.items', $config);
         $this->setServices();
+
+        return $this;
+    }
+
+    public function setPaths($path)
+    {
+        Config::setPaths(require $path);
 
         return $this;
     }
@@ -296,6 +305,9 @@ class Application extends Container
         return $this;
     }
 
+    /**
+     * @return array
+     */
     public function getCoreAlias()
     {
         return [

@@ -5,6 +5,11 @@ if (!defined('CF_SYSTEM')) {
     exit('External script access not allowed');
 }
 
+/**
+ * Class Output
+ *
+ * @package Cygnite\Mvc\View
+ */
 class Output
 {
     private $output = [];

@@ -25,12 +25,12 @@ if (!defined('CF_SYSTEM')) {
  * <code>
  *  $asset = AssetCollection::make(function($asset)
  *  {
- *   $asset->add('style', array('path' => 'css.cygnite.css', 'media' => '', 'title' => ''))
- *   ->add('style', array('path' => 'css.*', 'media' => '', 'title' => ''))
- *   ->add('script', array('path' => 'js.*', 'attributes' => ''))
- *   ->add('link', array('path' => '', 'name' => '', 'attributes' => []));
+ *      $asset->add('style', array('path' => 'css.cygnite.css', 'media' => '', 'title' => ''))
+ *            ->add('style', array('path' => 'css.*', 'media' => '', 'title' => ''))
+ *            ->add('script', array('path' => 'js.*', 'attributes' => ''))
+ *            ->add('link', array('path' => '', 'name' => '', 'attributes' => []));
  *
- *   return $asset;
+ *      return $asset;
  *  });
  *
  *  $asset->dump('style');
@@ -38,8 +38,8 @@ if (!defined('CF_SYSTEM')) {
  *  $asset->dump('link');
  * </code>
  */
-
-class Asset extends StaticResolver implements \ArrayAccess
+//extends StaticResolver
+class Asset implements \ArrayAccess
 {
     public static $directoryName = 'assets';
     private static $stylesheet = '<link rel="stylesheet" type="text/css"';
@@ -98,6 +98,8 @@ class Asset extends StaticResolver implements \ArrayAccess
                 call_user_func_array([$this, $type], $arguments);
                 break;
         }
+
+        //show($this->assets);
 
         return $this;
     }
@@ -370,12 +372,39 @@ class Asset extends StaticResolver implements \ArrayAccess
         unset($this->assets[$key]);
     }
 
+    public static function create()
+    {
+        return (new Static);
+    }
+
+    public static function css()
+    {
+        $args = func_get_args();
+        return call_user_func_array([new Static, 'style'], []);
+    }
+
+    public static function anchor()
+    {
+        $args = [];
+        $args = func_get_args();
+        $args[2] = array_merge($args[2], ['type' => 'static']);
+        return call_user_func_array([new Static, 'link'], $args);
+    }
+
+    public static function js()
+    {
+        $args = [];
+        $args = func_get_args();
+        $args[2] = array_merge($args[2], ['type' => 'static']);
+        return call_user_func_array([new Static, 'script'], $args);
+    }
+
     /**
      * Generate a link to a stylesheet file.
      *
      * <code>
      *   // Generate a link to a stylesheet file
-     *   Asset::style('css/cygnite.css');
+     *   Asset::css('css/cygnite.css');
      * </code>
      *
      * @internal param $href
@@ -407,19 +436,12 @@ class Asset extends StaticResolver implements \ArrayAccess
             return $this->assets[$this->tag[$this->where]][strtolower(__FUNCTION__)];
         }
 
-        list(, $caller) = debug_backtrace(false);
-
         $styleTag = '';
         $styleTag = static::$stylesheet . ' ' . $media . '
                    ' . $title . ' href="' . $this->getBaseUrl() . $href . '" >' . PHP_EOL;
 
-        /*
-         | If method called statically we will simply return
-         | string
-         */
-        if ($this->isFacade($caller)) {
-
-            return $this->stripCarriage($styleTag);
+        if (isset($media) && $media == 'static') {
+            return $styleTag;
         }
 
         $this->assets[$this->tag[$this->where]][strtolower(__FUNCTION__)][] = (string)$styleTag;
@@ -529,18 +551,6 @@ class Asset extends StaticResolver implements \ArrayAccess
     }
 
     /**
-     * Check if user is calling functions statically then
-     * We will access methods using StaticResolver
-     *
-     * @param $caller
-     * @return bool
-     */
-    private function isFacade($caller)
-    {
-        return (strpos($caller['file'], 'StaticResolver') !== false) ? true : false;
-    }
-
-    /**
      * @param $string
      * @return string
      */
@@ -554,10 +564,10 @@ class Asset extends StaticResolver implements \ArrayAccess
      *
      * <code>
      *  // Generate a link to a JavaScript file
-     *    echo Asset::script('js/jquery.js');
+     *    echo Asset::js('js/jquery.js');
      *
      * // Generate a link to a JavaScript file and add some attributes
-     *   echo Asset::script('js/jquery.js', array('required'));
+     *   echo $asset->script('js/jquery.js', array('required'));
      * </code>
      *
      * @false  string  $url
@@ -578,8 +588,6 @@ class Asset extends StaticResolver implements \ArrayAccess
             return $this->assets[$this->tag[$this->where]][strtolower(__FUNCTION__)];
         }
 
-        list(, $caller) = debug_backtrace(false);
-
         $scriptTag = '';
         $scriptTag = static::$script . '
                 src="' . $this->getBaseUrl() . $url . '"' . $this->addAttributes($attributes) . '></script>' . PHP_EOL;
@@ -588,8 +596,7 @@ class Asset extends StaticResolver implements \ArrayAccess
         | If method called statically we will simply return
         | as string
         */
-        if ($this->isFacade($caller)) {
-
+        if (isset($attributes['type']) && $attributes['type'] == 'static') {
             return $this->stripCarriage($scriptTag);
         }
 
@@ -613,9 +620,6 @@ class Asset extends StaticResolver implements \ArrayAccess
     {
         $name = (is_null($name)) ? $url : $name;
         $this->setLocation($url, strtolower(__FUNCTION__));
-
-        list(, $caller) = debug_backtrace(false);
-
         $lingTag = '';
         $lingTag = '<a href="' . $this->getBaseUrl() . Html::entities($url) . '"
          ' . $this->addAttributes($attributes) . '>' . Html::entities($name) . '</a>' . PHP_EOL;
@@ -624,8 +628,7 @@ class Asset extends StaticResolver implements \ArrayAccess
         | If method called statically we will simply return
         | as string
         */
-        if ($this->isFacade($caller)) {
-
+        if (isset($attributes['type']) && $attributes['type'] == 'static') {
             return $this->stripCarriage($lingTag);
         }
 
