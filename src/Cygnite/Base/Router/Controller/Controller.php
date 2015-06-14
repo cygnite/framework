@@ -9,6 +9,7 @@
  */
 namespace Cygnite\Base\Router\Controller;
 
+use Cygnite\Helpers\Inflector;
 use Cygnite\Base\Router\Router;
 use Cygnite\Foundation\Application as App;
 
@@ -34,14 +35,19 @@ class Controller implements RouteControllerInterface
      */
     public function routeController($controller)
     {
-        foreach ($this->controllerRoutes as $key => $action) {
-            if (method_exists($this, 'set'.ucfirst($action).'Route')) {
-                $this->{'set'.ucfirst($action).'Route'}(lcfirst($controller), $action);
+        $actions = $this->getActions();
+
+        foreach ($actions as $key => $action) {
+
+            $method = ucfirst(Inflector::pathAction($action));
+
+            if (method_exists($this, 'set'.$method.'Route')) {
+                $this->{'set'.$method.'Route'}(lcfirst($controller), $action);
             }
         }
+
         return $this;
     }
-
 
     /**
      * @param $actions
@@ -49,7 +55,7 @@ class Controller implements RouteControllerInterface
      */
     public function setActions($actions)
     {
-        array_merge($this->controllerRoutes, $actions);
+        $this->controllerRoutes = array_merge($this->controllerRoutes, $actions);
     }
 
     /**
@@ -67,7 +73,7 @@ class Controller implements RouteControllerInterface
      */
     protected function setIndexRoute($controller, $action)
     {
-        return $this->mapRoutes(ucfirst($controller).'.'.$action, "/$controller/");
+        return $this->mapRoute("/$controller/", Inflector::classify($controller).'.'.$action);
     }
 
     /**
@@ -77,7 +83,7 @@ class Controller implements RouteControllerInterface
      */
     protected function setAddRoute($controller, $action)
     {
-        return $this->mapRoutes(ucfirst($controller).'.'.$action, "/$controller/$action/");
+        return $this->mapRoute("/$controller/$action/", Inflector::classify($controller).'.'.$action);
     }
 
     /**
@@ -87,7 +93,7 @@ class Controller implements RouteControllerInterface
      */
     protected function setEditRoute($controller, $action)
     {
-        return $this->mapRoutes(ucfirst($controller).'.'.$action, "/$controller/$action/{:id}");
+        return $this->mapRoute("/$controller/$action/{:id}", Inflector::classify($controller).'.'.$action);
     }
 
     /**
@@ -97,7 +103,7 @@ class Controller implements RouteControllerInterface
      */
     protected function setShowRoute($controller, $action)
     {
-        return $this->mapRoutes(ucfirst($controller).'.'.$action, "/$controller/$action/{:id}");
+        return $this->mapRoute("/$controller/$action/{:id}", Inflector::classify($controller).'.'.$action);
     }
 
     /**
@@ -107,15 +113,31 @@ class Controller implements RouteControllerInterface
      */
     protected function setDeleteRoute($controller, $action)
     {
-        return $this->mapRoutes(ucfirst($controller).'.'.$action, "/$controller/$action/{:id}");
+        return $this->mapRoute("/$controller/$action/{:id}", Inflector::classify($controller).'.'.$action);
+    }
+
+    /**
+     * @param $pattern
+     * @param $func
+     * @return mixed
+     * @throws \Exception
+     */
+    protected function mapRoute($pattern, $func)
+    {
+        if (!is_string($func)) {
+            throw new \Exception("$func must be string!");
+        }
+
+        return $this->mapStaticRoutes($pattern, $func);
     }
 
     /**
      * @param $func
      * @param $pattern
+     * @throws \Exception
      * @return mixed
      */
-    protected function mapRoutes($func, $pattern)
+    protected function mapStaticRoutes($pattern, $func)
     {
         $app = null;
         $app = App::instance();

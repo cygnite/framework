@@ -82,7 +82,11 @@ class Dispatcher
             }
         } else {
             $routes = $this->getRoutes();
-            $response = $routes();
+            try {
+                $response = $routes();
+            } catch (\Exception $e) {
+                throw $e;
+            }
         }
 
         return $response;
@@ -91,8 +95,8 @@ class Dispatcher
     public function getRoutes()
     {
         return function () {
-            return require APPPATH.DS.'Routing'.DS.'Routes'.EXT;
+            require APPPATH.DS.'Routing'.DS.'Routes'.EXT;
         };
     }
 
-}//End of the class
+}

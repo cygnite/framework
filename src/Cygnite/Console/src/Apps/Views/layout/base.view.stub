@@ -6,24 +6,24 @@ $asset = AssetCollection::make(function ($asset)
 {
     // Set of resources tagged to header
     $asset->where('header')
-        ->add('style', array('path' => 'assets/css/bootstrap/css/bootstrap.min.css'))
-        ->add('style', array('path' => 'assets/css/bootstrap/css/bootstrap-theme.min.css'))
-        ->add('style', array('path' => 'assets/css/cygnite/bootstrap/datatables-bootstrap.css'));
+        ->add('style', array('path' => 'public/assets/css/bootstrap/css/bootstrap.min.css'))
+        ->add('style', array('path' => 'public/assets/css/bootstrap/css/bootstrap-theme.min.css'))
+        ->add('style', array('path' => 'public/assets/css/cygnite/bootstrap/datatables-bootstrap.css'));
 
     // Set of resources tagged to footer
     $asset->where('footer')
-        ->add('style', array('path' => 'assets/css/cygnite/flash.css'))
-        ->add('style', array('path' => 'assets/css/cygnite/wysihtml5/prettify.css'))
-        ->add('style', array('path' => 'assets/css/cygnite/wysihtml5/bootstrap-wysihtml5.css'));
+        ->add('style', array('path' => 'public/assets/css/cygnite/flash.css'))
+        ->add('style', array('path' => 'public/assets/css/cygnite/wysihtml5/prettify.css'))
+        ->add('style', array('path' => 'public/assets/css/cygnite/wysihtml5/bootstrap-wysihtml5.css'));
 
     // Set of resources tagged to footer
     $asset->where('footer')
-        ->add('script', array('path' => 'assets/js/cygnite/jquery/1.10.1/jquery.min.js'))
-        ->add('script', array('path' => 'assets/js/twitter/bootstrap/js/bootstrap.min.js'))
-        ->add('script', array('path' => 'assets/js/dataTables/jquery.dataTables.min.js'))
-        ->add('script', array('path' => 'assets/js/dataTables/datatables-bootstrap.js'))
-        ->add('script', array('path' => 'assets/js/dataTables/datatables.fnReloadAjax.js'))
-        ->add('script', array('path' => 'assets/js/dataTables/prettify.js'));
+        ->add('script', array('path' => 'public/assets/js/cygnite/jquery/1.10.1/jquery.min.js'))
+        ->add('script', array('path' => 'public/assets/js/twitter/bootstrap/js/bootstrap.min.js'))
+        ->add('script', array('path' => 'public/assets/js/dataTables/jquery.dataTables.min.js'))
+        ->add('script', array('path' => 'public/assets/js/dataTables/datatables-bootstrap.js'))
+        ->add('script', array('path' => 'public/assets/js/dataTables/datatables.fnReloadAjax.js'))
+        ->add('script', array('path' => 'public/assets/js/dataTables/prettify.js'));
 
     return $asset;
 });
@@ -45,10 +45,9 @@ $asset = AssetCollection::make(function ($asset)
         <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 
         <?php $asset->where('header')->dump('style');// Header Style block ?>
-        <style>
-            body {
-                padding: 60px 0;
-            }
+        <style type="text/css">
+                body {padding: 60px 0;}
+                .navbar-inverse {background: none repeat scroll 0 0 #07508f!important;}
         </style>
         <!-- HTML5 shim, for IE6-8 support of HTML5 elements -->
         <!--[if lt IE 9]>
@@ -82,14 +81,9 @@ $asset->where('footer')->dump('script');
 ?>
 
 <script type="text/javascript">
-$(function () {
-    $('#dataGrid').DataTable();
-});
+    $(function () {
+        $('#dataGrid').DataTable();
+    });
 </script>
-
-<style type="text/css">
-.navbar-inverse {background: none repeat scroll 0 0 #07508f!important;}
-</style>
-
 </body>
 </html>

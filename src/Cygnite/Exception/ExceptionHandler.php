@@ -160,7 +160,7 @@ class ExceptionHandler implements ExceptionInterface
         $this->setCollapsePaths();
 
         //Add new panel to debug bar
-        $this->addPanel(
+       $this->addPanel(
             function($e) use($handler) {
 
                 if (!is_null($path = $handler->assetsPath())) {
@@ -172,6 +172,7 @@ class ExceptionHandler implements ExceptionInterface
                     if ($handler->isLoggerEnabled()) {
                         $handler->log($e);
                     }
+
                     return [
                         'tab' => $handler->name,
                         'panel' => '<h1>
@@ -199,7 +200,6 @@ class ExceptionHandler implements ExceptionInterface
 
             }
         );
-
     }
 
     public function getBlueScreenInstance()
@@ -209,7 +209,6 @@ class ExceptionHandler implements ExceptionInterface
 
     public function addPanel($callback)
     {
-
         $this->getTracyDebugger()->{__FUNCTION__}($callback);
 
         return $this;
@@ -238,14 +237,26 @@ class ExceptionHandler implements ExceptionInterface
      */
     public function includeAssets($path)
     {
-        $vendor = CYGNITE_BASE.DS.'vendor';
-        $stylePath = $vendor."/tracy/tracy/src/Tracy/templates/bluescreen.css";
-
-        if (!file_exists($stylePath)) {
-            throw new Exception("Tracy debugger not found inside vendor directory");
-        }
+        //$this->overwriteBlueScreenStyle($path);
 
         return file_get_contents($path.self::$style.'.css');
+    }
+
+    private function overwriteBlueScreenStyle($path)
+    {
+        $vendor = CYGNITE_BASE.DS.'vendor';
+        $stylePath = Config::get('global.config', 'bluescreen.style');
+        $screenPath = $vendor.DS.str_replace('.', DS, $stylePath).DS."bluescreen.css";
+
+        if (!file_exists($screenPath)) {
+            throw new Exception("Tracy debugger bluescreen.css not found inside vendor directory");
+        }
+        $blueScreen = file_get_contents($screenPath);
+        $pretty = file_get_contents($path.self::$style.'.css');
+        $blueScreen = (string) $blueScreen."\n".$pretty;
+        if (!string_has($blueScreen, '@Author:Cygnite')) {
+            file_put_contents($blueScreen);
+        }
     }
 
     public function assetsPath()
@@ -268,7 +279,7 @@ class ExceptionHandler implements ExceptionInterface
      * Event will Trigger this method on runtime when any exception
      * occurs
      */
-    public function handleException($app)
+    public function handleException()
     {
         /*
         | Exception handler registered here. So it will handle all
@@ -279,9 +290,7 @@ class ExceptionHandler implements ExceptionInterface
         |-----------------------------------
         */
         $config = Config::get('global.config');
-
-        $app['debugger']
-            ->enable($config['enable_logging'], $config['log_path'])
+        $this->enable($config['enable_logging'], $config['log_path'])
             ->setTitle()
             ->setDebugger(Debugger::getBlueScreen())
             ->setEmailAddress(
@@ -304,12 +313,32 @@ class ExceptionHandler implements ExceptionInterface
      * @param $e
      * @return mixed
      */
-    private function importCustomErrorPage($e)
+    public function importCustomErrorPage($e = null)
     {
-        if (file_exists(APPPATH.'/views/errors/'.$e->getStatusCode().'.view'.EXT)) {
-            $error = ['error.code' => $e->getMessage(), 'error.message' => $e->getMessage()];
+        $path = CYGNITE_BASE.DS.str_replace('/', DS, APPPATH.'/Views/errors/');
+        if ($e == null) {
+            Debugger::$errorTemplate = include $path.'500.view'.EXT;
+        }
+
+        $statusCode = 500;
+        if (method_exists($e, 'getStatusCode')) {
+            $statusCode = $e->getStatusCode();
+        } else {
+            if (method_exists($e, 'getCode')) {
+                $statusCode = $e->getCode();
+            }
+        }
+
+        if ($statusCode == 0) {
+            $statusCode = 500;
+        }
+
+        if (file_exists($path.$statusCode.'.view'.EXT)) {
+            $error = ['error.code' => $e->getStatusCode(), 'message' => $e->getMessage()];
             extract($error);
-            return include APPPATH.'/views/errors/'.$e->getStatusCode().'.view'.EXT;
+            Debugger::$errorTemplate = include $path.$statusCode.'.view'.EXT;
+        } else {
+            throw new \Exception("Error view file not exists ".$path.$e->getStatusCode().'.view'.EXT);
         }
     }
 
@@ -319,6 +348,6 @@ class ExceptionHandler implements ExceptionInterface
      */
     public function renderErrorPage($e)
     {
-        return $this->importCustomErrorPage($e);
+        $this->importCustomErrorPage($e);
     }
 }

@@ -11,6 +11,8 @@ use Cygnite\Common\UrlManager\Url;
  * </code>
  */
 define('ENV', Config::get('global.config', 'environment'));
+define('APP', str_replace('src/', 'src'.DS, APPPATH));
+
 
 if (ENV == 'development') {
     ini_set('display_errors', -1);

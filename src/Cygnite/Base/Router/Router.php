@@ -15,8 +15,9 @@ use ErrorException;
 use Cygnite\Helpers\Inflector;
 use Cygnite\Helpers\Helper;
 use Cygnite\Foundation\Application as App;
-use Cygnite\Base\Router\Controller\RouteController;
-use Cygnite\Base\Router\Controller\ResourceController;
+use Cygnite\Base\Router\Controller\Controller;
+use Cygnite\Base\Router\Controller\RouteControllerTrait;
+use Cygnite\Base\Router\Controller\ResourceControllerTrait;
 
 /*
  * Cygnite Router
@@ -30,7 +31,7 @@ if (!defined('CF_SYSTEM')) {
 
 class Router implements RouterInterface
 {
-    use RouteController, ResourceController;
+    use RouteControllerTrait, ResourceControllerTrait;
 
     const MODULE_DIR = 'Modules';
     /**
@@ -356,6 +357,17 @@ class Router implements RouterInterface
     }
 
     /**
+     * @param $controllerName
+     * @return mixed
+     */
+    public function routeController($controllerName)
+    {
+        $app = App::instance();
+        return (new Controller)->{__FUNCTION__}($controllerName);
+    }
+
+
+    /**
      * @return unknown
      */
     public function urlRoutes()
@@ -447,6 +459,7 @@ class Router implements RouterInterface
 
                 // call the handling function with the URL
                 $this->handledRoute = call_user_func_array($route['fn'], $params);
+
                 $handledRequest++;
 
                 // If we need to quit, then quit
@@ -563,7 +576,7 @@ class Router implements RouterInterface
      * @param object $func The function to be executed
      * @return mixed|void
      */
-    public function set404($func)
+    public function set404Page($func)
     {
         $this->notFound = $func;
     }

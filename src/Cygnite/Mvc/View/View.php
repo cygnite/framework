@@ -195,7 +195,7 @@ class View
         if (!file_exists($viewPage) &&
             !is_readable($viewPage)
         ) {
-            throw new ViewNotFoundException;('The Path ' . $path . $view . '.view' . EXT . ' is invalid.');
+            throw new ViewNotFoundException("Requested view doesn't exists in path $viewPage");
         }
 
         $this->layout = Inflector::toDirectorySeparator($this->layout);
@@ -223,7 +223,7 @@ class View
             str_replace('.', DS, $this->viewsFilePath) :
             $this->viewsFilePath;
 
-        return array($viewPath, CYGNITE_BASE . DS . APPPATH . DS . $viewPath . DS . $controller . DS);
+        return array($viewPath, CYGNITE_BASE . DS . APP . DS . $viewPath . DS . $controller . DS);
     }
 
     /**
@@ -244,10 +244,11 @@ class View
      * @param $viewPage
      * @param $viewPath
      * @param $params
+     * @throws Exceptions\ViewNotFoundException
      */
     private function renderViewLayout($viewPage, $viewPath, $params)
     {
-        $layout = CYGNITE_BASE . DS . str_replace('src/', 'src'.DS, APPPATH) . DS . $viewPath . DS . $this->layout . '.view' . EXT;
+        $layout = CYGNITE_BASE . DS . APP . DS . $viewPath . DS . $this->layout . '.view' . EXT;
 
         ob_start();
         // Render the view page
@@ -258,9 +259,12 @@ class View
         $data['yield'] = ob_get_contents();
         ob_get_clean();
 
-        // Render the layout page
+        if (!is_readable($layout)) {
+            throw new ViewNotFoundException("The layout not exists in path $layout");
+        }
         extract($data);
         include $layout;
+
         $output = ob_get_contents();
         ob_get_clean();
 

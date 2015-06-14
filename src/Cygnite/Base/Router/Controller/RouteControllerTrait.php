@@ -28,7 +28,7 @@ if (!defined('CF_SYSTEM')) {
  * @author Sanjoy Dey <dey.sanjoy0@gmail.com>
  */
 
-trait RouteController
+trait RouteControllerTrait
 {
     private $controllerWithNS;
     public $method;

@@ -90,7 +90,7 @@ if ( ! function_exists('app')) {
     */
     function app($callback = null)
     {
-        return Application::instance($callback);
+        return App::instance($callback);
     }
 }
 
@@ -141,7 +141,7 @@ if (!function_exists('trans')) {
     /**
      *    trans('Hello, :user', array(':user' => $username));
      *
-     * The target language is defined by [Translator::$lang].
+     * The target language is defined by [Translator::$locale].
      *
      * @uses    Translator::get()
      * @param   string $string text to translate

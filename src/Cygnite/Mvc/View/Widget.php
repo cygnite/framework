@@ -121,7 +121,7 @@ class Widget implements \ArrayAccess
             $modulePath = $this->moduleDir.DS.$moduleName.DS.'Views';
         }
 
-        return CYGNITE_BASE.DS.str_replace('src/', 'src'.DS, APPPATH).DS.$modulePath.DS.$widget.'.view'.EXT;
+        return CYGNITE_BASE.DS.APP.DS.$modulePath.DS.$widget.'.view'.EXT;
     }
 
     /**

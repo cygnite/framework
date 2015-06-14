@@ -33,7 +33,7 @@ class %ControllerName%Controller extends AbstractBaseController
     */
 
     // Plain layout
-    protected $layout = 'layout.base';
+    protected $layout = 'layouts.base';
 
     /**
     * Your constructor.

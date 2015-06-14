@@ -12,7 +12,6 @@ namespace Cygnite\Foundation;
 
 use Closure;
 use Exception;
-use Cygnite\Strapper;
 use Cygnite\Base\Router\Router;
 use Cygnite\Helpers\Config;
 use Cygnite\Helpers\Inflector;
@@ -22,6 +21,8 @@ use Cygnite\Translation\Translator;
 use Cygnite\DependencyInjection\Container;
 use Cygnite\Exception\Handler as ExceptionHandler;
 
+use Tracy\Helpers;
+
 if (!defined('CF_SYSTEM')) {
     exit('External script access not allowed');
 }
@@ -30,7 +31,7 @@ class Application extends Container
 {
     protected static $loader;
     private static $instance;
-    private static $version = 'v1.3.2';
+    private static $version = 'v2.0';
     public $aliases = [];
     public $namespace = '\\Controllers\\';
 
@@ -284,6 +285,10 @@ class Application extends Container
         return $this;
     }
 
+    /**
+     * @param $path
+     * @return $this
+     */
     public function setPaths($path)
     {
         Config::setPaths(require $path);
@@ -299,10 +304,64 @@ class Application extends Container
     public function bootApplication()
     {
         $this->registerCoreAlias();
+        $this->beforeBootingApplication();
+
         $this->setEnvironment();
+        $this['debugger']->handleException();
         $this['service.provider']();
 
+        $this->afterBootingApplication();
+
         return $this;
+    }
+
+
+    /**
+     * Attach all application events to event handler.
+     *
+     */
+    public function attachEvents()
+    {
+        if (!empty($this['event']->getAppEvents())) {
+            $events = [];
+            $events = $this['event']->getAppEvents();
+
+            foreach ($events as $event => $namespace) {
+                // attach all before and after event to handler
+                $this['event']->attach("$event", $namespace);
+            }
+        }
+    }
+
+    /**
+     * We will trigger after booting application event if it is
+     * activated in Event Middleware
+     *
+     * @return bool
+     */
+    public function beforeBootingApplication()
+    {
+        if ($this['event']->getAppEvents() == false) {
+            return true;
+        }
+
+        $this->attachEvents();
+        return $this['event']->trigger(__FUNCTION__, $this);
+    }
+
+    /**
+     * We will trigger after booting application event if it is
+     * activated in Event Middleware
+     *
+     * @return bool
+     */
+    public function afterBootingApplication()
+    {
+        if ($this['event']->getAppEvents() == false) {
+            return true;
+        }
+
+        return $this['event']->trigger(__FUNCTION__, $this);
     }
 
     /**
@@ -336,6 +395,9 @@ class Application extends Container
         return $this;
     }
 
+    /**
+     * @return mixed
+     */
     private function setEnvironment()
     {
         $app = $this;
@@ -351,18 +413,13 @@ class Application extends Container
             return $this->handle();
 
         } catch (\Exception $e) {
-
-            $this['debugger']->handleException($this);
-
             if (ENV == 'development') {
                 throw $e;
             }
 
-            if ($this['debugger']->isLoggerEnabled() == true) {
-                $this['debugger']->log($e);
+            if (ENV == 'production') {
+                $this['debugger']->renderErrorPage($e);
             }
-
-            $this['debugger']->renderErrorPage($e);
         }
     }
 

@@ -56,7 +56,7 @@ class Inflector extends StaticResolver
      * @param $s
      * @return string
      */
-    private static function actionPath($s)
+    protected static function actionPath($s)
     {
         $s = preg_replace('#(.)(?=[A-Z])#', '$1-', $s);
         $s = strtolower($s);
@@ -67,6 +67,7 @@ class Inflector extends StaticResolver
 
     /**
      * dash-separated -> camelCaseAction name.
+     * dash_separated -> camelCaseAction name.
      *
      * @false  string
      * @param $s
@@ -76,6 +77,7 @@ class Inflector extends StaticResolver
     {
         $s = strtolower($s);
         $s = preg_replace('#-(?=[a-z])#', ' ', $s);
+        $s = preg_replace('#_(?=[a-z])#', ' ', $s);
         $s = substr(ucwords('x' . $s), 1);
         $s = str_replace(' ', '', $s);
         return $s;

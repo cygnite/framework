@@ -29,7 +29,7 @@ if (!defined('CF_SYSTEM')) {
     exit('No External script access allowed');
 }
 
-trait ResourceController
+trait ResourceControllerTrait
 {
     protected $resourceRoutes = ['index', 'new', 'create', 'show', 'edit', 'update', 'delete'];
 
