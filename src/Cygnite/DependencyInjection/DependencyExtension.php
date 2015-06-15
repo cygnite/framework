@@ -155,6 +155,7 @@ abstract class DependencyExtension extends SplObjectStorage
                 } else {
 
                     $prop = $reflectionClass->getProperty($classProperty);
+
                     /*
                      | Check if property defined as static.
                      | we will throw exception is property defined as static
