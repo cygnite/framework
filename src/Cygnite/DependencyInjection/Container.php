@@ -1,14 +1,21 @@
 <?php
+/**
+ * This file is part of the Cygnite package.
+ *
+ * (c) Sanjoy Dey <dey.sanjoy0@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 namespace Cygnite\DependencyInjection;
 
-use ArrayAccess;
 use Closure;
-use Cygnite\Foundation\Application;
-use Cygnite\Helpers\Inflector;
-use Cygnite\Reflection;
-use Exception;
-use InvalidArgumentException;
+use ArrayAccess;
 use ReflectionClass;
+use Cygnite\Reflection;
+use Cygnite\Helpers\Inflector;
+use Cygnite\DependencyInjection\Exceptions\ContainerException;
+
 
 /**
  * Class Container
@@ -17,8 +24,9 @@ use ReflectionClass;
  * @author  Sanjoy Dey
  */
 
-class Container extends DependencyExtension implements ContainerInterface, ArrayAccess
+class Container extends DependencyExtension implements ContainerAwareInterface, ArrayAccess
 {
+    use DependencyInjectorTrait;
     /**
      * The container's bind data
      *
@@ -27,14 +35,11 @@ class Container extends DependencyExtension implements ContainerInterface, Array
      */
     private $stack = [];
 
-    private $services;
-
-
     /**
      * Get a data by key
      *
      * @param $key
-     * @throws InvalidArgumentException
+     * @throws \InvalidArgumentException
      * @return
      * @internal param \Cygnite\Container\The $string key data to retrieve
      * @access   public
@@ -42,7 +47,7 @@ class Container extends DependencyExtension implements ContainerInterface, Array
     public function &__get($key)
     {
         if (!isset($this->stack[$key])) {
-            throw new InvalidArgumentException(sprintf('Value "%s" is not defined.', $key));
+            throw new \InvalidArgumentException(sprintf('Value "%s" is not defined.', $key));
         }
 
         $set = isset($this->stack[$key]);
@@ -197,14 +202,20 @@ class Container extends DependencyExtension implements ContainerInterface, Array
         return $this->offsetExists($offset) ? $this->stack[$offset] : null;
     }
 
+    /**
+     * @param          $key
+     * @param callable $callable
+     * @return callable
+     * @throws \InvalidArgumentException
+     */
     public function extend($key, Closure $callable)
     {
         if (!isset($this->stack[$key])) {
-            throw new InvalidArgumentException(sprintf('Identifier "%s" is not defined.', $key));
+            throw new \InvalidArgumentException(sprintf('Identifier "%s" is not defined.', $key));
         }
 
         if (!$callable instanceof Closure) {
-            throw new InvalidArgumentException(
+            throw new \InvalidArgumentException(
                 sprintf('Identifier "%s" is not Closure Object.', $callable)
             );
         }
@@ -214,7 +225,7 @@ class Container extends DependencyExtension implements ContainerInterface, Array
         $extended = function ($container) use ($callable, $binding) {
 
             if (!is_object($binding)) {
-                throw new DependencyException(sprintf('"%s" must be Closure object.', $binding));
+                throw new ContainerException(sprintf('"%s" must be Closure object.', $binding));
             }
 
             return $callable($binding($container), $container);
@@ -268,8 +279,10 @@ class Container extends DependencyExtension implements ContainerInterface, Array
             return $this->stack[$key] = $instance[$key];
         }
 
-        //| If callback is not instance of closure then we will simply
-        //| create a singleton instance and return it
+        /*
+         | If callback is not instance of closure then we will simply
+         | create a singleton instance and return it
+         */
         if (!isset($instance[$key])) {
             $instance[$key] = new $callback();
         }
@@ -295,16 +308,18 @@ class Container extends DependencyExtension implements ContainerInterface, Array
      * your class
      *
      * @param $class string
-     * @throws \Exception
+     * @throws Exceptions\ContainerException
      * @return object
      */
     public function make($class)
     {
+        $reflectionClass = $reflection = null;
         $reflection = new Reflection();
         $reflection->setClass($class);
+        $reflectionClass = $reflection->getReflectionClass();
 
-        if (false === $reflection->reflectionClass->isInstantiable()) {
-            throw new DependencyException(
+        if (false === $reflectionClass->isInstantiable()) {
+            throw new ContainerException(
                 "Cannot instantiate " .
                 ($reflection->reflectionClass->isInterface() ? 'interface' : 'class') . " '$class'"
             );
@@ -312,9 +327,9 @@ class Container extends DependencyExtension implements ContainerInterface, Array
 
         $constructor = null;
         $constructorArgsCount = '';
-        if ($reflection->reflectionClass->hasMethod('__construct')) {
+        if ($reflectionClass->hasMethod('__construct')) {
 
-            $constructor = $reflection->reflectionClass->getConstructor();
+            $constructor = $reflectionClass->getConstructor();
             $constructorArgsCount = $constructor->getNumberOfParameters();
             $constructor->setAccessible(true);
         }
@@ -322,7 +337,9 @@ class Container extends DependencyExtension implements ContainerInterface, Array
         // if class does not have explicitly defined constructor or constructor does not have parameters
         // get the new instance
         if (!isset($constructor) && is_null($constructor) || $constructorArgsCount < 1) {
-            $this->stack[$class] = $reflection->reflectionClass->newInstance();
+
+            $this->stack[$class] = $reflectionClass->newInstance();
+
         } else {
             $dependencies = $constructor->getParameters();
 
@@ -331,9 +348,7 @@ class Container extends DependencyExtension implements ContainerInterface, Array
 
                 if (!is_null($dependency->getClass())) {
 
-                    //Get constructor class name
-                    $resolveClass = $dependency->getClass()->name;
-                    $reflectionParam = new ReflectionClass($resolveClass);
+                    list($resolveClass, $reflectionParam) = $this->getReflectionParam($dependency);
 
                     // Application and Container cannot be injected into controller currently
                     // since Application constructor is protected
@@ -342,33 +357,18 @@ class Container extends DependencyExtension implements ContainerInterface, Array
                         $constructorArgs[] = $this->makeInstance($resolveClass);
                     }
 
-                    /*
-                     | Check if constructor dependency is Interface or not.
-                     | if interface we will check definition for the interface
-                     | and inject into controller constructor
-                     */
-                    if (!$reflectionParam->IsInstantiable() && $reflectionParam->isInterface()) {
+                    $constructorArgs[] = $this->interfaceInjection($reflectionParam);
 
-                        $definition = $this->getDefinition();
-                        $aliases = $definition()->registerAlias();
-
-                        $interface = Inflector::getClassName($reflectionParam->getName());
-                        if (array_key_exists($interface, $aliases)) {
-                            $constructorArgs[] = $this->makeInstance($aliases[$interface]);
-                        }
-                    }
                 } else {
                     /*
                      | Check parameters are optional or not
                      | if it is optional we will set the default value
                      */
-                    if ($dependency->isOptional()) {
-                        $constructorArgs[] = $dependency->getDefaultValue();
-                    }
+                     $constructorArgs[] = $this->isOptionalArgs($dependency);
                 }
             }
 
-            $this->stack[$class] = $reflection->reflectionClass->newInstanceArgs($constructorArgs);
+            $this->stack[$class] = $reflectionClass->newInstanceArgs($constructorArgs);
         }
 
         return $this->stack[$class];
@@ -377,13 +377,14 @@ class Container extends DependencyExtension implements ContainerInterface, Array
     /**
      * @param $resolvedClass
      * @return mixed
-     * @throws DependencyException
+     * @throws Exceptions\ContainerException
      */
     protected function makeInstance($resolvedClass)
     {
         if (!class_exists($resolvedClass)) {
-            throw new DependencyException(sprintf('Class "%s" not exists.', $resolvedClass));
+            throw new ContainerException(sprintf('Class "%s" not exists.', $resolvedClass));
         }
+
         return $this->stack[$resolvedClass] = new $resolvedClass;
     }
 

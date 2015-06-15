@@ -137,7 +137,7 @@ class Application extends Container
     public static function service(Closure $callback)
     {
         if (!$callback instanceof Closure) {
-            throw new Exception("Application::service() accept only valid closure callback");
+            throw new \Exception("Application::service() accept only valid closure callback");
         }
 
         return $callback(static::$instance);
@@ -198,19 +198,6 @@ class Application extends Container
     public function registerDirectories($directories)
     {
         return self::$loader->registerDirectories($directories);
-    }
-
-    /**
-     * @return callable
-     */
-    public function getDefinition()
-    {
-        $this['config.definition'] = function () {
-            $class = "\\" . str_replace('src/', '', APPPATH) . "\\Configs\\Definitions\\DefinitionManager";
-            return new $class;
-        };
-
-        return $this['config.definition'];
     }
 
     /**
@@ -346,6 +333,7 @@ class Application extends Container
         }
 
         $this->attachEvents();
+
         return $this['event']->trigger(__FUNCTION__, $this);
     }
 
@@ -376,8 +364,13 @@ class Application extends Container
         ];
     }
 
-
-    private function compose($class)
+    /**
+     * Create an instance of the class and return it
+     *
+     * @param $class
+     * @return mixed
+     */
+    public function compose($class)
     {
         return $this->makeInstance($class);
     }
@@ -405,7 +398,8 @@ class Application extends Container
     }
 
     /**
-     * @return Dispatcher
+     * @return mixed
+     * @throws \Exception
      */
     public function run()
     {

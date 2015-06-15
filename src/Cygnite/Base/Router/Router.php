@@ -362,7 +362,6 @@ class Router implements RouterInterface
      */
     public function routeController($controllerName)
     {
-        $app = App::instance();
         return (new Controller)->{__FUNCTION__}($controllerName);
     }
 

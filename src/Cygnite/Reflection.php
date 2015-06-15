@@ -41,8 +41,8 @@ class Reflection
 
         $reflector = new ReflectionClass('\\'.$class);
 
-            return new $reflector->name;
-        }
+        return new $reflector->name;
+    }
 
     /**
      * Set your class to reflection api
@@ -50,7 +50,6 @@ class Reflection
      * @access public
      * @param  $class
      * @return $this
-     *
      */
     public function setClass($class)
     {
@@ -64,6 +63,14 @@ class Reflection
     }
 
     /**
+     * @return null
+     */
+    public function getReflectionClass()
+    {
+        return (isset($this->reflectionClass) ? $this->reflectionClass : null);
+    }
+
+    /**
      * Make your protected or private property accessible
      *
      * @access public
@@ -73,9 +80,26 @@ class Reflection
      */
     public function makePropertyAccessible($property)
     {
-        $this->reflectionProperty = $this->reflectionClass->getProperty($property);
-        $this->reflectionProperty->setAccessible(true);
+        $reflectionProperty = $this->getReflectionClass()->getProperty($property);
+        $this->setReflectionProperty($reflectionProperty);
+        $reflectionProperty->setAccessible(true);
 
-        return $this->reflectionProperty->getValue($this->reflectionClass);
+        return $reflectionProperty->getValue($this->getReflectionClass());
+    }
+
+    /**
+     * @param $property
+     */
+    public function setReflectionProperty($property)
+    {
+        $this->reflectionProperty = $property;
+    }
+
+    /**
+     * @return null
+     */
+    public function getReflectionProperty()
+    {
+        return (isset($this->reflectionProperty) ? $this->reflectionProperty : null);
     }
 }
