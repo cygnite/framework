@@ -86,7 +86,7 @@ class Model
         );
 
         $primaryKey = $this->command->getPrimaryKey();
-        $content = str_replace('{%Apps%}', ucfirst(APPPATH), $content);
+        $content = str_replace('{%Apps%}', APP_NS, $content);
         $content = str_replace('{%primaryKey%}', $primaryKey, $content);
         $content = str_replace('%modelName%', Inflector::tabilize($this->command->model), $content);
         $content = str_replace('%databaseName%', $this->command->database, $content);
@@ -98,7 +98,7 @@ class Model
     public function generate()
     {
         $filePath = '';
-        $filePath =  $this->command->applicationDir.DS.'models'.DS.$this->command->model.EXT;
+        $filePath =  $this->command->applicationDir.DS.'Models'.DS.$this->command->model.EXT;
         /*write operation ->*/
         $writeTmp =fopen(
             $filePath,

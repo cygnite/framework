@@ -193,6 +193,10 @@ class Router implements RouterInterface
                 return $this->callStaticRoute($func);
             };
 
+            if ($_SERVER['REQUEST_METHOD'] == 'POST') {
+                $_SERVER['REQUEST_METHOD'] = 'GET';
+            }
+
             return $this->match(strtoupper(__FUNCTION__), $pattern, $callable);
         }
 

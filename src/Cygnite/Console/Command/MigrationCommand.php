@@ -70,19 +70,20 @@ class MigrationCommand extends Command
         if ($table instanceof Table) {
             $this->table = $table;
         }
-
     }
 
-    public static function __callStatic($method, $arguments = [])
+    public static function instance()
     {
-        if ($method == 'instance') {
-            return new self();
-        }
+        return new self();
     }
 
     public function setMigrationPath($dir)
     {
-        $this->migrationDir = $dir.DS.'database'.DS.'migrations'.DS;
+        $this->migrationDir = $dir.DS.'Resources'.DS.'Database'.DS.'Migrations'.DS;
     }
 
+    public function getMigrationPath()
+    {
+        return (isset($this->migrationDir) ? $this->migrationDir : null);
+    }
 }

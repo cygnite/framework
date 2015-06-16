@@ -1,4 +1,4 @@
-{% extends 'layout/main/base.html.twig' %}
+{% extends 'layouts/main/base.html.twig' %}
 
 {% block title %}
     {{ title }}

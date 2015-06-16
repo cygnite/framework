@@ -12,7 +12,7 @@ if ($this->hasFlash('success')) {
 	<h3>CRUD Application
         <div class="pull-right">
         <!--<span class="glyphicon glyphicon-plus-sign">-->
-        <?php echo Asset::link('#controllerName#/add', 'Add #ControllerName#', array('class' => 'btn btn-small btn-info cboxElement')); ?>
+        <?php echo Asset::anchor('#controllerName#/add', 'Add #ControllerName#', array('class' => 'btn btn-small btn-info cboxElement')); ?>
         </div>
 	</h3>
 </div>
@@ -45,9 +45,9 @@ if ($this->hasFlash('success')) {
             {#tdColumns#}
             <td>
                 <?php
-                echo Asset::link('#controllerName#/show/' . $row->{%primaryKey%}, 'View', array('class' => 'btn btn btn-info btn-xs'));
-                echo Asset::link('#controllerName#/edit/' . $row->{%primaryKey%}, 'Edit', array('class' => 'btn btn-default btn-xs'));
-                echo Asset::link('#controllerName#/delete/' . $row->{%primaryKey%}, 'Delete', array('class' => 'btn btn-danger btn-xs' ));
+                echo Asset::anchor('#controllerName#/show/' . $row->{%primaryKey%}, 'View', array('class' => 'btn btn btn-info btn-xs'));
+                echo Asset::anchor('#controllerName#/edit/' . $row->{%primaryKey%}, 'Edit', array('class' => 'btn btn-default btn-xs'));
+                echo Asset::anchor('#controllerName#/delete/' . $row->{%primaryKey%}, 'Delete', array('class' => 'btn btn-danger btn-xs' ));
                 ?>
 
             </td>

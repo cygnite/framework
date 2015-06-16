@@ -263,7 +263,10 @@ class Security
         $data = str_replace(['&', '<', '>'], ['&', '<', '>'], $data);
         $data = preg_replace('/(&#*\w+)[\x00-\x20]+;/u', '$1;', $data);
         $data = preg_replace('/(&#x*[0-9A-F]+);*/iu', '$1;', $data);
-        header('Content-Type: text/html; charset=utf-8');
+        if (!headers_sent()) {
+            header('Content-Type: text/html; charset=utf-8');
+        }
+
         //$data = htmlspecialchars($data, ENT_QUOTES, 'UTF-8');
         $data = html_entity_decode($data, ENT_COMPAT, 'UTF-8');
 

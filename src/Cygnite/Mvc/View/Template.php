@@ -71,9 +71,8 @@ class Template
     public function setEnvironment()
     {
         $this->properties['twigLoader'] = new \Twig_Loader_Filesystem($this->view->views);
-
         $this->template = new \Twig_Environment($this->properties['twigLoader'], array(
-            'cache' => CYGNITE_BASE . DS . APPPATH . DS . 'temp' . DS . 'twig' . DS . 'tmp' . DS . 'cache',
+            'cache' => CYGNITE_BASE.DS. 'public'.DS.'storage' . DS . 'temp' . DS . 'twig' . DS . 'tmp' . DS . 'cache',
             'auto_reload' => $this->properties['autoReload'],
             'debug' => $this->properties['twigDebug'],
         ));
@@ -117,7 +116,7 @@ class Template
         $this->functions[] = $this->getTwigSimpleFunctionInstance(
             'link',
             function ($link, $name = null, $attributes = []) {
-                return Asset::link(str_replace('.', '/', $link), $name, $attributes);
+                return Asset::anchor(str_replace('.', '/', $link), $name, $attributes);
             }
         );
 

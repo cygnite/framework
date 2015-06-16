@@ -6,7 +6,7 @@ use Cygnite\Validation\Validator;
 use Cygnite\Common\UrlManager\Url;
 use Cygnite\Foundation\Application;
 use Cygnite\Mvc\Controller\AbstractBaseController;
-use {%Apps%}\Components\Form\%ControllerName%Form;
+use {%Apps%}\Form\%ControllerName%Form;
 use {%Apps%}\Models\%StaticModelName%;
 
 /**
@@ -16,20 +16,20 @@ use {%Apps%}\Models\%StaticModelName%;
 
 class %ControllerName%Controller extends AbstractBaseController
 {
-    /**
-    * --------------------------------------------------------------------------
-    * The %ControllerName% Controller
-    *--------------------------------------------------------------------------
-    *  This controller respond to uri beginning with %controllerName% and also
-    *  respond to root url like "%controllerName%/index"
-    *
-    * Your GET request of "%controllerName%/index" will respond like below -
-    *
-    *     public function indexAction()
-    *     {
-    *            echo "Cygnite : Hello ! World ";
-    *     }
-    *
+   /**
+    | --------------------------------------------------------------------------
+    | The %ControllerName% Controller
+    |--------------------------------------------------------------------------
+    |  This controller respond to uri beginning with %controllerName% and also
+    |  respond to root url like "%controllerName%/index"
+    |
+    | Your GET request of "%controllerName%/index" will respond like below -
+    |
+    |     public function indexAction()
+    |     {
+    |            echo "Cygnite : Hello ! World ";
+    |     }
+    |
     */
 
     // Plain layout
@@ -52,17 +52,17 @@ class %ControllerName%Controller extends AbstractBaseController
     public function indexAction()
     {
         $%controllerName% = [];
-        $%controllerName% = %StaticModelName%::all(array('orderBy' => '{%primaryKey%} desc',
+        $%controllerName% = %StaticModelName%::all(['orderBy' => '{%primaryKey%} desc',
                 /*'paginate' => array(
                     'limit' => Url::segment(3)
-                )*/)
+                )*/]
         );
 
-        $this->render('index', array(
+        $this->render('index', [
             'records' => $%controllerName%,
             'links' => '', //%StaticModelName%::createLinks(),
             'title' => 'Cygnite Framework - Crud Application'
-        ));
+        ]);
     }
 
     /**
@@ -73,10 +73,10 @@ class %ControllerName%Controller extends AbstractBaseController
     private function setValidationRules($input)
     {
         //Set Form validation rules
-        return Validator::instance($input, function ($validate)
+        return Validator::create($input, function ($validate)
         {
-            $validate%addRule%
-
+            $validate
+%addRule%
             return $validate;
         });
     }
@@ -103,16 +103,15 @@ class %ControllerName%Controller extends AbstractBaseController
                 $%modelName% = new %StaticModelName%();
                 // get post array value except the submit button
                 $postArray = $input->except('btnSubmit')->post();
-
-                %modelColumns%
+%modelColumns%
 
                 // Save form details
                 if ($%modelName%->save()) {
                     $this->setFlash('success', '%ControllerName% added successfully!')
-                        ->redirectTo('%controllerName%/index/'.Url::segment(3));
+                        ->redirectTo('%controllerName%/index/');
                 } else {
                     $this->setFlash('error', 'Error occured while saving %ControllerName%!')
-                        ->redirectTo('%controllerName%/index/'.Url::segment(3));
+                        ->redirectTo('%controllerName%/index/');
                 }
 
             } else {
@@ -124,11 +123,11 @@ class %ControllerName%Controller extends AbstractBaseController
         }
 
         // We can also use same view page for create and update
-        $this->render('create', array(
+        $this->render('create', [
                 'form' => $form->buildForm()->render(),
                 'validation_errors' => $form->errors,
                 'title' => 'Add a new %ControllerName%'
-        ));
+        ]);
     }
 
     /**
@@ -139,7 +138,7 @@ class %ControllerName%Controller extends AbstractBaseController
     public function editAction($id)
     {
         $validator = null; $%controllerName% = [];
-        $%controllerName% = %StaticModelName%::find($id);
+        $%modelName% = %StaticModelName%::find($id);
         $form = new %ControllerName%Form($%controllerName%, Url::segment(3));
         $form->action = 'edit';
 
@@ -155,16 +154,15 @@ class %ControllerName%Controller extends AbstractBaseController
 
                 // get post array value except the submit button
                 $postArray = $input->except('btnSubmit')->post();
-
-                %modelColumns%
+%modelColumns%
 
                 // Save form information
                 if ($%modelName%->save()) {
                     $this->setFlash('success', '%ControllerName% updated successfully!')
-                        ->redirectTo('%controllerName%/index/'.Url::segment(3));
+                        ->redirectTo('%controllerName%/index/');
                 } else {
                     $this->setFlash('error', 'Error occured while saving %ControllerName%!')
-                        ->redirectTo('%controllerName%/index/'.Url::segment(3));
+                        ->redirectTo('%controllerName%/index/');
                 }
 
             } else {
@@ -175,11 +173,11 @@ class %ControllerName%Controller extends AbstractBaseController
             $form->validation = $validator;
         }
 
-        $this->render('update', array(
+        $this->render('update', [
                 'form' => $form->buildForm()->render(),
                 'validation_errors' => $form->errors,
                 'title' => 'Update the %ControllerName%'
-        ));
+        ]);
 
     }
 
@@ -191,10 +189,10 @@ class %ControllerName%Controller extends AbstractBaseController
     {
         $%modelName% = %StaticModelName%::find($id);
 
-        $this->render('show', array(
+        $this->render('show', [
             'record' => $%modelName%,
             'title' => 'Show the %ControllerName%'
-        ));
+        ]);
     }
 
     /**

@@ -110,7 +110,7 @@ class Schema
      */
     public static function __callStatic($method, $arguments = [])
     {
-        if ($method == 'instance' && !empty($arguments)) {
+        if ($method == 'make' && !empty($arguments)) {
 
             $schema = new self($arguments[0]);
 
@@ -492,10 +492,10 @@ class Schema
     {
         $schema = self::SELECT . " EXISTS
                    (
-                       " . self::SELECT . " * FROM " . $this->_informationSchema . ".columns
+                       " . self::SELECT . " * FROM " . $this->_informationSchema . ".COLUMNS
                        WHERE " . $this->_tableSchema . "= '" . $this->database . "' AND
-                       table_name ='" . $this->tableName . "' AND
-                       column_key = 'PRI'
+                       TABLE_NAME ='" . $this->tableName . "' AND
+                       COLUMN_KEY = 'PRI'
 
                    ) AS has_primary_key;";
 

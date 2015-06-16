@@ -20,7 +20,7 @@ use Cygnite\Console\Command\ControllerGeneratorCommand;
 use Cygnite\Console\Command\ModelGeneratorCommand;
 use Symfony\Component\Console\Input\InputOption;
 
-require CYGNITE_BASE.DS.APPPATH.'/configs/database.php';
+require str_replace(['\\', '/'], DS, CYGNITE_BASE.DS.APPPATH.'/Configs/database.php');
 
 /**
  * Cygnite Console Application
@@ -38,6 +38,10 @@ class CygniteApplication extends Application
 
     private $description;
 
+    /**
+     * @param string $version
+     * @param string $description
+     */
     public function __construct($version, $description = 'Cygnite CLI Application')
     {
         parent::__construct($description, $version);

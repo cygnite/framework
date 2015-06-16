@@ -63,7 +63,7 @@ class Table extends Connection
         $columns = $this->query($schema)->getAll();
         $this->setSchemaInstance($columns);
 
-        return $this->getSchemaInstance();
+        return $columns;
     }
 
     /**

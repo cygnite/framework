@@ -124,10 +124,10 @@ class Controller
     private function generateFormElements($value)
     {
         $form = $label = '';
-        $label = Inflector::underscoreToSpace($value->column_name);
+        $label = Inflector::underscoreToSpace($value->COLUMN_NAME);
         $form .= "\t\t".'->addElement("label", "'.$label.'", array("class" => "col-sm-2 control-label","style" => "width:100%;"))'.PHP_EOL;
 
-        $form .= "\t\t".'->addElement("text", "'.$value->column_name.'", array("value" => (isset($this->model->'.$value->column_name.')) ? $this->model->'.$value->column_name.' : "", "class" => "form-control"))'.PHP_EOL;
+        $form .= "\t\t".'->addElement("text", "'.$value->COLUMN_NAME.'", array("value" => (isset($this->model->'.$value->COLUMN_NAME.')) ? $this->model->'.$value->COLUMN_NAME.' : "", "class" => "form-control"))'.PHP_EOL;
         return $form;
     }
 
@@ -155,7 +155,7 @@ class Controller
     {
         $code = '';
         $code .=
-            "\t".'$'.Inflector::tabilize($this->model).'->'.$value->column_name.' = $postArray["'.$value->column_name.'"];'.PHP_EOL;
+        "\t\t\t\t".'$'.Inflector::tabilize($this->model).'->'.$value->COLUMN_NAME.' = $postArray["'.$value->COLUMN_NAME.'"];'.PHP_EOL;
 
         return $code;
     }
@@ -168,7 +168,7 @@ class Controller
     private function generateValidator($value)
     {
         $validationCode = '';
-        $validationCode .= "\t\t->addRule('".$value->column_name."', 'required|min:5')".PHP_EOL;
+        $validationCode .= "\t\t\t->addRule('".$value->COLUMN_NAME."', 'required|min:5')".PHP_EOL;
 
         return $validationCode;
     }
@@ -186,7 +186,7 @@ class Controller
 
         foreach ($this->columns as $key=> $value) {
 
-            if ($value->column_name !== 'id') {
+            if ($value->COLUMN_NAME !== 'id') {
                 if ($this->isFormGenerator == false) {
                     $codeDb .= $this->generateDbCode($value);
                 }
@@ -199,7 +199,7 @@ class Controller
 
         $this->setForm($form);
         $this->setDbCode($codeDb);
-        $this->setValidationCode($validationCode.';');
+        $this->setValidationCode($validationCode."\t\t\t;");
     }
 
     private function setForm($form)
@@ -258,23 +258,11 @@ class Controller
      */
     private function replaceControllerName($content)
     {
-        $content = str_replace(
-            'class %ControllerName%',
-            'class '.Inflector::classify(str_replace("Controller", "", $this->controller)),
-            $content
-        );
-        $content = str_replace(
-            '%ControllerName%',
-            Inflector::classify(str_replace("Controller", "", $this->controller)),
-            $content
-        );
-        $content = str_replace(
-            '%controllerName%',
-            strtolower(
-                str_replace("Controller", "", $this->controller)
-            ),
-            $content
-        );
+        $controller = str_replace("Controller", "", $this->controller);
+
+        $content = str_replace('class %ControllerName%', 'class '.Inflector::classify($controller), $content);
+        $content = str_replace('%ControllerName%', Inflector::classify($controller), $content);
+        $content = str_replace('%controllerName%', strtolower($controller), $content);
 
         return $content;
     }
@@ -288,24 +276,9 @@ class Controller
     private function replaceModelName($content)
     {
         $newContent = '';
-        $content = str_replace(
-            'new %modelName%',
-            'new '.$this->model,
-            $content
-        );
-
-        $content = str_replace(
-            '%StaticModelName%',
-            $this->model,
-            $content
-        );
-
-        $content = str_replace(
-            'new %StaticModelName%()',
-            $this->model,
-            $content
-        );
-
+        $content = str_replace('new %modelName%', 'new '.$this->model, $content);
+        $content = str_replace('%StaticModelName%', $this->model, $content);
+        $content = str_replace('new %StaticModelName%()', $this->model, $content);
         $newContent = str_replace('%modelName%', Inflector::tabilize($this->model), $content);
 
         return $newContent;
@@ -332,7 +305,7 @@ class Controller
                 'Controllers\\',
                 '',
                 $this->getControllerTemplatePath()
-            ).'Components'.DS.'Form'.DS;
+        ).'Components'.DS.'Form'.DS;
 
         file_exists($file) or die("Controller Template not Exists");
         //file_exists($modelFl ) or die("No Model Exists");
@@ -343,7 +316,7 @@ class Controller
         //fclose($tmp);
 
         $content = $this->replaceControllerName($content);
-        $content = str_replace('{%Apps%}', ucfirst(APPPATH), $content);
+        $content = str_replace('{%Apps%}', APP_NS, $content);
         $primaryKey = $this->controllerCommand->getPrimaryKey();
 
         $content = str_replace('{%primaryKey%}', $primaryKey, $content);
@@ -379,10 +352,9 @@ class Controller
      */
     public function generateFormComponent($formContent)
     {
-
         /*write operation ->*/
         $writeTmp =fopen(
-            $this->applicationDir.DS.'components'.DS.'form'.DS.Inflector::classify(
+            $this->applicationDir.DS.'Form'.DS.Inflector::classify(
                 str_replace('Controller', '', $this->controller)
             ).'Form'.EXT,
             "w"
@@ -390,7 +362,7 @@ class Controller
 
         $contentAppendWith = '';
         $contentAppendWith = '<?php '.PHP_EOL;
-        $formContent = str_replace('{%Apps%}', ucfirst(APPPATH), $formContent);
+        $formContent = str_replace('{%Apps%}', APP_NS, $formContent);
         fwrite($writeTmp, $contentAppendWith .$formContent);
         fclose($writeTmp);
 
@@ -411,6 +383,7 @@ class Controller
      */
     public function generate()
     {
+        echo $this->applicationDir.DS.'Controllers'.DS.$this->controller.EXT;
         /*write operation ->*/
         $writeTmp =fopen(
             $this->applicationDir.DS.'controllers'.DS.$this->controller.EXT,
@@ -457,7 +430,7 @@ class Controller
      */
     private function generateBasicController()
     {
-        $controllerClass = $this->applicationDir.DS.'controllers'.DS.$this->controller.EXT;
+        $controllerClass = $this->applicationDir.DS.'Controllers'.DS.$this->controller.EXT;
 
         if (file_exists($controllerClass)) {
             throw new \Exception("$controllerClass already exists!!");
@@ -491,7 +464,7 @@ class Controller
     {
         $this->getControllerTemplatePath();
         $content = file_get_contents($this->getControllerTemplatePath().'controller.tpl.stub', true);
-        $content = $this->replaceTemplate('{%Apps%}', ucfirst(APPPATH), $content);
+        $content = $this->replaceTemplate('{%Apps%}', APP_NS, $content);
         return $this->replaceTemplate('{%ControllerName%}', $this->controller, $content);
     }
 

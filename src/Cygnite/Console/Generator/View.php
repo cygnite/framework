@@ -128,10 +128,10 @@ class View
 
         $file = $this->getViewTemplatePath().$layout.DS.$this->viewLayoutName();
         $appViewPath = '';
-        $appViewPath = $this->command->applicationDir.DS.'views'.DS;
+        $appViewPath = $this->command->applicationDir.DS.'Views'.DS;
 
         $this->hasDirectory($appViewPath);
-        $this->hasDirectory($appViewPath.'layout');
+        $this->hasDirectory($appViewPath.'layouts');
         $this->hasDirectory($appViewPath.DS.$layout);
 
         file_exists($file) or die("Base layout stub file doesn't exists in Cygnite Core");
@@ -199,7 +199,8 @@ class View
     public function generateViews()
     {
         $viewPath  = $viewExtension = '';
-        $viewDir = $this->command->applicationDir.DS.'views'.DS.strtolower(str_replace("Controller", "", $this->command->controller));
+        $controller = str_replace("Controller", "", $this->command->controller);
+        $viewDir = $this->command->applicationDir.DS.'Views'.DS.strtolower($controller);
         $this->hasDirectory($viewDir);
 
         $viewExtension = ($this->layoutType == 'php') ? self::EXTENSION : self::TWIG_EXTENSION;
@@ -264,17 +265,17 @@ class View
 
         foreach ($this->getTableColumns() as $key=> $value) {
 
-            if ($value->column_name !== 'id') {
+            if ($value->COLUMN_NAME !== 'id') {
 
                 if ($type == 'th') {
-                    $tableHead = Inflector::underscoreToSpace($value->column_name);
+                    $tableHead = Inflector::underscoreToSpace($value->COLUMN_NAME);
                     $column .= "\t\t\t".'<'.$type.'>'.$tableHead.'</'.$type.'>'.PHP_EOL;
                 } else{
                     $rowType = '';
                     if ($this->layoutType == 'php') {
-                        $rowType = '<?php echo $row->'.$value->column_name.'; ?>';
+                        $rowType = '<?php echo $row->'.$value->COLUMN_NAME.'; ?>';
                     } else {
-                        $rowType = '{{row.'.$value->column_name.'}}';
+                        $rowType = '{{row.'.$value->COLUMN_NAME.'}}';
                     }
                     $column .= "\t\t\t".'<'.$type.'>'.$rowType.'</'.$type.'>'.PHP_EOL;
                 }
@@ -309,18 +310,18 @@ class View
         $column = '';
         foreach ($this->getTableColumns() as $key=> $value) {
 
-            if ($value->column_name !== 'id') {
+            if ($value->COLUMN_NAME !== 'id') {
 
                 if ($this->layoutType == 'php') {
-                    $rowType = '<?php echo $record->'.$value->column_name.'; ?>';
+                    $rowType = '<?php echo $record->'.$value->COLUMN_NAME.'; ?>';
                 } else {
-                    $rowType = '{{ record.'.$value->column_name.' }}';
+                    $rowType = '{{ record.'.$value->COLUMN_NAME.' }}';
                 }
 
                 $column .=
                 "\t\t\t".'<div class="form-group">
                     <label class="col-sm-2 control-label">'.
-                    Inflector::underscoreToSpace($value->column_name).
+                    Inflector::underscoreToSpace($value->COLUMN_NAME).
                     '</label>
                     <div class="col-sm-10">
                         <p class="form-control-static"><span>'.$rowType.'</span></p>

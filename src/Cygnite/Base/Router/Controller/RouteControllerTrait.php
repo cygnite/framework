@@ -110,7 +110,7 @@ trait RouteControllerTrait
             $params = $arguments[1];
         }
 
-        $file = CYGNITE_BASE . str_replace('\\', DS, '\\src\\'.$this->controllerWithNS) . EXT;
+        $file = CYGNITE_BASE . str_replace('\\', DS, '\\src'.$this->controllerWithNS) . EXT;
 
         if (!is_readable($file)) {
             throw new \Exception("Route " . $this->controllerWithNS . " not found. ");

@@ -14,6 +14,7 @@ use Cygnite\Helpers\Inflector;
 use Cygnite\Database\Connection;
 use Cygnite\Console\Generator\Model;
 use Symfony\Component\Console\Command\Command;
+use Cygnite\Database\Exceptions\DatabaseException;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -62,7 +63,7 @@ class ModelGeneratorCommand extends Command
         return $this->tableSchema->connect(
                     $this->database,
                     Inflector::tabilize($this->model)
-                )->getColumns();
+                )->{__FUNCTION__}();
     }
 
     /**
@@ -72,11 +73,14 @@ class ModelGeneratorCommand extends Command
     public function getPrimaryKey()
     {
         $primaryKey = null;
+        if (!isset($this->columns)) {
+            throw new DatabaseException("Column schema not found!");
+        }
 
         if (count($this->columns) > 0) {
             foreach ($this->columns as $key => $value) {
-                if ($value->column_key == 'PRI' || $value->extra == 'auto_increment') {
-                    $primaryKey = $value->column_name;
+                if ($value->COLUMN_KEY == 'PRI' || $value->EXTRA == 'auto_increment') {
+                    $primaryKey = $value->COLUMN_NAME;
                     break;
                 }
             }
@@ -90,8 +94,7 @@ class ModelGeneratorCommand extends Command
         $this->setName('model:create')
              ->setDescription('Generate Sample Model Class Using Cygnite CLI')
              ->addArgument('name', InputArgument::OPTIONAL, 'Name Of Your Model Class ?')
-             ->addArgument('database', InputArgument::OPTIONAL, 'If not specified we will take default database as connection.')
-        ;
+             ->addArgument('database', InputArgument::OPTIONAL, '');
     }
 
     /**
@@ -110,11 +113,10 @@ class ModelGeneratorCommand extends Command
         // Check for argument database name if not given we will use default
         // database connection
         $this->database = $this->getDatabase($input);
-
         $this->columns = $this->getColumns();
 
         if (empty($this->columns)) {
-            throw new \Exception("Please check your model name. It seems doesn't exists in the database.");
+            throw new \Exception("Please check your model name. It seems table doesn't exists into database.");
         }
 
         $this->applicationDir = CYGNITE_BASE.DS.APPPATH;

@@ -6,7 +6,7 @@ use Cygnite\FormBuilder\Form;
 use Cygnite\Validation\Validator;
 use Cygnite\Common\UrlManager\Url;
 use Cygnite\Mvc\Controller\AbstractBaseController;
-use {%Apps%}\Components\Form\%ControllerName%Form;
+use {%Apps%}\Form\%ControllerName%Form;
 use {%Apps%}\Models\%StaticModelName%;
 
 /**
@@ -45,11 +45,11 @@ class %ControllerName%Controller extends AbstractBaseController
     public function indexAction()
     {
         $%controllerName% = [];
-        $%controllerName% = %StaticModelName%::all(array('orderBy' => '{%primaryKey%} desc',
+        $%controllerName% = %StaticModelName%::all(['orderBy' => '{%primaryKey%} desc',
                 /*'paginate' => array(
                     'limit' => Url::segment(3)
                 )*/
-            )
+            ]
         );
         $flash = null;
 
@@ -61,12 +61,12 @@ class %ControllerName%Controller extends AbstractBaseController
         }
 
         $this->render('index')->with(
-            array(
+            [
                 'records' => $%controllerName%,
                 'flashMessage' => $flash,
                 'links' => '', //%StaticModelName%::createLinks()
                 'title' => 'Cygnite Framework - Crud Application'
-            )
+            ]
         );
     }
 
@@ -78,12 +78,12 @@ class %ControllerName%Controller extends AbstractBaseController
     private function setValidationRules($input)
     {
         //Set Form validation rules
-        return Validator::instance($input, function ($validate)
-            {
-                $validate%addRule%
+        return Validator::create($input, function ($validate)
+        {
+$validate%addRule%
 
-                return $validate;
-            });
+            return $validate;
+        });
     }
 
     /**
@@ -108,16 +108,15 @@ class %ControllerName%Controller extends AbstractBaseController
                 $%modelName% = new %StaticModelName%();
                 // get post array value except the submit button
                 $postArray = $input->except('btnSubmit')->post();
-
-                %modelColumns%
+%modelColumns%
 
                     // Save form details
                     if ($%modelName%->save()) {
                     $this->setFlash('success', '%ControllerName% added successfully!')
-                        ->redirectTo('%controllerName%/index/'.Url::segment(3));
+                        ->redirectTo('%controllerName%/index/');
                 } else {
                     $this->setFlash('error', 'Error occured while saving %ControllerName%!')
-                        ->redirectTo('%controllerName%/index/'.Url::segment(3));
+                        ->redirectTo('%controllerName%/index/');
                 }
 
                 } else {
@@ -129,11 +128,11 @@ class %ControllerName%Controller extends AbstractBaseController
         }
 
         // render view page
-        $this->render('create')->with(array(
+        $this->render('create')->with([
                 'form' => $form->buildForm()->render(),
                 'validation_errors' => $form->errors,
                 'title' => 'Add a new %ControllerName%'
-        ));
+        ]);
     }
 
     /**
@@ -144,7 +143,7 @@ class %ControllerName%Controller extends AbstractBaseController
     public function editAction($id)
     {
         $validator = null; $%controllerName% = [];
-        $%controllerName% = %StaticModelName%::find($id);
+        $%modelName% = %StaticModelName%::find($id);
         $form = new %ControllerName%Form($%controllerName%, Url::segment(3));
         $form->action = 'edit';
 
@@ -160,16 +159,15 @@ class %ControllerName%Controller extends AbstractBaseController
 
                 // get post array value except the submit button
                 $postArray = $input->except('btnSubmit')->post();
-
-                %modelColumns%
+%modelColumns%
 
                 // Save form information
                 if ($%modelName%->save()) {
                     $this->setFlash('success', '%ControllerName% updated successfully!')
-                        ->redirectTo('%controllerName%/index/'.Url::segment(3));
+                        ->redirectTo('%controllerName%/index/');
                 } else {
                     $this->setFlash('error', 'Error occured while saving %ControllerName%!')
-                        ->redirectTo('%controllerName%/index/'.Url::segment(3));
+                        ->redirectTo('%controllerName%/index/');
                 }
 
             } else {
@@ -181,11 +179,11 @@ class %ControllerName%Controller extends AbstractBaseController
         }
 
          // render view page
-        $this->render('update')->with(array(
+        $this->render('update')->with([
                 'form' => $form->buildForm()->render(),
                 'validation_errors' => $form->errors,
                 'title' => 'Update %ControllerName%'
-        ));
+        ]);
     }
 
     /**
@@ -197,10 +195,10 @@ class %ControllerName%Controller extends AbstractBaseController
         $%modelName% = %StaticModelName%::find($id);
 
         // render view page
-        $this->render('show')->with(array(
+        $this->render('show')->with([
                 'record' => $%modelName%,
                 'title' => 'Show a %ControllerName%'
-        ));
+        ]);
     }
 
     /**

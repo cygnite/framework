@@ -9,14 +9,15 @@
  */
 namespace Cygnite\Console\Command;
 
-use Cygnite\Foundation\Application;
-use Cygnite\Helpers\Inflector;
 use Cygnite\Database;
 use Cygnite\Database\Schema;
+use Cygnite\Helpers\Inflector;
+use Cygnite\Foundation\Application;
 use Cygnite\Console\Generator\Model;
 use Cygnite\Console\Generator\View;
 use Cygnite\Console\Generator\Controller;
 use Symfony\Component\Console\Command\Command;
+use Cygnite\Database\Exceptions\DatabaseException;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -25,7 +26,6 @@ use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 
 class GeneratorCommand extends Command
 {
-
     public $applicationDir;
     public $controller;
     public $model;
@@ -36,11 +36,9 @@ class GeneratorCommand extends Command
     private $output;
     private $viewType;
 
-    public static function __callStatic($method, $arguments = [])
+    public static function instance()
     {
-        if ($method == 'instance') {
-            return new self();
-        }
+        return new self();
     }
 
     public function setSchema($table)
@@ -56,11 +54,14 @@ class GeneratorCommand extends Command
     public function getPrimaryKey()
     {
         $primaryKey = null;
+        if (!isset($this->columns)) {
+            throw new DatabaseException("Column schema not found!");
+        }
 
         if (count($this->columns) > 0) {
             foreach ($this->columns as $key => $value) {
-                if ($value->column_key == 'PRI' || $value->extra == 'auto_increment') {
-                    $primaryKey = $value->column_name;
+                if ($value->COLUMN_KEY == 'PRI' || $value->EXTRA == 'auto_increment') {
+                    $primaryKey = $value->COLUMN_NAME;
                     break;
                 }
             }
@@ -93,7 +94,8 @@ class GeneratorCommand extends Command
         $this->controller = Inflector::classify($input->getArgument('name')) . 'Controller';
         // Model name
         $this->model = Inflector::classify($input->getArgument('model'));
-        /** Check for argument database name if not given we will use default
+        /**
+         * Check for argument database name if not given we will use default
          *  database connection
          */
         $this->database = (!is_null($input->getArgument('database'))) ?
@@ -102,7 +104,6 @@ class GeneratorCommand extends Command
 
         // By default we will generate plain php layout and view pages
         $this->viewType = ($input->getOption('template') == false) ? 'php' : 'twig';
-
         $this->columns = $this->getColumns();
 
         if (empty($this->columns)) {
@@ -141,7 +142,7 @@ class GeneratorCommand extends Command
         $controllerInstance = Controller::instance($this->columns, $this->viewType, $this);
 
         $controllerTemplateDir =
-            dirname(dirname(__FILE__)) . DS . 'src' . DS . ucfirst('apps') . DS . ucfirst('controllers') . DS;
+            dirname(dirname(__FILE__)) . DS . 'src' . DS . 'Apps' . DS . 'Controllers' . DS;
 
         $controllerInstance->setControllerTemplatePath($controllerTemplateDir);
         $controllerInstance->setApplicationDirectory($this->applicationDir);
@@ -163,7 +164,7 @@ class GeneratorCommand extends Command
     {
         $modelInstance = Model::instance($this);
         $modelTemplateDir =
-            dirname(dirname(__FILE__)) . DS . 'src' . DS . ucfirst('apps') . DS . ucfirst('models') . DS;
+            dirname(dirname(__FILE__)) . DS . 'src' . DS . 'Apps' . DS . 'Models' . DS;
 
         $modelInstance->setModelTemplatePath($modelTemplateDir);
         $modelInstance->updateTemplate();
@@ -178,16 +179,16 @@ class GeneratorCommand extends Command
     {
         $viewInstance = View::instance($this);
         $viewInstance->setLayoutType($this->viewType);
-        $viewTemplateDir = dirname(dirname(__FILE__)) . DS . 'src' . DS . ucfirst('apps') . DS . ucfirst('views') . DS;
+        $viewTemplateDir = dirname(dirname(__FILE__)) . DS . 'src' . DS . 'Apps' . DS . 'Views' . DS;
         $viewInstance->setTableColumns($this->columns);
         $viewInstance->setViewTemplatePath($viewTemplateDir);
 
         // generate twig template layout if type has set via user
         if ($this->viewType == 'php') {
             // Type not set then we will generate php layout
-            $viewInstance->generateLayout('layout');
+            $viewInstance->generateLayout('layouts');
         } else {
-            $viewInstance->generateLayout('layout.main');
+            $viewInstance->generateLayout('layouts.main');
         }
 
         $viewInstance->generateViews();

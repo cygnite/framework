@@ -68,6 +68,7 @@ class View
         $this->setViewPath();
 
         if ($this->templateEngine !== false && $this->templateEngine == 'twig') {
+
             $this->setTwigEnvironment($template);
         }
     }
@@ -81,7 +82,7 @@ class View
             str_replace('.', DS, $this->viewsFilePath) :
             $this->viewsFilePath;
 
-        $this->views = CYGNITE_BASE . DS . APPPATH . DS . $viewPath . DS;
+        $this->views = CYGNITE_BASE . DS . APP . DS . $viewPath . DS;
     }
 
     /**
@@ -91,26 +92,26 @@ class View
      */
     private function setTwigEnvironment($template)
     {
-            if ($template instanceof Template) {
-                $template->init($this, new Reflection);
-                $this->setTemplate($template);
+        if ($template instanceof Template) {
+            $template->init($this, new Reflection);
+            $this->setTemplate($template);
 
-                $ns = $controller = null;
-                $ns = get_called_class();
-                $controller = str_replace('Controller', '', Inflector::getClassNameFromNamespace($ns));
-                $this->layout = Inflector::toDirectorySeparator($this->layout);
+            $ns = $controller = null;
+            $ns = get_called_class();
+            $controller = str_replace('Controller', '', Inflector::getClassNameFromNamespace($ns));
+            $this->layout = Inflector::toDirectorySeparator($this->layout);
 
-                if ($this->layout == '') {
-                    $this->layout = strtolower($controller);
-                }
+            if ($this->layout == '') {
+                $this->layout = strtolower($controller);
+            }
 
-                $this->tpl = $template->setEnvironment();
+            $this->tpl = $template->setEnvironment();
 
-                if ($this->twigDebug === true) {
-                    $template->addExtension();
-                }
+            if ($this->twigDebug === true) {
+                $template->addExtension();
             }
         }
+    }
 
     /**
      * @param $template
@@ -233,9 +234,12 @@ class View
      */
     private function setTwigTemplateInstance($controller, $view)
     {
-        $this->template = $this->tpl->loadTemplate(
-            $controller . DS . $view . $this->templateExtension
-        );
+        if (is_null($this->template)) {
+            $this->template = $this->tpl->loadTemplate(
+                $controller . DS . $view . $this->templateExtension
+            );
+        }
+
 
         return $this;
     }

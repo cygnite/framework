@@ -56,13 +56,10 @@ class Migrator
         $this->command = $command;
     }
 
-    public static function __callStatic($method, $arguments = [])
+    public static function instance($arguments = [])
     {
-        if ($method == 'instance') {
-            return new self($arguments[0]);
-        }
+        return new self($arguments);
     }
-
 
     public function setTemplateDir($path)
     {
@@ -88,11 +85,7 @@ class Migrator
     {
         #replace with table name - {%className%}
 
-        $file =  str_replace(
-                ['apps', 'database'],
-                ['Apps', 'Database'],
-                $this->getTemplatePath()
-            ).$template.EXT;
+        $file =  $this->getTemplatePath().$template.EXT;
 
         file_exists($file) or die("Base template doesn't exists");
 
@@ -121,7 +114,7 @@ class Migrator
     {
         $filePath = $appMigrationPath = '';
         $date->setTimezone(new \DateTimeZone(SET_TIME_ZONE));
-        $appMigrationPath = $this->getAppMigrationDirPath().DS.'database'.DS.'migrations'.DS;
+        $appMigrationPath = $this->getAppMigrationDirPath().DS.'Resources'.DS.'Database'.DS.'Migrations'.DS;
 
         $this->hasDirectory($appMigrationPath);
 
@@ -163,7 +156,7 @@ class Migrator
     public function setMigrationClassName($file = '')
     {
         if (pathinfo($this->latestFile, PATHINFO_EXTENSION) !== 'php') {
-            throw new \Exception(APPPATH."/database/migrations/ must contain only {xxxx_table_name.php} file types");
+            throw new \Exception(APP_NS."/Resources/Database/Migrations/ must have {xxxx_table_name.php} file types");
         }
 
         $file = str_replace(EXT, '',$this->latestFile);

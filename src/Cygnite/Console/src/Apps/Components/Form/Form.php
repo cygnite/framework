@@ -1,4 +1,4 @@
-namespace {%Apps%}\Components\Form;
+namespace {%Apps%}\Form;
 
 use Cygnite\FormBuilder\Form;
 use Cygnite\Foundation\Application;

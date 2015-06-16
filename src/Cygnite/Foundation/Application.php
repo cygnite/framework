@@ -302,6 +302,21 @@ class Application extends Container
         return $this;
     }
 
+    /**
+     * We will activate middle ware events if set as true in
+     * Configs/application.php
+     * @return mixed
+     */
+    public function activateEventMiddleWare()
+    {
+        $eventMiddleware = Config::get('global.config', 'activate.event.middlewares');
+
+        if ($eventMiddleware) {
+            $class = "\\".APP_NS."\\Middlewares\\Events\\Event";
+            return (new $class)->register();
+        }
+    }
+
 
     /**
      * Attach all application events to event handler.
@@ -422,6 +437,7 @@ class Application extends Container
      */
     public function handle()
     {
+        $this->activateEventMiddleWare();
         /**-------------------------------------------------------
          * Booting completed. Lets handle user request!!
          * Lets Go !!
