@@ -51,35 +51,39 @@ class File implements StorageInterface
      */
     public function __construct()
     {
-        $config = array(
-            'name' => Config::get('global.config', 'cache_name'),
-            'path' => Config::get('global.config', 'cache_directory'),
-            'extension' => Config::get('global.config', 'cache_extension')
-        );
+        $config = Config::get('global.config');
+        $data = [
+            'name' => $config['cache']['name'],
+            'path' => $config['cache']['directory'],
+            'extension' => $config['cache']['extension']
+        ];
 
-        if ($config['path'] == "") {
+        if ($data['path'] == "") {
             throw new InvalidCacheDirectoryException('You must define cache directory to use cache.');
         }
 
-        $this->initialize($config);
+        $this->setup($data);
     }
 
     /**
      * @param array $config
+     * @return $this
      */
-    public function initialize($config = [])
+    public function setup($config = [])
     {
-        $path = str_replace(['.', '/'], DS, $config['path']);
+        $path = toPath($config['path']);
 
-        if (isset($config) === true) {
-            if (is_string($config)) {
-                $this->setCache($config);
-            } elseif (is_array($config)) {
-                $this->setCache($config['name']);
-                $this->setPath(APPPATH . DS . $path . DS);
-                $this->setCacheExtension($config['extension']);
-            }
+        if (is_array($config)) {
+            $this->setCache($config['name']);
+            $this->setPath(CYGNITE_BASE . DS . $path . DS);
+            $this->setCacheExtension($config['extension']);
+
+            return $this;
         }
+
+        $this->setCache($config);
+
+        return $this;
     }
 
     /**
@@ -140,9 +144,9 @@ class File implements StorageInterface
                 ),
                 true
             );
-        } else {
-            return false;
         }
+
+        return false;
     }
 
     /**
@@ -185,7 +189,7 @@ class File implements StorageInterface
      */
     private function getPath()
     {
-        return str_replace(['.', '/'], DS, $this->cachePath);
+        return toPath($this->cachePath);
     }
 
     /**
@@ -237,17 +241,18 @@ class File implements StorageInterface
         );
 
         if ($this->where == true) {
-            $this->setCache($key)->setPath(APPPATH.DS.'temp.cache'.DS);
+            $this->setCache($key)
+                 ->setPath(CYGNITE_BASE . DS . toPath('public.storage.cache') . DS);
         }
 
         if (is_array($this->getCache())) {
-            $dataArray = $this->getCache();
-            $dataArray[$key] = $data;
+            $array = $this->getCache();
+            $array[$key] = $data;
         } else {
-            $dataArray = [$key => $data];
+            $array = [$key => $data];
         }
 
-        $cacheData = json_encode($dataArray);
+        $cacheData = json_encode($array);
 
         if ($this->getDirectory() == true) {
             @file_put_contents($this->getDirectory(), $cacheData);
@@ -267,7 +272,7 @@ class File implements StorageInterface
     public function has($key)
     {
         if ($this->where == true) {
-            $this->setCache($key)->setPath(APPPATH.DS.'temp.cache'.DS);
+            $this->setCache($key)->setPath(CYGNITE_BASE . DS . toPath('public.storage.cache') . DS);
         }
 
         $cached = $this->getCache();
@@ -286,7 +291,7 @@ class File implements StorageInterface
     public function get($key, $timestamp = false)
     {
         if ($this->where == true) {
-            $this->setCache($key)->setPath(APPPATH.DS.'temp.cache'.DS);
+            $this->setCache($key)->setPath(CYGNITE_BASE . DS . toPath('public.storage.cache') . DS);
         }
 
         $cached = [];

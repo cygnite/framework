@@ -4,6 +4,10 @@
     "keywords": ["Cygnite", "Framework"],
     "homepage": "http://www.cygniteframework.com",
     "license": "MIT",
+    "support": {
+        "issues": "https://github.com/cygnite/framework/issues",
+        "source": "https://github.com/cygnite/framework"
+    },
     "authors": [
         {
             "name": "Sanjoy Dey",
@@ -11,10 +15,10 @@
         }
     ],
     "require": {
-	 "php": ">=5.3.3",
+	 "php": ">=5.4",
 	 "twig/twig": "1.*",
 	 "symfony/console": "2.3.*",
-	 "tracy/tracy": "2.2",
+	 "tracy/tracy": "2.3.*",
 	 "swiftmailer/swiftmailer": "~5.1"
    },	
    "require-dev": {

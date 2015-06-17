@@ -398,6 +398,7 @@ class Router implements RouterInterface
         $handledRequest = 0;
         if (isset($this->routes[$_SERVER['REQUEST_METHOD']])) {
             $flag = (!is_null($this->afterRouter)) ? true : false;
+
             $handledRequest = $this->handle($this->routes[$_SERVER['REQUEST_METHOD']], $flag);
         }
 

@@ -110,7 +110,7 @@ class Schema
      */
     public static function __callStatic($method, $arguments = [])
     {
-        if ($method == 'make' && !empty($arguments)) {
+        if ($method == 'instance' && !empty($arguments)) {
 
             $schema = new self($arguments[0]);
 

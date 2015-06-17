@@ -34,46 +34,66 @@ class ExceptionHandler implements ExceptionInterface
     public $logPath;
 
     /**
-     * @param $configurations
+     * @param $enableLogger
+     * @param $loggerDir
      * @return $this
      */
     public function enable($enableLogger, $loggerDir)
     {
-        if (ENV == 'development') {
-            $this->enableDebuggerWith(Debugger::DEVELOPMENT, $loggerDir);
+        $this->setLogConfig($enableLogger, $loggerDir);
+
+        $debuggerMode = null;
+        $debuggerMode = Debugger::DEVELOPMENT;
+
+        if (ENV == 'production') {
+            $debuggerMode = Debugger::PRODUCTION;
+        }
+
+        return $this->enableDebuggerWith($debuggerMode);
+    }
+
+    /**
+     * @param $enableMode
+     * @return $this
+     */
+    private function enableDebuggerWith($enableMode)
+    {
+        if ($this->isLoggerEnabled() == true) {
+            Debugger::enable($enableMode, $this->getLogPath());
         } else {
-            $this->setLogConfig($enableLogger, $loggerDir)
-                 ->enableDebuggerWith(Debugger::PRODUCTION, $loggerDir);
+            Debugger::enable($enableMode);
         }
 
         return $this;
     }
 
     /**
-     * @param       $enableMode
-     * @param array $config
+     * @param $enableLogger
+     * @param $logPath
+     * @return $this
      */
-    private function enableDebuggerWith($enableMode, $loggerDir = "")
-    {
-        if ($this->isLoggerEnabled() == true) {
-            $logPath = str_replace('.', '/', $loggerDir).'/';
-            Debugger::enable($enableMode, $logPath);
-        } else {
-            Debugger::enable($enableMode);
-        }
-    }
-
     public function setLogConfig($enableLogger, $logPath)
     {
         $this->enableLogger = $enableLogger;
-        $this->logPath = $logPath;
+        $this->logPath = CYGNITE_BASE.DS.toPath($logPath).DS;
 
         return $this;
     }
 
+    /**
+     * @return bool
+     */
     public function isLoggerEnabled()
     {
         return $this->enableLogger;
+    }
+
+    /**
+     * @return mixed
+     */
+    public function getLogPath()
+    {
+        return (isset($this->logPath) ? $this->logPath : null);
     }
 
     /**
@@ -88,12 +108,12 @@ class ExceptionHandler implements ExceptionInterface
 
     /**
      * @param      $email
-     * @param bool $enableEmailing
+     * @param bool $hasEmail
      * @return $this
      */
-    public function setEmailAddress($email, $isSetEmail = false)
+    public function setEmailAddress($email, $hasEmail = false)
     {
-        if ($isSetEmail == true) {
+        if ($hasEmail) {
             Debugger::$email = $email;
         }
 
@@ -290,12 +310,13 @@ class ExceptionHandler implements ExceptionInterface
         |-----------------------------------
         */
         $config = Config::get('global.config');
-        $this->enable($config['enable_logging'], $config['log_path'])
+
+        $this->enable($config['logs']['activate'], $config['logs']['path'])
             ->setTitle()
             ->setDebugger(Debugger::getBlueScreen())
             ->setEmailAddress(
-                $config['params']['log_email'],
-                $config['enable_error_emailing']
+                $config['logs']['email'],
+                $config['logs']['error.emailing']
             )->run();
     }
 
@@ -310,12 +331,13 @@ class ExceptionHandler implements ExceptionInterface
 
     /**
      * We will display custom error page in production mode
-     * @param $e
-     * @return mixed
+     *
+     * @param null $e
+     * @throws \Exception
      */
     public function importCustomErrorPage($e = null)
     {
-        $path = CYGNITE_BASE.DS.str_replace('/', DS, APPPATH.'/Views/errors/');
+        $path = CYGNITE_BASE.DS.toPath(APPPATH.'/Views/errors/');
         if ($e == null) {
             Debugger::$errorTemplate = include $path.'500.view'.EXT;
         }
@@ -334,7 +356,7 @@ class ExceptionHandler implements ExceptionInterface
         }
 
         if (file_exists($path.$statusCode.'.view'.EXT)) {
-            $error = ['error.code' => $e->getStatusCode(), 'message' => $e->getMessage()];
+            $error = ['error.code' => $statusCode, 'message' => $e->getMessage()];
             extract($error);
             Debugger::$errorTemplate = include $path.$statusCode.'.view'.EXT;
         } else {

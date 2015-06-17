@@ -48,10 +48,10 @@ class Dispatcher
         $this->router = $app['router'];
 
         $this->default['controller'] = lcfirst(
-            Config::get('global.config', 'default_controller')
+            Config::get('global.config', 'default.controller')
         );
         $this->default['action'] = lcfirst(
-            Config::get('global.config', 'default_method')
+            Config::get('global.config', 'default.method')
         );
 
     }

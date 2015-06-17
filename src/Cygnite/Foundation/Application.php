@@ -427,6 +427,14 @@ class Application extends Container
             }
 
             if (ENV == 'production') {
+
+                /**
+                 * We will log exception if logger enabled
+                 */
+                if ($this['debugger']->isLoggerEnabled()) {
+                    $this['debugger']->log($e);
+                }
+
                 $this['debugger']->renderErrorPage($e);
             }
         }

@@ -42,11 +42,11 @@ class Encrypt
     */
     public function __construct()
     {
-        $encryptKey = Config::get('global.config', 'cf_encryption_key');
+        $encryptKey = Config::get('global.config', 'encryption.key');
 
         if (is_null($encryptKey)) {
-            $config = include_once CYGNITE_BASE.DS.APPPATH.DS.'configs'.DS.'application'.EXT;
-            $this->setSaltKey($config['cf_encryption_key']);
+            $config = include_once CYGNITE_BASE.DS.APPPATH.DS.'Configs'.DS.'application'.EXT;
+            $this->setSaltKey($config['encryption.key']);
         } else {
             $this->setSaltKey($encryptKey);
         }

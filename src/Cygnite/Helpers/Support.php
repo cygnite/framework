@@ -139,14 +139,16 @@ if ( ! function_exists('e')) {
 
 if (!function_exists('trans')) {
     /**
-     *    trans('Hello, :user', array(':user' => $username));
+     * trans('Hello, :user', array(':user' => $username));
      *
      * The target language is defined by [Translator::$locale].
      *
-     * @uses    Translator::get()
-     * @param   string $string text to translate
-     * @param   array  $replace values to replace in the translated text
-     * @param   string $lang   source language
+     * @uses     Translator::get()
+     * @param         $key
+     * @param   array $replace values to replace in the translated text
+     * @param string  $locale
+     * @internal param string $string text to translate
+     * @internal param string $lang source language
      * @return  string
      */
     function trans($key, array $replace = null, $locale = 'en-us')
@@ -161,5 +163,18 @@ if (!function_exists('trans')) {
 
             return empty($replace) ? $key : strtr($key, $replace);
         });
+    }
+}
+
+if ( ! function_exists('toPath')) {
+    /**
+     * We will replace dot / slash(/) to directory separator
+     *
+     * @param $string
+     * @return string
+     */
+    function toPath($string)
+    {
+        return str_replace(['.', '/'], DIRECTORY_SEPARATOR, $string);
     }
 }

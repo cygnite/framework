@@ -99,8 +99,6 @@ class Asset implements \ArrayAccess
                 break;
         }
 
-        //show($this->assets);
-
         return $this;
     }
 
@@ -377,12 +375,24 @@ class Asset implements \ArrayAccess
         return (new Static);
     }
 
+    /**
+     * This method is alias of stye()
+     *
+     * @return mixed
+     */
     public static function css()
     {
+        $args = [];
         $args = func_get_args();
-        return call_user_func_array([new Static, 'style'], []);
+        $args[1] = 'static';
+        return call_user_func_array([new Static, 'style'], $args);
     }
 
+    /**
+     * This method is alias of link()
+     *
+     * @return mixed
+     */
     public static function anchor()
     {
         $args = [];
@@ -391,6 +401,11 @@ class Asset implements \ArrayAccess
         return call_user_func_array([new Static, 'link'], $args);
     }
 
+    /**
+     * This method is alias of script()
+     *
+     * @return mixed
+     */
     public static function js()
     {
         $args = [];

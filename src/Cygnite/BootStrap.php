@@ -33,10 +33,10 @@ Url::setBase(
  *  Set Cygnite user defined encryption key
  * ---------------------------------------------------
  */
-if (!is_null(Config::get('global.config', 'cf_encryption_key')) ||
+if (!is_null(Config::get('global.config', 'encryption.key')) ||
     in_array('encrypt', Config::get('config.autoload', 'helpers')) == true
 ) {
-    define('CF_ENCRYPT_KEY', Config::get('global.config', 'cf_encryption_key'));
+    define('CF_ENCRYPT_KEY', Config::get('global.config', 'encryption.key'));
 }
 
 /*------------------------------------------------------------------
@@ -44,6 +44,6 @@ if (!is_null(Config::get('global.config', 'cf_encryption_key')) ||
  * has not been set in configuration
  * ------------------------------------------------------------------
  */
-if (is_null(Config::get('global.config', "default_controller"))) {
+if (is_null(Config::get('global.config', "default.controller"))) {
     throw new \Exception("Set Default Controller in ".APPPATH."/configs/application.php");
 }

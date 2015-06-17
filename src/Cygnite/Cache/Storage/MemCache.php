@@ -65,13 +65,14 @@ class MemCache implements StorageInterface
      */
     public function create($host = '', $port = '')
     {
-        if ($host == '' && $port == '') {
-            $this->host = 'localhost';
-            $this->port = 11211;
-        } else {
+        $this->host = 'localhost';
+        $this->port = 11211;
+
+        if ($host != '' && $port != '') {
             $this->host = $host;
             $this->port = $port;
         }
+
 
         if (class_exists('Memcache')) {
 
