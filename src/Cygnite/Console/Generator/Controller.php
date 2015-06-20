@@ -383,10 +383,9 @@ class Controller
      */
     public function generate()
     {
-        echo $this->applicationDir.DS.'Controllers'.DS.$this->controller.EXT;
         /*write operation ->*/
         $writeTmp =fopen(
-            $this->applicationDir.DS.'controllers'.DS.$this->controller.EXT,
+            $this->applicationDir.DS.'Controllers'.DS.$this->controller.EXT,
             "w"
         ) or die('Unable to generate controller');
 
