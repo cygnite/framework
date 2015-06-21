@@ -1,0 +1,27 @@
+{
+    "name": "cygnite/hash-bcrypt",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Sanjoy Dey",
+            "email": "dey.sanjoy0@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.4.0",
+        "cygnite/proxy": "1.0.*",
+        "ircmaxell/password-compat": "~1.0"
+    },
+    "autoload": {
+        "psr-0": {
+            "Cygnite\\Hash": ""
+        }
+    },
+    "target-dir": "Cygnite/Hash",
+    "extra": {
+        "branch-alias": {
+            "dev-master": "2.0-dev"
+        }
+    },
+    "minimum-stability": "dev"
+}
