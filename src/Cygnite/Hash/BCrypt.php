@@ -1,14 +1,12 @@
 <?php
 namespace Cygnite\Hash;
 
-use Cygnite\Proxy\StaticResolver;
-
 /**
  * Class BCrypt
  *
  * @package Cygnite\Hash
  */
-class BCrypt extends StaticResolver implements HashInterface
+class BCrypt implements HashInterface
 {
     /**
      * Default cost for BCrypt hashing
