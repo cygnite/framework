@@ -17,7 +17,7 @@ if (defined('CF_SYSTEM') == false) {
  */
 class Config extends StaticResolver
 {
-    private static $config = [];
+    public static $config = [];
 
     protected $configuration = [];
 
@@ -61,8 +61,7 @@ class Config extends StaticResolver
                 return $config[$arrKey][$keyValue];
             }
         }
-
-    }//end of getConfig()
+    }
 
     /**
      * Store new configurations
@@ -72,7 +71,6 @@ class Config extends StaticResolver
     protected function set($name, $values = [])
     {
         self::$config[$name] = $values;
-
     }
 
     /**
@@ -84,6 +82,11 @@ class Config extends StaticResolver
         static::$paths = $paths;
 
         return $this;
+    }
+
+    protected function setFileArray($array)
+    {
+        $this->files = array_merge($this->files, $array);
     }
 
     /**
@@ -120,7 +123,16 @@ class Config extends StaticResolver
     {
         $this->importConfigurations();
 
+        //Set up configurations for your awesome application
+        Config::set('config.items', $this->configuration);
+
         return $this->configuration;
+    }
+
+    protected function setConfigurationItems($name, $value)
+    {
+        $value = array_merge($this->configuration, $value);
+        Config::set($name, $value);
     }
 
     /**
@@ -130,17 +142,9 @@ class Config extends StaticResolver
     private function importConfigurations()
     {
         $configPath = "";
-        $configPath = static::$paths['app.path'].static::$paths['app.config']['directory'];
+        $configPath = toPath(static::$paths['app.path'].static::$paths['app.config']['directory']);
         $files = [];
         $files = array_merge($this->files, static::$paths['app.config']['files']);
-
-        if (isset(
-            $this->configuration['global.config'],
-            $this->configuration['config.database'],
-            $this->configuration['config.session']
-        )) {
-            return $this->configuration;
-        }
 
         foreach ($files as $key => $file) {
 
