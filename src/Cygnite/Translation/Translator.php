@@ -113,8 +113,8 @@ class Translator implements TranslatorInterface
             $locale = $this->locale();
         }
 
-        if (strpos($key, '.') !== false) {
-            $exp = explode('.', $key);
+        if (string_has($key, '.')) {
+            $exp = string_split($key);
             // Load the translation table for this language
             $translator = $this->load($locale.'-'.$exp[0]);
             // Return the translated string if it exists
@@ -265,7 +265,7 @@ class Translator implements TranslatorInterface
         // New Translator array
         $trans = [];
         // Split the language: language, region, locale, etc
-        $parts = explode('-', $locale);
+        $parts = string_split($locale, '-');
 
         do {
             // Create a path for this set of parts

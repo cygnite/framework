@@ -262,11 +262,10 @@ class Application extends Container
     {
         $this->importHelpers();
         $this->setPaths(CYGNITE_BASE.DS.CF_BOOTSTRAP.DS.'config.paths'.EXT);
-        $config = [];
-        $config = \Cygnite\Helpers\Config::load();
 
         //Set up configurations for your awesome application
-        Config::set('config.items', $config);
+        \Cygnite\Helpers\Config::load();
+
         $this->setServices();
 
         return $this;

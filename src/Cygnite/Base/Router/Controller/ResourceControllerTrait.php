@@ -86,7 +86,7 @@ trait ResourceControllerTrait
             strtoupper('get'),
             $name,
             function () use ($controller, $action) {
-                $args = [$controller . '.' .'get'.ucfirst($action)];
+                $args = [$controller . '@' .'get'.ucfirst($action)];
                 return $this->callController($args);
             }
         );
@@ -179,9 +179,9 @@ trait ResourceControllerTrait
             $pattern,
             function ($router, $id) use ($controller, $action, $type) {
 
-                $args = [$controller . '.' . $action];
+                $args = [$controller . '@' . $action];
                 if ($type) {
-                    $args = [$controller . '.' . $action, $id];// delete, update
+                    $args = [$controller . '@' . $action, $id];// delete, update
                 }
 
                 return $this->callController($args);

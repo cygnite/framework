@@ -73,8 +73,8 @@ class Controller implements RouteControllerInterface
      */
     protected function setIndexRoute($controller, $action)
     {
-         $this->mapRoute("/$controller/", Inflector::classify($controller).'.'.$action);
-         return $this->mapRoute("/$controller/$action/", Inflector::classify($controller).'.'.$action);
+         $this->mapRoute("/$controller/", Inflector::classify($controller).'@'.$action);
+         return $this->mapRoute("/$controller/$action/", Inflector::classify($controller).'@'.$action);
     }
 
     /**
@@ -84,7 +84,7 @@ class Controller implements RouteControllerInterface
      */
     protected function setAddRoute($controller, $action)
     {
-        return $this->mapRoute("/$controller/$action/", Inflector::classify($controller).'.'.$action);
+        return $this->mapRoute("/$controller/$action/", Inflector::classify($controller).'@'.$action);
     }
 
     /**
@@ -94,7 +94,7 @@ class Controller implements RouteControllerInterface
      */
     protected function setEditRoute($controller, $action)
     {
-        return $this->mapRoute("/$controller/$action/{:id}/", Inflector::classify($controller).'.'.$action);
+        return $this->mapRoute("/$controller/$action/{:id}/", Inflector::classify($controller).'@'.$action);
     }
 
     /**
@@ -104,7 +104,7 @@ class Controller implements RouteControllerInterface
      */
     protected function setShowRoute($controller, $action)
     {
-        return $this->mapRoute("/$controller/$action/{:id}/", Inflector::classify($controller).'.'.$action);
+        return $this->mapRoute("/$controller/$action/{:id}/", Inflector::classify($controller).'@'.$action);
     }
 
     /**
@@ -114,7 +114,7 @@ class Controller implements RouteControllerInterface
      */
     protected function setDeleteRoute($controller, $action)
     {
-        return $this->mapRoute("/$controller/$action/{:id}/", Inflector::classify($controller).'.'.$action);
+        return $this->mapRoute("/$controller/$action/{:id}/", Inflector::classify($controller).'@'.$action);
     }
 
     /**

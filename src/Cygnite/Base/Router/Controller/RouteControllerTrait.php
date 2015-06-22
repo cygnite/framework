@@ -14,7 +14,7 @@ use Reflection;
 use Cygnite\Foundation\Application as App;
 use Cygnite\Base\Router\Router;
 use Cygnite\Helpers\Inflector;
-use Cygnite\Helpers\Helper;
+use Cygnite\Helpers\Config;
 use Cygnite\Exception\Http\HttpNotFoundException;
 
 if (!defined('CF_SYSTEM')) {
@@ -41,50 +41,19 @@ trait RouteControllerTrait
     public $app;
     public $route;
 
-    public function findControllerAndMethodStaticRoute($route)
-    {
-        return explode('.', $route);
-    }
-
+    /**
+     * @return array
+     */
     public function getUrlSegments()
     {
         $newUrl = str_replace('/index.php', '', rtrim($this->getCurrentUri()));
         return array_filter(explode('/', $newUrl));
     }
 
-    public function getControllerByUrlSegment()
-    {
-        $exp = $this->getUrlSegments();
-        $controller = $params = null;$controllerDir = "";
-        $controller = $exp[1];
-        $params = array_slice($exp, 2);
-        $dir = CYGNITE_BASE.str_replace('\\', DS, strtolower("\\" .APPPATH.$this->getApplication()->namespace.$exp[1]));
-
-        /*
-         | We will check if user requesting uri has directory
-         | inside, then we will consider next param as controller name
-         | /admin/user/index/32
-         | directory    : admin
-         | controller   : user
-         | action       : index
-         | param        : 32
-         */
-        if (is_dir($dir)) {
-            list($controllerDir, $controller, $method, $params) = $this->setControllerDirectoryConfig($exp);
-        }
-
-        $method = (isset($exp[2])) ? $exp[2] : null;
-        $action = (isset($method)) ? $method : 'index';
-        /*
-         | Make Controller and Action name and return
-         */
-        list($controller, $action) = $this->getControllerAndAction($controller, $action, $controllerDir);
-
-        $this->controllerName = $controller;
-        $this->actionName = $action;
-        $this->actionParams = $params;
-    }
-
+    /**
+     * @param $exp
+     * @return array
+     */
     private function setControllerDirectoryConfig($exp)
     {
         return [ucfirst($exp[1]), $exp[2], $exp[3], array_slice($exp, 3)];
@@ -98,12 +67,17 @@ trait RouteControllerTrait
     public function callController($arguments)
     {
         $params = [];
-        $this->setUpControllerAndMethodName($arguments);
 
-        // Check if whether user trying to access module
+        /*
+         | Check if whether user trying to access module
+         | If module we will setup module configuration
+         | or else setup default MVC configurations
+         */
         if (string_has($arguments[0], '::')) {
             $exp = string_split($arguments[0], '::');
             $this->setModuleConfiguration($exp);
+        } else {
+            $this->setUpControllerAndMethodName($arguments);
         }
 
         if (isset($arguments[1])) {
@@ -113,24 +87,19 @@ trait RouteControllerTrait
         $file = CYGNITE_BASE . str_replace('\\', DS, '\\src'.$this->controllerWithNS) . EXT;
 
         if (!is_readable($file)) {
-            throw new \Exception("Route " . $this->controllerWithNS . " not found. ");
+            throw new \Exception("Route class " . $this->controllerWithNS . " not found. ");
         }
 
-        // Get the instance of controller from Cygnite Container
-        // and inject all dependencies into controller dynamically
-        // It's cool. You can write powerful rest api using restful
-        // routing
-        return App::instance(
-            function ($app) use ($params) {
-                // make and return instance of controller
-                $instance = $app->make($this->controllerWithNS);
-                // inject all properties of controller defined in definition
-                $app->propertyInjection($instance, $this->controllerWithNS);
-                $args = [];
-                $args = (!is_array($params)) ? [$params] : $params;
-                return call_user_func_array([$instance, $this->method], $args);
-            }
-        );
+        $args = [];
+        $args = (!is_array($params)) ? [$params] : $params;
+
+        /*
+         | Get the instance of controller from Cygnite Container
+         | and inject all dependencies into controller dynamically.
+         | It's cool! You can write powerful rest api using restful
+         | routing
+         */
+        return $this->handleControllerDependencies($this->controllerWithNS, $this->method, $args);
     }
 
     /**
@@ -140,16 +109,43 @@ trait RouteControllerTrait
      */
     private function setUpControllerAndMethodName($arguments)
     {
-        $expression = string_split($arguments[0]);
+        $expression = string_split($arguments[0], '@');
         $this->setControllerConfig($arguments, $expression);
     }
 
+    /**
+     * @param $args
+     */
     private function setModuleConfiguration($args)
     {
-        $param = string_split($args[1]);
+        $param = string_split($args[1], '@');
+        $this->bootstrapModule($args[0]);
         $this->setControllerConfig($args, $param, true);
     }
 
+    /**
+     * @param $module
+     * @return bool
+     */
+    public function bootstrapModule($module)
+    {
+        $config = Config::get('module');
+        $modulePath = $config['module.path'].DS;
+        $moduleConfigDir = $config['module.config'].DS;
+        $class = '\\'.APP_NS.'\\'.$this->getModuleDir().'\\'.ucfirst($module).'\\BootStrap';
+
+        $file = $modulePath.ucfirst($module).DS.$moduleConfigDir.strtolower($module).EXT;
+        if (!file_exists($file)) {
+            return false;
+        }
+
+        Config::setConfigurationItems(strtolower($module).'.config', include $file);
+        return (new $class)->register($this->getApplication(), $file);
+    }
+
+    /**
+     * @return mixed
+     */
     public function getModuleDir()
     {
         return isset(static::$moduleDir) ? static::$moduleDir : static::MODULE_DIR;
@@ -165,18 +161,28 @@ trait RouteControllerTrait
         $this->controller = Inflector::classify($param[0]) . 'Controller';
 
         if ($module) {
-            $this->namespace = '\\' . ucfirst($this->getModuleDir()) . '\\' . $args[0] . '\\Controllers\\';
+            $this->namespace = '\\' . $this->getModuleDir() . '\\' . $args[0] . '\\Controllers\\';
         }
         $this->controllerWithNS = "\\" . str_replace('src/', '', APPPATH) . $this->namespace . $this->controller;
         $this->method = Inflector::camelize($param[1]) . 'Action';
     }
 
-
+    /**
+     * Get Application instance
+     *
+     * @return App
+     */
     private function getApplication()
     {
         return App::instance();
     }
 
+    /**
+     * Set router instance
+     *
+     * @param $router
+     * @return $this
+     */
     public function setRoute($router)
     {
         $this->route = $router;
@@ -184,6 +190,11 @@ trait RouteControllerTrait
         return $this;
     }
 
+    /**
+     * Get the router instance
+     *
+     * @return mixed
+     */
     public function getRouter()
     {
         return isset($this->route) ? $this->route : null;
@@ -235,21 +246,24 @@ trait RouteControllerTrait
      * @param       $action
      * @param array $params
      * @return mixed
+     * @throws \Cygnite\Exception\Http\HttpNotFoundException
      */
     public function handleControllerDependencies($controller, $action, $params = [])
     {
+        // make and return instance of controller
         $instance = $this->getApplication()->make($controller);
 
         if (!method_exists($instance, $action)) {
-            throw new HttpNotFoundException("Unhandled Exception: Controller Action $controller::$action() Not Found!");
-
-            return (int) 0;
+            throw new HttpNotFoundException("Action Not Found In Controller $controller::$action()");
         }
 
+        // inject all properties of controller defined in definition
         $this->getApplication()->propertyInjection($instance, $controller);
-        // Trigger Events for Action
+        // Trigger Before Action Events
         $this->triggerActionEvent($instance, $action);
+
         $response = call_user_func_array([$instance, $action], $params);
+        // Trigger After Action Events
         $this->triggerActionEvent($instance, $action, 'after');
 
         return $response;

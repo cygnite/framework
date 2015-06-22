@@ -85,6 +85,8 @@ class Router implements RouterInterface
     private $routeBasePath = '';
     private $after = [];
 
+    public static $moduleDir;
+
     /**
      * @param $method
      * @param $arguments
@@ -137,7 +139,13 @@ class Router implements RouterInterface
         return $this->routeBasePath ? rtrim($pattern, '/') : $pattern;
     }
 
-    public function setModuleDir($name)
+    /**
+     * Sometime you may also want to change the 'modules' directory
+     * name. Such cases set module directory name to be identified by Router
+     *
+     * @param $name
+     */
+    public function setModuleDirectory($name)
     {
         static::$moduleDir = $name;
     }
