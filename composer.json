@@ -15,20 +15,25 @@
         }
     ],
     "require": {
-	 "php": ">=5.4",
-	 "twig/twig": "1.*",
-	 "symfony/console": "2.5.*",
-	 "tracy/tracy": "2.3.*",
-     "ircmaxell/password-compat": "~1.0",
-	 "swiftmailer/swiftmailer": "5.4.*"
+         "php": ">=5.4",
+         "twig/twig": "1.*",
+         "symfony/console": "2.5.*",
+         "tracy/tracy": "2.3.*",
+         "ircmaxell/password-compat": "~1.0",
+         "swiftmailer/swiftmailer": "5.4.*"
    },	
    "require-dev": {
-        "mockery/mockery": "dev-master",
-        "phpunit/phpunit": "dev-master"
+       "mockery/mockery": "~0.9.1",
+       "phpunit/phpunit": "~4.0"
     },
      "autoload": {
-        "psr-0": {
-            "Cygnite": "src/"
+         "psr-4": {
+             "Cygnite\\": "src/Cygnite/"
+         }
+    },
+    "extra": {
+        "branch-alias": {
+            "dev-master": "2.0-dev"
         }
     },
     "minimum-stability": "dev"
