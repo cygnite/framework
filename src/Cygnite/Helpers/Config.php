@@ -1,9 +1,8 @@
 <?php
 namespace Cygnite\Helpers;
 
-use Exception;
 use Cygnite\Proxy\StaticResolver;
-use InvalidArgumentException;
+use Cygnite\Common\ArrayManipulator\ArrayAccessor;
 
 if (defined('CF_SYSTEM') == false) {
     exit('No External script access allowed');
@@ -11,7 +10,7 @@ if (defined('CF_SYSTEM') == false) {
 /**
  * Class Config
  * This class used to load all configurations files in order to
- * quick access on user request
+ * quick access of user request
  *
  * @package Cygnite\Helpers
  */
@@ -19,58 +18,71 @@ class Config extends StaticResolver
 {
     public static $config = [];
 
-    protected $configuration = [];
-
     public static $paths = [];
 
     public $files = [
-        'global.config' => 'application',
+        'global.config'   => 'application',
         'config.database' => 'database',
-        'config.session' => 'session',
-        'config.view' => 'view',
+        'config.session'  => 'session',
+        'config.view'     => 'view',
     ];
 
+    public $default = 'config.items';
+
     /**
-     * Get the configuration.
+     *  Get the configuration by index
      *
-     * @param string $arrKey get config based on key
-     *
-     * @param bool $keyValue get config value
-     *
-     * @return mixed
-     * @throws InvalidArgumentException
+     * @param      $key
+     * @param bool $value
+     * @return mixed|null
+     * @throws \InvalidArgumentException
+     * @throws \Exception
      */
-    protected function get($arrKey, $keyValue = false)
+    protected function get($key, $value = false)
     {
+        if (is_null($key)) {
+            throw new \InvalidArgumentException('Null argument passed to '.__METHOD__);
+        }
+
         $config = [];
+        $config = self::$config;
 
-        $config = $this->getConfigItems('config.items');
-
-        if ($arrKey === null) {
-            throw new InvalidArgumentException(
-                'Cannot pass null argument to '.__METHOD__
-            );
+        if (empty($config)) {
+            throw new \Exception('Config stack is empty!');
         }
 
-        if (is_array($config)) {
-            if (false !== array_key_exists($arrKey, $config) && $keyValue === false) {
-                return $config[$arrKey];
-            }
-
-            if (false !== array_key_exists($arrKey, $config) && $keyValue !== false) {
-                return $config[$arrKey][$keyValue];
-            }
+        if ($value == false && array_key_exists($key, $config)) {
+            return isset($config[$key]) ? $config[$key] : null;
         }
+
+        if (array_key_exists($key, $config) && $value == true) {
+            return $config[$key][$value];
+        }
+
+        /*
+         | We will access array value as string with dot separator
+         | 'module.config' => [
+         |    "config"  => [
+         |        "name" => "Welcome To Module"
+         |    ]
+         | ]
+         | Config::get('module-config.config.name');
+         */
+        return ArrayAccessor::make(function($accessor) use ($key, $config)
+            {
+                return $accessor->set($config)->toString($key);
+            });
     }
 
     /**
-     * Store new configurations
-     * @param       $name
-     * @param array $values
+     * Set configuration parameter
+     *
+     * @param       $key
+     * @param array $value
      */
-    protected function set($name, $values = [])
+    protected function set($key, $value = [])
     {
-        self::$config[$name] = $values;
+        self::$config[$key] = $value;
     }
 
     /**
@@ -84,9 +96,11 @@ class Config extends StaticResolver
         return $this;
     }
 
-    protected function setFileArray($array)
+    protected function addConfigFile($array)
     {
         $this->files = array_merge($this->files, $array);
+
+        return $this;
     }
 
     /**
@@ -96,43 +110,15 @@ class Config extends StaticResolver
     {
         return isset(static::$paths) ? static::$paths : [];
     }
-
-    /**
-     * @param $key
-     * @return null
-     * @throws \InvalidArgumentException
-     */
-    protected function getConfigItems($key)
-    {
-        if (is_null($key) == true) {
-            throw new InvalidArgumentException(
-                'Cannot pass null argument to '.__METHOD__
-            );
-        }
-
-        return isset(self::$config[strtolower($key)]) ?
-            self::$config[strtolower($key)] :
-            null
-            ;
-
-    }
     /*
      * Import application configurations
      */
     protected function load()
     {
+        //Set up configurations for your awesome application
         $this->importConfigurations();
 
-        //Set up configurations for your awesome application
-        Config::set('config.items', $this->configuration);
-
-        return $this->configuration;
-    }
-
-    protected function setConfigurationItems($name, $value)
-    {
-        $value = array_merge($this->configuration, $value);
-        Config::set($name, $value);
+        return true;
     }
 
     /**
@@ -148,17 +134,16 @@ class Config extends StaticResolver
 
         foreach ($files as $key => $file) {
 
-            if (file_exists($configPath.$file.EXT)) {
-                /**
-                 | We will include configuration file into array only first time
-                 |
-                 */
-                if (!isset($this->configuration[$key])){
-                    $this->configuration[$key] = include $configPath.$file.EXT;
-                }
+            if (!file_exists($configPath.$file.EXT)) {
+                throw new \Exception("File doesn't exists in the path ".$configPath.$file.EXT);
+            }
 
-            } else {
-                throw new Exception("File not exists on the path ".$configPath.$file.EXT);
+            /**
+            | We will include configuration file into array only
+            | for the first time
+             */
+            if (!isset(self::$config[$key])){
+                Config::set($key, include $configPath.$file.EXT);
             }
         }
     }

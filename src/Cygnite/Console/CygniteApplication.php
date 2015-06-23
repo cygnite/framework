@@ -46,38 +46,97 @@ class CygniteApplication extends Application
     {
         parent::__construct($description, $version);
 
-        //Get Generator command instance and set table schema
-        $generateInstance = GeneratorCommand::instance();
-        $generateInstance->setSchema(new Table);
-
-        //Initialise Migration
-        $initInstance = InitCommand::instance();
-        $initInstance->setSchema(new Table);
-
-        //Get the migration instance and Set schema
-        $migrationInstance = MigrationCommand::instance();
-        $migrationInstance->setSchema(new Table);
-        $migrationInstance->setMigrationPath($this->getApplicationDirectory());
-
-        //Get the Form Generator instance and set Schema
-        $formInstance = FormGeneratorCommand::instance();
-        $formInstance->setSchema(new Table);
-
-        $controllerInstance = ControllerGeneratorCommand::make();
-        $modelInstance = ModelGeneratorCommand::make();
-        $modelInstance->setSchema(new Table);
-
+        /*
+         | Setup all console commands and add
+         | commands into the console application
+         */
+        $generateInstance = $this->setGenerateCommand();
+        $initInstance = $this->setInitCommand();
+        $migrationInstance = $this->setMigrationCommand();
+        $formInstance = $this->setFormGeneratorCommand();
+        $controllerInstance = $this->setControllerGeneratorCommand();
+        $modelInstance = $this->setModelGeneratorCommand();
 
         $this->addCommands(
-            array(
+            [
                 $initInstance,
                 $generateInstance,
                 $migrationInstance,
                 $controllerInstance,
                 $formInstance,
                 $modelInstance
-            )
+            ]
         );
+    }
+
+    /**
+     * @return GeneratorCommand
+     */
+    private function setGenerateCommand()
+    {
+        //Get Generator command instance and set table schema
+        $generateInstance = GeneratorCommand::instance();
+        $generateInstance->setSchema(new Table);
+
+        return $generateInstance;
+    }
+
+    /**
+     * @return mixed
+     */
+    private function setInitCommand()
+    {
+        //Initialise Migration
+        $initInstance = InitCommand::instance();
+        $initInstance->setSchema(new Table);
+
+        return $initInstance;
+    }
+
+    /**
+     * @return MigrationCommand
+     */
+    private function setMigrationCommand()
+    {
+        //Get the migration instance and Set schema
+        $migrationInstance = MigrationCommand::instance();
+        $migrationInstance->setSchema(new Table);
+        $migrationInstance->setMigrationPath($this->getApplicationDirectory());
+
+        return $migrationInstance;
+    }
+
+    /**
+     * @return mixed
+     */
+    private function setFormGeneratorCommand()
+    {
+        //Get the Form Generator instance and set Schema
+        $formInstance = FormGeneratorCommand::instance();
+        $formInstance->setSchema(new Table);
+
+        return $formInstance;
+    }
+
+    /**
+     * @return ControllerGeneratorCommand
+     */
+    private function setControllerGeneratorCommand()
+    {
+        $controllerInstance = ControllerGeneratorCommand::make();
+
+        return $controllerInstance;
+    }
+
+    /**
+     * @return ModelGeneratorCommand
+     */
+    private function setModelGeneratorCommand()
+    {
+        $modelInstance = ModelGeneratorCommand::make();
+        $modelInstance->setSchema(new Table);
+
+        return $modelInstance;
     }
 
     // Get the Application directory
