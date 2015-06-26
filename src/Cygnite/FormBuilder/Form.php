@@ -1,82 +1,84 @@
 <?php
+
+/*
+ * This file is part of the Cygnite package.
+ *
+ * (c) Sanjoy Dey <dey.sanjoy0@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Cygnite\FormBuilder;
 
 use Closure;
 use Cygnite\Common\Input;
-use Cygnite\Proxy\StaticResolver;
 
 if (!defined('CF_SYSTEM')) {
     exit('No External script access allowed');
 }
+
 /**
- *  Cygnite Framework
+ * Form.
  *
- *  An open source application development framework for PHP 5.3x or newer
+ * Build your form on the fly.
  *
- *   License
- *
- *   This source file is subject to the MIT license that is bundled
- *   with this package in the file LICENSE.txt.
- *   http://www.cygniteframework.com/license.txt
- *   If you did not receive a copy of the license and are unable to
- *   obtain it through the world-wide-web, please send an email
- *   to sanjoy@hotmail.com so I can send you a copy immediately.
- *
- * @package               :  Cygnite
- * @subpackages           :  FormBuilder
- * @filename              :  Form
- * @description           :  This class used to build your form
- * @author                :  Sanjoy Dey
- * @copyright             :  Copyright (c) 2013 - 2014,
- * @link	              :  http://www.cygniteframework.com
- * @since	              :  Version 1.0
- * @FileSource
- *
+ * @author Sanjoy Dey <dey.sanjoy0@gmail.com>
  */
 
-class Form extends StaticResolver implements FormInterface
+class Form implements FormInterface
 {
 
-    private static $formHolder = array();
+    private static $formHolder = [];
 
     public static $formName;
 
     public static $formOpen;
 
-    public $attributes = array();
+    protected $attributes = [];
 
-    public  $elements = array();
+    protected  $elements = [];
 
-    public $value = array();
+    protected $value = [];
 
-    public  $element = array();
+    protected  $element = [];
 
     private static $object;
 
-    private $validArray = array('text', 'button', 'select', 'textarea');
+    private $validArray = ['text', 'button', 'select', 'textarea'];
 
     public $validator;
 
-    public $errorClass = 'error';
+    protected $errorClass = 'error';
+
+    private static $validMethod = ['make', 'instance'];
 
     /**
-     * @param       $name
+     * @param       $method
      * @param array $arguments
      * @return mixed
      * @throws \Exception
      */
-     /*
-    public static function __callStatic($name, $arguments = array())
+    public static function __callStatic($method, $arguments = [])
     {
-        if ($name == 'instance' && empty($arguments)) {
-            return call_user_func_array(array(new self,'get'.ucfirst($name)), array());
-        } elseif ($name == 'instance' && $arguments[0] instanceof Closure) {
-            return call_user_func_array(array(new self,'get'.ucfirst($name)), $arguments);
+        // Check for valid function name
+        if (in_array($method, static::$validMethod)) {
+            if (empty($arguments)) {
+                return call_user_func_array([new self,'getInstance'], []);
+            } elseif ($arguments[0] instanceof Closure) {
+                return call_user_func_array([new self,'getInstance'], $arguments);
+            }
         }
 
-        throw new \Exception("Undefined $name method called.");
-    }*/
+        throw new \Exception("Undefined $method method called.");
+    }
 
+    /**
+     * Get the form builder instance to build form
+     *
+     * @param callable $callback
+     * @return Form
+     */
     protected function getInstance(Closure $callback = null)
     {
         if ($callback instanceof Closure) {
@@ -93,7 +95,7 @@ class Form extends StaticResolver implements FormInterface
      * @param array $attributes
      * @return $this
      */
-    public function open($formName, $attributes = array())
+    public function open($formName, $attributes = [])
     {
         self::$formName = $formName;
         self::$formHolder[$formName] = $formName;
@@ -104,20 +106,7 @@ class Form extends StaticResolver implements FormInterface
         return $this;
     }
 
-    public function __call($method, $arguments = array())
-    {
-
-        $inputType = null;
-        $inputType = strtolower(substr($method, 3));
-
-        if ($inputType == 'text') {
-           // $this->attributes['type'] = $arguments;
-            $arguments['type'] = $inputType;
-            return call_user_func_array(array(new self, 'addEl'), $arguments);
-        }
-    }
-
-    /*
+   /*
     * Add form elements
     *
     * @param  $key
@@ -125,7 +114,7 @@ class Form extends StaticResolver implements FormInterface
     * @return $this
     *
     */
-    public function addElement($type, $key, $values = array())
+    public function addElement($type, $key, $values = [])
     {
         $values['type'] = $type;
         $this->value[$key] = $values;
@@ -148,7 +137,7 @@ class Form extends StaticResolver implements FormInterface
      * @param array $elements
      * @return $this
      */
-    public function addElements($elements = array())
+    public function addElements($elements = [])
     {
         $this->value = array_shift($elements);
 
@@ -270,7 +259,7 @@ class Form extends StaticResolver implements FormInterface
     private function select($key, $values)
     {
         $select = $selectValue = '';
-        $attributes = array();
+        $attributes = [];
 
         $selectOptions = $values['options'];
         $selected = $values['selected'];
@@ -341,7 +330,9 @@ class Form extends StaticResolver implements FormInterface
     //Have to work on this.
     public function __toString()
     {
-        return $this->element[@self::$formHolder[self::$formName]];
+        return isset($this->element[self::$formHolder[self::$formName]]) ?
+            $this->element[self::$formHolder[self::$formName]]
+            : "";
     }
 
     /**

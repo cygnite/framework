@@ -16,41 +16,20 @@ use Swift_SendmailTransport as SendmailTransport;
 if ( ! defined('CF_SYSTEM')) exit('External script access not allowed');
 
 /**
- *  Cygnite Framework
+ * Mailer
+ * Swiftmailer wrapper class to handle email functionality
  *
- *  An open source application development framework for PHP 5.3  or newer
- *
- *   License
- *
- *   This source file is subject to the MIT license that is bundled
- *   with this package in the file LICENSE.txt.
- *   http://www.cygniteframework.com/license.txt
- *   If you did not receive a copy of the license and are unable to
- *   obtain it through the world-wide-web, please send an email
- *   to sanjoy@hotmail.com so I can send you a copy immediately.
- *
- * @Package                         :  Packages
- * @Sub Packages                    :  Library
- * @Filename                        :  Email
- * @Description                     :  Swiftmailer wrapper class to handle email functionalities
- * @Author                          :  Sanjoy Dey
- * @Copyright                       :  Copyright (c) 2013 - 2014,
- * @Link                            :  http://www.cygniteframework.com
- * @Since                           :  Version 1.0.6
- * @Filesource                      :
- *
- *  Mailer::instance(function($mailer) {
+ *  Mailer::compose(function($mailer) {
  *
  *      $mailer->setDriver('SMTP');
  *      $mailer->setHost('smtp.example.org');
  *      $mailer->setPort('25');
  *     //$mailer->setEncryption('25');
  *      $mailer->setCredentials(array(
-                                    'username' => 'Your Username',
- *                                  'password' => 'Your Password'
+             'username' => 'Your Username',
+ *           'password' => 'Your Password'
  *
  *      ));
- *
  *
  *     $mailMessage = $mailer->setPriority($priority)
                 ->setSubject($subject)
@@ -62,8 +41,6 @@ if ( ! defined('CF_SYSTEM')) exit('External script access not allowed');
                 ->addPart('<q>Here is the message itself</q>', 'text/html')
  *              ->getMessage();
  *
- *
- *
  *      $mailer->send($mailMessage);
  * });
  *
@@ -73,7 +50,7 @@ class Mailer
 {
 
     // email configuration
-    private $emailConfig = array();
+    private $emailConfig = [];
 
     private $transportInstance;
 
@@ -103,8 +80,8 @@ class Mailer
      */
     public static function __callStatic($method, $arguments)
     {
-        if ($method == 'instance') {
-            return call_user_func_array(array(new self,'get'.ucfirst($method)), $arguments);
+        if ($method == 'compose') {
+            return call_user_func_array([new self,'get'.ucfirst($method)], $arguments);
         }
     }
 

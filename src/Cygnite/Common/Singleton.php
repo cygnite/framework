@@ -9,7 +9,7 @@ abstract class Singleton
      * @instances array
      */
 
-     private static $instances = array();
+     private static $instances = [];
 
     /**
      * Static method for instantiating a singleton object.

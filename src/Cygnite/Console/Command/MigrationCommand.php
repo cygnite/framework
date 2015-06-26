@@ -1,4 +1,12 @@
 <?php
+/*
+ * This file is part of the Cygnite package.
+ *
+ * (c) Sanjoy Dey <dey.sanjoy0@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 namespace Cygnite\Console\Command;
 
 use Cygnite\Database;
@@ -16,31 +24,12 @@ use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 
 /**
- *  Cygnite Framework
+ * Cygnite Migration Command
  *
- *  An open source application development framework for PHP 5.3 or newer
- *
- *   License
- *
- *   This source file is subject to the MIT license that is bundled
- *   with this package in the file LICENSE.txt.
- *   http://www.cygniteframework.com/license.txt
- *   If you did not receive a copy of the license and are unable to
- *   obtain it through the world-wide-web, please send an email
- *   to sanjoy@hotmail.com so that I can send you a copy immediately.
- *
- * @Package            :  Console
- * @Filename           :  MigrationCommand.php
- * @Description        :  Migration Command class used to take care of your database migrations using Cygnite CLI.
- *                        Cygnite Cli driven by Symfony2 Console Component.
- * @Author             :  Sanjoy Dey
- * @Copyright          :  Copyright (c) 2013 - 2014,
- * @Link	           :  http://www.cygniteframework.com
- * @Since	           :  Version 1.0.6
- * @File Source
+ * Migration Command class used to take care of your database migrations using Cygnite CLI.
+ * @author Sanjoy Dey <dey.sanjoy0@gmail.com>
  *
  */
-
 class MigrationCommand extends Command
 {
     private $name = 'migrate';
@@ -64,11 +53,11 @@ class MigrationCommand extends Command
 
         $migration = $migrationName = null;
 
-        $migration = Migrator::instance(new Inflector, $this);
+        $migration = Migrator::instance($this);
         $migration->getLatestMigration($this->migrationDir)
                   ->setMigrationClassName();
 
-        if ($type == '') {
+        if ($type == '' || $type == 'up') {
             $migration->updateMigration();
         } else {
             $migration->updateMigration('down');
@@ -81,19 +70,20 @@ class MigrationCommand extends Command
         if ($table instanceof Table) {
             $this->table = $table;
         }
-
     }
 
-    public static function __callStatic($method, $arguments = array())
+    public static function instance()
     {
-        if ($method == 'instance') {
-            return new self();
-        }
+        return new self();
     }
 
     public function setMigrationPath($dir)
     {
-        $this->migrationDir = $dir.DS.'database'.DS.'migrations'.DS;
+        $this->migrationDir = $dir.DS.'Resources'.DS.'Database'.DS.'Migrations'.DS;
     }
 
+    public function getMigrationPath()
+    {
+        return (isset($this->migrationDir) ? $this->migrationDir : null);
+    }
 }

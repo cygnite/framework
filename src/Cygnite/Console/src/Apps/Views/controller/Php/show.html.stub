@@ -1,0 +1,12 @@
+<?php use Cygnite\AssetManager\Asset; ?>
+
+<div class="pull-right">
+    <?php echo Asset::anchor('#controllerName#', 'Back', array('class' => 'btn btn-default btn-small btn-inverse')); ?>
+</div>
+
+<div class="form-horizontal">
+    <h2>Showing #controllerName# #<?php echo $record->id; ?></h2>
+
+    {#recordDivElements#}
+
+</div>

@@ -1,4 +1,12 @@
 <?php
+/*
+ * This file is part of the Cygnite package.
+ *
+ * (c) Sanjoy Dey <dey.sanjoy0@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 namespace Cygnite\Console;
 
 use Cygnite\Database;
@@ -7,32 +15,20 @@ use Cygnite\Console\Command\InitCommand;
 use Cygnite\Console\Command\GeneratorCommand;
 use Cygnite\Console\Command\MigrationCommand;
 use Symfony\Component\Console\Application;
+use Cygnite\Console\Command\FormGeneratorCommand;
+use Cygnite\Console\Command\ControllerGeneratorCommand;
+use Cygnite\Console\Command\ModelGeneratorCommand;
 use Symfony\Component\Console\Input\InputOption;
 
-require BASE_PATH.DS.APP_PATH.'/configs/database.php';
+require str_replace(['\\', '/'], DS, CYGNITE_BASE.DS.APPPATH.'/Configs/database.php');
+
 /**
- *  Cygnite Framework
+ * Cygnite Console Application
  *
- *  An open source application development framework for PHP 5.3 or newer
- *
- *   License
- *
- *   This source file is subject to the MIT license that is bundled
- *   with this package in the file LICENSE.txt.
- *   http://www.cygniteframework.com/license.txt
- *   If you did not receive a copy of the license and are unable to
- *   obtain it through the world-wide-web, please send an email
- *   to sanjoy@hotmail.com so that I can send you a copy immediately.
- *
- * @Package            :  Console
- * @Filename           :  CygniteApplication.php
- * @Description        :  Cygnite Application is the middle ware of all your console command using Cygnite CLI. 
- *                        Cygnite Cli driven by Symfony2 Console Component.
- * @Author             :  Sanjoy Dey
- * @Copyright          :  Copyright (c) 2013 - 2014,
- * @Link	       :  http://www.cygniteframework.com
- * @Since	       :  Version 1.0.6
- * @File Source
+ * This class is the entry point of Console component. It is the
+ * a middle ware of all your console commands.
+ * Cygnite CLI powered by Symfony2 Console Component.
+ * @author Sanjoy Dey <dey.sanjoy0@gmail.com>
  *
  */
 
@@ -42,32 +38,110 @@ class CygniteApplication extends Application
 
     private $description;
 
+    /**
+     * @param string $version
+     * @param string $description
+     */
     public function __construct($version, $description = 'Cygnite CLI Application')
     {
         parent::__construct($description, $version);
 
+        /*
+         | Setup all console commands and add
+         | commands into the console application
+         */
+        $generateInstance = $this->setGenerateCommand();
+        $initInstance = $this->setInitCommand();
+        $migrationInstance = $this->setMigrationCommand();
+        $formInstance = $this->setFormGeneratorCommand();
+        $controllerInstance = $this->setControllerGeneratorCommand();
+        $modelInstance = $this->setModelGeneratorCommand();
+
+        $this->addCommands(
+            [
+                $initInstance,
+                $generateInstance,
+                $migrationInstance,
+                $controllerInstance,
+                $formInstance,
+                $modelInstance
+            ]
+        );
+    }
+
+    /**
+     * @return GeneratorCommand
+     */
+    private function setGenerateCommand()
+    {
         //Get Generator command instance and set table schema
         $generateInstance = GeneratorCommand::instance();
         $generateInstance->setSchema(new Table);
 
+        return $generateInstance;
+    }
+
+    /**
+     * @return mixed
+     */
+    private function setInitCommand()
+    {
+        //Initialise Migration
         $initInstance = InitCommand::instance();
         $initInstance->setSchema(new Table);
 
+        return $initInstance;
+    }
+
+    /**
+     * @return MigrationCommand
+     */
+    private function setMigrationCommand()
+    {
+        //Get the migration instance and Set schema
         $migrationInstance = MigrationCommand::instance();
         $migrationInstance->setSchema(new Table);
         $migrationInstance->setMigrationPath($this->getApplicationDirectory());
 
-        $this->addCommands(
-            array(
-                $initInstance,
-                $generateInstance,
-                $migrationInstance,
-            )
-        );
+        return $migrationInstance;
     }
 
+    /**
+     * @return mixed
+     */
+    private function setFormGeneratorCommand()
+    {
+        //Get the Form Generator instance and set Schema
+        $formInstance = FormGeneratorCommand::instance();
+        $formInstance->setSchema(new Table);
+
+        return $formInstance;
+    }
+
+    /**
+     * @return ControllerGeneratorCommand
+     */
+    private function setControllerGeneratorCommand()
+    {
+        $controllerInstance = ControllerGeneratorCommand::make();
+
+        return $controllerInstance;
+    }
+
+    /**
+     * @return ModelGeneratorCommand
+     */
+    private function setModelGeneratorCommand()
+    {
+        $modelInstance = ModelGeneratorCommand::make();
+        $modelInstance->setSchema(new Table);
+
+        return $modelInstance;
+    }
+
+    // Get the Application directory
     private function getApplicationDirectory()
     {
-        return BASE_PATH.DS.APP_PATH;
+        return CYGNITE_BASE.DS.APPPATH;
     }
 }

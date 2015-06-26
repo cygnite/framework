@@ -1,12 +1,35 @@
 <?php
 namespace Cygnite\Common\SessionManager;
 
-interface SessionInterface
+interface SessionInterface extends PacketInterface
 {
-    public function save($key, $value);
+    /**
+     * Regenerates the session ID
+     *
+     * @return $this
+     */
+    public function regenerate();
 
-    public function get($key = null, $defaultValue = null);
+    /**
+     * Clears all session data and regenerates session ID
+     *
+     * @return $this
+     */
+    public function destroy();
 
-    public function trash($userData = null);
-    
+    /**
+     * Returns session identifier
+     *
+     * @param string $id
+     * @return string
+     */
+    public function started($id = null);
+
+    /**
+     * Returns session name
+     *
+     * @param string $name
+     * @return string
+     */
+    public function name($name = null);
 }

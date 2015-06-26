@@ -1,40 +1,28 @@
 <?php
+/*
+ * This file is part of the Cygnite package.
+ *
+ * (c) Sanjoy Dey <dey.sanjoy0@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 namespace Cygnite\Console\Generator;
 
 use Cygnite\Database\Configurations;
-use Cygnite\Database\Connections;
+use Cygnite\Database\Connection;
 use Cygnite\Helpers\Inflector;
 
-/**
- *  Cygnite Framework
+/*
+ * Console Migration
  *
- *  An open source application development framework for PHP 5.3 or newer
+ * Handle database migrations
  *
- *   License
- *
- *   This source file is subject to the MIT license that is bundled
- *   with this package in the file LICENSE.txt.
- *   http://www.cygniteframework.com/license.txt
- *   If you did not receive a copy of the license and are unable to
- *   obtain it through the world-wide-web, please send an email
- *   to sanjoy@hotmail.com so that I can send you a copy immediately.
- *
- * @Package           :  Console
- * @Filename          :  Migrator.php
- * @Description       :  This class is used to take care of your migration using console
- * @Author            :  Sanjoy Dey
- * @Copyright         :  Copyright (c) 2013 - 2014,
- * @Link	          :  http://www.cygniteframework.com
- * @Since	          :  Version 1.0.6
- * @File Source
- *
+ * @author Sanjoy Dey <dey.sanjoy0@gmail.com>
  */
- 
 class Migrator
 {
     private $command;
-
-    private $inflector;
 
     private $content;
 
@@ -50,8 +38,6 @@ class Migrator
 
     private $migrationClass;
 
-    const EXTENSION = '.php';
-
     private $latestFile;
 
     private $migrationDir;
@@ -65,22 +51,15 @@ class Migrator
      * @param $columns array of columns
      * @return void
      */
-    private function __construct(Inflector $inflect, $command = null)
+    private function __construct($command = null)
     {
-        if ($inflect instanceof Inflector) {
-            $this->inflector = $inflect;
-        }
         $this->command = $command;
-
     }
 
-    public static function __callStatic($method, $arguments = array())
+    public static function instance($arguments = [])
     {
-        if ($method == 'instance') {
-            return new self($arguments[0], $arguments[1]);
-        }
+        return new self($arguments);
     }
-
 
     public function setTemplateDir($path)
     {
@@ -105,9 +84,8 @@ class Migrator
     public function replaceTemplateByInput($template = 'Migration')
     {
         #replace with table name - {%className%}
-        //var_dump($this->inflector->classify(strtolower($this->command->input)));
 
-        $file = $this->getTemplatePath().$template.self::EXTENSION;
+        $file =  $this->getTemplatePath().$template.EXT;
 
         file_exists($file) or die("Base template doesn't exists");
 
@@ -116,7 +94,7 @@ class Migrator
         $fileContent = file_get_contents($file);
 
         $content = str_replace('{%className%}',
-            $this->inflector->classify(strtolower($this->command->input)),
+            Inflector::classify(strtolower($this->command->input)),
             $fileContent
         );
 
@@ -136,13 +114,13 @@ class Migrator
     {
         $filePath = $appMigrationPath = '';
         $date->setTimezone(new \DateTimeZone(SET_TIME_ZONE));
-        $appMigrationPath = $this->getAppMigrationDirPath().DS.'database'.DS.'migrations'.DS;
+        $appMigrationPath = $this->getAppMigrationDirPath().DS.'Resources'.DS.'Database'.DS.'Migrations'.DS;
 
         $this->hasDirectory($appMigrationPath);
 
         $filePath =  $appMigrationPath.strtolower(
-                $this->inflector->changeToLower(
-                    $date->format('YmdHis').'_'.$this->command->input.self::EXTENSION
+                Inflector::changeToLower(
+                    $date->format('YmdHis').'_'.$this->command->input.EXT
                 )
             );
 
@@ -177,8 +155,11 @@ class Migrator
 
     public function setMigrationClassName($file = '')
     {
-        $file = str_replace('.php', '',$this->latestFile);
+        if (pathinfo($this->latestFile, PATHINFO_EXTENSION) !== 'php') {
+            throw new \Exception(APP_NS."/Resources/Database/Migrations/ must have {xxxx_table_name.php} file types");
+        }
 
+        $file = str_replace(EXT, '',$this->latestFile);
         $exp = '';
         $exp =  preg_split('((\d+|\D+))', $file, -1, PREG_SPLIT_DELIM_CAPTURE|PREG_SPLIT_NO_EMPTY);
 
@@ -196,32 +177,28 @@ class Migrator
         return $this->migrationClass;
     }
 
+    /**
+     * Call migration and do update
+     *
+     * @param string $type
+     */
     public function updateMigration($type = 'up')
     {
-        $file = $this->migrationDir.$this->getVersion().$this->getMigrationClass().self::EXTENSION;
+        $file = $class = null;
+
+        $file = $this->migrationDir.$this->getVersion().$this->getMigrationClass().EXT;
 
         if (is_readable($file)) {
             include_once $file;
-            $class = $this->inflector->classify($this->getMigrationClass());
+            $class = Inflector::classify($this->getMigrationClass());
         }
 
-        if ($type == 'down') {
-            call_user_func_array(
-                array(
-                    new $class,
-                    $type
-                ),
-                array()
-            );
-        } else {
-            call_user_func_array(
-                array(
-                    new $class,
-                    $type
-                ),
-                array()
-            );
+        if (trim($type) !== 'down') {
+            $type = 'up';
         }
+
+        call_user_func_array([new $class, $type], []);
+
         $this->updateMigrationTable();
 
     }

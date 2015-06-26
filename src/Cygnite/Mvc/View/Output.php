@@ -1,22 +1,35 @@
 <?php
 namespace Cygnite\Mvc\View;
 
-use Cygnite\Proxy\StaticResolver;
-
 if (!defined('CF_SYSTEM')) {
     exit('External script access not allowed');
 }
 
-class Output extends StaticResolver
+/**
+ * Class Output
+ *
+ * @package Cygnite\Mvc\View
+ */
+class Output
 {
+    private $output = [];
 
-   /*protected function startBuffer()
+    private $name;
+
+    /**
+     * @param $name
+     */
+    public function __construct($name)
     {
-        ob_start();
-        return $this;
-    }*/
+        $this->name = $name;
+    }
 
-    protected function load($file, $data = array())
+    /**
+     * @param       $file
+     * @param array $data
+     * @return $this
+     */
+    public function buffer($file, $data = [])
     {
         ob_start();
 
@@ -31,12 +44,43 @@ class Output extends StaticResolver
         return $this;
     }
 
-    protected function endBuffer()
+    /**
+     * @param $name
+     * @param $value
+     */
+    public function setOutput($name, $value)
+    {
+        $this->output[$name] = $value;
+    }
+
+    /**
+     * @param $name
+     * @return null
+     */
+    public function getOutput($name)
+    {
+        return isset($this->output[$name]) ? $this->output[$name] : null;
+    }
+
+    /**
+     * @return null
+     */
+    public function __toString()
+    {
+        return $this->getOutput($this->name);
+    }
+
+    /**
+     * @return $this
+     */
+    public function clean()
     {
         $output = ob_get_contents();
         ob_get_clean();
-        ob_end_flush();
+        //ob_end_flush();
 
-        return $output;
+        $this->setOutput($this->name, $output);
+
+        return $this;
     }
 }

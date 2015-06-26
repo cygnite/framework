@@ -1,38 +1,33 @@
 <?php
+/*
+ * This file is part of the Cygnite package.
+ *
+ * (c) Sanjoy Dey <dey.sanjoy0@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 namespace Cygnite\Common\SessionManager\Flash;
 
-use Cygnite\Common\Encrypt;
-use Cygnite\Helpers\Inflector;
-use Cygnite\Common\SessionManager;
 use Cygnite\Common\SessionManager\Session;
+use Cygnite\Helpers\Inflector;
 
 class FlashMessage
 {
     // Valid Flash Types
-    private $validFlashTypes = array('help', 'info', 'success', 'error', 'warning');
-
+    private $validFlashTypes = ['help', 'info', 'success', 'error', 'warning'];
     private $class = __CLASS__;
-
     private $flashWrapper = "<div class='%s %s'><a href='#' class='closeFlash'></a>\n%s</div>\n";
-
     private $inflection;
 
     /**
      * Constructor
      *
-     * @param Inflector $inflection
      */
-    public function __construct(Inflector $inflection)
+    public function __construct()
     {
-        // Check whether $inflection is instance of Inflector
-        if ($inflection instanceof Inflector) {
-            $this->inflection = $inflection;
-        }
-
-        if( !session_id() ) session_start();
-
-        if (!isset($_SESSION['flashMessages'])) {
-            $_SESSION['flashMessages'] = array();
+        if (!Session::has('flashMessages')) {
+            Session::set('flashMessages', []);
         }
     }
 
@@ -46,7 +41,7 @@ class FlashMessage
      */
     public function setFlash($key, $message)
     {
-        if (!isset($_SESSION['flashMessages'])) {
+        if (!Session::has('flashMessages')) {
             return false;
         }
 
@@ -60,11 +55,11 @@ class FlashMessage
         }
 
         // If the flash session array doesn't exist, make it
-        if (!array_key_exists($key, $_SESSION['flashMessages'])) {
-            $_SESSION['flashMessages'][$key] = array();
+        if (!array_key_exists($key, Session::get('flashMessages'))) {
+            Session::set('flashMessages', [$key => []]);
         }
 
-        $_SESSION['flashMessages'][$key][] = $message;
+        Session::set('flashMessages', [$key => [$message]]);
 
         return true;
     }
@@ -80,23 +75,25 @@ class FlashMessage
     {
         $messages = $flash = '';
 
-        if (!isset($_SESSION['flashMessages'])) {
+        if (!Session::has('flashMessages')) {
             return false;
         }
+
+        $flashArray = Session::get('flashMessages');
 
         // Check $key is valid flash type
         if (in_array($key, $this->validFlashTypes)) {
 
-            if (isset($_SESSION['flashMessages'][$key])) {
+            if (isset($flashArray[$key])) {
 
-                foreach ($_SESSION['flashMessages'][$key] as $msg) {
+                foreach ($flashArray[$key] as $msg) {
                     $messages .= '<p>' . $msg . "</p>\n";
                 }
             }
 
             $flash .= sprintf(
                 $this->flashWrapper,
-                strtolower($this->inflection->getClassName($this->class)),
+                strtolower(Inflector::getClassName($this->class)),
                 $key,
                 $messages
             );
@@ -107,7 +104,7 @@ class FlashMessage
             // Print ALL queued messages
         } elseif (is_null($key)) {
 
-            foreach ($_SESSION['flashMessages'] as $key => $msgArray) {
+            foreach ($flashArray as $key => $msgArray) {
                 $messages = '';
                 foreach ($msgArray as $msg) {
                     $messages .= '<p>' . $msg . "</p>\n";
@@ -119,41 +116,12 @@ class FlashMessage
             // clear already viewed messages
             $this->clearViewedMessages();
 
-        // Invalid message type
+            // Invalid message type
         } else {
             return false;
         }
 
         return $flash;
-    }
-
-
-    /**
-     * Check is there any error messages
-     *
-     * @return bool  true/false
-     */
-    public function hasError()
-    {
-        return empty($_SESSION['flashMessages']['error']) ? false : true;
-    }
-
-    /**
-     * Check is there any flash message in session
-     *
-     * @param  string $key
-     * @return bool
-     *
-     */
-    public function hasFlash($key = null)
-    {
-        if (!is_null($key)) {
-            if (!empty($_SESSION['flashMessages'][$key])) {
-                return $_SESSION['flashMessages'][$key];
-            }
-        }
-
-        return false;
     }
 
     /**
@@ -166,10 +134,42 @@ class FlashMessage
     public function clearViewedMessages($key = null)
     {
         if (is_null($key)) {
-            unset($_SESSION['flashMessages']);
+            Session::delete('flashMessages');
         } else {
-            unset($_SESSION['flashMessages'][$key]);
+            Session::delete('flashMessages');
         }
+
         return true;
+    }
+
+    /**
+     * Check is there any error messages
+     *
+     * @return bool  true/false
+     */
+    public function hasError()
+    {
+        $flashArray = Session::get('flashMessages');
+        return empty($flashArray['error']) ? false : true;
+    }
+
+    /**
+     * Check is there any flash message in session
+     *
+     * @param  string $key
+     * @return bool
+     *
+     */
+    public function hasFlash($key = null)
+    {
+        $flashArray = Session::get('flashMessages');
+
+        if (!is_null($key)) {
+            if (isset($flashArray[$key])) {
+                return $flashArray[$key];
+            }
+        }
+
+        return false;
     }
 }

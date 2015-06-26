@@ -1,33 +1,22 @@
 <?php
+/*
+ * This file is part of the Cygnite package.
+ *
+ * (c) Sanjoy Dey <dey.sanjoy0@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 namespace Cygnite\Console\Generator;
 
 use Cygnite\Helpers\Inflector;
-
 /**
- *  Cygnite Framework
+ * Cygnite View Generator
  *
- *  An open source application development framework for PHP 5.3 or newer
- *
- *   License
- *
- *   This source file is subject to the MIT license that is bundled
- *   with this package in the file LICENSE.txt.
- *   http://www.cygniteframework.com/license.txt
- *   If you did not receive a copy of the license and are unable to
- *   obtain it through the world-wide-web, please send an email
- *   to sanjoy@hotmail.com so that I can send you a copy immediately.
- *
- * @Package            :  Console
- * @Filename           :  View.php
- * @Description        :  This class is used to generate view pages of your application using Cygnite console
- * @Author             :  Sanjoy Dey
- * @Copyright          :  Copyright (c) 2013 - 2014,
- * @Link	           :  http://www.cygniteframework.com
- * @Since	           :  Version 1.0.6
- * @File Source
+ * This class used to generate views
+ * @author Sanjoy Dey <dey.sanjoy0@gmail.com>
  *
  */
- 
 class View
 {
     private $command;
@@ -38,47 +27,37 @@ class View
 
     private $replacedContent;
 
-    const TEMP_EXTENSION = '.html.php';
+    const TEMP_EXTENSION = '.html.stub';
 
     public $layoutType = 'php';
 
     // Plain php layout extension
-    const EXTENSION = '.view.php';
+    const EXTENSION = '.view.stub';
 
     // Twig layout extension
     const TWIG_EXTENSION = '.html.twig';
 
-    private $views = array(
-                        'index',
-                        'create',
-                        'update',
-                        'view',
-    );
+    private $views = ['index', 'create', 'update', 'show'];
 
-    private $fields = array();
+    private $fields = [];
 
     /*
      * Since constructor is private you cannot create object
      * for this class directly
      *
      * @access private
-     * @param $inflect instance of Inflector
      * @param $columns array of columns
      * @return void
      */
-    private function __construct(Inflector $inflect, $command = null)
+    private function __construct($command = null)
     {
-        if ($inflect instanceof Inflector) {
-            $this->inflector = $inflect;
-        }
         $this->command = $command;
-
     }
 
-    public static function __callStatic($method, $arguments = array())
+    public static function __callStatic($method, $arguments = [])
     {
         if ($method == 'instance') {
-            return new self($arguments[0], $arguments[1]);
+            return new self($arguments[0]);
         }
     }
 
@@ -123,7 +102,7 @@ class View
 
     private function viewLayoutName()
     {
-        return  ($this->layoutType == 'twig') ? 'base.html.twig': 'base.view.php';
+        return ($this->layoutType == 'twig') ? 'base.html.stub': 'base.view.stub';
     }
 
     /**
@@ -145,22 +124,28 @@ class View
      */
     public function generateLayout($layout)
     {
-        $layout = $this->inflector->toDirectorySeparator($layout);
+        $layout = Inflector::toDirectorySeparator($layout);
 
         $file = $this->getViewTemplatePath().$layout.DS.$this->viewLayoutName();
         $appViewPath = '';
-        $appViewPath = $this->command->applicationDir.DS.'views'.DS;
+        $appViewPath = $this->command->applicationDir.DS.'Views'.DS;
 
         $this->hasDirectory($appViewPath);
-        $this->hasDirectory($appViewPath.'layout');
+        $this->hasDirectory($appViewPath.'layouts');
         $this->hasDirectory($appViewPath.DS.$layout);
 
-        file_exists($file) or die("Base Layout stub File doesn't exists in Cygnite Core");
+        file_exists($file) or die("Base layout stub file doesn't exists in Cygnite Core");
 
         $layoutFile = $appViewPath.$layout.DS.$this->viewLayoutName();
 
+        if ($this->layoutType == 'php') {
+            $layoutFile = str_replace('.stub', EXT, $layoutFile);
+        } else {
+            $layoutFile = str_replace('.stub', '.twig', $layoutFile);
+        }
+
         if (file_exists($layoutFile)) {
-            echo "\n Layout file exists in $layoutFile directory \n";
+            echo "\n Layout file already exists in $layoutFile directory \n";
             return true;
         }
 
@@ -200,7 +185,7 @@ class View
             case 'update':
                 $content = $this->replaceCreateOrUpdateTemplateContents($content);
                 break;
-            case 'view':
+            case 'show':
                 $content = $this->replaceViewTemplateContents($content);
                 break;
         }
@@ -214,7 +199,8 @@ class View
     public function generateViews()
     {
         $viewPath  = $viewExtension = '';
-        $viewDir = $this->command->applicationDir.DS.'views'.DS.strtolower(str_replace("Controller", "", $this->command->controller));
+        $controller = str_replace("Controller", "", $this->command->controller);
+        $viewDir = $this->command->applicationDir.DS.'Views'.DS.strtolower($controller);
         $this->hasDirectory($viewDir);
 
         $viewExtension = ($this->layoutType == 'php') ? self::EXTENSION : self::TWIG_EXTENSION;
@@ -245,8 +231,14 @@ class View
             $content
         );
 
-        $content = str_replace('#ControllerName#',
-            ucfirst($this->command->controller),
+        $content = str_replace(
+            '#ControllerName#',
+            Inflector::classify(str_replace("Controller", "", $this->command->controller)),
+            $content
+        );
+
+        $content = str_replace('{%primaryKey%}',
+            $this->command->getPrimaryKey(),
             $content
         );
 
@@ -273,17 +265,17 @@ class View
 
         foreach ($this->getTableColumns() as $key=> $value) {
 
-            if ($value->column_name !== 'id') {
+            if ($value->COLUMN_NAME !== 'id') {
 
                 if ($type == 'th') {
-                    $tableHead = $this->inflector->underscoreToSpace($value->column_name);
+                    $tableHead = Inflector::underscoreToSpace($value->COLUMN_NAME);
                     $column .= "\t\t\t".'<'.$type.'>'.$tableHead.'</'.$type.'>'.PHP_EOL;
                 } else{
                     $rowType = '';
                     if ($this->layoutType == 'php') {
-                        $rowType = '<?php echo $value->'.$value->column_name.'; ?>';
+                        $rowType = '<?php echo $row->'.$value->COLUMN_NAME.'; ?>';
                     } else {
-                        $rowType = '{{row.'.$value->column_name.'}}';
+                        $rowType = '{{row.'.$value->COLUMN_NAME.'}}';
                     }
                     $column .= "\t\t\t".'<'.$type.'>'.$rowType.'</'.$type.'>'.PHP_EOL;
                 }
@@ -302,10 +294,9 @@ class View
         /* Update View Page */
         # replace controller name - #controllerName#
 
-        $content = str_replace('#controllerName#',
-            strtolower(str_replace("Controller", "", $this->command->controller)),
-            $content
-        );
+        $controller = str_replace("Controller", "", $this->command->controller);
+        $content = str_replace('#controllerName#', strtolower($controller), $content);
+        $content = str_replace('#Controller#', Inflector::classify($controller), $content);
 
         return $content;
     }
@@ -319,19 +310,19 @@ class View
         $column = '';
         foreach ($this->getTableColumns() as $key=> $value) {
 
-            if ($value->column_name !== 'id') {
+            if ($value->COLUMN_NAME !== 'id') {
 
                 if ($this->layoutType == 'php') {
-                    $rowType = '<?php echo $this->record->'.$value->column_name.'; ?>';
+                    $rowType = '<?php echo $record->'.$value->COLUMN_NAME.'; ?>';
                 } else {
-                    $rowType = '{{ record.'.$value->column_name.' }}';
+                    $rowType = '{{ record.'.$value->COLUMN_NAME.' }}';
                 }
 
                 $column .=
                 "\t\t\t".'<div class="form-group">
-                    <div class="form-label control-label">'.
-                    $this->inflector->underscoreToSpace($value->column_name).
-                    '</div>
+                    <label class="col-sm-2 control-label">'.
+                    Inflector::underscoreToSpace($value->COLUMN_NAME).
+                    '</label>
                     <div class="col-sm-10">
                         <p class="form-control-static"><span>'.$rowType.'</span></p>
                     </div>
@@ -366,6 +357,13 @@ class View
     {
         $filePath = '';
         $appViewPath = $this->getApplicationViewPath();
+
+        if ($this->layoutType == 'php') {
+           $viewName = str_replace('.stub', EXT, $viewName);
+        } else {
+           $viewName = str_replace('.stub', '.twig', $viewName);
+        }
+
         $filePath =  $appViewPath.strtolower($viewName);
         $this->hasDirectory($appViewPath);
 

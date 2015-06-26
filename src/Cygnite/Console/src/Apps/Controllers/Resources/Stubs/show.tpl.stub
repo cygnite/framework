@@ -1,0 +1,11 @@
+	
+    /**
+    * Display specific information into the page.
+    *
+    * @param  int  $id
+    */
+    public function getShowAction($id)
+    {
+        //
+
+    }

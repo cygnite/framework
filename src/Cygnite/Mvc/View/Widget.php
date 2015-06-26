@@ -1,110 +1,238 @@
 <?php
 namespace Cygnite\Mvc\View;
 
-use Cygnite\Proxy\StaticResolver;
-
 if (!defined('CF_SYSTEM')) {
     exit('External script access not allowed');
 }
 
-class Widget extends StaticResolver implements \ArrayAccess
+/**
+ * Class Widget
+ *
+ * @package Cygnite\Mvc\View
+ */
+class Widget implements \ArrayAccess
 {
-    public $widget = array();
+    public $widget = [];
 
-    protected function make($name, $arguments = array())
+    public $data = [];
+
+    protected $module = false;
+
+    protected $widgetName;
+
+    protected $moduleDir = 'Modules';
+
+    /**
+     * @param       $name
+     * @param array $data
+     */
+    public function __construct($name, $data= [])
     {
-        if ($this->has($name)) {
-            return $this->widget[$name];
-        }
-
-        if (strpos($name, '::') != false) {
-            $expression = explode('::', $name);
-        }
-
-        //we will check is modules is available in given string
-        // if not we will look for view widget into the normal views directory
-        if (strpos($name, 'modules') !== false) {
-            $views = $expression[0];
-            $moduleViews = DS.'Views'.DS;
-        } else {
-            $moduleViews = '';
-            $views = 'views'.DS.$expression[0];
-        }
-
-        $path = getcwd().DS.APPPATH.DS.$views.DS.$expression[1].$moduleViews;
-
-        $view = $path.str_replace('.', DS, $expression[2]).'.view'.EXT;
-
-        Output::load($view, $arguments);
-        $output = Output::endBuffer();
-
-        return $this[$name] = $output;
+        $this->setWidgetName($name);
+        $this->data = $data;
     }
 
-    protected function has($key)
+    private function setWidgetName($name)
     {
-        return isset($this->data[$key]) ? true :false;
+        $this->widgetName = $name;
+    }
+
+    private function getWidgetName()
+    {
+        return (isset($this->widgetName)) ? $this->widgetName : null;
     }
 
     /**
-     * (PHP 5 &gt;= 5.0.0)<br/>
-     * Whether a offset exists
-     *
-     * @link http://php.net/manual/en/arrayaccess.offsetexists.php
-     * @param mixed $offset <p>
-     *                      An offset to check for.
-     * </p>
-     * @return boolean true on success or false on failure.
-     * </p>
-     * <p>
-     *       The return value will be casted to boolean if non-boolean was returned.
+     * @param          $var
+     * @param callable $callback
+     * @param array    $data
+     * @return mixed
+     */
+    public static function make($var, \Closure $callback = null, $data = [])
+    {
+        /*
+         | If second param given as closure then we will
+         | return callback
+         */
+        if ($callback instanceof \Closure && !is_null($callback)) {
+            return $callback(new Widget($var, $data));
+        }
+        /*
+         | return object
+         */
+        return (new Widget($var, $data))->render();
+    }
+
+    /**
+     * @param $bool
+     */
+    public function setModule($bool)
+    {
+        $this->module = $bool;
+    }
+
+    public function module()
+    {
+        return ($this->module) ? true : false;
+    }
+
+    /**
+     * We will setup module view path
+     * @return string
+     */
+    protected function setupModule()
+    {
+        if (string_has($this->getWidgetName(), ':')) {
+
+            $exp = [];
+            $exp = explode(':', $this->getWidgetName());
+            $moduleName = $exp[0]; $view = $exp[1];
+            $path = $this->getWidgetPath($view, true);
+            $this->setWidgetName(null);
+            $this->setModule(false);
+
+            return $path;
+        }
+    }
+
+    /**
+     * Set up widget view path
+     * @return string
+     */
+    protected function setupWidget()
+    {
+        /*
+         | If widget not belongs to HMVC modules and
+         | has ":" in the view name, we will convert name as path
+         */
+
+        if (string_has($this->getWidgetName(), ':')) {
+            $widget = null;
+            $widget = str_replace(':', DS, $this->getWidgetName());
+            return $this->getWidgetPath($widget);
+        }
+    }
+
+    private function getWidgetPath($widget, $isModule = false)
+    {
+        $moduleName = '';
+        $modulePath = 'Views';
+        if ($isModule) {
+            $modulePath = $this->moduleDir.DS.$moduleName.DS.'Views';
+        }
+
+        return CYGNITE_BASE.DS.APP.DS.$modulePath.DS.$widget.'.view'.EXT;
+    }
+
+    /**
+     * @param bool $isModule
+     * @return null
+     */
+    public function render($isModule = false)
+    {
+        /*
+         | In some case you may not want to write much code
+         | in such case you have option to pass param into render
+         | so that we will understand you are trying to invoke module view
+         */
+        if ($isModule) {
+            $this->setModule($isModule);
+        }
+
+        /*
+         | We will return if widget already cached
+         */
+        if ($this->has($this->getWidgetName())) {
+           return $this->getWidget($this->getWidgetName());
+        }
+
+        $path = null;
+
+        if ($this->module()) {
+            /*
+             | If widget belongs to HMVC modules and
+             | has ":" in the view name, we will think first param
+             | as module name and second param as view name
+             */
+            $path = $this->setupModule();
+        } else {
+            $path = $this->setupWidget();
+        }
+
+        $output = (new Output($this->getWidgetName()))->buffer($path, $this->data)->clean();
+        $this->setWidget($this->getWidgetName(), $output);
+
+        return $this->getWidget($this->getWidgetName());
+    }
+
+    public function __toString()
+    {
+        return $this->getWidget($this->getWidgetName());
+    }
+
+    /**
+     * @param $name
+     * @param $value
+     */
+    public function setWidget($name, $value)
+    {
+        $this->widget[$name] = $value;
+    }
+
+    /**
+     * @param $name
+     * @return null
+     */
+    public function getWidget($name)
+    {
+        return isset($this->widget[$name]) ? $this->widget[$name] : null;
+    }
+
+    /**
+     * @param $key
+     * @return bool
+     */
+    public function has($key)
+    {
+        return isset($this->widget[$key]) ? true :false;
+    }
+
+    /**
+     * ArrayAccess
+     * @param  int|string $offset
+     * @return bool
      */
     public function offsetExists($offset)
     {
-        // TODO: Implement offsetExists() method.
+        return isset($this->data[$offset]);
     }
 
     /**
-     * (PHP 5 &gt;= 5.0.0)<br/>
-     * Offset to retrieve
-     * @link http://php.net/manual/en/arrayaccess.offsetget.php
-     * @param mixed $offset <p>
-     *                      The offset to retrieve.
-     * </p>
-     * @return mixed Can return all value types.
+     * ArrayAccess
+     * @param  int|string $offset
+     * @return mixed
      */
     public function offsetGet($offset)
     {
-        // TODO: Implement offsetGet() method.
+        return $this->offsetExists($offset) ? $this->data[$offset] : null;
     }
 
     /**
-     * (PHP 5 &gt;= 5.0.0)<br/>
-     * Offset to set
-     * @link http://php.net/manual/en/arrayaccess.offsetset.php
-     * @param mixed $offset <p>
-     *                      The offset to assign the value to.
-     * </p>
-     * @param mixed $value  <p>
-     *                      The value to set.
-     * </p>
-     * @return void
+     * ArrayAccess
+     * @param int|string $offset
+     * @param mixed      $value
      */
     public function offsetSet($offset, $value)
     {
-        // TODO: Implement offsetSet() method.
+        $this->data[$offset] = $value;
     }
 
     /**
-     * (PHP 5 &gt;= 5.0.0)<br/>
-     * Offset to unset
-     * @link http://php.net/manual/en/arrayaccess.offsetunset.php
-     * @param mixed $offset <p>
-     *                      The offset to unset.
-     * </p>
-     * @return void
+     * ArrayAccess
+     * @param int|string $offset
      */
     public function offsetUnset($offset)
     {
-        // TODO: Implement offsetUnset() method.
-    }}
+        unset($this->data[$offset]);
+    }
+}

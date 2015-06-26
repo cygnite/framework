@@ -1,4 +1,14 @@
 <?php
+
+/**
+ * This file is part of the Cygnite package.
+ *
+ * (c) Sanjoy Dey <dey.sanjoy0@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Cygnite\Common;
 
 use Closure;
@@ -6,49 +16,26 @@ use Cygnite\Proxy\StaticResolver;
 use Cygnite\Helpers\Inflector;
 use Cygnite\Common\UrlManager\Url;
 
-
 if (!defined('CF_SYSTEM')) {
     exit('External script access not allowed');
 }
 /*
- *  Cygnite Framework
+ * Pagination.
  *
- *  An open source application development framework for PHP 5.3x or newer
+ * @author Sanjoy Dey <dey.sanjoy0@gmail.com>
  *
- *   License
- *
- *   This source file is subject to the MIT license that is bundled
- *   with this package in the file LICENSE.txt.
- *   http://www.cygniteframework.com/license.txt
- *   If you did not receive a copy of the license and are unable to
- *   obtain it through the world-wide-web, please send an email
- *   to sanjoy@hotmail.com so I can send you a copy immediately.
- *
- * @Package           :  Packages
- * @Sub Packages      :  Library
- * @Filename          :  Pagination
- * @Description       :  This library used to handle all http requests
- * @Author            :  Cygnite Dev Team
- * @Copyright         :  Copyright (c) 2013 - 2014,
- * @Link	          :  http://www.cygniteframework.com
- * @Since	          :  Version 1.0
- * @FileSource
- *
- *
+ * <code>
+ * $paginator = new \Cygnite\Common\Pagination;
+ * $paginator->getItems();
+ * $paginator->getTotalNumOfItems();
+ * $paginator->setPerPage(5);
+ * $paginator->createLinks();
+ * </code>
  */
-
-/*
-$paginator = new Pagination;
-$paginator->getItems();
-$paginator->getTotalNumOfItems();
-$paginator->setPerPage(5);
-$paginator->createLinks();
-*/
 
 class Pagination
 {
-
-    private $perPage = '15';
+    protected $perPage = '15';
 
     public $model;
 
@@ -86,7 +73,7 @@ class Pagination
      * @param callable $callback
      * @return Pagination
      */
-    public static function instance($args = array(), Closure $callback = null)
+    public static function make($args = [], Closure $callback = null)
     {
         if ($callback instanceof Closure) {
             return $callback(new self($args));
@@ -116,8 +103,8 @@ class Pagination
     {
        $numRecords = null;
 
-       $modelClass = Inflector::instance()->getClassNameFromNamespace(get_class($this->model));
-       $table = Inflector::instance()->tabilize($modelClass);
+       $modelClass = Inflector::getClassNameFromNamespace(get_class($this->model));
+       $table = Inflector::tabilize($modelClass);
 
        $numRecords = $this->model
                           ->query("SELECT ".$this->count()." as ".$this->numCount." FROM `".$table."`")
@@ -161,7 +148,7 @@ class Pagination
         //last page is = total pages / items per page, rounded up.
         $this->lastPage = ceil($this->getTotalNumberOfPages()/$this->model->perPage);
 
-        $this->lastPageMinusOne = $this->lastPage - 1;	//last page minus 1
+        $this->lastPageMinusOne = $this->lastPage - 1;  //last page minus 1
         $this->create();
     }
 

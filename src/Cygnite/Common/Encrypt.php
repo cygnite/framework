@@ -1,4 +1,12 @@
 <?php
+/**
+ * This file is part of the Cygnite package.
+ *
+ * (c) Sanjoy Dey <dey.sanjoy0@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 namespace Cygnite\Common;
 
 use Cygnite\Helpers\Config;
@@ -6,37 +14,17 @@ use Cygnite\Helpers\Config;
 if (!defined('CF_SYSTEM')) {
     exit('No External script access allowed');
 }
-/**
- *  Cygnite Framework
- *
- *  An open source application development framework for PHP 5.3x or newer
- *
- *   License
- *
- *   This source file is subject to the MIT license that is bundled
- *   with this package in the file LICENSE.txt.
- *   http://www.cygniteframework.com/license.txt
- *   If you did not receive a copy of the license and are unable to
- *   obtain it through the world-wide-web, please send an email
- *   to sanjoy@hotmail.com so I can send you a copy immediately.
- *
- * @Package                   :  Packages
- * @Sub Packages              :  Library
- * @Filename                  :  Encrypt
- * @Description               :  This library used to encrypt and decrypt user input.
- * @Author                    :  Sanjoy Dey
- * @Copyright                 :  Copyright (c) 2013 - 2014,
- * @Link	                  :  http://www.cygniteframework.com
- * @Since	                  :  Version 1.0
- * @Filesource
- * @Warning                   :  Any changes in this library can cause abnormal behaviour of the framework
- *
- *
- */
 
+/**
+ * Common Encrypt.
+ *
+ * This class used to encode and decode user input based on the salt key
+ * provided in configuration
+ *
+ * @author Sanjoy Dey <dey.sanjoy0@gmail.com>
+ */
 class Encrypt
 {
-
     private $secureKey;
 
     private $iv;
@@ -45,6 +33,8 @@ class Encrypt
 
     private static $instance;
 
+    private $defaultKey = 'BXT#ERHD!DSD#ndUOAS9821LL';
+
     /**
     * Constructor function
     * @false string - encryption key
@@ -52,31 +42,44 @@ class Encrypt
     */
     public function __construct()
     {
-        $encryptKey = Config::get('global.config', 'cf_encryption_key');
+        $encryptKey = Config::get('global.config', 'encryption.key');
 
-        if (!is_null($encryptKey)) {
-
-            $this->set($encryptKey);
-
-            if (!function_exists('mcrypt_create_iv')) {
-                throw new \BadFunctionCallException("Mcrypt extension library not loaded");
-            }
-
-            $this->iv = mcrypt_create_iv(32);
-
+        if (is_null($encryptKey)) {
+            $config = include_once CYGNITE_BASE.DS.APPPATH.DS.'Configs'.DS.'application'.EXT;
+            $this->setSaltKey($config['encryption.key']);
         } else {
-            throw new \BadFunctionCallException(
-                "Please check for encription key inside config file and autoload helper encrypt key is set or not."
-            );
+            $this->setSaltKey($encryptKey);
         }
     }
 
+    /**
+     * We will set the Encryption key
+     * @param $key
+     * @throws \BadFunctionCallException
+     */
+    private function setSaltKey($key)
+    {
+        $this->set($key);
 
+        if (!function_exists('mcrypt_create_iv')) {
+            throw new \BadFunctionCallException("Mcrypt extension library not loaded");
+        }
+
+        $this->iv = mcrypt_create_iv(32);
+    }
+
+    /**
+     * @param $encryptKey
+     */
     public function set($encryptKey)
     {
         $this->secureKey = hash('sha256', $encryptKey, true);
     }
 
+    /**
+     * Get Encryption key
+     * @return mixed
+     */
     public function get()
     {
         return $this->secureKey;
@@ -90,10 +93,6 @@ class Encrypt
      */
     public function encode($input)
     {
-        if (!function_exists('mcrypt_create_iv')) {
-            throw new \BadFunctionCallException("Mcrypt extension library not loaded");
-        }
-
         $this->value = base64_encode(
             mcrypt_encrypt(
                 MCRYPT_RIJNDAEL_256,
@@ -128,21 +127,28 @@ class Encrypt
         return $this->value;
     }
 
-    public function __call($method, $arguments = array())
+    public function __call($method, $arguments = [])
     {
-        if ($method == 'instance') {
-            return $this;
-        }
     }
 
-    public static function __callStatic($method, $arguments = array())
+    public static function __callStatic($method, $arguments = [])
     {
-        if ($method == 'instance') {
+        if ($method == 'create') {
+
             if (self::$instance === null) {
                 self::$instance = new self();
             }
-            return call_user_func_array(array(self::$instance, $method), array($arguments));
+            // we will return $this for method chaining
+            return call_user_func_array([self::$instance, 'getInstance'], [$arguments]);
         }
+    }
+
+    /**
+     * @return $this
+     */
+    public function getInstance()
+    {
+        return $this;
     }
 
     public function __destruct()

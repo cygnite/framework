@@ -1,0 +1,21 @@
+{
+    "name": "cygnite/File",
+    "license": "MIT",
+    "keywords": ["Cygnite", "File", "Upload", "Thumbnail"],
+    "authors": [
+        {
+            "name": "Sanjoy Dey",
+            "email": "dey.sanjoy0@gmail.com"
+        }
+    ],
+    "require": {
+        "php": ">=5.4.0"
+    },
+    "autoload": {
+        "psr-0": {
+            "Cygnite\\Common\\File": ""
+        }
+    },
+    "target-dir": "Cygnite\\Common\\File",
+    "minimum-stability": "dev"
+}

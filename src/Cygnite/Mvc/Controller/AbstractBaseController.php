@@ -1,49 +1,37 @@
 <?php
+
+/**
+ * This file is part of the Cygnite package.
+ *
+ * (c) Sanjoy Dey <dey.sanjoy0@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+
 namespace Cygnite\Mvc\Controller;
 
+use Exception;
+use Cygnite\Base\EventHandler\Event;
 use Cygnite\Common\Encrypt;
 use Cygnite\Common\SessionManager\Session;
-use Cygnite\Common\SessionManager\Flash\FlashMessage;
-use Cygnite\DependencyInjection\Container;
+use Cygnite\Foundation\Application as App;
 use Cygnite\Helpers\Inflector;
-use Exception;
-use Cygnite\Foundation\Application;
-use Cygnite\Base\Event;
-use Cygnite\Mvc\View\CView;
+use Cygnite\Mvc\View\View;
 use Cygnite\Mvc\View\Template;
 
 /**
- *  Cygnite Framework
+ * AbstractBaseController.
  *
- *  An open source application development framework for PHP 5.3x or newer
+ * Extend the features of BaseController.
  *
- *   License
- *
- *   This source file is subject to the MIT license that is bundled
- *   with this package in the file LICENSE.txt.
- *   http://www.cygniteframework.com/license.txt
- *   If you did not receive a copy of the license and are unable to
- *   obtain it through the world-wide-web, please send an email
- *   to sanjoy@hotmail.com so I can send you a copy immediately.
- *
- * @Package                   :  Cygnite
- * @SubPackages               :  Mvc
- * @Filename                  :  AbstractBaseController
- * @Description               :  This is the base controller of your application.
- *                               Controllers extends all base functionality of BaseController class.
- * @Author                    :  Cygnite Dev Team
- * @Copyright                 :  Copyright (c) 2013 - 2014,
- * @Link	                  :  http://www.cygniteframework.com
- * @Since	                  :  Version 1.0
- * @FileSource
- *
+ * @author Sanjoy Dey <dey.sanjoy0@gmail.com>
  */
-
-abstract class AbstractBaseController extends CView
+abstract class AbstractBaseController extends View
 {
-    public $container;
+    private $validFlashMessage = ['setFlash', 'hasFlash', 'getFlash', 'hasError'];
 
-    private $validFlashMessage = array('setFlash', 'hasFlash', 'getFlash', 'hasError');
+    private $class;
 
     /**
      * Constructor function
@@ -54,7 +42,6 @@ abstract class AbstractBaseController extends CView
     public function __construct()
     {
         parent::__construct(new Template);
-        $this->container = new Container();
     }
 
     //prevent clone.
@@ -63,21 +50,45 @@ abstract class AbstractBaseController extends CView
 
     }
 
+    protected function getContainer()
+    {
+        return App::instance();
+    }
+
     /**
-     * Magic Method for handling errors.
+     * Magic Method for handling errors and undefined methods.
      *
+     * @param $method
+     * @param $arguments
+     * @return AbstractBaseController|mixed|void
+     * @throws \Exception
      */
     public function __call($method, $arguments)
     {
         if (in_array($method, $this->validFlashMessage)) {
-            $flashSession = $this->get('cygnite.common.session-manager.flash.FlashMessage');
-
-            $return = call_user_func_array(array($flashSession, $method), $arguments);
-
-            return ($method == 'setFlash') ? $this : $return;
+            return $this->setFlashMessage($method, $arguments);
         }
 
-        throw new Exception("Undefined method [$method] called by ".get_class($this).' Controller');
+        if (!method_exists($this, $method)) {
+            throw new Exception("Undefined method [$method] called by ".get_class($this).' Controller');
+        }
+    }
+
+    /**
+     * @param $method
+     * @param $arguments
+     * @return AbstractBaseController|mixed
+     */
+    private function setFlashMessage($method, $arguments)
+    {
+        $flashSession = $this->get('cygnite.common.session-manager.flash.flash-message');
+
+        if ($method == 'setFlash') {
+            $this->_call($flashSession, $method, $arguments);
+            return $this;
+        } else {
+            return $this->_call($flashSession, $method, $arguments);
+        }
     }
 
     /**
@@ -96,33 +107,60 @@ abstract class AbstractBaseController extends CView
 
     /**
      * @param $class
-     * @return object @instance instance of your class
+     * @return object
      */
     protected function get($class)
     {
-        return $this->container->resolve($class);
+        $container = $this->getContainer();
+        return $container->resolve($class);
     }
 
     /**
-    <code>
-    * // Call the "index" method on the "user" controller
-    *  $response = $this->call('admin::user@index');
-    *
-    * // Call the "user/admin" controller and pass parameters
-    *   $response = $this->call('modules.admin.user@profile', $arguments);
-    * </code>
-    */
-    public function call($resource, $arguments = array())
+     * @param       $instance
+     * @param       $method
+     * @param array $arguments
+     * @return mixed
+     */
+    protected function _call($instance, $method, $arguments = [])
     {
-        //$expression = explode('@', $resource);
+        return call_user_func_array([$instance, $method], $arguments);
+    }
+
+    /**
+     * <code>
+     * // Call the "index" method on the "user" controller
+     *  $response = $this->call('admin::user@index');
+     *
+     * // Call the "user/admin" controller and pass parameters
+     *   $response = $this->call('modules.admin.user@profile', $arguments);
+     * </code>
+     */
+    public function call($resource, $arguments = [])
+    {
         list($name, $method) = explode('@', $resource);
 
         $method = $method.'Action';
         $class = array_map('ucfirst', explode('.', $name));
-        $className = Inflector::instance()->classify(end($class)).'Controller';
+        $className = Inflector::classify(end($class)).'Controller';
         $namespace = str_replace(end($class), '', $class);
         $class = '\\'.ucfirst(APPPATH).'\\'.implode('\\', $namespace).$className;
 
-        return call_user_func_array(array(new $class, $method), $arguments);
+        return $this->_call(new $class, $method, $arguments);
     }
- }
+
+    /**
+     * @param $name
+     */
+    public function setController($name)
+    {
+        $this->class = $name;
+    }
+
+    /**
+     * @return string
+     */
+    public function getController()
+    {
+        return isset($this->class) ? $this->class : get_called_class();
+    }
+}

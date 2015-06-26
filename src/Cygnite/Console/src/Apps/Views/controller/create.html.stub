@@ -1,0 +1,28 @@
+{% extends 'layouts/main/base.html.twig' %}
+
+{% block title %}
+    {{ title }}
+{% endblock %}
+
+{% block content %}
+
+    {# dump(#controllerName#) #}
+
+    <div class="pull-right">
+        {{  link('#controllerName#/', 'Back',{'class': 'btn btn-default btn-small btn-inverse'}) | raw }}
+    </div>
+
+    <div class="error" style="color:#FF0000;">
+        {{ validation_errors | raw }}
+    </div>
+
+    <div style="float:left;">
+        {{ form | raw }}
+    </div>
+
+
+{% endblock %}
+
+{% block footer %}
+
+{% endblock %}
