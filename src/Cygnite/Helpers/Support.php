@@ -175,6 +175,15 @@ if ( ! function_exists('toPath')) {
      */
     function toPath($string)
     {
-        return str_replace(['.', '/'], DIRECTORY_SEPARATOR, $string);
+        switch ($string) {
+            case string_has($string, '.'):
+                $string = str_replace('.', DS, $string);
+                break;
+            case string_has($string, '/'):
+                $string = str_replace('/', DS, $string);
+                break;
+        }
+
+        return $string;
     }
 }

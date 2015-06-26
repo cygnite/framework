@@ -185,7 +185,7 @@ class Application extends Container
     {
         $this['service.provider'] = function () {
             $paths = Config::getPaths();
-            return include $paths['app.path']. $paths['app.config']['directory'] .'services' . EXT;
+            return include $paths['app.path']. DS.$paths['app.config']['directory'] .'services' . EXT;
         };
 
         return $this;
@@ -261,7 +261,7 @@ class Application extends Container
     public function configure()
     {
         $this->importHelpers();
-        $this->setPaths(CYGNITE_BASE.DS.CF_BOOTSTRAP.DS.'config.paths'.EXT);
+        $this->setPaths(realpath(CYGNITE_BASE.DS.CF_BOOTSTRAP.DS.'config.paths'.EXT));
 
         //Set up configurations for your awesome application
         \Cygnite\Helpers\Config::load();

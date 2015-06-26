@@ -128,7 +128,7 @@ class Config extends StaticResolver
     private function importConfigurations()
     {
         $configPath = "";
-        $configPath = toPath(static::$paths['app.path'].static::$paths['app.config']['directory']);
+        $configPath = static::$paths['app.path'].DS.toPath(static::$paths['app.config']['directory']);
         $files = [];
         $files = array_merge($this->files, static::$paths['app.config']['files']);
 
