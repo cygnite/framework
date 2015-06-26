@@ -28,9 +28,7 @@ class Session extends ActiveRecord implements PacketInterface
         /*
          | Get user configuration
          */
-        $config = [];
-        $config = Config::getConfigItems('config.items');
-        $this->config = $config['config.session'];
+        $this->config = Config::get('config.session');
 
         /*
          | Set Database and Table for storing

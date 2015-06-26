@@ -72,9 +72,7 @@ class Session extends Manager implements SessionInterface
         /*
          | Get user configuration
          */
-        $configItem = [];
-        $configItem = Config::getConfigItems('config.items');
-        $config = $configItem['config.session'];
+        $config = Config::get('config.session');
         $sessionManager = $this->getWrapper();
         $sessionManager->setHash(); // set session hash
 

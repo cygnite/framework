@@ -42,15 +42,12 @@ class Session
      */
     public function __construct()
     {
-        $config = [];
-        $config =  Config::getConfigItems('config.items');
-
         /*
          | We will set session configuration into config property
          | Based on user defined configuration we will load the session
          | driver
          */
-        $this->config = $config['config.session'];
+        $this->config = Config::get('config.session');
 
         $this->setName($this->config['session_name']);
     }
