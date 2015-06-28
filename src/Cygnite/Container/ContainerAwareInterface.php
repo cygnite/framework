@@ -7,14 +7,14 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-namespace Cygnite\DependencyInjection;
-
-use Closure;
+namespace Cygnite\Container;
 
 /**
  * Describes the basic interface of a container.
  *
- * @since v1.0.8
+ * Interface ContainerAwareInterface
+ *
+ * @package Cygnite\Container
  * @author Sanjoy  Dey
  */
 interface ContainerAwareInterface
@@ -49,5 +49,5 @@ interface ContainerAwareInterface
      * @param callable $callable
      * @return mixed
      */
-    public function extend($key, Closure $callable);
+    public function extend($key, \Closure $callable);
 }

@@ -9,11 +9,12 @@
  */
 namespace Cygnite\Console\Command;
 
+use Cygnite\Database\Table;
 use Cygnite\Foundation\Application;
 use Cygnite\Helpers\Inflector;
 use Cygnite\Database\Connection;
 use Cygnite\Console\Generator\Model;
-use Symfony\Component\Console\Command\Command;
+use Cygnite\Console\Command\Command;
 use Cygnite\Database\Exceptions\DatabaseException;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -36,7 +37,7 @@ class ModelGeneratorCommand extends Command
 
     public $inflection;
 
-    private $tableSchema;
+    public $table;
 
     public $controller;
 
@@ -44,14 +45,33 @@ class ModelGeneratorCommand extends Command
 
     private $columns;
 
-    public static function make()
+    protected $name = 'model:create';
+
+    protected $description = 'Generate Sample Model Class Using Cygnite CLI';
+
+    /**
+     * @param Table $table
+     * @throws \InvalidArgumentException
+     */
+    public function __construct(Table $table)
     {
-        return new ModelGeneratorCommand();
+        parent::__construct();
+
+        if (!$table instanceof Table) {
+            throw new \InvalidArgumentException(sprintf('Constructor parameter should be instance of %s.', $table));
+        }
+
+        $this->table = $table;
     }
 
-    public function setSchema($table)
+    public function table()
     {
-        $this->tableSchema = $table;
+        return $this->table;
+    }
+
+    public function getModel()
+    {
+        return $this->model;
     }
 
     /**
@@ -60,40 +80,14 @@ class ModelGeneratorCommand extends Command
      */
     private function getColumns()
     {
-        return $this->tableSchema->connect(
-                    $this->database,
-                    Inflector::tabilize($this->model)
-                )->{__FUNCTION__}();
-    }
+        $table = $this->table()->connect($this->database, Inflector::tabilize($this->model));
 
-    /**
-     * Get primary key of the table
-     * @return null
-     */
-    public function getPrimaryKey()
-    {
-        $primaryKey = null;
-        if (!isset($this->columns)) {
-            throw new DatabaseException("Column schema not found!");
-        }
-
-        if (count($this->columns) > 0) {
-            foreach ($this->columns as $key => $value) {
-                if ($value->COLUMN_KEY == 'PRI' || $value->EXTRA == 'auto_increment') {
-                    $primaryKey = $value->COLUMN_NAME;
-                    break;
-                }
-            }
-        }
-
-        return $primaryKey;
+        return $table->{__FUNCTION__}();
     }
 
     protected function configure()
     {
-        $this->setName('model:create')
-             ->setDescription('Generate Sample Model Class Using Cygnite CLI')
-             ->addArgument('name', InputArgument::OPTIONAL, 'Name Of Your Model Class ?')
+        $this->addArgument('name', InputArgument::OPTIONAL, 'Name Of Your Model Class ?')
              ->addArgument('database', InputArgument::OPTIONAL, '');
     }
 
@@ -107,12 +101,15 @@ class ModelGeneratorCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $this->setInput($input)->setOutput($output);
+
         // Your model name
         $this->model = Inflector::classify($input->getArgument('name'));
-
-        // Check for argument database name if not given we will use default
-        // database connection
-        $this->database = $this->getDatabase($input);
+        /*
+         | Check for argument database name if not given
+         | we will use default database connection
+         */
+        $this->database = $this->getDatabase();
         $this->columns = $this->getColumns();
 
         if (empty($this->columns)) {
@@ -127,13 +124,13 @@ class ModelGeneratorCommand extends Command
     }
 
     /**
-     * @param $input
+     * Get Database name
      * @return mixed
      */
-    private function getDatabase($input)
+    public function getDatabase()
     {
-        return ($input->getArgument('database') != '') ?
-            $input->getArgument('database') :
+        return ($this->input->getArgument('database') != '') ?
+            $this->input->getArgument('database') :
             Connection::getDefaultConnection();
     }
 
@@ -149,6 +146,7 @@ class ModelGeneratorCommand extends Command
         $modelInstance->setModelTemplatePath($modelTemplateDir);
         $modelInstance->updateTemplate();
         $modelInstance->generate();
+
         return true;
     }
 }

@@ -7,7 +7,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-namespace Cygnite\DependencyInjection;
+namespace Cygnite\Container\Dependency;
 
 use SplObjectStorage;
 use Cygnite\Reflection;
@@ -20,7 +20,7 @@ use Cygnite\DependencyInjection\Exceptions\DependencyException;
  *
  * @package Cygnite\DependencyInjection
  */
-abstract class DependencyExtension extends SplObjectStorage
+abstract class Builder extends SplObjectStorage
 {
     use DefinitionManagerTrait;
 

@@ -1,18 +1,18 @@
 <?php
-namespace Cygnite\DependencyInjection;
+namespace Cygnite\Container\Service;
 
 use Cygnite\Foundation\Application as App;
 
 /**
  * Class Container
  *
- * @package Cygnite\DependencyInjection
+ * @package Cygnite\Container\Service
  * @author  Sanjoy Dey
  */
 
 abstract class ServiceProvider
 {
-    protected $container;
+    protected $app;
 
     /**
      * Create a new service provider instance.
@@ -21,7 +21,7 @@ abstract class ServiceProvider
      */
     public function __construct($app)
     {
-        $this->container = $app;
+        $this->app = $app;
     }
 
     /**

@@ -1,10 +1,11 @@
 <?php
 namespace Cygnite\Console\Command;
 
+use Cygnite\Database\Table;
 use Cygnite\Helpers\Inflector;
 use Cygnite\Foundation\Application;
 use Cygnite\Console\Generator\Controller;
-use Symfony\Component\Console\Command\Command;
+use Cygnite\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -19,18 +20,31 @@ class ControllerGeneratorCommand extends Command
 
     private $isResourceController;
 
-    public $inflection;
+    public $table;
 
-    public static function make()
+    protected $name = 'controller:create';
+
+    protected $description = 'Generate Sample Controller Using Cygnite CLI';
+
+    /**
+     * @param Table $table
+     * @throws \InvalidArgumentException
+     */
+    public function __construct(Table $table)
     {
-        return new ControllerGeneratorCommand();
+        parent::__construct();
+
+        if (!$table instanceof Table) {
+            throw new \InvalidArgumentException(sprintf('Constructor parameter should be instance of %s.', $table));
+        }
+
+        $this->table = $table;
     }
+
 
     protected function configure()
     {
-        $this->setName('controller:create')
-             ->setDescription('Generate Sample Controller Using Cygnite CLI')
-             ->addArgument('name', InputArgument::OPTIONAL, 'Your Controller Name ?')
+        $this->addArgument('name', InputArgument::OPTIONAL, 'Your Controller Name ?')
              ->addOption('resource', null, InputOption::VALUE_NONE, 'If set, will create RESTful resource controller.')
         ;
     }
@@ -45,6 +59,8 @@ class ControllerGeneratorCommand extends Command
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $this->setInput($input)->setOutput($output);
+
         // Your controller name
         $this->controller = Inflector::classify($input->getArgument('name')).'Controller';
 
@@ -58,7 +74,7 @@ class ControllerGeneratorCommand extends Command
             throw $e;
         }
 
-        $output->writeln('<info>Controller '.$this->controller.' Generated Successfully By Cygnite Cli.</info>');
+        $this->info('Controller '.$this->controller.' Generated Successfully By Cygnite Cli.');
     }
 
     /**

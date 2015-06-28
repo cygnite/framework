@@ -9,14 +9,11 @@
  */
 namespace Cygnite\Console\Command;
 
-use Cygnite\Database;
 use Cygnite\Database\Table;
-use Cygnite\Database\Schema;
 use Cygnite\Helpers\Inflector;
-use Cygnite\Foundation\Application;
 use Cygnite\Console\Generator\Migrator;
 use Cygnite\Console\Generator\Controller;
-use Symfony\Component\Console\Command\Command;
+use Cygnite\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -32,29 +29,46 @@ use Symfony\Component\Console\Formatter\OutputFormatterStyle;
  */
 class MigrationCommand extends Command
 {
-    private $name = 'migrate';
+    protected $name = 'migrate';
+
+    protected $description = 'Migrate Database By Cygnite CLI';
 
     public $table;
 
-    private $migrationDir;
+    /**
+     * @param Table $table
+     * @throws \InvalidArgumentException
+     */
+    public function __construct(Table $table)
+    {
+        parent::__construct();
+
+        if (!$table instanceof Table) {
+            throw new \InvalidArgumentException(sprintf('Constructor parameter should be instance of %s.', $table));
+        }
+
+        $this->table = $table;
+    }
+
+    public function table()
+    {
+        return $this->table;
+    }
 
     protected function configure()
     {
-        //cygnite migrate:init
-        $this->setName($this->name)
-             ->setDescription('Migrate database By Cygnite CLI')
-             ->addArgument('type', null, InputArgument::OPTIONAL, '');
+        $this->addArgument('type', null, InputArgument::OPTIONAL, '');
     }
 
     protected function execute(InputInterface $input, OutputInterface $output)
     {
+        $this->setInput($input)->setOutput($output);
+
         // Migrate init - to create migration table
         $type = $input->getArgument('type');
 
-        $migration = $migrationName = null;
-
         $migration = Migrator::instance($this);
-        $migration->getLatestMigration($this->migrationDir)
+        $migration->getLatestMigration($this->getMigrationPath())
                   ->setMigrationClassName();
 
         if ($type == '' || $type == 'up') {
@@ -62,28 +76,13 @@ class MigrationCommand extends Command
         } else {
             $migration->updateMigration('down');
         }
-        $output->writeln("Migration completed Successfully!");
-    }
 
-    public function setSchema(Table $table)
-    {
-        if ($table instanceof Table) {
-            $this->table = $table;
-        }
-    }
-
-    public static function instance()
-    {
-        return new self();
-    }
-
-    public function setMigrationPath($dir)
-    {
-        $this->migrationDir = $dir.DS.'Resources'.DS.'Database'.DS.'Migrations'.DS;
+        $this->info("Migration completed Successfully!");
     }
 
     public function getMigrationPath()
     {
-        return (isset($this->migrationDir) ? $this->migrationDir : null);
+        $path = CYGNITE_BASE.DS.APPPATH.DS.'Resources'.DS.'Database'.DS.'Migrations'.DS;
+        return $path;
     }
 }

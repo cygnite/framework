@@ -7,24 +7,23 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-namespace Cygnite\DependencyInjection;
+namespace Cygnite\Container;
 
 use Closure;
 use ArrayAccess;
-use ReflectionClass;
 use Cygnite\Reflection;
 use Cygnite\Helpers\Inflector;
-use Cygnite\DependencyInjection\Exceptions\ContainerException;
-
+use Cygnite\Container\Dependency\Builder as DependencyBuilder;
+use Cygnite\Container\Dependency\DependencyInjectorTrait;
+use Cygnite\Container\Exceptions\ContainerException;
 
 /**
  * Class Container
  *
- * @package Cygnite\DependencyInjection
+ * @package Cygnite\Container
  * @author  Sanjoy Dey
  */
-
-class Container extends DependencyExtension implements ContainerAwareInterface, ArrayAccess
+class Container extends DependencyBuilder implements ContainerAwareInterface, ArrayAccess
 {
     use DependencyInjectorTrait;
     /**
@@ -158,8 +157,6 @@ class Container extends DependencyExtension implements ContainerAwareInterface, 
         } else {
             $this->stack[$offset] = $value;
         }
-        //$boundClosure = $value->bindTo($value);
-        //$boundClosure();
     }
 
     /**
@@ -262,7 +259,9 @@ class Container extends DependencyExtension implements ContainerAwareInterface, 
     /**
      * Get singleton instance of your class
      *
-     *
+     * @param      $key
+     * @param null $callback
+     * @return mixed
      */
     public function singleton($key, $callback = null)
     {
@@ -307,9 +306,9 @@ class Container extends DependencyExtension implements ContainerAwareInterface, 
      * Resolve all dependencies of your class and return instance of
      * your class
      *
-     * @param $class string
-     * @throws Exceptions\ContainerException
-     * @return object
+     * @param $class
+     * @return mixed
+     * @throws \Cygnite\Container\Exceptions\ContainerException
      */
     public function make($class)
     {

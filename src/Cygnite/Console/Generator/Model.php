@@ -81,15 +81,15 @@ class Model
     private function replaceModelTemplate($content)
     {
         $content = str_replace('%StaticModelName%',
-            $this->command->model,
+            $this->command->getModel(),
             $content
         );
 
-        $primaryKey = $this->command->getPrimaryKey();
+        $primaryKey = $this->command->table()->getPrimaryKey();
         $content = str_replace('{%Apps%}', APP_NS, $content);
         $content = str_replace('{%primaryKey%}', $primaryKey, $content);
-        $content = str_replace('%modelName%', Inflector::tabilize($this->command->model), $content);
-        $content = str_replace('%databaseName%', $this->command->database, $content);
+        $content = str_replace('%modelName%', Inflector::tabilize($this->command->getModel()), $content);
+        $content = str_replace('%databaseName%', $this->command->getDatabase(), $content);
 
         return $content;
 
@@ -98,7 +98,7 @@ class Model
     public function generate()
     {
         $filePath = '';
-        $filePath =  $this->command->applicationDir.DS.'Models'.DS.$this->command->model.EXT;
+        $filePath =  $this->command->applicationDir.DS.'Models'.DS.$this->command->getModel().EXT;
         /*write operation ->*/
         $writeTmp =fopen(
             $filePath,

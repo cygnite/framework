@@ -1,6 +1,6 @@
 <?php
 
-$container = new \Cygnite\DependencyInjection\Container();
+$container = new \Cygnite\Container\Container();
 //$obj = new Service;
 
 $container['a'] = 'Store A';
@@ -11,17 +11,17 @@ $container->c = 'Store C';
 //        };
 //
 //var_dump($container['a']());exit;
-$container['d'] = function () use ($service) {
-            return new Tes($c['a']);
-        };
+$container['d'] = function ($c) use ($service) {
+    return new Tes($c['a']);
+};
 
 //var_dump($container['d']());exit;
 //$container['e'] =
 $container['d'] = $container->extend('d', function ($tes, $c) {
-            $tes->name = 'Sanjay';
+    $tes->name = 'Sanjay';
 
-            return $tes;
-        });
+    return $tes;
+});
 var_dump($container['d']());
 
 echo "<pre>";
@@ -29,16 +29,17 @@ var_dump($container['d']);
 //var_dump($container['e']);
 
 $obj['dynamicFields'] = function ($c) {
-            return new Users;
-        };
+    return new Users;
+};
 
 //var_dump($obj['dynamicFields']);
 
 $container['dynamicFields'] = $container->extend('dynamicFields', function ($user, $c) {
-            $user->form = "User Form";
-            $user->setUser($c['a']);
+    $user->form = "User Form";
+    $user->setUser($c['a']);
 
-            return $user;
-        });
+    return $user;
+});
+
 $container['dynamicFields']()->start('Ami');
 var_dump($container['dynamicFields']());

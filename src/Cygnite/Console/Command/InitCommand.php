@@ -9,11 +9,11 @@
  */
 namespace Cygnite\Console\Command;
 
-use Cygnite\Foundation\Application;
 use Cygnite\Database\Table;
 use Cygnite\Helpers\Inflector;
+use Cygnite\Foundation\Application;
 use Cygnite\Console\Generator\Migrator;
-use Symfony\Component\Console\Command\Command;
+use Cygnite\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -29,23 +29,42 @@ use Symfony\Component\Console\Formatter\OutputFormatterStyle;
  */
 class InitCommand extends Command
 {
+    protected $name = 'migrate:init';
 
-    private $name = 'migrate:init';
+    protected $description = 'Initializing Migration By Cygnite CLI..';
 
-    public $input;
+    public $argumentName;
 
     public $appDir;
 
     private $table;
 
     /**
+     * @param Table $table
+     * @throws \InvalidArgumentException
+     */
+    public function __construct(Table $table)
+    {
+        parent::__construct();
+
+        if (!$table instanceof Table) {
+            throw new \InvalidArgumentException(sprintf('Constructor parameter should be instance of %s.', $table));
+        }
+
+        $this->table = $table;
+    }
+
+    public function getTable()
+    {
+        return $this->table;
+    }
+
+    /**
      * {@inheritdoc}
      */
     protected function configure()
     {
-        $this->setName($this->name)
-            ->setDescription('Initializing Cygnite CLI..')
-            ->addArgument('name', null, InputArgument::OPTIONAL, null)
+        $this->addArgument('name', null, InputArgument::OPTIONAL, null)
             ->setHelp("<<<EOT
                 The <info>init</info> command creates a skeleton file and a migrations directory
                 <info>cygnite migrate:init</info>
@@ -53,52 +72,34 @@ class InitCommand extends Command
             );
     }
 
+    /**
+     * @param InputInterface  $input
+     * @param OutputInterface $output
+     * @return int|null|void
+     */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $this->input = $input->getArgument('name');
+        $this->setInput($input)->setOutput($output);
+
+        $this->argumentName = $input->getArgument('name');
         $this->appDir = CYGNITE_BASE.DS.APPPATH;
         $migrateTemplateDir =
-            dirname(dirname(__FILE__)).DS.'src'.DS.'apps'.DS.'database'.DS;
+            dirname(dirname(__FILE__)).DS.'src'.DS.'Apps'.DS.'Database'.DS;
 
         $migrateInstance = null;
         $migrateInstance = Migrator::instance($this);
-        $this->getSchema()->makeMigration('migrations');
+        $this->table->makeMigration('migrations');
 
         // We will generate migration class only if class name provided in command
-        if (!is_null($this->input)) {
+        if (!is_null($this->argumentName)) {
 
             $migrateInstance->setTemplateDir($migrateTemplateDir);
             $migrateInstance->replaceTemplateByInput();
             $status = $migrateInstance->generate(new \DateTime('now', new \DateTimeZone('Europe/London')));
 
             if ($status) {
-                $output->writeln("Your migration class generated in $status");
+                $this->info("Your migration class generated in $status");
             }
-        }
-    }
-
-    /**
-     * @param Table $table
-     */
-    public function setSchema(Table $table)
-    {
-        if ($table instanceof Table) {
-            $this->table = $table;
-        }
-    }
-
-    /**
-     * @return null
-     */
-    public function getSchema()
-    {
-        return isset($this->table) ? $this->table : null;
-    }
-
-    public static function __callStatic($method, $arguments = [])
-    {
-        if ($method == 'instance') {
-            return new self();
         }
     }
 }

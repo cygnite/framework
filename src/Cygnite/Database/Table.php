@@ -11,6 +11,7 @@
 namespace Cygnite\Database;
 
 use Cygnite\Database\Connection;
+use Cygnite\Database\Exceptions\DatabaseException;
 
 class Table extends Connection
 {
@@ -29,6 +30,11 @@ class Table extends Connection
 
     private $statement;
 
+    /**
+     * @param $database
+     * @param $model
+     * @return $this
+     */
     public function connect($database, $model)
     {
         $this->database = $database;
@@ -51,19 +57,39 @@ class Table extends Connection
             $this,
             function($table) {
                 $table->tableName = $this->tableName;
-                $columns = null;
-                //$table->setDbConnection($this->_connection, $this->database);
-                $table->setTableSchema();
 
-                return $table->schema;
+                return $table->setTableSchema()->getSchema();
             }
         );
 
-        //$columns = $conn->query($table->schema)->fetchAll();
         $columns = $this->query($schema)->getAll();
         $this->setSchemaInstance($columns);
 
         return $columns;
+    }
+
+    /**
+     * @throws DatabaseException
+     * @return null
+     */
+    public function getPrimaryKey()
+    {
+        $columns = $this->getColumns();
+        if (!isset($columns)) {
+            throw new DatabaseException("Column schema not found!");
+        }
+
+        if (count($columns) > 0) {
+            $primaryKey = null;
+            foreach ($columns as $key => $value) {
+                if ($value->COLUMN_KEY == 'PRI' || $value->EXTRA == 'auto_increment') {
+                    $primaryKey = $value->COLUMN_NAME;
+                    break;
+                }
+            }
+        }
+
+        return $primaryKey;
     }
 
     /**

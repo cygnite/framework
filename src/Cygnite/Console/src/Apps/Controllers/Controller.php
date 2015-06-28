@@ -144,7 +144,7 @@ $validate%addRule%
     {
         $validator = null; $%controllerName% = [];
         $%modelName% = %StaticModelName%::find($id);
-        $form = new %ControllerName%Form($%controllerName%, Url::segment(3));
+        $form = new %ControllerName%Form($%modelName%, Url::segment(3));
         $form->action = 'edit';
 
         $input = Input::make();

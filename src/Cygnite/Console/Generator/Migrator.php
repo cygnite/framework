@@ -24,13 +24,7 @@ class Migrator
 {
     private $command;
 
-    private $content;
-
-    private $default;
-
     private $templatePath;
-
-    private $filePointer;
 
     private $replacedContent;
 
@@ -94,7 +88,7 @@ class Migrator
         $fileContent = file_get_contents($file);
 
         $content = str_replace('{%className%}',
-            Inflector::classify(strtolower($this->command->input)),
+            Inflector::classify(strtolower($this->command->argumentName)),
             $fileContent
         );
 
@@ -107,7 +101,7 @@ class Migrator
 
     private function getAppMigrationDirPath()
     {
-        return $this->command->appDir;
+        return $this->command->getMigrationPath();
     }
 
     public function generate(\DateTime $date)
@@ -120,7 +114,7 @@ class Migrator
 
         $filePath =  $appMigrationPath.strtolower(
                 Inflector::changeToLower(
-                    $date->format('YmdHis').'_'.$this->command->input.EXT
+                    $date->format('YmdHis').'_'.$this->command->argumentName.EXT
                 )
             );
 
@@ -146,7 +140,11 @@ class Migrator
     {
         $this->migrationDir = $directory;
 
-        $files = scandir($directory, SCANDIR_SORT_DESCENDING);
+        try {
+            $files = scandir($directory, SCANDIR_SORT_DESCENDING);
+        } catch (\Exception $e) {
+            throw new \Exception(sprintf("Invalid migration directory %s.", $directory));
+        }
 
         $this->latestFile = $files[0];
 
@@ -205,6 +203,6 @@ class Migrator
     
     public function updateMigrationTable()
     {
-        $this->command->table->updateMigrationVersion($this);
+        $this->command->table()->updateMigrationVersion($this);
     }
 }

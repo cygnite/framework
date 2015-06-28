@@ -238,7 +238,7 @@ class View
         );
 
         $content = str_replace('{%primaryKey%}',
-            $this->command->getPrimaryKey(),
+            $this->command->table()->getPrimaryKey(),
             $content
         );
 

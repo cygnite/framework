@@ -110,7 +110,7 @@ class Schema
      */
     public static function __callStatic($method, $arguments = [])
     {
-        if ($method == 'instance' && !empty($arguments)) {
+        if ($method == 'make' && !empty($arguments)) {
 
             $schema = new self($arguments[0]);
 
@@ -696,6 +696,11 @@ class Schema
                         TABLE_NAME = '" . $this->tableName . "'";
 
         return $this;
+    }
+
+    public function getSchema()
+    {
+        return $this->schema;
     }
 
     /**

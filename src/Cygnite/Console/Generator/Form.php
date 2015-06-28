@@ -34,7 +34,7 @@ class Form
      */
     public function __construct($controller, $formCommand = null)
     {
-        $this->controller = $controller;
+        $this->controllerInstance = $controller;
         $this->formCommand = $formCommand;
     }
 
@@ -73,7 +73,7 @@ class Form
     public function generate()
     {
         $filePath = '';
-        $formName = Inflector::classify($this->formCommand->table);
+        $formName = Inflector::classify($this->formCommand->tableName);
 
         if (file_exists($this->getFormTemplatePath().'Form'.EXT)) {
            //We will generate Form Component
@@ -82,12 +82,13 @@ class Form
            die("Form template doesn't exists in ".$this->getFormTemplatePath().'Form'.EXT." directory.");
         }
 
-        $this->controller->isFormGenerator = true;
-        $this->controller->updateTemplate();
-        $this->controller->controller = $formName;
-        $this->controller->applicationDir = CYGNITE_BASE.DS.APPPATH;
+        $this->controllerInstance->isFormGenerator = true;
+        $this->controllerInstance->updateTemplate();
+        $this->controllerInstance->setControllerName($formName);
+        $this->controllerInstance->setApplicationDirectory(realpath(CYGNITE_BASE.DS.APPPATH));
         $formContent = str_replace('%controllerName%', $formName, $formContent);
-        $formContent = str_replace('{%formElements%}', $this->controller->getForm().PHP_EOL, $formContent);
-        $this->controller->generateFormComponent($formContent);
+        $formContent = str_replace('{%formElements%}', $this->controllerInstance->getForm().PHP_EOL, $formContent);
+
+        $this->controllerInstance->generateFormComponent($formContent);
     }
 }

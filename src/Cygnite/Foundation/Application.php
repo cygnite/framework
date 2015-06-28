@@ -18,7 +18,7 @@ use Cygnite\Helpers\Inflector;
 use Cygnite\Base\Request\Dispatcher;
 use Cygnite\Common\UrlManager\Url;
 use Cygnite\Translation\Translator;
-use Cygnite\DependencyInjection\Container;
+use Cygnite\Container\Container;
 use Cygnite\Exception\Handler as ExceptionHandler;
 
 use Tracy\Helpers;

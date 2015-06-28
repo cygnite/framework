@@ -1,12 +1,12 @@
 <?php
-namespace Cygnite\DependencyInjection\Exceptions;
+namespace Cygnite\Container\Exceptions;
 
 /**
  * Class ContainerException
  *
  * Catch all exceptions of Container
  *
- * @package Cygnite\DependencyInjection
+ * @package Cygnite\Container\Exceptions
  */
 class ContainerException extends \Exception
 {

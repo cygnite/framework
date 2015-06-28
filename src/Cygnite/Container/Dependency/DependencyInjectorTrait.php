@@ -1,12 +1,12 @@
 <?php
-namespace Cygnite\DependencyInjection;
+namespace Cygnite\Container\Dependency;
 
 use Cygnite\Helpers\Inflector;
 
 /**
- * Class DependencyInjectorTrait
+ * Trait DependencyInjectorTrait
  *
- * @package Cygnite\DependencyInjection
+ * @package Cygnite\Container\Dependency
  */
 trait DependencyInjectorTrait
 {
@@ -38,6 +38,8 @@ trait DependencyInjectorTrait
     }
 
     /**
+     * We will inject interface implementation
+     *
      * @param $reflectionParam
      * @return array
      */

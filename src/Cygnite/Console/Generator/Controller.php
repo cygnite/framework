@@ -317,7 +317,7 @@ class Controller
 
         $content = $this->replaceControllerName($content);
         $content = str_replace('{%Apps%}', APP_NS, $content);
-        $primaryKey = $this->controllerCommand->getPrimaryKey();
+        $primaryKey = $this->controllerCommand->table()->getPrimaryKey();
 
         $content = str_replace('{%primaryKey%}', $primaryKey, $content);
         $content = str_replace('%modelColumns%', $this->getDbCode().PHP_EOL, $content);
@@ -383,9 +383,10 @@ class Controller
      */
     public function generate()
     {
+        echo $this->applicationDir.DS.'Controllers'.DS.$this->controller.EXT;
         /*write operation ->*/
         $writeTmp =fopen(
-            $this->applicationDir.DS.'Controllers'.DS.$this->controller.EXT,
+            $this->applicationDir.DS.'controllers'.DS.$this->controller.EXT,
             "w"
         ) or die('Unable to generate controller');
 
