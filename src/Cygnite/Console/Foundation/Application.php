@@ -107,10 +107,6 @@ class Application extends SymfonyApplication implements ConsoleApplicationInterf
         }
 
         return $this;
-
-        //var_dump($this->stack);
-        //$this->addCommands($this->stack);
-        //return true;
     }
 
     /**
@@ -122,38 +118,6 @@ class Application extends SymfonyApplication implements ConsoleApplicationInterf
      */
     public function resolveConsoleCommand($command)
     {
-        //var_dump($this->cygnite->make($command));
-        /*$command = $this->cygnite->make($command);
-        $this->stack[] = $command;*/
         $this->add($this->cygnite->make($command));
     }
-
-    /**
-     * We will register all commands into Console
-     *
-     * @return true
-     */
-    /*public function execute()
-    {
-        $this->registerCommands();
-        exit;
-        $command = $this->cygnite->make($this->commandsStack[0]);
-        //var_dump($command);
-        $this->add($command);
-        //parent::setDefaultCommand($command->getName());
-        parent::run();
-    }*/
-
-    /*protected function execute()
-    {
-        $input = new Symfony\Component\Console\Input\InputInterface();
-        $output = new Symfony\Component\Console\Output\OutputInterface();
-
-        $this->input = $input;
-
-        $this->output = $output;
-
-        return parent::run($input, $output);
-
-    }*/
 }
