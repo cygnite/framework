@@ -26,6 +26,7 @@ use Cygnite\Container\Exceptions\ContainerException;
 class Container extends DependencyBuilder implements ContainerAwareInterface, ArrayAccess
 {
     use DependencyInjectorTrait;
+    
     /**
      * The container's bind data
      *
