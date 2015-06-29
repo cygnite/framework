@@ -108,15 +108,15 @@ class Migrator
     {
         $filePath = $appMigrationPath = '';
         $date->setTimezone(new \DateTimeZone(SET_TIME_ZONE));
-        $appMigrationPath = $this->getAppMigrationDirPath().DS.'Resources'.DS.'Database'.DS.'Migrations'.DS;
+        $appMigrationPath = $this->getAppMigrationDirPath();
 
         $this->hasDirectory($appMigrationPath);
 
-        $filePath =  $appMigrationPath.strtolower(
-                Inflector::changeToLower(
+        $file = strtolower(Inflector::changeToLower(
                     $date->format('YmdHis').'_'.$this->command->argumentName.EXT
-                )
-            );
+                ));
+
+        $filePath =  $appMigrationPath.$file;
 
         /*write operation ->*/
         $writeTmp =fopen(
@@ -133,27 +133,51 @@ class Migrator
         fclose($writeTmp);
         $this->replacedContent = '';
 
-        return $filePath;
+        return $file;
     }
 
-    public function getLatestMigration($directory)
+    public function getLatestMigration()
     {
-        $this->migrationDir = $directory;
-
         try {
-            $files = scandir($directory, SCANDIR_SORT_DESCENDING);
+            $files = $this->files($this->getAppMigrationDirPath());
         } catch (\Exception $e) {
-            throw new \Exception(sprintf("Invalid migration directory %s.", $directory));
+            throw new \Exception(sprintf("Invalid migration directory %s.", $this->getAppMigrationDirPath()));
         }
 
-        $this->latestFile = $files[0];
+        $this->latestFile = reset($files);
 
         return $this;
     }
 
+    /**
+     * We will scan directory and return only files with .php extension
+     *
+     * @param $directory
+     * @return array
+     */
+    private function files($directory)
+    {
+        return preg_grep('~\.(php)$~', scandir($directory, SCANDIR_SORT_DESCENDING));
+    }
+
+    /**
+     * Return file extension
+     *
+     * @param $file
+     * @return string
+     */
+    private function getFileExt($file)
+    {
+        return strtolower(pathinfo($file, PATHINFO_EXTENSION));
+    }
+
+    /**
+     * @param string $file
+     * @throws \Exception
+     */
     public function setMigrationClassName($file = '')
     {
-        if (pathinfo($this->latestFile, PATHINFO_EXTENSION) !== 'php') {
+        if ($this->getFileExt($this->latestFile) !== 'php') {
             throw new \Exception(APP_NS."/Resources/Database/Migrations/ must have {xxxx_table_name.php} file types");
         }
 
@@ -184,7 +208,7 @@ class Migrator
     {
         $file = $class = null;
 
-        $file = $this->migrationDir.$this->getVersion().$this->getMigrationClass().EXT;
+        $file = $this->getAppMigrationDirPath().$this->getVersion().$this->getMigrationClass().EXT;
 
         if (is_readable($file)) {
             include_once $file;

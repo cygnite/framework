@@ -40,7 +40,7 @@ class Application extends SymfonyApplication implements ConsoleApplicationInterf
 
     protected $stack = [];
 
-    protected $cygnite;
+    public $cygnite;
 
     /**
      * Create Cyrus Console Application
@@ -52,7 +52,13 @@ class Application extends SymfonyApplication implements ConsoleApplicationInterf
     {
         parent::__construct('Cygnite Framework: Console Application', $version);
         $this->cygnite = $cygniteApplication;
+        /*
+         | Sets whether to automatically exit after a command execution or not.
+         */
         $this->setAutoExit(false);
+        /*
+         | Sets whether to catch exceptions or not during commands execution.
+         */
         $this->setCatchExceptions(false);
     }
 

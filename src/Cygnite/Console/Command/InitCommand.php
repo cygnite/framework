@@ -54,7 +54,7 @@ class InitCommand extends Command
         $this->table = $table;
     }
 
-    public function getTable()
+    public function table()
     {
         return $this->table;
     }
@@ -88,18 +88,24 @@ class InitCommand extends Command
 
         $migrateInstance = null;
         $migrateInstance = Migrator::instance($this);
-        $this->table->makeMigration('migrations');
+        $this->table()->makeMigration('migrations');
 
         // We will generate migration class only if class name provided in command
         if (!is_null($this->argumentName)) {
 
             $migrateInstance->setTemplateDir($migrateTemplateDir);
             $migrateInstance->replaceTemplateByInput();
-            $status = $migrateInstance->generate(new \DateTime('now', new \DateTimeZone('Europe/London')));
+            $file = $migrateInstance->generate(new \DateTime('now', new \DateTimeZone(SET_TIME_ZONE)));
 
-            if ($status) {
-                $this->info("Your migration class generated in $status");
+            if ($file) {
+                $file = APP_NS.DS.'Resources'.DS.'Database'.DS.'Migrations'.DS.$file;
+                $this->info("Your migration class generated in ".$file);
             }
         }
+    }
+
+    public function getMigrationPath()
+    {
+        return realpath(CYGNITE_BASE.DS.APPPATH.DS.'Resources'.DS.'Database'.DS.'Migrations').DS;
     }
 }

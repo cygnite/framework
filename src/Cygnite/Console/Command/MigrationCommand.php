@@ -68,7 +68,7 @@ class MigrationCommand extends Command
         $type = $input->getArgument('type');
 
         $migration = Migrator::instance($this);
-        $migration->getLatestMigration($this->getMigrationPath())
+        $migration->getLatestMigration()
                   ->setMigrationClassName();
 
         if ($type == '' || $type == 'up') {
@@ -82,7 +82,6 @@ class MigrationCommand extends Command
 
     public function getMigrationPath()
     {
-        $path = CYGNITE_BASE.DS.APPPATH.DS.'Resources'.DS.'Database'.DS.'Migrations'.DS;
-        return $path;
+        return realpath(CYGNITE_BASE.DS.APPPATH.DS.'Resources'.DS.'Database'.DS.'Migrations').DS;
     }
 }
