@@ -9,7 +9,7 @@
  */
 namespace Cygnite\Console\Command;
 
-use Cygnite\Database\Table;
+use Cygnite\Database\Table\Table;
 use Cygnite\Foundation\Application;
 use Cygnite\Helpers\Inflector;
 use Cygnite\Database\Connection;

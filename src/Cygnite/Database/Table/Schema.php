@@ -8,10 +8,9 @@
  * file that was distributed with this source code.
  */
 
-namespace Cygnite\Database;
+namespace Cygnite\Database\Table;
 
 use Closure;
-use Cygnite\Common\Singleton;
 use Cygnite\Helpers\Inflector;
 use Cygnite\Database\Connection;
 
@@ -110,7 +109,7 @@ class Schema
      */
     public static function __callStatic($method, $arguments = [])
     {
-        if ($method == 'make' && !empty($arguments)) {
+        if ($method == 'instance' && !empty($arguments)) {
 
             $schema = new self($arguments[0]);
 
@@ -696,11 +695,6 @@ class Schema
                         TABLE_NAME = '" . $this->tableName . "'";
 
         return $this;
-    }
-
-    public function getSchema()
-    {
-        return $this->schema;
     }
 
     /**

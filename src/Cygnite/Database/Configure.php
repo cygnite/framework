@@ -4,7 +4,7 @@ namespace Cygnite\Database;
 use Closure;
 use Cygnite\Common\Singleton;
 
-class Configuration extends Singleton
+class Configure extends Singleton
 {
     public static $config = [];
 
@@ -15,7 +15,7 @@ class Configuration extends Singleton
     /**
      * @param callable $setup
      */
-    public static function initialize(Closure $setup)
+    public static function database(Closure $setup)
     {
         return $setup(parent::instance());
     }
@@ -24,7 +24,7 @@ class Configuration extends Singleton
      * @param  array           $config
      * @throws ConfigException
      */
-    public function setConfig($config = [])
+    public function set($config = [])
     {
         if (!is_array($config)) {
             throw new ConfigException("Connection must be an array");

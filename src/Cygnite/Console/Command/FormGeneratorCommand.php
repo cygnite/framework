@@ -11,7 +11,7 @@ namespace Cygnite\Console\Command;
 
 use Cygnite\Foundation\Application;
 use Cygnite\Helpers\Inflector;
-use Cygnite\Database\Table;
+use Cygnite\Database\Table\Table;
 use Cygnite\Database\Schema;
 use Cygnite\Console\Generator\Form;
 use Cygnite\Console\Generator\Model;

@@ -1,7 +1,7 @@
 <?php
 namespace Cygnite\Console\Command;
 
-use Cygnite\Database\Table;
+use Cygnite\Database\Table\Table;
 use Cygnite\Helpers\Inflector;
 use Cygnite\Foundation\Application;
 use Cygnite\Console\Generator\Controller;

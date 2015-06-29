@@ -13,7 +13,7 @@ use Cygnite\Console\Command\Command;
 use Cygnite\Console\Generator\Controller;
 use Cygnite\Console\Generator\Model;
 use Cygnite\Console\Generator\View;
-use Cygnite\Database\Table;
+use Cygnite\Database\Table\Table;
 use Cygnite\Foundation\Application;
 use Cygnite\Helpers\Inflector;
 use Symfony\Component\Console\Command\Command as SymfonyCommand;

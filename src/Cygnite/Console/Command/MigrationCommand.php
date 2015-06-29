@@ -9,8 +9,8 @@
  */
 namespace Cygnite\Console\Command;
 
-use Cygnite\Database\Table;
 use Cygnite\Helpers\Inflector;
+use Cygnite\Database\Table\Table;
 use Cygnite\Console\Generator\Migrator;
 use Cygnite\Console\Generator\Controller;
 use Cygnite\Console\Command\Command;

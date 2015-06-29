@@ -8,7 +8,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Cygnite\Database;
+namespace Cygnite\Database\Query;
 
 /**
  * Database ActiveRecord.
@@ -22,9 +22,11 @@ use PDOException;
 use Cygnite\Helpers\Inflector;
 use Cygnite\Common\Pagination;
 use Cygnite\Foundation\Collection;
+use Cygnite\Database\Connection;
+use Cygnite\Database\Cyrus\ActiveRecord;
 
 //extends Connection
-class Query
+class Builder
 {
     //set your pdo statement here
     const DELETE = 'DELETE';
@@ -101,7 +103,7 @@ class Query
 
     public static function make(\Closure $callback, $activeRecord = null)
     {
-        return $callback(new Query($activeRecord));
+        return $callback(new Builder($activeRecord));
     }
 
     public static function _callMethod(\Closure $callback, $instance = null)
@@ -587,7 +589,7 @@ class Query
                 $data = $statement->fetchAll(\PDO::FETCH_COLUMN);
                 break;
             case 'class':
-                $data = $statement->fetchAll(\PDO::FETCH_CLASS, '\\' . __NAMESPACE__ . '\\DataSource');
+                $data = $statement->fetchAll(\PDO::FETCH_CLASS, "\\Cygnite\\Database\\DataSource");
                 break;
             default:
                 $data = $statement->fetchAll(\PDO::FETCH_CLASS, '\\' . self::getActiveRecord()->modelClassNs);

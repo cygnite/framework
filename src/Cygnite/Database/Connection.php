@@ -13,7 +13,7 @@ namespace Cygnite\Database;
 
 use PDO;
 use Exception;
-use Cygnite\Database\Configurations;
+use Cygnite\Database\Configure;
 
 abstract class Connection
 {
@@ -173,7 +173,7 @@ abstract class Connection
 
         $config = [];
 
-        $config = Configuration::getDatabaseConfiguration();
+        $config = Configure::getDatabaseConfiguration();
 
         foreach ($config as $key => $value) {
 
@@ -191,7 +191,7 @@ abstract class Connection
      */
     public static function getDefaultConnection()
     {
-        $connection= self::parseUrl(Configuration::getDefault());
+        $connection= self::parseUrl(Configure::getDefault());
 
         return $connection['database'];
     }

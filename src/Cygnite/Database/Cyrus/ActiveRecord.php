@@ -8,7 +8,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Cygnite\Database;
+namespace Cygnite\Database\Cyrus;
 
 /**
  * Database ActiveRecord.
@@ -16,6 +16,7 @@ namespace Cygnite\Database;
  * @author Sanjoy Dey <dey.sanjoy0@gmail.com>
  */
 use Cygnite;
+use Cygnite\Database\Query\Builder as QueryBuilder;
 use Cygnite\Common\Pagination;
 use Cygnite\Helpers\Inflector;
 
@@ -641,7 +642,7 @@ abstract class ActiveRecord implements \ArrayAccess
      */
     public function fluentQuery()
     {
-        return new Query($this);
+        return new QueryBuilder($this);
     }
 
     /**
