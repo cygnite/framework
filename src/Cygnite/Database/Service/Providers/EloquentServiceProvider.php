@@ -6,8 +6,25 @@ use Illuminate\Container\Container;
 use Cygnite\Foundation\Application;
 use Cygnite\Database\Configure as Database;
 use Cygnite\Container\Service\ServiceProvider;
-use Illuminate\Database\Capsule\Manager as EloquentProvider;
+use Illuminate\Database\Capsule\Manager as EloquentCapsule;
 
+/**
+ * If you want to use Eloquent ORM register EloquentServiceProvider
+ * as Service and extend \Cygnite\Database\Service\Eloquent in your
+ * model class
+ *
+ * <code>
+ * class User extends \Cygnite\Database\Service\Eloquent
+ * {
+ *
+ *
+ * }
+ * </code>
+ *
+ * Class EloquentServiceProvider
+ *
+ * @package Cygnite\Database\Service\Providers
+ */
 class EloquentServiceProvider extends ServiceProvider
 {
     protected $app;
@@ -16,7 +33,7 @@ class EloquentServiceProvider extends ServiceProvider
     {
         $app['eloquent'] = $app->share (function($c) {
 
-            $eloquent = new EloquentProvider();
+            $eloquent = new EloquentCapsule();
             $config = Database::getDatabaseConfiguration();
 
             $eloquent->addConnection([
