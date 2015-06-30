@@ -93,14 +93,6 @@ class Schema
         $this->_connection = Connection::getConnection($database);
     }
 
-    /*
-     * Get Schema instance to generate table schema
-     * @access public
-     * @param $_pointer get the model pointer
-     * @param Closure instance to hold schema object
-     *
-     */
-
     /**
      * @param       $method
      * @param array $arguments
@@ -109,7 +101,7 @@ class Schema
      */
     public static function __callStatic($method, $arguments = [])
     {
-        if ($method == 'instance' && !empty($arguments)) {
+        if ($method == 'make' && !empty($arguments)) {
 
             $schema = new self($arguments[0]);
 
@@ -127,6 +119,13 @@ class Schema
         }
     }
 
+	/**
+     * Get Schema instance to generate table schema
+     * @access public
+     * @param $_pointer get the model pointer
+     * @param Closure instance to hold schema object
+     *
+     */
     public function init(Closure $callback = null, $schema = null)
     {
         if ($callback instanceof Closure) {
