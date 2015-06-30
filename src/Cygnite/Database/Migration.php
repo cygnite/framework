@@ -1,7 +1,7 @@
 <?php
 namespace Cygnite\Database;
 
-use Cygnite\Database\ActiveRecord;
+use Cygnite\Database\Cyrus\ActiveRecord;
 
 /**
  * Class Migration

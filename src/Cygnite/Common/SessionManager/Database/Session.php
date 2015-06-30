@@ -4,7 +4,7 @@ namespace Cygnite\Common\SessionManager\Database;
 use Cygnite\Common\Encrypt;
 use Cygnite\Common\SessionManager\PacketInterface;
 use Cygnite\Common\SessionManager\Session as SessionManager;
-use Cygnite\Database\ActiveRecord;
+use Cygnite\Database\Cyrus\ActiveRecord;
 use Cygnite\Database\Schema;
 use Cygnite\Helpers\Config;
 
