@@ -12,8 +12,6 @@ namespace Cygnite\Console;
 use Cygnite\Foundation\Application as CygniteApplication;
 use Cygnite\Console\Foundation\Application as ConsoleApplication;
 
-require str_replace(['\\', '/'], DS, CYGNITE_BASE.DS.APPPATH.'/Configs/database.php');
-
 /**
  * Class CygniteConsoleApplication
  *

@@ -260,7 +260,7 @@ class Application extends Container
      */
     public function configure()
     {
-        $this->importHelpers();
+        //$this->importHelpers();
         $this->setPaths(realpath(CYGNITE_BASE.DS.CF_BOOTSTRAP.DS.'config.paths'.EXT));
 
         //Set up configurations for your awesome application
@@ -289,10 +289,23 @@ class Application extends Container
      */
     public function bootApplication()
     {
+         /*
+        | -------------------------------------------------------------------
+        | Check if script is running via cli and return false
+        | -------------------------------------------------------------------
+        |
+        | We will check if script running via console
+        | then we will return from here, else application
+        | fall back down
+        */
+        if (isCli()) {
+            return $this;
+        }
+    
         $this->registerCoreAlias();
-        $this->beforeBootingApplication();
-
         $this->setEnvironment();
+        $this->beforeBootingApplication();
+        
         $this['debugger']->handleException();
         $this['service.provider']();
 
@@ -417,6 +430,15 @@ class Application extends Container
      */
     public function run()
     {
+        /**
+         | We will check if script running via console
+         | then we will return out from here, else application
+         | fall back down
+         */
+        if (isCli()) {
+            return $this;
+        }
+
         try {
             return $this->handle();
 

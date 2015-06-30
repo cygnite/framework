@@ -29,29 +29,48 @@ class EloquentServiceProvider extends ServiceProvider
 {
     protected $app;
 
+    public $eloquent;
+
+    /**
+     * Setup Eloquent ORM Service Provider
+     *
+     * @param Application $app
+     * @source https://github.com/illuminate/database
+     */
     public function register(Application $app)
     {
-        $app['eloquent'] = $app->share (function($c) {
+        $this->eloquent = new EloquentCapsule();
+        $config = Database::getDatabaseConfiguration();
 
-            $eloquent = new EloquentCapsule();
-            $config = Database::getDatabaseConfiguration();
+        /**
+         | We will loop over all connections
+         | and set connection
+         */
+        foreach ($config as $key => $c) {
+            $this->setConnection($c);
+        }
 
-            $eloquent->addConnection([
-                'driver'    => $config['driver'],
-                'host'      => $config['host'],
-                'database'  => $config['database'],
-                'username'  => $config['username'],
-                'password'  => $config['password'],
-                'charset'   => $config['charset'],
-                'collation' => $config['collation'],
-                'prefix'    => $config['prefix'],
-            ]);
+        $this->eloquent->setEventDispatcher(new Dispatcher(new Container));
+        // Make this Capsule instance available globally via static methods... (optional)
+        $this->eloquent->setAsGlobal();
+        // Setup the Eloquent ORM... (optional; unless you've used setEventDispatcher())
+        $this->eloquent->bootEloquent();
+    }
 
-            $eloquent->setEventDispatcher(new Dispatcher(new Container));
-            // Make this Capsule instance available globally via static methods... (optional)
-            $eloquent->setAsGlobal();
-            // Setup the Eloquent ORM... (optional; unless you've used setEventDispatcher())
-            $eloquent->bootEloquent();
-        });
+    /**
+     * @param $c
+     */
+    private function setConnection($c)
+    {
+        $this->eloquent->addConnection([
+            'driver'    => $c['driver'],
+            'host'      => $c['host'],
+            'database'  => $c['database'],
+            'username'  => $c['username'],
+            'password'  => $c['password'],
+            'charset'   => $c['charset'],
+            'collation' => $c['collation'],
+            'prefix'    => $c['prefix'],
+        ]);
     }
 }

@@ -44,11 +44,30 @@ class Encrypt
     {
         $encryptKey = Config::get('global.config', 'encryption.key');
 
+        $this->checkMCryptExists();
+
         if (is_null($encryptKey)) {
             $config = include_once CYGNITE_BASE.DS.APPPATH.DS.'Configs'.DS.'application'.EXT;
             $this->setSaltKey($config['encryption.key']);
         } else {
             $this->setSaltKey($encryptKey);
+        }
+    }
+
+    private function checkMCryptExists()
+    {
+        /*
+        |--------------------------------------------------------------------------
+        | Check Extensions
+        |--------------------------------------------------------------------------
+        |
+        | Cygnite Encrypt requires a few extensions to function. We will check if
+        | extensions loaded. If not we'll just exit from here.
+        |
+        */
+        if ( ! extension_loaded('mcrypt')) {
+            echo 'Encrypt library requires Mcrypt PHP extension.'.PHP_EOL;
+            exit(1);
         }
     }
 

@@ -27,9 +27,12 @@
        "phpunit/phpunit": "~4.0"
     },
      "autoload": {
-         "psr-4": {
-             "Cygnite\\": "src/Cygnite/"
-         }
+     	"files": [
+            "src/Cygnite/Helpers/Support.php"
+        ],
+        "psr-4": {
+            "Cygnite\\": "src/Cygnite/"
+        }
     },
     "extra": {
         "branch-alias": {
