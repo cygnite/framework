@@ -342,8 +342,8 @@ class Container extends DependencyBuilder implements ContainerAwareInterface, Ar
 
         } else {
             $dependencies = $constructor->getParameters();
-
             $constructorArgs = [];
+
             foreach ($dependencies as $dependency) {
 
                 if (!is_null($dependency->getClass())) {
@@ -352,19 +352,27 @@ class Container extends DependencyBuilder implements ContainerAwareInterface, Ar
 
                     // Application and Container cannot be injected into controller currently
                     // since Application constructor is protected
-
                     if ($reflectionParam->IsInstantiable()) {
                         $constructorArgs[] = $this->makeInstance($resolveClass);
+                    } else {
+                        $constructorArgs[] = $this->interfaceInjection($reflectionParam);
                     }
 
-                    $constructorArgs[] = $this->interfaceInjection($reflectionParam);
-
                 } else {
+                    /*
+                     | We will check if construct has default value
+                     | if exists we will simply assign it and continue
+                     | for next argument
+                     */
+                    if ($dependency->isDefaultValueAvailable()) {
+                        $constructorArgs[] = $dependency->getDefaultValue();
+                        continue;
+                    }
                     /*
                      | Check parameters are optional or not
                      | if it is optional we will set the default value
                      */
-                     $constructorArgs[] = $this->isOptionalArgs($dependency);
+                    $constructorArgs[] = $this->isOptionalArgs($dependency);
                 }
             }
 
