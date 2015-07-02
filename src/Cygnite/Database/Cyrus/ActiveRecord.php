@@ -15,10 +15,10 @@ namespace Cygnite\Database\Cyrus;
  *
  * @author Sanjoy Dey <dey.sanjoy0@gmail.com>
  */
-use Cygnite;
-use Cygnite\Database\Query\Builder as QueryBuilder;
-use Cygnite\Common\Pagination;
 use Cygnite\Helpers\Inflector;
+use Cygnite\Common\Pagination;
+use Cygnite\Database\Connection;
+use Cygnite\Database\Query\Builder as QueryBuilder;
 
 abstract class ActiveRecord implements \ArrayAccess
 {
