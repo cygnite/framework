@@ -101,6 +101,8 @@ class InitCommand extends Command
                 $file = APP_NS.DS.'Resources'.DS.'Database'.DS.'Migrations'.DS.$file;
                 $this->info("Your migration class generated in ".$file);
             }
+
+            $this->info("Cool!! You are ready to use migration!");
         }
     }
 

@@ -208,10 +208,10 @@ class Migrator
     {
         $file = $class = null;
 
-        $file = $this->getAppMigrationDirPath().$this->getVersion().$this->getMigrationClass().EXT;
+        $file = $this->getAppMigrationDirPath().$this->getVersion().$this->getMigrationClass();
 
-        if (is_readable($file)) {
-            include_once $file;
+        if (is_readable($file.EXT)) {
+            include_once $file.EXT;
             $class = Inflector::classify($this->getMigrationClass());
         }
 
@@ -223,6 +223,7 @@ class Migrator
 
         $this->updateMigrationTable();
 
+        $this->command->info("Migrated: $file OK!");
     }
     
     public function updateMigrationTable()

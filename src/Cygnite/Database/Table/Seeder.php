@@ -73,7 +73,7 @@ abstract class Seeder
      */
     private function resolve($class)
     {
-        $class = 'Apps\\Resources\\Database\\Seeding\\'.$class;
+        $class = APP_NS.'\\Resources\\Database\\Seeding\\'.$class;
 
         return (new $class)->execute();
     }
