@@ -5,6 +5,7 @@ use Closure;
 use Cygnite\Helpers\Inflector;
 use Cygnite\Common\Input\Input;
 use Cygnite\Foundation\Application;
+use Cygnite\Validation\Exception\ValidatorException;
 
 /**
  * Class Validator
@@ -18,7 +19,7 @@ class Validator implements ValidatorInterface
     const ERROR = '_error';
     public $errors= [];
     public $columns = [];
-    protected $glue = "<br />";
+    public $glue = PHP_EOL;
     protected $errorElementStart = '<span class="error">';
     protected $errorElementEnd = '</span>';
     /**
@@ -30,20 +31,21 @@ class Validator implements ValidatorInterface
     private $validPhoneNumbers = [10,11,13,14,91,81];
 
     /*
-     * Constructor to set as private.
-     * You cannot create instance ob validator directly
+     * Constructor to set as protected.
+     * You cannot create instance of validator directly
      *
-     * set post values into param array
+     * set post array into param
      *
      * @param  $var post values
      *
      */
-
-    private function __construct(Input $var)
+    public function __construct(Input $input)
     {
-        if ($var instanceof Input) {
-            $this->param = $var->post();
+        if (!$input instanceof Input) {
+            throw new ValidatorException(sprintf('Constructor expects Input instance, give %s ', $input));
         }
+
+        $this->param = $input->post();
     }
 
     /*
@@ -181,6 +183,10 @@ class Validator implements ValidatorInterface
         return $this->{$method}($key);
     }
 
+    /**
+     * @param $name
+     * @param $value
+     */
     private function setErrors($name, $value)
     {
         $this->columns[$name] =
@@ -218,7 +224,7 @@ class Validator implements ValidatorInterface
     * @return boolean true or false
     *
     */
-    private function required($key)
+    protected function required($key)
     {
         $val = trim($this->param[$key]);
 
@@ -245,7 +251,7 @@ class Validator implements ValidatorInterface
      * @param $key
      * @return bool
      */
-    private function validEmail($key)
+    protected function validEmail($key)
     {
         $sanitize_email = filter_var($this->param[$key], FILTER_SANITIZE_EMAIL);
 
@@ -261,7 +267,7 @@ class Validator implements ValidatorInterface
      * @param $key
      * @return bool
      */
-    private function isIp($key)
+    protected function isIp($key)
     {
         if (filter_var($this->param[$key], FILTER_VALIDATE_IP) === false) {
             $this->errors[$key.self::ERROR] =
@@ -278,7 +284,7 @@ class Validator implements ValidatorInterface
      * @param $key
      * @return bool
      */
-    private function isInt($key)
+    protected function isInt($key)
     {
         $conCate =  '';
         $columnName =  ucfirst($this->convertToFieldName($key)).' should be ';
@@ -301,7 +307,7 @@ class Validator implements ValidatorInterface
      * @param $key
      * @return bool
      */
-    private function isString($key)
+    protected function isString($key)
     {
         $conCate =  '';
         $columnName =  ucfirst($this->convertToFieldName($key)).' should be ';
@@ -325,7 +331,7 @@ class Validator implements ValidatorInterface
      * @param $length
      * @return bool
      */
-    private function min($key, $length)
+    protected function min($key, $length)
     {
         $conCate = (isset($this->errors[$key.self::ERROR])) ?
             $this->errors[$key.self::ERROR].' and ' :
@@ -350,7 +356,7 @@ class Validator implements ValidatorInterface
      * @param $length
      * @return bool
      */
-    private function max($key, $length)
+    protected function max($key, $length)
     {
         $conCate =  '';
         $columnName =  ucfirst($this->convertToFieldName($key)).' should be ';
@@ -373,7 +379,7 @@ class Validator implements ValidatorInterface
      * @param $key
      * @return bool
      */
-    private function validUrl($key)
+    protected function validUrl($key)
     {
         $sanitize_url = filter_var($this->param[$key], FILTER_SANITIZE_URL);
 
@@ -398,7 +404,7 @@ class Validator implements ValidatorInterface
      * @param $key
      * @return bool
      */
-    private function phone($key)
+    protected function phone($key)
     {
         $num = preg_replace('#\d+#', '', $this->param[$key]);
 

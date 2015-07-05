@@ -2,24 +2,51 @@
 namespace Cygnite\Validation;
 
 use Closure;
-use Cygnite\Proxy\StaticResolver;
-use Cygnite\Foundation\Application;
-use Cygnite\Helpers\Inflector;
-use Cygnite\Common\Input\Input;
 
 interface ValidatorInterface
 {
+    /**
+     * @param          $var
+     * @param callable $callback
+     * @return mixed
+     */
     public static function create($var, Closure $callback);
 
+    /**
+     * @param $key
+     * @param $rule
+     * @return mixed
+     */
     public function addRule($key, $rule);
 
+    /**
+     * @param $key
+     * @return mixed
+     */
     public function validDate($key);
 
+    /**
+     * @param $key
+     * @return mixed
+     */
     public function notEmptyFile($key);
 
+    /**
+     * @param $key
+     * @param $value
+     * @return mixed
+     */
     public function setCustomError($key, $value);
 
+    /**
+     * @param null $column
+     * @return mixed
+     */
     public function getErrors($column = null);
 
+    /**
+     * Run validation
+     * @return mixed
+     */
     public function run();
 }
