@@ -61,7 +61,8 @@ class SeederCommand extends Command
      */
     protected function configure()
     {
-        $this->addArgument('name', null, InputArgument::OPTIONAL, '');
+        //'If set and value given, we will seed only that table.'
+        $this->addArgument('name', InputArgument::OPTIONAL, null);
     }
 
     /**
@@ -76,11 +77,20 @@ class SeederCommand extends Command
         $this->setInput($input)->setOutput($output);
 
         // Migrate init - to create migration table
-        $name = $input->getArgument('name');
-        
+        $name = $this->input->getArgument('name');
+
+        if (!is_null($name)) {
+
+            if (string_has($name, ',')) {
+                $this->seeder()->executeOnly($name);
+            } else {
+                $this->seeder()->executeOnly($name);
+            }
+        }
+
         $this->seeder()->run();
 
-        $this->info("Seeding completed Successfully!");
+        $this->info("Seeding Completed Successfully!");
     }
 
     public function getSeederPath()

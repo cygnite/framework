@@ -10,19 +10,51 @@
 namespace Cygnite\Database\Table;
 
 use Cygnite\Database\Connection;
+use Illuminate\Database\Query\Builder;
 
 abstract class Seeder
 {
     /**
-     * @param array $seeders
+     * Filter out other class and set only class to seed
+     * @param $class
      */
-    public function execute($seeders = [])
+    public function executeOnly($class)
     {
-        if (empty($seeders)) {
-            $seeders = $this->seeders;
-        }
+        /*
+         | We will check if user requesting for seeding multiple table
+         | Then we will filter out only those class to seed from the
+         | specified seeder array
+         */
+        if ($exp = string_split($class, ',')) {
 
-        $this->resolveSeeders($seeders);
+            $this->seeders = $this->filterClass($exp);
+        } else {
+            $hasClass = (in_array($class, $this->seeders)) ? true : false;
+
+            if ($hasClass) {
+                $this->seeders = $this->filterClass([$class]);
+            }
+        }
+    }
+
+    /**
+     * Filter the class name from seeder array
+     *
+     * @param array $class
+     * @return array
+     */
+    private function filterClass(array $class = [])
+    {
+        return array_intersect($this->seeders, $class);
+    }
+
+
+    /**
+     * We will execute all seeder and populate database table
+     */
+    public function execute()
+    {
+        $this->resolveSeeders($this->seeders);
     }
 
     /**
@@ -41,6 +73,8 @@ abstract class Seeder
      */
     private function resolve($class)
     {
+        $class = 'Apps\\Resources\\Database\\Seeding\\'.$class;
+
         return (new $class)->execute();
     }
 
