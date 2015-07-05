@@ -38,6 +38,14 @@ class CygniteConsoleApplication
 
         $console = new ConsoleApplication($app, $this->version);
 
-        $console->registerCommands()->run();
+        /*
+         | We will also register Application Console commands
+         | User can register multiple commands apart from core
+         | commands and run on the fly
+         */
+        $appConsoleBootStrap = $app->make('\Apps\Console\BootStrapConsoleApplication');
+        $appConsoleCommands = $appConsoleBootStrap->register();
+
+        $console->setCommand($appConsoleCommands)->registerCommands()->run();
     }
 }

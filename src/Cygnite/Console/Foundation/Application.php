@@ -48,7 +48,7 @@ class Application extends SymfonyApplication implements ConsoleApplicationInterf
      * @param string $cygniteApplication
      * @param string $version
      */
-    public function __construct($cygniteApplication, $version)
+    public function __construct($cygniteApplication, $version = '')
     {
         parent::__construct('Cygnite Framework: Console Application', $version);
         $this->cygnite = $cygniteApplication;
