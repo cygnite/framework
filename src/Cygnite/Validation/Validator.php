@@ -70,10 +70,10 @@ class Validator implements ValidatorInterface
     public static function create($var, Closure $callback = null)
     {
         if ($callback instanceof Closure) {
-            return $callback(new Static($var));
+            return $callback(new static($var));
         }
 
-        return new Static($var);
+        return new static($var);
     }
 
     /*
@@ -141,11 +141,9 @@ class Validator implements ValidatorInterface
         }
 
         foreach ($this->rules as $key => $val) {
-
             $rules = explode('|', $val);
 
             foreach ($rules as $rule) {
-
                 if (!strstr($rule, 'max') &&
                     !strstr($rule, 'min')
                 ) {
@@ -153,7 +151,6 @@ class Validator implements ValidatorInterface
                     //$isValid = call_user_func([$this, $rule[0]], [$key]);
                 } else {
                     $isValid = $this->doValidateMinMax($rule, $key, $isValid);
-
                 }
             }
         }
@@ -229,7 +226,6 @@ class Validator implements ValidatorInterface
         $val = trim($this->param[$key]);
 
         if (strlen($val) == 0) {
-
             $this->errors[$key.self::ERROR] =
                 ucfirst($this->convertToFieldName($key)).' is '.str_replace('_', ' ', __FUNCTION__);
             return false;

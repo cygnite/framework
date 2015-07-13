@@ -10,6 +10,7 @@
 namespace Cygnite\Console\Generator;
 
 use Cygnite\Helpers\Inflector;
+
 /**
  * Cygnite Controller Generator
  *
@@ -179,13 +180,11 @@ class Controller
      */
     public function updateTemplate()
     {
-
         $codeDb = $validationCode = $form = '';
 
         $form = $this->buildFormOpen();
 
         foreach ($this->columns as $key=> $value) {
-
             if ($value->COLUMN_NAME !== 'id') {
                 if ($this->isFormGenerator == false) {
                     $codeDb .= $this->generateDbCode($value);
@@ -287,7 +286,7 @@ class Controller
 
     private function controllerTemplateName()
     {
-        return basename( __FILE__ );
+        return basename(__FILE__);
     }
 
     /**
@@ -312,7 +311,7 @@ class Controller
 
         /*read operation ->*/
         $this->filePointer = fopen($file, "r");
-        $content=fread($this->filePointer,filesize($file));
+        $content=fread($this->filePointer, filesize($file));
         //fclose($tmp);
 
         $content = $this->replaceControllerName($content);
@@ -331,7 +330,7 @@ class Controller
         if (file_exists($formTemplatePath.'Form'.EXT)) {
             //We will generate Form Component
             $formContent = file_get_contents($formTemplatePath.'Form'.EXT, true);
-        } else{
+        } else {
             die("Form template doesn't exists in ".$formTemplatePath.'Form'.EXT." directory.");
         }
 
@@ -418,7 +417,7 @@ class Controller
         // If --resource set then we will generate resource controller
         if ($this->controllerCommand->getControllerType()) {
             return $this->makeResourceController();
-}
+        }
 
         // generate basic controller
         return $this->generateBasicController();

@@ -83,9 +83,7 @@ class FlashMessage
 
         // Check $key is valid flash type
         if (in_array($key, $this->validFlashTypes)) {
-
             if (isset($flashArray[$key])) {
-
                 foreach ($flashArray[$key] as $msg) {
                     $messages .= '<p>' . $msg . "</p>\n";
                 }
@@ -103,7 +101,6 @@ class FlashMessage
 
             // Print ALL queued messages
         } elseif (is_null($key)) {
-
             foreach ($flashArray as $key => $msgArray) {
                 $messages = '';
                 foreach ($msgArray as $msg) {

@@ -44,10 +44,10 @@ class Translator implements TranslatorInterface
     public static function make(\Closure $callback)
     {
         if ($callback instanceof \Closure) {
-            return $callback(new Static());
+            return $callback(new static());
         }
 
-        return new Static();
+        return new static();
     }
 
     /**
@@ -277,7 +277,6 @@ class Translator implements TranslatorInterface
             }
 
             array_pop($parts);
-
         } while ($parts);
 
         // Cache the Translator table locally
@@ -296,7 +295,7 @@ class Translator implements TranslatorInterface
         $message = [];
         foreach ($files as $file) {
             // Merge the language strings into the sub message array
-            if ( is_readable($file) ) {
+            if (is_readable($file)) {
                 $message = array_merge($message, include $file);
             }
         }

@@ -231,7 +231,6 @@ class Builder
             $this->triggerEvent('afterDelete');
 
             return $affectedRow;
-
         } catch (\PDOException  $ex) {
             throw new \Exception($ex->getMessage());
         }
@@ -257,7 +256,7 @@ class Builder
         if (is_array($where) && $multiple == false) {
             $whr = array_keys($where);
             $this->where($this->quoteIdentifier($whr[0]), '=', $where[$whr[0]]);
-        } else if (is_array($where) && $multiple == true) {
+        } elseif (is_array($where) && $multiple == true) {
             $this->whereIn($this->quoteIdentifier($ar->getPrimaryKey()), 'IN', implode(',', $where));
         }
 
@@ -597,7 +596,6 @@ class Builder
         }
 
         return $data;
-
     }
 
     public function getGroupBy()
@@ -658,7 +656,6 @@ class Builder
             } else {
                 $this->_statement->execute();
             }
-
         } catch (\PDOException $e) {
             throw new Exception($e->getMessage());
         }
@@ -723,7 +720,6 @@ class Builder
                     if ($param) {
                         $req->bindValue(":$key", $value, $param);
                     }
-
                 }
             }
         }
@@ -747,7 +743,6 @@ class Builder
         $condition = explode($type, str_replace('findBy', '', $method));
 
         if (count($condition) == count($arguments[0])) {
-
             foreach ($condition as $key => $value) {
                 $field = Inflector::tabilize($value);
                 $whrValue = isset($arguments[0][$key]) ?
@@ -758,7 +753,6 @@ class Builder
                 } else {
                     static::$query->select('all')->orWhere($field, '=', $whrValue);
                 }
-
             }
         } else {
             throw new Exception("Arguments doesn't matched with number of fields");
@@ -871,7 +865,6 @@ class Builder
     public function find($method, $options = [])
     {
         if (isset($options['primaryKey']) && $method == __FUNCTION__) {
-
             return $this->select('all')
                 ->where(self::getActiveRecord()->getPrimaryKey(), '=', array_shift($options['args']))
                 ->orderBy(self::getActiveRecord()->getPrimaryKey(), 'DESC')
@@ -1159,7 +1152,6 @@ class Builder
         $exceptColumns = $ar->skip();
         $columnArray = [];
         foreach ($columns as $key => $value) {
-
             if (!in_array($value->column_name, $exceptColumns)) {
                 $columnArray[] = $value->column_name;
             }
@@ -1254,7 +1246,6 @@ class Builder
                     self::getActiveRecord()->getTableName()
                 ) . '.*';
         } else {
-
             if (stripos($column, 'AS') !== false) {
                 return $this->selectExpr($column);
             }
@@ -1294,7 +1285,6 @@ class Builder
 
         // applying pagination limit
         if (isset($arguments[0]['paginate']) || method_exists(self::getActiveRecord(), 'pageLimit')) {
-
             $page = $offset = $start = "";
             $offset = self::getActiveRecord()->perPage; //how many items to show per page
             $limit = !isset($arguments[0]['paginate']['limit']) ?

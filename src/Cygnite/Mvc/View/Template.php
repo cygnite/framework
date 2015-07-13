@@ -50,7 +50,6 @@ class Template
 
         // we will make accessible all valid properties
         foreach ($this->validProperties as $key => $property) {
-
             if (property_exists($this->view, $property)) {
                 $this->setPropertyAccessible($property);
             }

@@ -252,7 +252,6 @@ class Security
                 '',
                 $data
             );
-
         } while ($old_data !== $data);
 
         return htmlentities($data);
@@ -337,7 +336,6 @@ class Security
         }
 
         return $_GET;
-
     }
 
     /**
@@ -354,7 +352,6 @@ class Security
         }
 
         return $_COOKIE;
-
     }
 
     public static function decode($matches)
@@ -387,7 +384,6 @@ class Security
 
     public static function _xssClean(&$item, &$key)
     {
-
         $item = htmlspecialchars($item, ENT_QUOTES);
         $item = preg_replace_callback(
             '!&amp;#((?:[0-9]+)|(?:x(?:[0-9A-F]+)));?!i',
@@ -466,6 +462,5 @@ class Security
         }
 
         return self::$instance;
-
     }
 }

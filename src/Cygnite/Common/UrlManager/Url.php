@@ -22,7 +22,6 @@ use InvalidArgumentException;
 
 class Url
 {
-
     public static $base;
     private static $instance = 'make';
     private static $router;
@@ -114,7 +113,7 @@ class Url
     public static function make()
     {
         $app = App::instance();
-        return new Static($app['router']);
+        return new static($app['router']);
     }
 
     /**
@@ -211,7 +210,6 @@ class Url
         } else {
             throw new \InvalidArgumentException("Url::{$property} doesn't exist");
         }
-
     }
 
     /**
@@ -269,7 +267,7 @@ class Url
                 return $this->{'get' . ucfirst($method)}($args);
                 break;
             default:
-                if ( preg_match('/^([gs]et)([A-Z])(.*)$/', $method, $match) ) {
+                if (preg_match('/^([gs]et)([A-Z])(.*)$/', $method, $match)) {
                     $parameters = ['args' => $args, 'match' => $match];
                     return call_user_func_array([$url, 'configureBase'], [$parameters]);
                 }

@@ -35,7 +35,7 @@ abstract class Connection
         PDO::ATTR_CASE              =>  PDO::CASE_NATURAL,
         PDO::ATTR_ORACLE_NULLS      =>  PDO::NULL_NATURAL,
         PDO::ATTR_PERSISTENT        =>  true,
-        PDO::ATTR_STRINGIFY_FETCHES	=>  false,
+        PDO::ATTR_STRINGIFY_FETCHES    =>  false,
         PDO::ATTR_EMULATE_PREPARES  =>  false,
     );
 
@@ -45,7 +45,7 @@ abstract class Connection
      */
     public static function get($key)
     {
-         return (isset(static::$connections[$key])) ? static::$connections[$key] : null;
+        return (isset(static::$connections[$key])) ? static::$connections[$key] : null;
     }
 
     /**
@@ -70,10 +70,8 @@ abstract class Connection
             $socketDb = null;
             $socketDb =  $info['hostname'] . '/' .  $info['database'];
             if (preg_match_all('/^unix\((.+)\)\/(.+)$/', $socketDb, $matches) > 0) {
-
                 $info['hostname'] = $matches[1][0];
                 $info['database'] = $matches[2][0];
-
             }
         }
 
@@ -117,7 +115,6 @@ abstract class Connection
 
         try {
             if (!array_key_exists($info['database'], static::$connections)) {
-
                 static::$connections[$info['database']] = new PDO(
                     $dns,
                     $info['username'],
@@ -138,15 +135,12 @@ abstract class Connection
                     PDO::ATTR_DEFAULT_FETCH_MODE,
                     PDO::FETCH_OBJ
                 );
-
             }
 
             return static::$connections[$info['database']];
-
         } catch (\PDOException $e) {
             throw new \Exception($e->getMessage());
         }
-
     }
 
     /**
@@ -176,7 +170,6 @@ abstract class Connection
         $config = Configure::getDatabaseConfiguration();
 
         foreach ($config as $key => $value) {
-
             if (trim($value['database']) == trim($connKey)) {
                 self::$connectionObject[$connKey] = self::setConnection($value);
                 break;

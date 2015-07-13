@@ -11,7 +11,6 @@ use Cygnite\Database\Cyrus\ActiveRecord;
  */
 class Migration extends ActiveRecord
 {
-
     /**
      * Migration constructor
      */
@@ -52,7 +51,7 @@ class Migration extends ActiveRecord
 
         if (is_array($attribute)) {
             return $this->trash($attribute, true);
-        } else if (is_string($attribute) || is_int($attribute)) {
+        } elseif (is_string($attribute) || is_int($attribute)) {
             return $this->trash($attribute);
         }
     }

@@ -93,8 +93,7 @@ class Application extends SymfonyApplication implements ConsoleApplicationInterf
      */
     public function add(SymfonyCommand $command)
     {
-        if ($command instanceof Command)
-        {
+        if ($command instanceof Command) {
             $command->setCygnite($this->cygnite);
         }
 

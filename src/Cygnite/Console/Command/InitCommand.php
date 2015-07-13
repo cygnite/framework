@@ -92,7 +92,6 @@ class InitCommand extends Command
 
         // We will generate migration class only if class name provided in command
         if (!is_null($this->argumentName)) {
-
             $migrateInstance->setTemplateDir($migrateTemplateDir);
             $migrateInstance->replaceTemplateByInput();
             $file = $migrateInstance->generate(new \DateTime('now', new \DateTimeZone(SET_TIME_ZONE)));

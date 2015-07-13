@@ -21,10 +21,10 @@ class BCrypt implements HashInterface
     public static function make(\Clouser $callback = null)
     {
         if ($callback instanceof \Closure) {
-            return $callback(new Static());
+            return $callback(new static());
         }
 
-        return new Static();
+        return new static();
     }
 
     /**
@@ -40,18 +40,18 @@ class BCrypt implements HashInterface
         return $this;
     }
 
-	/**
+    /**
      * We will creating hash for the given string and return it.
-	 *
-	 * @param  string  $string
-	 * @param  array   $arguments
-	 * @return string
-	 *
-	 * @throws \RuntimeException
-	 */
+     *
+     * @param  string  $string
+     * @param  array   $arguments
+     * @return string
+     *
+     * @throws \RuntimeException
+     */
     public function create($string, array $arguments = [])
-	{
-		$cost = isset($arguments['cost']) ? $arguments['cost'] : $this->cost;
+    {
+        $cost = isset($arguments['cost']) ? $arguments['cost'] : $this->cost;
 
         if (isset($arguments['salt'])) {
             $hash = password_hash($string, PASSWORD_BCRYPT, ['cost' => $cost, 'salt' => $arguments['salt']]);
@@ -59,38 +59,38 @@ class BCrypt implements HashInterface
             $hash = password_hash($string, PASSWORD_BCRYPT, ['cost' => $cost]);
         }
 
-		if ($hash === false) {
-			throw new \RuntimeException("BCrypt hashing support not available.");
-		}
+        if ($hash === false) {
+            throw new \RuntimeException("BCrypt hashing support not available.");
+        }
 
-		return $hash;
-	}
+        return $hash;
+    }
 
-	/**
+    /**
      * We will verify the given string(password) against hashed password
-	 *
-	 * @param  string  $string
-	 * @param  string  $hash
-	 * @param  array   $arguments
-	 * @return bool
-	 */
+     *
+     * @param  string  $string
+     * @param  string  $hash
+     * @param  array   $arguments
+     * @return bool
+     */
     public function verify($string, $hash, array $arguments = [])
-	{
-		return password_verify($string, $hash);
-	}
+    {
+        return password_verify($string, $hash);
+    }
 
-	/**
-	 * We will check if given hashed string has been
+    /**
+     * We will check if given hashed string has been
      * hashed using the given options.
-	 *
-	 * @param  string  $hashedString
-	 * @param  array   $arguments
-	 * @return bool
-	 */
+     *
+     * @param  string  $hashedString
+     * @param  array   $arguments
+     * @return bool
+     */
     public function needReHash($hashedString, array $arguments = [])
-	{
-		$cost = isset($arguments['cost']) ? $arguments['cost'] : $this->cost;
+    {
+        $cost = isset($arguments['cost']) ? $arguments['cost'] : $this->cost;
 
-		return password_needs_rehash($hashedString, PASSWORD_BCRYPT, ['cost' => $cost]);
-	}
+        return password_needs_rehash($hashedString, PASSWORD_BCRYPT, ['cost' => $cost]);
+    }
 }

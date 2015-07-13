@@ -34,7 +34,6 @@ class Log
 
     public function read()
     {
-
     }
 
     private function open($logFilePath)
@@ -51,7 +50,7 @@ class Log
     ) {
         $this->getLogConfig();
 
-         $logFilePath = $this->log_path.$this->fileName.'_'.date('Y-m-d').''.$this->logExt; //exit;
+        $logFilePath = $this->log_path.$this->fileName.'_'.date('Y-m-d').''.$this->logExt; //exit;
         $this->logSize = $log_size *(1024*1024); // Megs to bytes
 
         if ($this->config['log_trace_type'] == 2) {
@@ -67,7 +66,6 @@ class Log
                 "Log config not set properly in config file. Set log_errors = on and log_trace_type = 2 "
             );
         }
-
     }
 
     private function writeInternal(
@@ -76,7 +74,6 @@ class Log
         $logLevel = "log_debug",
         $log_size = 1
     ) {
-
         if (!is_resource($this->fp)) {
             $this->open($this->logPath);
         }

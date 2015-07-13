@@ -179,7 +179,6 @@ class File implements StorageInterface
                     'Cache Path Error ' . $this->getPath() . ' directory must be writable'
                 );
             }
-
         }
         return true;
     }
@@ -259,7 +258,6 @@ class File implements StorageInterface
         }
 
         return $this;
-
     }
 
     /**
@@ -342,7 +340,6 @@ class File implements StorageInterface
         if (true === is_array($cacheData)) {
             $counter = 0;
             foreach ($cacheData as $key => $entry) {
-
                 if (true === $this->isExpired($entry['time'], $entry['expire'])) {
                     unset($cacheData[$key]);
                     $counter++;
@@ -376,7 +373,6 @@ class File implements StorageInterface
 
     public function destroy($key)
     {
-
     }
 
     /**

@@ -53,7 +53,6 @@ class Dispatcher
         $this->default['action'] = lcfirst(
             Config::get('global.config', 'default.method')
         );
-
     }
 
     /**
@@ -69,7 +68,6 @@ class Dispatcher
             $this->router->getCurrentUri() == '/' . self::$indexPage
         ) {
             if ($this->default['controller'] != '') {
-
                 $this->router->getRouteControllerInstance();
 
                 list($controller, $action) = $this->router->getControllerAndAction(
@@ -98,5 +96,4 @@ class Dispatcher
             require APPPATH.DS.'Routing'.DS.'Routes'.EXT;
         };
     }
-
 }

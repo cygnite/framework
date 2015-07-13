@@ -36,11 +36,11 @@ class Event implements EventInterface
     {
         // Check if $callback is instance of Closure we return callback
         if (!is_null($callback) && $callback instanceof Closure) {
-            return $callback(new Static);
+            return $callback(new static);
         }
 
         // Return instance of the Event Handler
-        return new Static;
+        return new static;
     }
 
     /**
@@ -86,7 +86,6 @@ class Event implements EventInterface
         }
 
         foreach ($this->events[$name] as $callback) {
-
             switch ($callback) {
                 case is_object($callback) && ($callback instanceof Closure):
                     return $callback($name, $data);
@@ -108,7 +107,7 @@ class Event implements EventInterface
     {
         $exp = explode('@', $callback);
 
-        if ( method_exists($instance = new $exp[0], $exp[1]) ) {
+        if (method_exists($instance = new $exp[0], $exp[1])) {
             return call_user_func_array([$instance, $exp[1]], [$data]);
         }
     }

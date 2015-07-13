@@ -92,7 +92,6 @@ class Model
         $content = str_replace('%databaseName%', $this->command->getDatabase(), $content);
 
         return $content;
-
     }
 
     public function generate()

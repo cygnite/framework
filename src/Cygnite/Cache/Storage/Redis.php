@@ -26,17 +26,13 @@ class Redis implements StorageInterface
 {
     public function store($key, $value)
     {
-
     }
 
     public function get($key)
     {
-
     }
 
     public function destroy($key)
     {
-
     }
-
 }

@@ -68,7 +68,6 @@ class View
         $this->setViewPath();
 
         if ($this->templateEngine !== false && $this->templateEngine == 'twig') {
-
             $this->setTwigEnvironment($template);
         }
     }
@@ -318,7 +317,6 @@ class View
             ob_get_clean();
 
             echo $output;
-
         } catch (\Exception $ex) {
             throw new ViewNotFoundException('The view path ' . $this->viewPath . ' is invalid.' . $ex->getMessage());
         }

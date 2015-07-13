@@ -16,7 +16,6 @@ if (!defined('CF_SYSTEM')) {
 
 class File
 {
-
     private $_mimeType;
     private $filePath;
     private $rootDir;

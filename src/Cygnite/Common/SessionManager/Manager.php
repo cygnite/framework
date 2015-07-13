@@ -1,7 +1,6 @@
 <?php
 namespace Cygnite\Common\SessionManager;
 
-
 class Manager extends AbstractPacket implements PacketInterface
 {
     // Storage property to store session values
@@ -47,8 +46,7 @@ class Manager extends AbstractPacket implements PacketInterface
             return $this;
         }
 
-        if ( is_array($key) ) {
-
+        if (is_array($key)) {
             foreach ($key as $key => $value) {
                 $this->storage[$key] = $value;
             }

@@ -18,7 +18,7 @@ interface FormInterface
      * @param array $values
      * @return mixed
      */
-    public function  addElement($type, $key, $values = []);
+    public function addElement($type, $key, $values = []);
 
     /**
      * @param array $elements

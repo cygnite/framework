@@ -20,7 +20,6 @@ if (!defined('CF_SYSTEM')) {
  */
 interface RouteControllerInterface
 {
-
     /**
      * Set the controller as Route Controller
      * Cygnite Router knows how to respond to routes controller

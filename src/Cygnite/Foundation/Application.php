@@ -20,7 +20,6 @@ use Cygnite\Common\UrlManager\Url;
 use Cygnite\Translation\Translator;
 use Cygnite\Container\Container;
 use Cygnite\Exception\Handler as ExceptionHandler;
-
 use Tracy\Helpers;
 
 if (!defined('CF_SYSTEM')) {
@@ -65,11 +64,9 @@ class Application extends Container
     public static function instance(Closure $callback = null)
     {
         if (!is_null($callback) && $callback instanceof Closure) {
-
             if (static::$instance instanceof Application) {
                 return $callback(static::$instance);
             }
-
         } elseif (static::$instance instanceof Application) {
             return static::$instance;
         }
@@ -171,8 +168,7 @@ class Application extends Container
         $locale = Config::get('global.config', 'locale');
         $fallbackLocale = Config::get('global.config', 'fallback.locale');
 
-        return Translator::make(function ($trans) use ($locale, $fallbackLocale)
-        {
+        return Translator::make(function ($trans) use ($locale, $fallbackLocale) {
             return $trans->setFallback($fallbackLocale)->locale($locale);
         });
     }
@@ -289,7 +285,7 @@ class Application extends Container
      */
     public function bootApplication()
     {
-         /*
+        /*
         | -------------------------------------------------------------------
         | Check if script is running via cli and return false
         | -------------------------------------------------------------------
@@ -441,7 +437,6 @@ class Application extends Container
 
         try {
             return $this->handle();
-
         } catch (\Exception $e) {
             if (ENV == 'development') {
                 throw $e;

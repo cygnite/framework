@@ -69,7 +69,7 @@ class Image
     public function __get($key)
     {
         if (isset($this->thumbs[$key])) {
-              return $this->thumbs[$key];
+            return $this->thumbs[$key];
         }
     }
 
@@ -91,7 +91,7 @@ class Image
     public function resize()
     {
         $path = [];
-        $src = $this->rootDir.DS.str_replace(['/','\\'], DS, $this->directory);   /* read the source image */
+        $src = $this->rootDir.DS.str_replace(['/', '\\'], DS, $this->directory);   /* read the source image */
 
 
         if (file_exists($src)) {
@@ -138,9 +138,8 @@ class Image
             }
 
             return true;
-
         } else {
-              throw new \Exception("404 File not found on given path");
+            throw new \Exception("404 File not found on given path");
         }
     }
 
@@ -158,7 +157,6 @@ class Image
         return (is_callable($func))
             ? $func($src)
             : null;
-
     }
 
     /**
@@ -177,7 +175,7 @@ class Image
 
         /** @var $func TYPE_NAME */
         //if (is_callable($func)) {
-        if ( $func(
+        if ($func(
                 $thumb,
                 $this->rootDir.DS.str_replace(
                     ['/', '\\'],
@@ -186,9 +184,9 @@ class Image
                 ).$name
              )
             ) {
-                chmod($this->rootDir.DS.str_replace(['/', '\\'], DS, $this->thumbPath).$name, 0777);
+            chmod($this->rootDir.DS.str_replace(['/', '\\'], DS, $this->thumbPath).$name, 0777);
         } else {
-                throw new \Exception("Unknown Exception while generating thumb image");
+            throw new \Exception("Unknown Exception while generating thumb image");
         }
     }
 

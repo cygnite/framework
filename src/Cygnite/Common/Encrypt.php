@@ -65,7 +65,7 @@ class Encrypt
         | extensions loaded. If not we'll just exit from here.
         |
         */
-        if ( ! extension_loaded('mcrypt')) {
+        if (! extension_loaded('mcrypt')) {
             echo 'Encrypt library requires Mcrypt PHP extension.'.PHP_EOL;
             exit(1);
         }
@@ -153,7 +153,6 @@ class Encrypt
     public static function __callStatic($method, $arguments = [])
     {
         if ($method == 'create') {
-
             if (self::$instance === null) {
                 self::$instance = new self();
             }

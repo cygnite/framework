@@ -181,7 +181,7 @@ class Migrator
             throw new \Exception(APP_NS."/Resources/Database/Migrations/ must have {xxxx_table_name.php} file types");
         }
 
-        $file = str_replace(EXT, '',$this->latestFile);
+        $file = str_replace(EXT, '', $this->latestFile);
         $exp = '';
         $exp =  preg_split('((\d+|\D+))', $file, -1, PREG_SPLIT_DELIM_CAPTURE|PREG_SPLIT_NO_EMPTY);
 

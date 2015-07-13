@@ -29,7 +29,6 @@ if (!defined('CF_SYSTEM')) {
  */
 class Apc implements StorageInterface
 {
-
     // default life time
     private $lifeTime;
     private $defaultTime = 600; //default time is set 600
@@ -145,6 +144,5 @@ class Apc implements StorageInterface
 
     final private function __clone()
     {
-
     }
 }

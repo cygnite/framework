@@ -10,12 +10,10 @@ if (!defined('CF_SYSTEM')) {
 
 interface ExceptionInterface
 {
-
     /**
      * Display the given exception to the user.
      */
     public function run();
 
     public static function register(Closure $callback);
-
 }

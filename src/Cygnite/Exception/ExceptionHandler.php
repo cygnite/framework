@@ -8,7 +8,6 @@ use Tracy\Debugger;
 use Cygnite\Helpers\Config;
 use Cygnite\Foundation\Application;
 
-
 if (!defined('CF_SYSTEM')) {
     exit('External script access not allowed');
 }
@@ -20,7 +19,6 @@ if (!defined('CF_SYSTEM')) {
  */
 class ExceptionHandler implements ExceptionInterface
 {
-
     public $name = 'Cygnite Framework';
 
     private static $style = 'pretty';
@@ -123,7 +121,6 @@ class ExceptionHandler implements ExceptionInterface
 
     public function setCustomPage()
     {
-
     }
 
     /**
@@ -181,14 +178,13 @@ class ExceptionHandler implements ExceptionInterface
 
         //Add new panel to debug bar
        $this->addPanel(
-            function($e) use($handler) {
+            function ($e) use ($handler) {
 
                 if (!is_null($path = $handler->assetsPath())) {
                     $contents = $handler->includeAssets($path);
                 }
 
                 if (!is_null($e)) {
-
                     if ($handler->isLoggerEnabled()) {
                         $handler->log($e);
                     }
@@ -207,7 +203,7 @@ class ExceptionHandler implements ExceptionInterface
             }
         );
         $this->addPanel(
-            function($e) {
+            function ($e) {
 
                 if (!$e instanceof \PDOException) {
                     return;
@@ -216,7 +212,7 @@ class ExceptionHandler implements ExceptionInterface
                     $sql = $e->queryString;
                 }
 
-                return isset($sql) ? ['tab' => 'SQL', 'panel' => $sql] : NULL;
+                return isset($sql) ? ['tab' => 'SQL', 'panel' => $sql] : null;
 
             }
         );
@@ -224,7 +220,6 @@ class ExceptionHandler implements ExceptionInterface
 
     public function getBlueScreenInstance()
     {
-
     }
 
     public function addPanel($callback)
@@ -237,7 +232,6 @@ class ExceptionHandler implements ExceptionInterface
     public function addSqlPanel($callback)
     {
         $this->getTracyDebugger()->{__FUNCTION__}($callback);
-
     }
 
     public function getBar()
@@ -281,7 +275,9 @@ class ExceptionHandler implements ExceptionInterface
 
     public function assetsPath()
     {
-        if (is_dir($path = $this->getAssetsPath())) return $path;
+        if (is_dir($path = $this->getAssetsPath())) {
+            return $path;
+        }
     }
 
     /**

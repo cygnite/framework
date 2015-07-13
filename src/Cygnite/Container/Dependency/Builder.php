@@ -68,14 +68,12 @@ abstract class Builder extends SplObjectStorage
         $namespace = $this->getAppNamespace();
 
         foreach ($propertyInjections as $controller => $properties) {
-
             foreach ($properties as $key => $value) {
                 /*
                  | We will add key value pair into the definition array only if
                  | it is not already exists
                  */
                 if (!isset($this->cache[$namespace.$controller][$key])) {
-
                     $classInstance = Inflector::toNamespace($value);
                     $this->definitions[$namespace.$controller][$key] = $classInstance;
                 }
@@ -138,11 +136,9 @@ abstract class Builder extends SplObjectStorage
         $dependencies = $this->getPropertyDefinition($controller);
 
         if (array_key_exists($controller, $this->definitions)) {
-
             list($reflection, $reflectionClass) = $this->setReflectionClassAttributes($controller);
 
             foreach ($dependencies as $classProperty => $class) {
-
                 $reflectionArray = [$reflectionClass, $classProperty];
                 list($object, $controllerProp) = $this->checkPropertyAndMakeObject($controller, $class, $reflectionArray);
                 /*
@@ -153,7 +149,6 @@ abstract class Builder extends SplObjectStorage
                 if (method_exists($controllerInstance, 'set'.$controllerProp)) {
                     $controllerInstance->{'set'.$controllerProp}($object);
                 } else {
-
                     $prop = $reflectionClass->getProperty($classProperty);
 
                     /*

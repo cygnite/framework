@@ -34,7 +34,6 @@ abstract class Singleton
     */
     final private function __clone()
     {
-
     }
 
     /**

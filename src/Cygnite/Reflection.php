@@ -36,7 +36,7 @@ class Reflection
         $reflector = null;
 
         if (class_exists($class)) {
-           throw new \Exception(sprintf("Class %s not found", $class));
+            throw new \Exception(sprintf("Class %s not found", $class));
         }
 
         $reflector = new ReflectionClass('\\'.$class);
@@ -55,7 +55,7 @@ class Reflection
     {
         if (is_object($class)) {
             $class = get_class($class);
-    }
+        }
 
         $this->reflectionClass = new ReflectionClass($class);
 

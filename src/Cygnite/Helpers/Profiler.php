@@ -20,9 +20,9 @@ class Profiler
     */
     public static function start($startToken = 'cygnite_start')
     {
-        if(!defined('MEMORY_START_POINT')):
+        if (!defined('MEMORY_START_POINT')):
             define('MEMORY_START_POINT', self::getMemorySpace());
-            self::$blocks[$startToken] = self::getTime();
+        self::$blocks[$startToken] = self::getTime();
         endif;
     }
 
@@ -72,6 +72,6 @@ class Profiler
     public static function getMemorySpaceUsage()
     {
         //round(memory_get_usage()/1024/1024, 2).'MB';
-        return round((( self::getMemorySpace() - MEMORY_START_POINT) / 1024), 2). '  KB<br />';
+        return round(((self::getMemorySpace() - MEMORY_START_POINT) / 1024), 2). '  KB<br />';
     }
 }

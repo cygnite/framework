@@ -9,5 +9,4 @@ class Redis
     protected $storage;
 
     private $config = [];
-
 }

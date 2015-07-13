@@ -20,7 +20,6 @@ class Zip
         }
 
         $this->zip = new ZipArchive();
-
     }
 
     private function open_zip_archive($filepath)
@@ -36,7 +35,6 @@ class Zip
      */
     final private function __clone()
     {
-
     }
 
     public function make($filename, $pathLocation, $new_location = "", $zip_name = "")
@@ -62,7 +60,6 @@ class Zip
         closedir($dir_handler);
         $this->close_zip_archive(); // echo $file;exit;
         $this->makeZip($zip_name, $pathLocation . $file);
-
     }
 
     /**
@@ -89,13 +86,14 @@ class Zip
 
     private function makeZip($zip_name, $file_path)
     {
-
-        if (ini_get('zlib.output_compression'))
+        if (ini_get('zlib.output_compression')) {
             ini_set('zlib.output_compression', 'Off');
+        }
 
         // Security checks
-        if (!file_exists($zip_name) || $zip_name == "")
+        if (!file_exists($zip_name) || $zip_name == "") {
             throw new Exception("The zip archive file not specified to download.");
+        }
 
         $downloader = new \Cygnite\Common\File\File();
         $downloader->download($file_path);

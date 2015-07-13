@@ -62,8 +62,7 @@ abstract class StaticResolver
          * and return value
          */
         // calling the method directly is faster then call_user_func_[] !
-        switch (count($arguments))
-        {
+        switch (count($arguments)) {
             case 0:
                 return (new $class())->$method();
             case 1:

@@ -10,6 +10,7 @@
 namespace Cygnite\Console\Generator;
 
 use Cygnite\Helpers\Inflector;
+
 /**
  * Cygnite View Generator
  *
@@ -159,7 +160,6 @@ class View
 
         fwrite($handle, $fileContent);
         fclose($handle);
-
     }
 
     /**
@@ -207,12 +207,10 @@ class View
         $viewType = ($this->layoutType == 'php') ? 'Php'.DS : '';
 
         foreach ($this->views as $key => $view) {
-
             $viewPath = $this->viewTemplatePath.'controller'.DS.$viewType.$view.self::TEMP_EXTENSION;
             $this->readContents($viewPath, $view);
             $this->generate($view.$viewExtension);
         }
-
     }
 
     /**
@@ -251,7 +249,6 @@ class View
         $content = str_replace('{#tdColumns#}', $column.PHP_EOL, $content);
 
         return $content;
-
     }
 
     /**
@@ -264,13 +261,11 @@ class View
         $column = '';
 
         foreach ($this->getTableColumns() as $key=> $value) {
-
             if ($value->COLUMN_NAME !== 'id') {
-
                 if ($type == 'th') {
                     $tableHead = Inflector::underscoreToSpace($value->COLUMN_NAME);
                     $column .= "\t\t\t".'<'.$type.'>'.$tableHead.'</'.$type.'>'.PHP_EOL;
-                } else{
+                } else {
                     $rowType = '';
                     if ($this->layoutType == 'php') {
                         $rowType = '<?php echo $row->'.$value->COLUMN_NAME.'; ?>';
@@ -279,7 +274,6 @@ class View
                     }
                     $column .= "\t\t\t".'<'.$type.'>'.$rowType.'</'.$type.'>'.PHP_EOL;
                 }
-
             }
         }
 
@@ -309,9 +303,7 @@ class View
 
         $column = '';
         foreach ($this->getTableColumns() as $key=> $value) {
-
             if ($value->COLUMN_NAME !== 'id') {
-
                 if ($this->layoutType == 'php') {
                     $rowType = '<?php echo $record->'.$value->COLUMN_NAME.'; ?>';
                 } else {
@@ -359,9 +351,9 @@ class View
         $appViewPath = $this->getApplicationViewPath();
 
         if ($this->layoutType == 'php') {
-           $viewName = str_replace('.stub', EXT, $viewName);
+            $viewName = str_replace('.stub', EXT, $viewName);
         } else {
-           $viewName = str_replace('.stub', '.twig', $viewName);
+            $viewName = str_replace('.stub', '.twig', $viewName);
         }
 
         $filePath =  $appViewPath.strtolower($viewName);

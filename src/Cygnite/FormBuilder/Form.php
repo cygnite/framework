@@ -39,7 +39,7 @@ class Form extends Elements implements FormInterface
 
     protected $value = [];
 
-    protected  $element = [];
+    protected $element = [];
 
     private $validArray = ['text', 'button', 'select', 'textarea'];
 
@@ -62,9 +62,9 @@ class Form extends Elements implements FormInterface
         // Check for valid function name
         if (in_array($method, static::$validMethod)) {
             if (empty($arguments)) {
-                return call_user_func_array([new self,'getInstance'], []);
+                return call_user_func_array([new self, 'getInstance'], []);
             } elseif ($arguments[0] instanceof Closure) {
-                return call_user_func_array([new self,'getInstance'], $arguments);
+                return call_user_func_array([new self, 'getInstance'], $arguments);
             }
         }
 
@@ -117,7 +117,7 @@ class Form extends Elements implements FormInterface
         $array['type'] = $type;
 
         if ($type == 'openTag') {
-            $key = $key.'_'.mt_rand(1,2000);
+            $key = $key.'_'.mt_rand(1, 2000);
         }
 
         if ($type == 'closeTag') {
@@ -146,7 +146,6 @@ class Form extends Elements implements FormInterface
     public function createForm()
     {
         foreach ($this->value as $key => $val) {
-
             switch ($val['type']) {
                 case 'textarea':
                     unset($val['type']);
@@ -182,16 +181,13 @@ class Form extends Elements implements FormInterface
             }
 
             if (isset($val['type']) && in_array($val['type'], $this->validArray)) {
-
                 if (!in_array('submit', $val)) {
-
                     if (is_object($this->validator) && isset($this->validator->errors[$key.'_error'])) {
                         $this->elements[self::$formHolder[self::$formName]][$key.'_error'] =
                             '<span class="'.$this->errorClass.'">'.$this->validator->errors[$key.'_error'].'</span>'.PHP_EOL;
                     }
                 }
             }
-
         }
 
         return $this;
@@ -252,7 +248,6 @@ class Form extends Elements implements FormInterface
          */
         foreach ($this->elements[self::$formHolder[self::$formName]] as $key => $val) {
             $elementString .= $val;
-
         }
 
         $close = null;
@@ -278,8 +273,8 @@ class Form extends Elements implements FormInterface
     public function close()
     {
         if (self::$formOpen) {
-           $close = trim(self::$formHolder[self::$formName].'_close');
-           $this->{$close} = "</form>".PHP_EOL;
+            $close = trim(self::$formHolder[self::$formName].'_close');
+            $this->{$close} = "</form>".PHP_EOL;
         }
 
         return $this;

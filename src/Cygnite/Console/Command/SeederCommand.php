@@ -80,7 +80,6 @@ class SeederCommand extends Command
         $name = $this->input->getArgument('name');
 
         if (!is_null($name)) {
-
             if (string_has($name, ',')) {
                 $this->seeder()->executeOnly($name);
             } else {

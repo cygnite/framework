@@ -18,7 +18,6 @@ use Cygnite\Base\Router\Router;
 use Cygnite\Foundation\Application as App;
 use Cygnite\Base\Router\Controller\RouteController;
 
-
 /*
  * Trait ResourceController
  *

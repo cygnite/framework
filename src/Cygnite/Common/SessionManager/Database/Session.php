@@ -173,7 +173,6 @@ class Session extends ActiveRecord implements PacketInterface
                 | if not we will create an table to store session info
                  */
                 if (!$table->hasTable()->run()) {
-
                     $table->create(
                         [
                             [
@@ -479,5 +478,4 @@ class Session extends ActiveRecord implements PacketInterface
         }
         return isset($this->storage[$key]);
     }
-
 }

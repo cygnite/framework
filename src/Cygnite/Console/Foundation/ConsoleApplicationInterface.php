@@ -10,6 +10,7 @@
 namespace Cygnite\Console\Foundation;
 
 use Symfony\Component\Console\Command\Command as SymfonyCommand;
+
 /**
  * Cygnite Console Application
  *

@@ -66,14 +66,12 @@ class AutoLoader
      */
     private function autoLoad($className)
     {
-
         $path  = $rootDir ='';
         //$fileName = $this->psr0AutoLoader($className);
 
         if (array_key_exists($className, $this->directories)) {
             try {
                 if (is_readable($this->directories[$className])) {
-
                     return include CYGNITE_BASE.DS.str_replace(
                             ['\\\\', '\\'],
                             DS,
@@ -105,7 +103,6 @@ class AutoLoader
             } else {
                 $fileName  = 'vendor'.DS.'cygnite'.DS.'src'.DS.str_replace('\\', DS, $namespace) . DS;
             }
-
         }
 
         $fileName .= str_replace('_', DS, $className) . '.php';
@@ -133,9 +130,7 @@ class AutoLoader
      */
     private function setDirectories($paths)
     {
-
-        if (!empty ($paths)) {
-
+        if (!empty($paths)) {
             foreach ($paths as $key => $dir) {
                 $path = str_replace(".", DS, $dir);
 
@@ -153,10 +148,8 @@ class AutoLoader
                     if (!isset($this->directories[$alias])) {
                         $this->directories[str_replace('Src', '', $alias)] = str_replace('\\', '/', $item->getPathName());
                     }
-
                 }
             }
-
         }
     }
 

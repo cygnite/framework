@@ -271,7 +271,6 @@ class Container extends DependencyBuilder implements ContainerAwareInterface, Ar
         // if closure callback given we will create a singleton instance of class
         // and return it to user
         if ($callback instanceof Closure) {
-
             if (!isset($instance[$key])) {
                 $instance[$key] = $callback($this);
             }
@@ -328,7 +327,6 @@ class Container extends DependencyBuilder implements ContainerAwareInterface, Ar
         $constructor = null;
         $constructorArgsCount = '';
         if ($reflectionClass->hasMethod('__construct')) {
-
             $constructor = $reflectionClass->getConstructor();
             $constructorArgsCount = $constructor->getNumberOfParameters();
             $constructor->setAccessible(true);
@@ -337,17 +335,13 @@ class Container extends DependencyBuilder implements ContainerAwareInterface, Ar
         // if class does not have explicitly defined constructor or constructor does not have parameters
         // get the new instance
         if (!isset($constructor) && is_null($constructor) || $constructorArgsCount < 1) {
-
             $this->stack[$class] = $reflectionClass->newInstance();
-
         } else {
             $dependencies = $constructor->getParameters();
             $constructorArgs = [];
 
             foreach ($dependencies as $dependency) {
-
                 if (!is_null($dependency->getClass())) {
-
                     list($resolveClass, $reflectionParam) = $this->getReflectionParam($dependency);
 
                     // Application and Container cannot be injected into controller currently
@@ -357,7 +351,6 @@ class Container extends DependencyBuilder implements ContainerAwareInterface, Ar
                     } else {
                         $constructorArgs[] = $this->interfaceInjection($reflectionParam);
                     }
-
                 } else {
                     /*
                      | We will check if construct has default value

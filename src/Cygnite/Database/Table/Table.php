@@ -14,7 +14,6 @@ use Cygnite\Database\Connection;
 
 class Table extends Connection
 {
-
     private $_connection;
 
     private $schemaInstance;
@@ -49,7 +48,7 @@ class Table extends Connection
         $conn = $this->_connection;
         $schema = Schema::instance(
             $this,
-            function($table) {
+            function ($table) {
                 $table->tableName = $this->tableName;
                 $columns = null;
                 //$table->setDbConnection($this->_connection, $this->database);
@@ -117,7 +116,7 @@ class Table extends Connection
 
         //Create migration table in order to save migrations information
         Schema::instance($this,
-            function($table) use ($tableName){
+            function ($table) use ($tableName) {
                 $table->tableName = $tableName;
                 $table->database = trim($this->getDefaultDatabaseConnection());
                 $table->create(
@@ -158,6 +157,5 @@ class Table extends Connection
                       )";
 
         return $this->_connection->prepare($sql)->execute();
-
     }
 }

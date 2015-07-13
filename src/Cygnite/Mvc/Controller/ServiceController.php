@@ -12,6 +12,7 @@
 namespace Cygnite\Mvc\Controller;
 
 use Cygnite\DependencyInjection\ServiceControllerInterface;
+
 /**
  * ServiceController.
  *
@@ -61,7 +62,7 @@ class ServiceController extends AbstractBaseController implements ServiceControl
      * @param mixed  The value to set
      * @access public
      */
-    public function __set($key,$value)
+    public function __set($key, $value)
     {
         $this->service[$key] = $value;
     }

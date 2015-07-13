@@ -13,7 +13,9 @@ use Swift_SmtpTransport as SmtpTransport;
 use Swift_MailTransport as MailTransport;
 use Swift_SendmailTransport as SendmailTransport;
 
-if ( ! defined('CF_SYSTEM')) exit('External script access not allowed');
+if (! defined('CF_SYSTEM')) {
+    exit('External script access not allowed');
+}
 
 /**
  * Mailer
@@ -48,7 +50,6 @@ if ( ! defined('CF_SYSTEM')) exit('External script access not allowed');
 
 class Mailer
 {
-
     // email configuration
     private $emailConfig = [];
 
@@ -61,7 +62,7 @@ class Mailer
 
         try {
             Application::import('vendor'.DS.$this->emailConfig['swift_mailer_path']);
-        }catch (Exception $ex) {
+        } catch (Exception $ex) {
             throw new Exception($ex->getMessage());
         }
         
@@ -81,7 +82,7 @@ class Mailer
     public static function __callStatic($method, $arguments)
     {
         if ($method == 'compose') {
-            return call_user_func_array([new self,'get'.ucfirst($method)], $arguments);
+            return call_user_func_array([new self, 'get'.ucfirst($method)], $arguments);
         }
     }
 
@@ -125,7 +126,6 @@ class Mailer
                 $this->setSendMailTransport();
                 break;
         }
-
     }
 
     /**
@@ -143,7 +143,6 @@ class Mailer
             $method = 'set'.ucfirst($key);
             $swift->{$method}($value);
         }
-
     }
     
     /**
@@ -172,7 +171,6 @@ class Mailer
     private function setSendMailTransport()
     {
         SendmailTransport::newInstance();
-
     }
     
     /**
@@ -185,7 +183,6 @@ class Mailer
      */
     private function setMailTransport()
     {
-
         MailTransport::newInstance();
     }
 
@@ -201,7 +198,7 @@ class Mailer
     {
         if ($type == 'smtp') {
             return SmtpTransport::newInstance();
-        } else if ($type == 'sendmail') {
+        } elseif ($type == 'sendmail') {
             return SendmailTransport::newInstance();
         } else {
             return MailTransport::newInstance();
@@ -256,7 +253,6 @@ class Mailer
     public function addAttachment($path)
     {
         return MailAttachment::fromPath($path);
-
     }
     
     /*
@@ -280,5 +276,4 @@ class Mailer
         ;
         $result = $mailer->send($message);
     }*/
-
 }

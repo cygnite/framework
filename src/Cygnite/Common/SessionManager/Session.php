@@ -102,7 +102,7 @@ class Session
     public static function __callStatic($method, $arguments)
     {
         $arguments['method'] = $method;
-        self::$instance = new Static;
+        self::$instance = new static;
         return call_user_func_array([self::$instance, 'factory'], [$arguments]);
     }
 

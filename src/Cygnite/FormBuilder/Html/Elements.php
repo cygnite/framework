@@ -23,7 +23,7 @@ if (!defined('CF_SYSTEM')) {
  */
 class Elements
 {
-    protected  $elements = [];
+    protected $elements = [];
 
     protected $openTagHolder;
 
@@ -181,7 +181,6 @@ class Elements
         $select = '';
 
         foreach ($options as $key => $value) {
-
             $isSelected = ($selected == $key) ? 'selected="selected"' : '';
             $select .= "<option $isSelected value='".$key."'>".$value."</option>".PHP_EOL;
         }

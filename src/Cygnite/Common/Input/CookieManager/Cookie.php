@@ -105,7 +105,6 @@ class Cookie extends StaticResolver implements CookieInterface
         $this->name = (string) $this->security->sanitize($name);
 
         return $this;
-
     }
 
 
@@ -163,8 +162,7 @@ class Cookie extends StaticResolver implements CookieInterface
         $var = null;
         $var = substr($expire, 0, 1);
 
-        if (in_array( $var, ['+','-'] )) {
-
+        if (in_array($var, ['+', '-'])) {
             $this->expire = strtotime($expire);
 
             if ($this->expire === false) {
@@ -179,7 +177,6 @@ class Cookie extends StaticResolver implements CookieInterface
         $this->expire = 0;
 
         return $this;
-
     }
 
     /**
@@ -209,7 +206,6 @@ class Cookie extends StaticResolver implements CookieInterface
         }
 
         return $this;
-
     }
 
 

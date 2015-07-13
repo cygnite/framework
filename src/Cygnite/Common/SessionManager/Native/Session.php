@@ -94,7 +94,7 @@ class Session extends Manager implements SessionInterface
     protected function startSession()
     {
         if (@session_status() === \PHP_SESSION_ACTIVE) {
-          throw new SessionNotStartedException('Session started already!');
+            throw new SessionNotStartedException('Session started already!');
         }
 
         if (ini_get('session.use_cookies') && headers_sent($file, $line)) {
@@ -142,14 +142,12 @@ class Session extends Manager implements SessionInterface
     protected function checkReferer()
     {
         if (!empty($_SERVER['HTTP_REFERER'])) {
-
             $url = parse_url($_SERVER['HTTP_REFERER']);
 
             if ($url['host'] != $_SERVER['HTTP_HOST']) {
                 session_destroy(); // destroy fake session
             }
         }
-
     }
     /**
      * Regenerate the session ID

@@ -132,5 +132,4 @@ abstract class AbstractPacket
         }
         return isset($this->storage[$key]);
     }
-
 }

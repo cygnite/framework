@@ -75,7 +75,6 @@ class MemCache implements StorageInterface
 
 
         if (class_exists('Memcache')) {
-
             if ($this->memory == null) {
                 $this->memory = new \Memcache();
 
@@ -167,6 +166,5 @@ class MemCache implements StorageInterface
 
     final private function __clone()
     {
-
     }
 }

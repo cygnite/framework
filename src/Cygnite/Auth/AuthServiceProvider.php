@@ -18,7 +18,7 @@ class AuthServiceProvider extends ServiceProvider
 
     public function register(Application $app)
     {
-        $app->singleton('auth', function($c) {
+        $app->singleton('auth', function ($c) {
             return new Auth($c['auth.provider']);
         });
     }

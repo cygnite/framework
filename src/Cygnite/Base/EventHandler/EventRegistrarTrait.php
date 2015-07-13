@@ -27,10 +27,9 @@ trait EventRegistrarTrait
      */
     public function getAppEvents()
     {
-        $class = 'Apps\Middlewares\Events\Event';
+        $class = APP_NS.'\Middlewares\Events\Event';
 
         if (property_exists($class, 'appEvents') && $class::$activateAppEvent == true) {
-
             return \Apps\Middlewares\Events\Event::$appEvents;
         }
 
@@ -50,7 +49,6 @@ trait EventRegistrarTrait
         }
 
         foreach ($events as $event => $namespace) {
-
             $parts = explode('@', $namespace);
             // attach all before and after event to handler
             $this->attach("$event.before", $parts[0].'@before'.ucfirst(Inflector::pathAction(end($parts))))

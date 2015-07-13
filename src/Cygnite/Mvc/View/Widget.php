@@ -83,10 +83,10 @@ class Widget implements \ArrayAccess
     protected function setupModule()
     {
         if (string_has($this->getWidgetName(), ':')) {
-
             $exp = [];
             $exp = explode(':', $this->getWidgetName());
-            $moduleName = $exp[0]; $view = $exp[1];
+            $moduleName = $exp[0];
+            $view = $exp[1];
             $path = $this->getWidgetPath($view, true);
             $this->setWidgetName(null);
             $this->setModule(false);
@@ -143,7 +143,7 @@ class Widget implements \ArrayAccess
          | We will return if widget already cached
          */
         if ($this->has($this->getWidgetName())) {
-           return $this->getWidget($this->getWidgetName());
+            return $this->getWidget($this->getWidgetName());
         }
 
         $path = null;

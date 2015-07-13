@@ -48,7 +48,6 @@ class Schema
         $this->_pointer = $model;
 
         if (class_exists(get_class($this->_pointer))) {
-
             $reflectionClass = new \ReflectionClass(get_class($this->_pointer));
 
             /*
@@ -102,11 +101,9 @@ class Schema
     public static function __callStatic($method, $arguments = [])
     {
         if ($method == 'make' && !empty($arguments)) {
-
             $schema = new self($arguments[0]);
 
             if (is_callable([$schema, 'init'])) {
-
                 if ($arguments[1] instanceof Closure) {
                     return $schema->init($arguments[1], $schema);
                 } else {
@@ -119,7 +116,7 @@ class Schema
         }
     }
 
-	/**
+    /**
      * Get Schema instance to generate table schema
      * @access public
      * @param $_pointer get the model pointer
@@ -163,16 +160,13 @@ class Schema
         $i = 0;
 
         foreach ($columns as $key => $value) {
-
             $increment = (isset($value['increment'])) ? 'AUTO_INCREMENT' : '';
             if (isset($value['key'])) {
-
                 $tableKey = strtoupper($value['key']) . ' ';
 
                 if ($value['key'] == 'primary') {
                     $tableKey = 'PRIMARY KEY';
                 }
-
             } else {
                 $tableKey = '';
             }
@@ -288,13 +282,11 @@ class Schema
         $schema .= strtoupper(__FUNCTION__) . ' TABLE ' . PHP_EOL;
 
         if (is_array($tableNames)) {
-
             $i = 0;
 
             $arrCount = count($tableNames);
 
             foreach ($tableNames as $key => $value) {
-
                 $schema .= '`' . $key . '` TO `' . $value . '`';
 
                 $comma = ($i < $arrCount - 1) ? ',' : '';
@@ -330,7 +322,6 @@ class Schema
 
     public function alter()
     {
-
     }
 
     /**
@@ -344,7 +335,6 @@ class Schema
         $callMethod = null;
 
         if (strpos($name, 'Column') == true) {
-
             $callMethod = explode('Column', $name);
 
             if (trim($callMethod[0]) == 'drop') {
@@ -353,7 +343,6 @@ class Schema
             }
 
             if (trim($callMethod[0]) == 'add') {
-
                 if (isset($arguments[0]) && is_array($arguments[0])) {
                     $arguments[1] = '';
                     $arguments[2] = trim($callMethod[0]);
@@ -386,13 +375,11 @@ class Schema
         }
 
         if (is_array($columns)) {
-
             $column = $columnKey = $columnValue = '';
             $i = 0;
             $arrCount = count($columns);
 
             foreach ($columns as $key => $value) {
-
                 if (trim($type) == 'drop') {
                     $columnKey = '';
                     $columnValue = "`$value`";
@@ -427,12 +414,10 @@ class Schema
         }
 
         return $this;
-
     }
 
     public function modifyColumn()
     {
-
     }
 
     public function after($column)
@@ -477,7 +462,6 @@ class Schema
                         AND COLUMN_NAME = '" . $column . "' ";
 
         return $this;
-
     }
 
     /**
@@ -517,7 +501,6 @@ class Schema
         }
 
         return $this;
-
     }
 
     /**
@@ -526,15 +509,12 @@ class Schema
      */
     private function commands($params)
     {
-
         if (is_array($params)) {
-
             $param = '';
             $i = 0;
             $arrCount = count($params);
 
             foreach ($params as $key => $value) {
-
                 $param .= $value;
 
                 $comma = ($i < $arrCount - 1) ? ',' : '';
@@ -543,7 +523,6 @@ class Schema
 
                 $i++;
             }
-
         }
 
         if (is_string($params)) {
@@ -560,7 +539,6 @@ class Schema
     {
         $this->schema = static::ALTER_TABLE . '
         `' . $this->database . '`.`' . $this->tableName . '` DROP PRIMARY KEY';
-
     }
 
     /**
@@ -582,7 +560,6 @@ class Schema
             $this->schema = $alter . ' CONSTRAINT
             UC_' . strtoupper($this->tableName) . '_' . strtoupper($keyConstraint) . '_ID
             ' . strtoupper(__FUNCTION__) . ' (' . $columns . ')';
-
         }
 
         if (is_string($column)) {
@@ -607,7 +584,6 @@ class Schema
             UC_' . strtoupper($this->tableName) . '_' . strtoupper($keyConstraint) . '_ID';
 
         return $this;
-
     }
 
     /**
@@ -643,28 +619,22 @@ class Schema
     //Foreign key References to table
     public function addForeignKey()
     {
-
     }
 
     public function referenceTo()
     {
-
     }
 
     public function dropForeignKey()
     {
-
-
     }
 
     public function onDelete()
     {
-
     }
 
     public function onSave()
     {
-
     }
 
     public function createDatabase($database)

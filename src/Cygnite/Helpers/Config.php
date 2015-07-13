@@ -68,8 +68,7 @@ class Config extends StaticResolver
          | ]
          | Config::get('module-config.config.name');
          */
-        return ArrayAccessor::make(function($accessor) use ($key, $config)
-            {
+        return ArrayAccessor::make(function ($accessor) use ($key, $config) {
                 return $accessor->set($config)->toString($key);
             });
     }
@@ -133,7 +132,6 @@ class Config extends StaticResolver
         $files = array_merge($this->files, static::$paths['app.config']['files']);
 
         foreach ($files as $key => $file) {
-
             if (!file_exists($configPath.$file.EXT)) {
                 throw new \Exception("File doesn't exists in the path ".$configPath.$file.EXT);
             }
@@ -142,7 +140,7 @@ class Config extends StaticResolver
             | We will include configuration file into array only
             | for the first time
              */
-            if (!isset(self::$config[$key])){
+            if (!isset(self::$config[$key])) {
                 Config::set($key, include $configPath.$file.EXT);
             }
         }

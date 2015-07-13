@@ -138,7 +138,6 @@ class Asset implements \ArrayAccess
             isset($this->combinedAssets[$this->tag[$this->where]][$name])
         ) {
             $this->render($this->combinedAssets[$this->tag[$this->where]][$name]);
-
         } else {
             if (isset($this->assets[$this->tag[$this->where]][$name])) {
                 $this->render($this->assets[$this->tag[$this->where]][$name]);
@@ -186,7 +185,6 @@ class Asset implements \ArrayAccess
         $this->combine = true;
 
         if (file_exists(CYGNITE_BASE . DS . $path . $file)) {
-
             $cssAsset = file_get_contents(CYGNITE_BASE . DS . $path . $file);
             if (string_has($cssAsset, '@generator')) {
                 return $this;
@@ -202,10 +200,9 @@ class Asset implements \ArrayAccess
          | @generator Cygnite AssetManager\n
          */\n\n";
         foreach ($this->paths[$this->tag[$this->where]][$name] as $key => $src) {
-
             if ($name == 'style') {
                 $content .= $this->combineStylesheets($src, $compress);
-            } else if ($name == 'script') {
+            } elseif ($name == 'script') {
                 $content .= $this->combineScripts($src, $compress);
             }
         }
@@ -372,7 +369,7 @@ class Asset implements \ArrayAccess
 
     public static function create()
     {
-        return (new Static);
+        return (new static);
     }
 
     /**
@@ -385,7 +382,7 @@ class Asset implements \ArrayAccess
         $args = [];
         $args = func_get_args();
         $args[1] = 'static';
-        return call_user_func_array([new Static, 'style'], $args);
+        return call_user_func_array([new static, 'style'], $args);
     }
 
     /**
@@ -398,7 +395,7 @@ class Asset implements \ArrayAccess
         $args = [];
         $args = func_get_args();
         $args[2] = array_merge($args[2], ['type' => 'static']);
-        return call_user_func_array([new Static, 'link'], $args);
+        return call_user_func_array([new static, 'link'], $args);
     }
 
     /**
@@ -411,7 +408,7 @@ class Asset implements \ArrayAccess
         $args = [];
         $args = func_get_args();
         $args[2] = array_merge($args[2], ['type' => 'static']);
-        return call_user_func_array([new Static, 'script'], $args);
+        return call_user_func_array([new static, 'script'], $args);
     }
 
     /**

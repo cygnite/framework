@@ -244,7 +244,6 @@ class Upload implements FileUploadInterface
         }
 
         $this->fileInfo[$key] = $value;
-
     }
 
 
@@ -252,7 +251,7 @@ class Upload implements FileUploadInterface
     {
         if ($function !== 'save') {
             throw new \ErrorException('Undefined function call :' . __CLASS__ . "::{$function} function name undefined");
-        } else if (empty($arguments)) {
+        } elseif (empty($arguments)) {
             throw new \ErrorException("Empty argument passed to method: " . __CLASS__ . "::{$function}");
         }
 
@@ -264,13 +263,10 @@ class Upload implements FileUploadInterface
         $tempArguments = $this->fileInfo['file'];
 
         if (isset($arguments[0]) && isset($arguments[0]['multiUpload']) === true) {
-
             foreach ($tempArguments as $key => $value) {
-
                 $this->fileInfo['file'] = $value;
                 $status[] = call_user_func_array([$this, 'uploadFile'], []);
             }
-
         } else {
             return call_user_func_array([$this, 'uploadFile'], $arguments);
         }
@@ -367,7 +363,6 @@ class Upload implements FileUploadInterface
         } else {
             return 'NaN';
         }
-
     }
 
     /**

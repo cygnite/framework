@@ -76,10 +76,10 @@ class Form
         $formName = Inflector::classify($this->formCommand->tableName);
 
         if (file_exists($this->getFormTemplatePath().'Form'.EXT)) {
-           //We will generate Form Component
+            //We will generate Form Component
             $formContent = file_get_contents($this->getFormTemplatePath().'Form'.EXT);
-        } else{
-           die("Form template doesn't exists in ".$this->getFormTemplatePath().'Form'.EXT." directory.");
+        } else {
+            die("Form template doesn't exists in ".$this->getFormTemplatePath().'Form'.EXT." directory.");
         }
 
         $this->controllerInstance->isFormGenerator = true;

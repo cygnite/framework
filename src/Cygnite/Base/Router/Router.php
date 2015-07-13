@@ -338,8 +338,7 @@ class Router implements RouterInterface
         $this->routeBasePath .= $groupRoute;
 
         // Call the Closure callback
-        call_user_func(function() use($callback)
-        {
+        call_user_func(function () use ($callback) {
             return $callback($this);
         });
 
@@ -412,7 +411,6 @@ class Router implements RouterInterface
 
         // If no route was handled, trigger the 404 (if any)
         if ($handledRequest == 0) {
-
             if (!is_null($this->notFound) && is_callable($this->notFound)) {
                 return call_user_func($this->notFound);
             }
@@ -452,7 +450,6 @@ class Router implements RouterInterface
         $i = 0;
         // Loop all routes
         foreach ($routes as $route) {
-
             $routePattern = $this->hasNamedPattern($route['pattern']);
             $pattern = ($routePattern == false) ? $route['pattern'] : $routePattern;
 
@@ -557,7 +554,6 @@ class Router implements RouterInterface
         $basePath = implode('/', array_slice(explode('/', $_SERVER['SCRIPT_NAME']), 0, -1)) . '/';
 
         return $basePath;
-
     }
 
     /**

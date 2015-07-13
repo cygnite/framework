@@ -416,7 +416,6 @@ abstract class ActiveRecord implements \ArrayAccess
 
     public function findByAndOr()
     {
-
     }
 
     /**
@@ -591,7 +590,6 @@ abstract class ActiveRecord implements \ArrayAccess
     public function getPaginationOffset()
     {
         return (isset($this->paginationOffset)) ? $this->paginationOffset : null;
-
     }
 
     public function setPaginationOffset($offset)

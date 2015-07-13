@@ -3,7 +3,7 @@ use Cygnite\Foundation\Application as App;
 use Cygnite\AssetManager\Html;
 use Cygnite\Translation\Translator;
 
-if ( ! function_exists('clear_sanity')) {
+if (! function_exists('clear_sanity')) {
     /*
     * $_POST   = array_map("clear_sanity", $_POST);
     * Strip html encoding out of a string, useful to prevent cross site scripting attacks
@@ -19,7 +19,7 @@ if ( ! function_exists('clear_sanity')) {
     }
 }
 
-if ( ! function_exists('days_diff')) {
+if (! function_exists('days_diff')) {
     /**
      * @param $date
      * @return int
@@ -41,7 +41,7 @@ if ( ! function_exists('days_diff')) {
     }
 }
 
-if ( ! function_exists('show')) {
+if (! function_exists('show')) {
     /**
      * @param array $data
      * @param bool  $hasExit
@@ -58,7 +58,7 @@ if ( ! function_exists('show')) {
 }
 
 
-if ( ! function_exists('string_split')) {
+if (! function_exists('string_split')) {
     /**
      * @param        $string
      * @param string $needle
@@ -72,7 +72,7 @@ if ( ! function_exists('string_split')) {
     }
 }
 
-if ( ! function_exists('string_has')) {
+if (! function_exists('string_has')) {
     /**
      * @param $haystack
      * @param $needle
@@ -84,7 +84,7 @@ if ( ! function_exists('string_has')) {
     }
 }
 
-if ( ! function_exists('app')) {
+if (! function_exists('app')) {
     /*
     * We will get the Application instance
     */
@@ -94,7 +94,7 @@ if ( ! function_exists('app')) {
     }
 }
 
-if ( ! function_exists('compress')) {
+if (! function_exists('compress')) {
     /**
      * We will remove comments and empty spaces from the resource
      * and compress contents
@@ -113,7 +113,7 @@ if ( ! function_exists('compress')) {
     }
 }
 
-if ( ! function_exists('isCli')) {
+if (! function_exists('isCli')) {
     /**
      * Check if code is running via command line interface or web
      * @return bool
@@ -124,7 +124,7 @@ if ( ! function_exists('isCli')) {
     }
 }
 
-if ( ! function_exists('e')) {
+if (! function_exists('e')) {
     /**
      * Escape HTML entities in a string.
      *
@@ -153,8 +153,7 @@ if (!function_exists('trans')) {
      */
     function trans($key, array $replace = null, $locale = 'en-us')
     {
-        return Translator::make(function ($trans) use ($key, $replace, $locale)
-        {
+        return Translator::make(function ($trans) use ($key, $replace, $locale) {
             if ($locale !== $trans->locale()) {
                 // The message and target languages are different
                 // Get the translation for this message
@@ -166,7 +165,7 @@ if (!function_exists('trans')) {
     }
 }
 
-if ( ! function_exists('toPath')) {
+if (! function_exists('toPath')) {
     /**
      * We will replace dot / slash(/) to directory separator
      *

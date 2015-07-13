@@ -17,7 +17,7 @@ class ArrayAccessor implements ArrayAccessorInterface
      */
     public static function make(\Closure $callback)
     {
-        return $callback(new Static());
+        return $callback(new static());
     }
 
     /**
@@ -82,7 +82,6 @@ class ArrayAccessor implements ArrayAccessorInterface
          | Loop all array index to find the array value
          */
         foreach ($chunks as $index) {
-
             if (!isset($array[$index])) {
                 return null;
             }

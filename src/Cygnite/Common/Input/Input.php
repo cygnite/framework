@@ -46,10 +46,10 @@ class Input
     public static function make(Closure $callback = null)
     {
         if ($callback instanceof Closure) {
-            return $callback(new Static(new Security()));
+            return $callback(new static(new Security()));
         }
 
-        return new Static(new Security());
+        return new static(new Security());
     }
 
     /**
@@ -122,7 +122,7 @@ class Input
 
         if (is_null($key) ===false && is_null($value) === false) {
             try {
-                 //Sets new value for given POST variable.
+                //Sets new value for given POST variable.
                  //@param string $key Post variable name
                  //@param mixed $value     New value to be set.
                 $this->request['post'][$key] = $value;
@@ -157,7 +157,7 @@ class Input
     {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             return 'post';
-        } else if ($_SERVER['REQUEST_METHOD'] == 'GET') {
+        } elseif ($_SERVER['REQUEST_METHOD'] == 'GET') {
             return 'get';
         }
 

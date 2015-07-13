@@ -21,5 +21,4 @@ class DatabaseException extends PDOException
             );
         }
     }
-
 }

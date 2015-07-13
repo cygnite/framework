@@ -47,7 +47,6 @@ abstract class AbstractBaseController extends View
     //prevent clone.
     private function __clone()
     {
-
     }
 
     protected function getContainer()

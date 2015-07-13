@@ -24,7 +24,6 @@ if (!defined('CF_SYSTEM')) {
 
 class Inflector extends StaticResolver
 {
-
     private static $instance;
     /********************* Inflections ******************/
 
@@ -242,7 +241,7 @@ class Inflector extends StaticResolver
         if (in_array(strtolower($result), $this->uncountableWords())) {
             return $result;
         } else {
-            foreach($this->pluralRules() as $rule => $replacement) {
+            foreach ($this->pluralRules() as $rule => $replacement) {
                 if (preg_match($rule, $result)) {
                     $result = preg_replace($rule, $replacement, $result);
                     break;
@@ -264,7 +263,7 @@ class Inflector extends StaticResolver
         if (in_array(strtolower($result), $this->uncountableWords())) {
             return $result;
         } else {
-            foreach($this->singularRules() as $rule => $replacement) {
+            foreach ($this->singularRules() as $rule => $replacement) {
                 if (preg_match($rule, $result)) {
                     $result = preg_replace($rule, $replacement, $result);
                     break;

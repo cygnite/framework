@@ -26,7 +26,6 @@ abstract class Seeder
          | specified seeder array
          */
         if ($exp = string_split($class, ',')) {
-
             $this->seeders = $this->filterClass($exp);
         } else {
             $hasClass = (in_array($class, $this->seeders)) ? true : false;
