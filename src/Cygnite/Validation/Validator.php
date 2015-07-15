@@ -39,7 +39,7 @@ class Validator implements ValidatorInterface
      * @param  $var post values
      *
      */
-    public function __construct(Input $input)
+    protected function __construct(Input $input)
     {
         if (!$input instanceof Input) {
             throw new ValidatorException(sprintf('Constructor expects Input instance, give %s ', $input));
@@ -120,7 +120,7 @@ class Validator implements ValidatorInterface
     public function getErrors($column = null)
     {
         if (is_null($column)) {
-            return implode($this->glue, array_values($this->errors));
+            return $this->errors;
         }
 
         return isset($this->errors[$column.self::ERROR]) ? $this->errors[$column.self::ERROR] : null;
@@ -148,7 +148,6 @@ class Validator implements ValidatorInterface
                     !strstr($rule, 'min')
                 ) {
                     $isValid = $this->doValidateData($rule, $key, $isValid);
-                    //$isValid = call_user_func([$this, $rule[0]], [$key]);
                 } else {
                     $isValid = $this->doValidateMinMax($rule, $key, $isValid);
                 }
@@ -286,8 +285,7 @@ class Validator implements ValidatorInterface
         $columnName =  ucfirst($this->convertToFieldName($key)).' should be ';
 
         if (isset($this->errors[$key.self::ERROR])) {
-            $conCate = str_replace('.', '', $this->errors[$key.self::ERROR]).' and must be valid ';
-            $columnName = '';
+            list($conCate, $columnName) = $this->setErrorConcat($key);
         }
 
         if (filter_var($this->param[$key], FILTER_VALIDATE_INT) === false) {
@@ -308,8 +306,7 @@ class Validator implements ValidatorInterface
         $conCate =  '';
         $columnName =  ucfirst($this->convertToFieldName($key)).' should be ';
         if (isset($this->errors[$key.self::ERROR])) {
-            $conCate = str_replace('.', '', $this->errors[$key.self::ERROR]).' and must be';
-            $columnName = '';
+            list($conCate, $columnName) = $this->setErrorConcat($key);
         }
 
         $value = trim($this->param[$key]);
@@ -320,6 +317,58 @@ class Validator implements ValidatorInterface
         }
 
         return true;
+    }
+
+    private function setErrorConcat($key)
+    {
+        $conCate = str_replace('.', '', $this->errors[$key.self::ERROR]).' and must be valid';
+        $columnName = '';
+
+        return [$conCate, $columnName];
+    }
+
+    protected function isAlphaNumeric($key)
+    {
+        $conCate =  '';
+        $columnName =  ucfirst($this->convertToFieldName($key)).' should be ';
+
+        if (isset($this->errors[$key.self::ERROR])) {
+            list($conCate, $columnName) = $this->setErrorConcat($key);
+        }
+
+        if (!ctype_alnum($key)) {
+            return $this->setAlphaNumError($key, $conCate, $columnName);
+        }
+
+        return true;
+    }
+
+    private function setAlphaNumError($key, $conCate, $columnName)
+    {
+        $this->errors[$key.self::ERROR] =
+            $conCate.$columnName.strtolower(str_replace('is', '', __FUNCTION__)).'.';
+
+        return false;
+    }
+
+    protected function isAlphaNumWithUnderScore($key)
+    {
+        $allowed = [".", "-", "_"];
+        $columnName =  ucfirst($this->convertToFieldName($key)).' should be ';
+
+        $conCate =  '';
+        if (isset($this->errors[$key.self::ERROR])) {
+            list($conCate, $columnName) = $this->setErrorConcat($key);
+        }
+
+        $string = str_replace($allowed, '', $str );
+
+        if (!ctype_alnum($string)) {
+            return $this->setAlphaNumError($key, $conCate, $columnName);
+        }
+
+        return true;
+
     }
 
     /**
@@ -446,6 +495,6 @@ class Validator implements ValidatorInterface
      */
     public function notEmptyFile($key)
     {
-        return empty($_FILES[$key]['name']) !== true;
+        return (empty($_FILES[$key]['name']) !== true);
     }
 }
