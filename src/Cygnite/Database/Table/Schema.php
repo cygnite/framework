@@ -12,7 +12,7 @@ namespace Cygnite\Database\Table;
 
 use Closure;
 use Cygnite\Helpers\Inflector;
-use Cygnite\Database\Connection;
+use Cygnite\Database\ConnectionManagerTrait;
 
 /*
  * Database Schema Builder
@@ -24,6 +24,8 @@ use Cygnite\Database\Connection;
 
 class Schema
 {
+    use ConnectionManagerTrait;
+
     const ALTER_TABLE = 'ALTER TABLE ';
     const SELECT = 'SELECT';
     public $database;
@@ -32,8 +34,6 @@ class Schema
     public $schema = [];
     protected $_connection;
     private $_pointer;
-    private $inflection;
-    private $config;
     private $_informationSchema = 'INFORMATION_SCHEMA';
     private $_tableSchema = 'TABLE_SCHEMA';
 
@@ -58,7 +58,7 @@ class Schema
                 $reflectionProperty->setAccessible(true);
                 $this->database = $reflectionProperty->getValue($this->_pointer);
             } else {
-                $this->database = Connection::getDefaultConnection();
+                $this->database = $this->getDefaultConnection();
             }
 
             /*
@@ -73,13 +73,12 @@ class Schema
             /*
              | Set database connection name
              */
-            $this->setConn($this->database);
+            $this->setDatabaseConnection($this->database);
 
             if (!property_exists($this->_pointer, 'tableName')) {
                 $this->tableName = Inflector::tabilize(get_class($this->_pointer));
             }
         }
-       // $this->config = Connection::getConfiguration();
     }
 
     /**
@@ -87,9 +86,9 @@ class Schema
      *
      * @param $database
      */
-    public function setConn($database)
+    public function setDatabaseConnection($database)
     {
-        $this->_connection = Connection::getConnection($database);
+        $this->_connection = $this->getConnection($database);
     }
 
     /**
@@ -101,19 +100,22 @@ class Schema
     public static function __callStatic($method, $arguments = [])
     {
         if ($method == 'make' && !empty($arguments)) {
+
             $schema = new self($arguments[0]);
 
             if (is_callable([$schema, 'init'])) {
-                if ($arguments[1] instanceof Closure) {
+
+                if (isset($arguments[1]) && $arguments[1] instanceof Closure) {
                     return $schema->init($arguments[1], $schema);
-                } else {
+                }
+
                     return $schema->init($schema);
                 }
             }
-        } else {
+
             throw new \Exception(
-                sprintf('Oops, Undefined method called %s', 'Schema::' . $method));
-        }
+            sprintf('Oops, Undefined method called %s', 'Schema::' . $method)
+        );
     }
 
     /**
@@ -127,9 +129,9 @@ class Schema
     {
         if ($callback instanceof Closure) {
             return $callback($schema);
-        } else {
-            return $callback;
         }
+
+        return $callback;
     }
 
     /**
@@ -657,8 +659,9 @@ class Schema
     public function setTableSchema()
     {
         /** @var $this TYPE_NAME */
-        $this->schema = self::SELECT . ' ' . strtoupper($this->_tableSchema) . ",TABLE_NAME,COLUMN_NAME,DATA_TYPE,
-                        `COLUMN_KEY`,`Extra`
+        $this->schema = self::SELECT . ' ' . strtoupper($this->_tableSchema) . ",
+                        TABLE_NAME,COLUMN_NAME,DATA_TYPE,
+                        `COLUMN_KEY`,`Extra`,COLUMN_TYPE
                         FROM " . strtoupper($this->_informationSchema) . ".COLUMNS
                         WHERE " . strtoupper($this->_tableSchema) . " = '" . $this->database . "' AND
                         TABLE_NAME = '" . $this->tableName . "'";
@@ -672,8 +675,8 @@ class Schema
      */
     public function run()
     {
-        if (is_object($this->_connection)) {
-            $stmt = $this->_connection->prepare($this->schema);
+        if (is_object($this->connection())) {
+            $stmt = $this->connection()->prepare($this->schema);
 
             if ($return = $stmt->execute()) {
                 return $return;

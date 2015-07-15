@@ -18,9 +18,10 @@ namespace Cygnite\Database\Cyrus;
 use Cygnite\Helpers\Inflector;
 use Cygnite\Common\Pagination;
 use Cygnite\Database\Connection;
+use Cygnite\Database\Table\Schema;
 use Cygnite\Database\Query\Builder as QueryBuilder;
 
-abstract class ActiveRecord implements \ArrayAccess
+abstract class ActiveRecord implements ActiveRecordInterface
 {
     const DEFAULT_FOREIGN_KEY_SUFFIX = '_id';
     public static $ar;
@@ -53,20 +54,20 @@ abstract class ActiveRecord implements \ArrayAccess
     ];
 
     //set user defined database name into it.
-    public $id;
+    protected $primaryKeyValue;
 
     //set user defined table name into it.
-    public $modelClass;
+    protected $modelClass;
 
     //set user defined table primary key
-    public $closed;
-    public $attributes = [];
-    public $paginationUri;
-    public $paginator = [];
-    public $paginationOffset;
-    public $pageNumber;
-    public $modelClassNs;
-    public $query;
+    //public $closed;
+    protected $attributes = [];
+    protected $paginationUri;
+    protected $paginator = [];
+    protected $paginationOffset;
+    protected $pageNumber;
+    protected $modelClassNs;
+    protected $query;
     protected $database;
     protected $tableName;
     protected $primaryKey;
@@ -165,6 +166,43 @@ abstract class ActiveRecord implements \ArrayAccess
         $this->primaryKey = $primaryKey;
     }
 
+    public static function find($argument)
+    {
+        return static::model()->findByPk($argument);
+    }
+
+    public static function first()
+    {
+        return static::model()->fluentQuery()->first();
+    }
+
+    public static function all($arguments = [])
+    {
+        return static::model()->fluentQuery()->find('all', $arguments);
+    }
+
+    public static function last()
+    {
+        return static::model()->fluentQuery()->last();
+    }
+
+    public static function findBySql($query)
+    {
+        return static::$ar->fluentQuery()->findBySql($query);
+    }
+
+    public static function createLinks()
+    {
+        $pagination = Pagination::make(static::model());
+
+        return $pagination->createLinks();
+    }
+
+    public static function lastQuery()
+    {
+        return static::model()->fluentQuery()->lastQuery();
+    }
+
     /**
      * The finder make use of __callStatic() to invoke
      * undefined static methods dynamically. This magic method is mainly used
@@ -177,27 +215,17 @@ abstract class ActiveRecord implements \ArrayAccess
      */
     public static function __callStatic($method, $arguments)
     {
-        $class = $params = null;
-        $class = self::getDynamicInstance();
+        $params = [];
+        $class = self::model();
 
         switch ($method) {
-            case 'first':
-            case 'all':
-            case 'last':
-                return static::$ar->fluentQuery()->callFinder($method, $arguments);
-                break;
-            case 'find':
-                return static::callDynamicMethod([$class, $method], $arguments);
-                break;
             case (substr($method, 0, 6) == 'findBy') :
-
-                if ($method == 'findBySql') {
-                    return static::$ar->fluentQuery()->{$method}($arguments);
-                }
 
                 if (strpos($method, 'And') !== false) {
                     return self::callFinderBy($method, $class, $arguments, 'And'); // findByAnd
-                } elseif (strpos($method, 'Or') !== false) {
+                }
+
+                if (strpos($method, 'Or') !== false) {
                     return self::callFinderBy($method, $class, $arguments, 'Or'); // findByOr
                 }
 
@@ -205,44 +233,35 @@ abstract class ActiveRecord implements \ArrayAccess
                 $operator = (isset($arguments[1])) ? $arguments[1] : '=';
                 $params = [$columnName, $operator, $arguments[0]];
 
-                return static::$ar->fluentQuery()->callFinder('findBy', $params);
+                return self::model()->fluentQuery()->find('findBy', $params);
                 break;
             case 'with' :
                 return static::$ar->with($class, $arguments);
-                break;
-            case 'createLinks' :
-                $model = get_called_class();
-                $pagination = null;
-                $pagination = Pagination::make(new $model());
-
-                return $pagination->{$method}();
-                break;
-            case 'debugLastQuery':
-                return static::$ar->fluentQuery()->debugLastQuery();
                 break;
         }
 
         //Use the power of PDO methods directly via static functions
         return static::callDynamicMethod(
-            [static::$ar->fluentQuery()->getDatabaseConnection(), $method],
+            [self::model()->fluentQuery()->getDatabaseConnection(), $method],
             $arguments
         );
     }
 
     /**
-     * Get the model instance
+     * Get the model class instance
      *
      * @return mixed
+     * @throws DatabaseException
      */
-    private static function getDynamicInstance()
+    public static function model()
     {
-        $class = $child = $reflector = null;
         $class = get_called_class();
-        if (class_exists($class)) {
-            if ($class !== __CLASS__) {
-                return new $class();
+
+        if ($class == __CLASS__) {
+            throw new DatabaseException(sprintf("Abstract Class %s cannot be instantiated.", __CLASS__));
             }
-        }
+
+        return (!class_exists($class)) ?: new $class();
     }
 
     public static function callDynamicMethod($callback, $arguments = [])
@@ -295,11 +314,13 @@ abstract class ActiveRecord implements \ArrayAccess
         return $this;
     }
 
-    /**
-     * @param array $attributes
-     */
+
     public function setAttributes($attributes = [])
     {
+        if (empty($attributes) || !is_array($attributes)) {
+            throw new DatabaseException(sprintf("Invalid argument passed to %s", __FUNCTION__));
+        }
+
         foreach ($attributes as $key => $value) {
             $this->__set($key, $value);
         }
@@ -497,7 +518,7 @@ abstract class ActiveRecord implements \ArrayAccess
             if ($method == 'insert') {
                 $arguments = $this->attributes;
             } else {
-                $arguments[$this->getPrimaryKey()] = $this->index[$this->getPrimaryKey()];
+                $arguments[$this->getKeyName()] = $this->index[$this->getKeyName()];
             }
             return call_user_func_array([$this->fluentQuery(), $method], [$arguments]);
         }
@@ -508,26 +529,28 @@ abstract class ActiveRecord implements \ArrayAccess
      *
      * @return null|string
      */
-    public function getPrimaryKey()
+    public function getKeyName()
     {
         return isset($this->primaryKey) ? $this->primaryKey : static::$defaultPrimaryKey;
     }
 
-    private function findByPK($method, $arguments)
+    public function findByPK($arguments)
     {
+        $arguments = (array) $arguments;
+
         $args = [
-            'primaryKey' => $this->getPrimaryKey(),
+            'primaryKey' => $this->getKeyName(),
             'args' => $arguments
         ];
 
-        $fetch = $this->fluentQuery()->find($method, $args);
-        $this->setId($this->getPrimaryKey(), array_shift($arguments));
+        $fetch = $this->fluentQuery()->find('find', $args);
+        $this->setId($this->getKeyName(), array_shift($arguments));
 
         if ($fetch == null) {
             return $this->returnEmptyObject();
         }
 
-        $this->{$this->getPrimaryKey()} = $fetch[0]->{$this->getPrimaryKey()};
+        $this->{$this->getKeyName()} = $fetch[0]->{$this->getKeyName()};
 
         foreach ($fetch[0]->attributes as $key => $value) {
             $this->{$key} = $value;
@@ -556,7 +579,7 @@ abstract class ActiveRecord implements \ArrayAccess
      */
     public function returnEmptyObject()
     {
-        $class = self::getDynamicInstance();
+        $class = self::model();
         $this->index[$this->primaryKey] = null;
 
         return new $class();
@@ -570,7 +593,7 @@ abstract class ActiveRecord implements \ArrayAccess
     protected function assignPropertiesToModel($attributes = [])
     {
         $model = null;
-        $model = self::getDynamicInstance();
+        $model = self::model();
         foreach ($attributes as $key => $value) {
             $model->{$key} = $value;
         }
@@ -617,14 +640,16 @@ abstract class ActiveRecord implements \ArrayAccess
         $pagination->setPerPage($number);
     }
 
-    protected function with($class, $arguments)
+    public function with($arguments)
     {
+        $class = static::model();
+
         $tableWith = Inflector::tabilize($arguments[0]);
 
         $params = [
             $class->tableName . '.' . $class->primaryKey,
             '=',
-            $tableWith . '.' . Inflector::singularize($class->tableName) . '_id'
+            $tableWith . '.' . Inflector::singularize($class->tableName) . self::DEFAULT_FOREIGN_KEY_SUFFIX
         ];
 
         if (isset($arguments[1])) {
@@ -649,7 +674,7 @@ abstract class ActiveRecord implements \ArrayAccess
      * @param $database
      * @return mixed
      */
-    public static function on($database)
+    public static function db($database)
     {
         static::$ar->setDatabase($database);
 
@@ -666,5 +691,15 @@ abstract class ActiveRecord implements \ArrayAccess
     {
         static::$ar->setDatabase($database);
         return static::$ar->fluentQuery()->getDatabaseConnection();
+    }
+
+    public function getModelClassNs()
+    {
+        return $this->modelClassNs;
+    }
+
+    public function getPrimaryKey()
+    {
+        return $this->primaryKeyValue;
     }
 }

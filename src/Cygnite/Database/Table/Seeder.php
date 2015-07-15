@@ -15,6 +15,12 @@ use Illuminate\Database\Query\Builder;
 abstract class Seeder
 {
     /**
+     * Seeder Command
+     * @var
+     */
+    public $command;
+
+    /**
      * Filter out other class and set only class to seed
      * @param $class
      */
@@ -74,7 +80,21 @@ abstract class Seeder
     {
         $class = APP_NS.'\\Resources\\Database\\Seeding\\'.$class;
 
-        return (new $class)->execute();
+        $return = (new $class)->execute();
+
+        if (isset($this->command)) {
+            $this->command->info("Seeded: $class OK!");
+        }
+
+        return $return;
+    }
+
+    /**
+     * @param $command
+     */
+    public function setSeederCommand($command)
+    {
+        $this->command = $command;
     }
 
     /**

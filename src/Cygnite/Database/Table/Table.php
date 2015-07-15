@@ -10,10 +10,12 @@
 
 namespace Cygnite\Database\Table;
 
-use Cygnite\Database\Connection;
+use Cygnite\Database\ConnectionManagerTrait;
 
-class Table extends Connection
+class Table
 {
+    use ConnectionManagerTrait;
+
     private $_connection;
 
     private $schemaInstance;
@@ -28,20 +30,31 @@ class Table extends Connection
 
     private $statement;
 
+    /**
+     * @param $database
+     * @param $model
+     * @return $this
+     */
     public function connect($database, $model)
     {
         $this->database = $database;
         $this->tableName = $model;
-        $this->_connection = Connection::getConnection($database);
+        $this->_connection = $this->getConnection($database);
 
         return $this;
     }
 
+    /**
+     * @return mixed
+     */
     public function getDefaultDatabaseConnection()
     {
-        return Connection::getDefaultConnection();
+        return $this->getDefaultConnection();
     }
 
+    /**
+     * @return mixed
+     */
     public function getColumns()
     {
         $conn = null;
@@ -58,7 +71,6 @@ class Table extends Connection
             }
         );
 
-        //$columns = $conn->query($table->schema)->fetchAll();
         $columns = $this->query($schema)->getAll();
         $this->setSchemaInstance($columns);
 
@@ -115,7 +127,7 @@ class Table extends Connection
         );
 
         //Create migration table in order to save migrations information
-        Schema::instance($this,
+        Schema::make($this,
             function ($table) use ($tableName) {
                 $table->tableName = $tableName;
                 $table->database = trim($this->getDefaultDatabaseConnection());
