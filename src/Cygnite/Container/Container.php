@@ -117,7 +117,7 @@ class Container extends DependencyBuilder implements ContainerAwareInterface, Ar
     public function unShare($class)
     {
         if (array_key_exists($class, $this->stack)) {
-            unset($this->stack[$class]);
+            $this->__unset($class);
         }
     }
 
@@ -183,7 +183,7 @@ class Container extends DependencyBuilder implements ContainerAwareInterface, Ar
     public function offsetUnset($offset)
     {
         if ($this->offsetExists($offset)) {
-            unset($this->__unset[$offset]);
+            $this->__unset($offset);
         }
     }
 
@@ -220,13 +220,13 @@ class Container extends DependencyBuilder implements ContainerAwareInterface, Ar
 
         $binding = $this->offsetExists($key) ? $this->stack[$key] : null;
 
-        $extended = function ($container) use ($callable, $binding) {
+        $extended = function () use ($callable, $binding) {
 
             if (!is_object($binding)) {
                 throw new ContainerException(sprintf('"%s" must be Closure object.', $binding));
             }
 
-            return $callable($binding($container), $container);
+            return $callable($binding($this), $this);
 
         };
 
@@ -271,6 +271,7 @@ class Container extends DependencyBuilder implements ContainerAwareInterface, Ar
         // if closure callback given we will create a singleton instance of class
         // and return it to user
         if ($callback instanceof Closure) {
+
             if (!isset($instance[$key])) {
                 $instance[$key] = $callback($this);
             }
@@ -327,6 +328,7 @@ class Container extends DependencyBuilder implements ContainerAwareInterface, Ar
         $constructor = null;
         $constructorArgsCount = '';
         if ($reflectionClass->hasMethod('__construct')) {
+
             $constructor = $reflectionClass->getConstructor();
             $constructorArgsCount = $constructor->getNumberOfParameters();
             $constructor->setAccessible(true);
@@ -380,7 +382,7 @@ class Container extends DependencyBuilder implements ContainerAwareInterface, Ar
      * @return mixed
      * @throws Exceptions\ContainerException
      */
-    protected function makeInstance($resolvedClass)
+    public function makeInstance($resolvedClass)
     {
         if (!class_exists($resolvedClass)) {
             throw new ContainerException(sprintf('Class "%s" not exists.', $resolvedClass));
