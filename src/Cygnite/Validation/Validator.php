@@ -16,7 +16,7 @@ use Cygnite\Validation\Exception\ValidatorException;
  */
 class Validator implements ValidatorInterface
 {
-    const ERROR = '_error';
+    const ERROR = '.error';
     public $errors= [];
     public $columns = [];
     public $glue = PHP_EOL;
@@ -28,6 +28,7 @@ class Validator implements ValidatorInterface
     */
     private $param;
     private $rules = [];
+    public static $files = [];
     private $validPhoneNumbers = [10,11,13,14,91,81];
 
     /*
@@ -226,7 +227,7 @@ class Validator implements ValidatorInterface
 
         if (strlen($val) == 0) {
             $this->errors[$key.self::ERROR] =
-                ucfirst($this->convertToFieldName($key)).' is '.str_replace('_', ' ', __FUNCTION__);
+                ucfirst($this->convertToFieldName($key)).' is required';
             return false;
         }
 
@@ -319,6 +320,22 @@ class Validator implements ValidatorInterface
         return true;
     }
 
+    protected function isAlphaNumeric($key)
+    {
+        $conCate =  ' ';
+        $columnName =  ucfirst($this->convertToFieldName($key)).' should be ';
+
+        if (isset($this->errors[$key.self::ERROR])) {
+            list($conCate, $columnName) = $this->setErrorConcat($key);
+        }
+
+        if (!ctype_alnum($key)) {
+            return $this->setAlphaNumError($key, $conCate, $columnName, 'alpha numeric.');
+        }
+
+        return true;
+    }
+
     private function setErrorConcat($key)
     {
         $conCate = str_replace('.', '', $this->errors[$key.self::ERROR]).' and must be valid';
@@ -327,26 +344,9 @@ class Validator implements ValidatorInterface
         return [$conCate, $columnName];
     }
 
-    protected function isAlphaNumeric($key)
+    private function setAlphaNumError($key, $conCate, $columnName, $func)
     {
-        $conCate =  '';
-        $columnName =  ucfirst($this->convertToFieldName($key)).' should be ';
-
-        if (isset($this->errors[$key.self::ERROR])) {
-            list($conCate, $columnName) = $this->setErrorConcat($key);
-        }
-
-        if (!ctype_alnum($key)) {
-            return $this->setAlphaNumError($key, $conCate, $columnName);
-        }
-
-        return true;
-    }
-
-    private function setAlphaNumError($key, $conCate, $columnName)
-    {
-        $this->errors[$key.self::ERROR] =
-            $conCate.$columnName.strtolower(str_replace('is', '', __FUNCTION__)).'.';
+        $this->errors[$key.self::ERROR] = $conCate.$columnName. $func;
 
         return false;
     }
@@ -364,7 +364,7 @@ class Validator implements ValidatorInterface
         $string = str_replace($allowed, '', $str );
 
         if (!ctype_alnum($string)) {
-            return $this->setAlphaNumError($key, $conCate, $columnName);
+            return $this->setAlphaNumError($key, $conCate, $columnName, 'alpha numeric with underscore/dash');
         }
 
         return true;
@@ -382,18 +382,14 @@ class Validator implements ValidatorInterface
             $this->errors[$key.self::ERROR].' and ' :
             '';
 
-        if (mb_strlen($this->param[$key]) >= $length) {
-            return true;
-        } else {
+        if (!mb_strlen($this->param[$key]) >= $length) {
             $this->errors[$key.self::ERROR] =
-                $conCate.ucfirst($this->convertToFieldName($key)).' should be '.str_replace(
-                    '_',
-                    ' ',
-                    __FUNCTION__
-                ).'mum '.$length.' characters.';
+                $conCate.ucfirst($this->convertToFieldName($key)).' should be '.__FUNCTION__.'imum '.$length.' characters.';
 
             return false;
         }
+
+        return true;
     }
 
     /**
@@ -490,11 +486,42 @@ class Validator implements ValidatorInterface
     }
 
     /**
+     * @return mixed
+     */
+    protected function files()
+    {
+        return static::$files = $_FILES;
+    }
+
+    /**
+     * @param $key
+     * @return mixed
+     */
+    protected function fileName($key)
+    {
+        $files = $this->files();
+
+        return $files[$key];
+    }
+
+    /**
      * @param $key
      * @return bool
      */
-    public function notEmptyFile($key)
+    public function isEmptyFile($key)
     {
-        return (empty($_FILES[$key]['name']) !== true);
+        $conCate =  '';
+        $columnName =  ucfirst($this->convertToFieldName($key)).' has ';
+
+        $files = $this->fileName($key);
+
+        if ($files['size'] == 0 && $files['error'] == 0) {
+
+            $this->errors[$key.static::ERROR] = $conCate.$columnName.' empty file.';
+
+            return false;
     }
+
+        return true;
+}
 }

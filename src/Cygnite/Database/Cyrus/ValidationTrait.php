@@ -74,7 +74,7 @@ trait ValidationTrait
         $this->validator()->addRule();
 
         if (!$this->run()) {
-            $this->errors = $this->validation->getErrors();
+            $this->setErrors($this->validation->getErrors());
 
             return false;
         }
@@ -82,8 +82,31 @@ trait ValidationTrait
         return true;
     }
 
+    /**
+     * Set all validation errors into array
+     *
+     * @param $errors
+     */
+    private function setErrors($errors)
+    {
+        $this->errors = $errors;
+    }
+
+    /**
+     * We will return validation errors if any
+     *
+     * @return array
+     */
     public function validationErrors()
     {
         return $this->errors;
+    }
+
+    /**
+     * @return bool
+     */
+    public function hasErrors()
+    {
+        return !empty($this->errors);
     }
 }
