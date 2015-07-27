@@ -139,4 +139,70 @@ class FormTest extends PHPUnit_Framework_TestCase
         $this->assertEquals($formString, preg_replace("/\r\n|\r|\n|\t/",'', trim($form->getForm())));
 	}
 
+	public function testCustomTagsByFormBuilder()
+	{
+		$this->setUpAssetConfig();
+
+		$form = Form::make()
+		            ->open(
+			            'contact',
+			            [
+			                'method' => 'post',
+			                'action' => Url::sitePath('contact/add'),
+			                'role' => 'form',
+			                'style' => 'width:500px;margin-top:35px;float:left;'
+			            ]
+        			)->addElement('custom', 'dl', 
+        				[
+        					'name'  => 'Custom Tag',
+				            'class' => 'col-sm-2 control-label',
+				            'style' => 'width:37.667%;'
+				        ]
+			        )->createForm()
+			        ->close();
+
+        $formString = preg_replace("/\r\n|\r|\n|\t/",'', trim("<form name='contact' method='post' action='http://localhost/cygnite/contact/add' role='form' style='width:500px;margin-top:35px;float:left;' >
+					<dl for='dl' name='Custom Tag' class='col-sm-2 control-label' style='width:37.667%;' >Custom Tag</dl>
+					</form>"));
+
+        $this->assertEquals($formString, preg_replace("/\r\n|\r|\n|\t/",'', trim($form->getForm())));
+	}
+
+	public function testDivOrSpanElementForFormBuilder()
+	{
+		$this->setUpAssetConfig();
+
+		$form = Form::make()
+		            ->open(
+			            'contact',
+			            [
+			                'method' => 'post',
+			                'action' => Url::sitePath('contact/add'),
+			                'role' => 'form',
+			                'style' => 'width:500px;margin-top:35px;float:left;'
+			            ]
+        			)
+		           	->addElement('openTag', 'div_1', ['style' => 'border:1px solid red;height:40px;'])
+			        	->addElement('text', 'I am Inside Div 1', ["class" => "col-sm-2 control-label","style" => "width:100%;"])
+			        ->addElement('closeTag', 'div_1')
+
+			        ->addElement('openTag', 'div_2', ['style' => 'border:1px solid red;height:40px;'])
+			        	->addElement('text', 'I am Inside Div 2', ["class" => "col-sm-2 control-label","style" => "width:100%;"])
+			        ->addElement('closeTag', 'div_2')
+
+        			->createForm()
+			        ->close();
+
+        $formString = preg_replace("/\r\n|\r|\n|\t/",'', trim("<form name='contact' method='post' action='http://localhost/cygnite/contact/add' role='form' style='width:500px;margin-top:35px;float:left;' >
+			<div name='div_1_1331' style='border:1px solid red;height:40px;'  />
+			<input name='I am Inside Div 1' class='col-sm-2 control-label' style='width:100%;' type='text'  />
+			</div>
+			<div name='div_2_1224' style='border:1px solid red;height:40px;'  />
+			<input name='I am Inside Div 2' class='col-sm-2 control-label' style='width:100%;' type='text'  />
+			</div>
+			</form>"));
+
+        // It works though But we cannot Test it because it generate random name for Div or Span Element 
+        // For Example [name='div_2_1224' or name='div_1_1331']
+	}
 }

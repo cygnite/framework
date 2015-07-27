@@ -24,7 +24,8 @@ class ContainerTest extends PHPUnit_Framework_TestCase
 
 	public function testClouserResolutionAsObject()
 	{
-		$this->_container->name = function() {
+		$this->_container->name = function()
+		{
 			return 'Cygnite';
 		};
 
@@ -33,7 +34,8 @@ class ContainerTest extends PHPUnit_Framework_TestCase
 
 	public function testArrayAccess()
 	{
-		$this->_container['name'] = function() {
+		$this->_container['name'] = function()
+		{
 			return 'Cygnite';
 		};
 
@@ -52,7 +54,8 @@ class ContainerTest extends PHPUnit_Framework_TestCase
 
 	public function testShareMethod()
 	{
-        $closure = $this->_container->share(function () { 
+        $closure = $this->_container->share(function ()
+        {
         	return new stdClass; 
         });
 
@@ -65,12 +68,12 @@ class ContainerTest extends PHPUnit_Framework_TestCase
 	public function testExtendMethod()
 	{
 		$this->_container['foo'] = 'foo';
-		$this->_container['bar'] = function ($c) 
+		$this->_container['bar'] = function ($c)
 		{
 			return new stdClass($c['foo']);
 		};
 
-		$this->_container['foobar'] = $this->_container->extend('bar', function ($bar, $c) 
+		$this->_container['foobar'] = $this->_container->extend('bar', function ($bar, $c)
 		{
 			$bar->name = 'FooBar';
 
@@ -85,7 +88,7 @@ class ContainerTest extends PHPUnit_Framework_TestCase
     {
         $this->_container->foo = function () { return 'foo'; };
 
-        $this->_container->extend('foo', function ($foo) 
+        $this->_container->extend('foo', function ($foo)
         {
             return $foo.'bar';
         });        
