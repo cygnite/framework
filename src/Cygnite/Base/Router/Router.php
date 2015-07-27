@@ -288,7 +288,7 @@ class Router implements RouterInterface
      */
     public function any($pattern, $func)
     {
-        return $this->match('GET|POST|PUT|PATCH|DELETE', $pattern, $func);
+        return $this->match('GET|POST|PUT|PATCH|DELETE|OPTIONS', $pattern, $func);
     }
 
      /**
@@ -324,6 +324,11 @@ class Router implements RouterInterface
         return isset($this->patterns[$key]) ? $this->patterns[$key] : '';
     }
 
+    public function getRoutes()
+    {
+        return $this->routes;
+    }
+
     /**
      * Allow you to apply nested sub routing.
      *
@@ -338,7 +343,8 @@ class Router implements RouterInterface
         $this->routeBasePath .= $groupRoute;
 
         // Call the Closure callback
-        call_user_func(function () use ($callback) {
+        call_user_func(function() use($callback)
+        {
             return $callback($this);
         });
 

@@ -41,6 +41,16 @@ class Elements
         return $this->composeElement($key, $val, $extra, true);
     }
 
+    /**
+     *
+     * <code> 
+     * ->addElement('custom', 'dl', ['name' => '<span style="color:red;">Custom Tag</span>',)
+     * </code>
+     *
+     * @param $key
+     * @param $val
+     * @return $this
+     */
     protected function custom($key, $val)
     {
         $extra = [
@@ -51,6 +61,11 @@ class Elements
     }
 
     /**
+     *
+     * <code> 
+     * ->addElement('openTag', 'div_1', ['style' => 'height:40px;'])
+     * </code>
+     *
      * @param $key
      * @param $val
      * @return $this
@@ -68,6 +83,11 @@ class Elements
     }
 
     /**
+     *
+     * <code> 
+     * ->addElement('closeTag', 'div_1')
+     * </code>
+     *
      * @param $key
      * @return $this
      */

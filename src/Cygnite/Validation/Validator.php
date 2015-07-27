@@ -27,9 +27,11 @@ class Validator implements ValidatorInterface
     * @var array
     */
     private $param;
-    private $rules = [];
+    protected $rules = [];
     public static $files = [];
-    private $validPhoneNumbers = [10,11,13,14,91,81];
+    protected $validPhoneNumbers = [7,10,11];
+
+    protected $after = [];
 
     /*
      * Constructor to set as protected.
@@ -40,20 +42,20 @@ class Validator implements ValidatorInterface
      * @param  $var post values
      *
      */
-    protected function __construct(Input $input)
+    protected function __construct($input)
     {
-        if (!$input instanceof Input) {
-            throw new ValidatorException(sprintf('Constructor expects Input instance, give %s ', $input));
+        if (!is_array($input)) {
+            throw new ValidatorException(sprintf('Constructor expect array of input, %s given.', \gettype($key)));
         }
 
-        $this->param = $input->post();
+        $this->param = $input;
     }
 
     /*
      * Create validator to set rules
      * <code>
      *  $input = Input::make();
-     *  $validator = Validator::create($input, function ($validator)
+     *  $validator = Validator::create($input->post(), function ($validator)
      *  {
      *       $validator->addRule('username', 'required|min:3|max:5')
      *                 ->addRule('password', 'required|is_int|valid_date')
@@ -92,6 +94,29 @@ class Validator implements ValidatorInterface
         return $this;
     }
 
+    /*
+    * Add validation rule
+    *
+    * @param  $key
+    * @param  $rule set up your validation rule
+    * @return $this
+    *
+    */
+    public function addRules(array $rules)
+    {
+        if (!is_array($rules) || empty($rules)) {
+            throw new ValidatorException(sprintf('Validator::addRules() expect array of rules, %s given.', \gettype($rules)));
+        }
+
+        foreach ($rules as $field => $rule ) {
+            $this->addRule($field, $rule);
+        }
+
+        return $this;
+    }
+
+
+
     /**
      * If you are willing to display custom error message
      * you can simple pass the field name with _error prefix and
@@ -128,6 +153,28 @@ class Validator implements ValidatorInterface
     }
 
     /**
+     * Get error string
+     *
+     * <code>
+     *   $validator->after(function($v) 
+     *   {
+     *       $v->setCustomError('field', 'Error Message!!');    
+     *   });
+     *   
+     * </code>
+     * @param $callback
+     * @return $this Clouser Instance
+     */
+    public function after(\Closure $callback)
+    {
+        $this->after[] = function () use ($callback) {
+            return call_user_func_array($callback, [$this]);
+        };
+
+        return $this;
+    }
+
+    /**
      * Run validation rules and catch errors
      *
      * @return bool
@@ -155,6 +202,15 @@ class Validator implements ValidatorInterface
             }
         }
 
+        /*
+        | We will fire all after validation callbacks
+        | This is useful to override error message with 
+        | custom messages
+        */
+        foreach ($this->after as $event) {
+            call_user_func($event);
+        }
+
         return $isValid;
     }
 
@@ -175,6 +231,10 @@ class Validator implements ValidatorInterface
 
         if ($isValid === false) {
             $this->setErrors($key.self::ERROR, Inflector::camelize((str_replace('_', ' ', $key))));
+        }
+
+        if (!isset($this->param[$key])) {
+            throw new ValidatorException(sprintf('Key %s doesn\'t exists in $_POST array ', $key));
         }
 
         return $this->{$method}($key);
@@ -291,7 +351,7 @@ class Validator implements ValidatorInterface
 
         if (filter_var($this->param[$key], FILTER_VALIDATE_INT) === false) {
             $this->errors[$key.self::ERROR] =
-                $conCate.$columnName.strtolower(str_replace('is', '', __FUNCTION__)).'ger.';
+                $conCate.$columnName.' integer';
             return false;
         }
 
@@ -305,15 +365,15 @@ class Validator implements ValidatorInterface
     protected function isString($key)
     {
         $conCate =  '';
-        $columnName =  ucfirst($this->convertToFieldName($key)).' should be ';
+        $columnName = ucfirst($this->convertToFieldName($key)).' should be ';
         if (isset($this->errors[$key.self::ERROR])) {
             list($conCate, $columnName) = $this->setErrorConcat($key);
         }
 
-        $value = trim($this->param[$key]);
+        $value = $this->param[$key];
 
-        if (is_string($value) == true && strlen($value) == 0) {
-            $this->errors[$key.self::ERROR] = $conCate.$columnName.' valid string';
+        if (!is_string($value) || gettype($value) !== 'string') {
+            $this->errors[$key.self::ERROR] = $conCate.$columnName.'valid string';
             return false;
         }
 
@@ -323,13 +383,13 @@ class Validator implements ValidatorInterface
     protected function isAlphaNumeric($key)
     {
         $conCate =  ' ';
-        $columnName =  ucfirst($this->convertToFieldName($key)).' should be ';
+        $columnName = ucfirst($this->convertToFieldName($key)).' should be ';
 
         if (isset($this->errors[$key.self::ERROR])) {
             list($conCate, $columnName) = $this->setErrorConcat($key);
         }
 
-        if (!ctype_alnum($key)) {
+        if (!ctype_alnum($this->param[$key])) {
             return $this->setAlphaNumError($key, $conCate, $columnName, 'alpha numeric.');
         }
 
@@ -346,7 +406,7 @@ class Validator implements ValidatorInterface
 
     private function setAlphaNumError($key, $conCate, $columnName, $func)
     {
-        $this->errors[$key.self::ERROR] = $conCate.$columnName. $func;
+        $this->errors[$key.self::ERROR] = trim($conCate.$columnName. $func);
 
         return false;
     }
@@ -354,14 +414,14 @@ class Validator implements ValidatorInterface
     protected function isAlphaNumWithUnderScore($key)
     {
         $allowed = [".", "-", "_"];
-        $columnName =  ucfirst($this->convertToFieldName($key)).' should be ';
+        $columnName =  ucfirst($this->convertToFieldName($key)).' must be ';
 
         $conCate =  '';
         if (isset($this->errors[$key.self::ERROR])) {
             list($conCate, $columnName) = $this->setErrorConcat($key);
         }
 
-        $string = str_replace($allowed, '', $str );
+        $string = str_replace($allowed, '', $this->param[$key]);
 
         if (!ctype_alnum($string)) {
             return $this->setAlphaNumError($key, $conCate, $columnName, 'alpha numeric with underscore/dash');
@@ -382,7 +442,10 @@ class Validator implements ValidatorInterface
             $this->errors[$key.self::ERROR].' and ' :
             '';
 
-        if (!mb_strlen($this->param[$key]) >= $length) {
+        //$stringLength = strlen($this->param[$key]);
+
+        //if ($stringLength < (int) $length) {
+        if (mb_strlen(trim($this->param[$key])) < $length) {
             $this->errors[$key.self::ERROR] =
                 $conCate.ucfirst($this->convertToFieldName($key)).' should be '.__FUNCTION__.'imum '.$length.' characters.';
 
@@ -408,7 +471,7 @@ class Validator implements ValidatorInterface
 
         if (mb_strlen($this->param[$key]) <= $length) {
             $this->errors[$key.self::ERROR] =
-                $conCate.$columnName.__FUNCTION__.'mum '.$length.' characters.';
+                $conCate.$columnName.'maximum '.$length.' characters.';
 
             return false;
         } else {
@@ -447,39 +510,48 @@ class Validator implements ValidatorInterface
      */
     protected function phone($key)
     {
-        $num = preg_replace('#\d+#', '', $this->param[$key]);
+        $num = preg_replace('/d+/', '', (int) $this->param[$key]);
 
         $conCate =  '';
-        $columnName =  ucfirst($this->convertToFieldName($key)).' number is not ';
+        $columnName =  ucfirst($this->convertToFieldName($key)).' should be ';
         if (isset($this->errors[$key.self::ERROR])) {
             $conCate = str_replace('.', '', $this->errors[$key.self::ERROR]).' and ';
             $columnName = '';
         }
 
         if (in_array(strlen($num), $this->validPhoneNumbers) == false) {
-            $this->errors[$key.self::ERROR] = $conCate.$columnName.'valid.';
+            $this->errors[$key.self::ERROR] = $conCate.$columnName.'valid phone number.';
+            return false;
         }
 
         return true;
     }
 
     /**
+     * Validate date string
      *
      * @param $key
      * @return bool
      */
     public function validDate($key)
     {
+        if ($this->param[$key] instanceof \DateTime) {
+            return true;
+        }
+
         $conCate =  '';
-        $columnName =  ucfirst($this->convertToFieldName($key)).' should be ';
+        $columnName =  ucfirst($this->convertToFieldName($key)).' is not';
+
         if (isset($this->errors[$key.self::ERROR])) {
             $conCate = str_replace('.', '', $this->errors[$key.self::ERROR]).' and ';
             $columnName = 'must be ';
         }
 
-        if (strtotime($this->param[$key]) !== true) {
-            $this->errors[$key.self::ERROR] =
-                $conCate.$columnName.'valid date.';
+        $date = date_parse($this->param[$key]);        
+        $isDate = checkdate($date['month'], $date['day'], $date['year']);
+
+        if (!$isDate) {
+            $this->errors[$key.self::ERROR] = $conCate.$columnName.' valid date.';
         }
 
         return true;

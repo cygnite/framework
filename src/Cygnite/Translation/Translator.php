@@ -41,7 +41,7 @@ class Translator implements TranslatorInterface
      * @param callable $callback
      * @return static
      */
-    public static function make(\Closure $callback)
+    public static function make(\Closure $callback = null)
     {
         if ($callback instanceof \Closure) {
             return $callback(new static());
@@ -101,7 +101,7 @@ class Translator implements TranslatorInterface
      *
      * trans('Hello, :user', array(':user' => $username));
      * $hello = $trans->get('welcome.Hello friends, my name is :name');
-
+     *
      * @param      $key to translate
      * @param null $locale target language
      * @return  string
@@ -277,6 +277,7 @@ class Translator implements TranslatorInterface
             }
 
             array_pop($parts);
+
         } while ($parts);
 
         // Cache the Translator table locally
@@ -295,7 +296,7 @@ class Translator implements TranslatorInterface
         $message = [];
         foreach ($files as $file) {
             // Merge the language strings into the sub message array
-            if (is_readable($file)) {
+            if ( is_readable($file) ) {
                 $message = array_merge($message, include $file);
             }
         }

@@ -29,7 +29,7 @@ interface ValidatorInterface
      * @param $key
      * @return mixed
      */
-    public function notEmptyFile($key);
+    public function isEmptyFile($key);
 
     /**
      * @param $key

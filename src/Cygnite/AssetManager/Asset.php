@@ -202,7 +202,7 @@ class Asset implements \ArrayAccess
         foreach ($this->paths[$this->tag[$this->where]][$name] as $key => $src) {
             if ($name == 'style') {
                 $content .= $this->combineStylesheets($src, $compress);
-            } elseif ($name == 'script') {
+            } else if ($name == 'script') {
                 $content .= $this->combineScripts($src, $compress);
             }
         }
@@ -388,18 +388,30 @@ class Asset implements \ArrayAccess
     /**
      * This method is alias of link()
      *
+     * echo Asset::anchor('/user/add', 'Add User');
+     * echo Asset::anchor('/user/add', 'Add User', ['required' => 'yes']);
+     *
      * @return mixed
      */
     public static function anchor()
     {
         $args = [];
         $args = func_get_args();
+        
+        if (isset($args[2])) {
         $args[2] = array_merge($args[2], ['type' => 'static']);
-        return call_user_func_array([new static, 'link'], $args);
+        } else {
+            $args[2] = ['type' => 'static'];
+        }
+
+        return call_user_func_array([new Static, 'link'], $args);
     }
 
     /**
      * This method is alias of script()
+     *
+     * echo Asset::js('your-js-path');
+     * echo Asset::js('your-js-path', ['required' => 'yes']);
      *
      * @return mixed
      */
@@ -407,8 +419,14 @@ class Asset implements \ArrayAccess
     {
         $args = [];
         $args = func_get_args();
-        $args[2] = array_merge($args[2], ['type' => 'static']);
-        return call_user_func_array([new static, 'script'], $args);
+
+        if (isset($args[1])) {
+            $args[1] = array_merge($args[1], ['type' => 'static']);
+        } else {
+            $args[1] = ['type' => 'static'];
+        }
+
+        return call_user_func_array([new Static, 'script'], $args);
     }
 
     /**
@@ -432,7 +450,7 @@ class Asset implements \ArrayAccess
     protected function style($href, $media = "", $title = "")
     {
         $media = (is_null($media)) ? 'media=all' : $media;
-        $title = (!is_null($title)) ? "title= '$title'" : '';
+        $title = (!is_null($title)) ? 'title= "'.$title.'"' : "";
 
         $this->setLocation($href, strtolower(__FUNCTION__));
 
@@ -450,13 +468,13 @@ class Asset implements \ArrayAccess
 
         $styleTag = '';
         $styleTag = static::$stylesheet . ' ' . $media . '
-                   ' . $title . ' href="' . $this->getBaseUrl() . $href . '" >' . PHP_EOL;
+                   ' . $title . ' href="' . $this->getBaseUrl() . $href . '" />' . PHP_EOL;
 
         if (isset($media) && $media == 'static') {
-            return $styleTag;
+            return trim($styleTag);
         }
 
-        $this->assets[$this->tag[$this->where]][strtolower(__FUNCTION__)][] = (string)$styleTag;
+        $this->assets[$this->tag[$this->where]][strtolower(__FUNCTION__)][] = trim((string)$styleTag);
 
         return $this->assets[$this->tag[$this->where]][strtolower(__FUNCTION__)];
     }
@@ -609,10 +627,10 @@ class Asset implements \ArrayAccess
         | as string
         */
         if (isset($attributes['type']) && $attributes['type'] == 'static') {
-            return $this->stripCarriage($scriptTag);
+            return trim($this->stripCarriage($scriptTag));
         }
 
-        $this->assets[$this->tag[$this->where]][strtolower(__FUNCTION__)][] = $scriptTag;
+        $this->assets[$this->tag[$this->where]][strtolower(__FUNCTION__)][] = trim($scriptTag);
 
         return $this->assets[$this->tag[$this->where]][strtolower(__FUNCTION__)];
     }
@@ -641,10 +659,10 @@ class Asset implements \ArrayAccess
         | as string
         */
         if (isset($attributes['type']) && $attributes['type'] == 'static') {
-            return $this->stripCarriage($lingTag);
+            return trim($this->stripCarriage($lingTag));
         }
 
-        $this->assets[$this->tag[$this->where]][strtolower(__FUNCTION__)][] = $lingTag;
+        $this->assets[$this->tag[$this->where]][strtolower(__FUNCTION__)][] = trim($lingTag);
 
         return $this->assets[$this->tag[$this->where]][strtolower(__FUNCTION__)];
     }

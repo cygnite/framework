@@ -56,6 +56,11 @@ trait ResourceControllerTrait
         return $this;
     }
 
+    public function getResourceRoutes()
+    {
+        return $this->resourceRoutes;
+    }
+
     /**
      * @param $router
      */
