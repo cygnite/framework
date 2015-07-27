@@ -11,6 +11,7 @@ class ContainerTest extends PHPUnit_Framework_TestCase
 		$this->_container = new Container();
 	}
 
+	// need to create a test class
 	public function testMakeClass()
 	{
         $router = new \Cygnite\Base\Router\Router();
@@ -64,16 +65,19 @@ class ContainerTest extends PHPUnit_Framework_TestCase
 	public function testExtendMethod()
 	{
 		$this->_container['foo'] = 'foo';
-		$this->_container['bar'] = function ($c) {
+		$this->_container['bar'] = function ($c) 
+		{
 			return new stdClass($c['foo']);
 		};
 
-		$this->_container['foobar'] = $this->_container->extend('bar', function ($bar, $c) {
+		$this->_container['foobar'] = $this->_container->extend('bar', function ($bar, $c) 
+		{
 			$bar->name = 'FooBar';
 
 			return $bar;
 		});
-		
+
+
         $this->assertEquals('FooBar', $this->_container['foobar']()->name);
 	}
 
@@ -81,7 +85,8 @@ class ContainerTest extends PHPUnit_Framework_TestCase
     {
         $this->_container->foo = function () { return 'foo'; };
 
-        $this->_container->extend('foo', function ($foo) {
+        $this->_container->extend('foo', function ($foo) 
+        {
             return $foo.'bar';
         });        
 

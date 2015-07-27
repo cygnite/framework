@@ -33,7 +33,6 @@ class ApplicationTest extends PHPUnit_Framework_TestCase
 		$madeUrl = $app->make('\Cygnite\Common\UrlManager\Url');
 		
         $this->assertEquals($url, $madeUrl);
-
     }
 
     public function tearDown()
