@@ -39,17 +39,15 @@ class MemCache implements StorageInterface
     /* Private variable $port null. set port to connect with memcache based on user input. */
     private $port;
 
-
     /*
      * Constructor function to check availability
      * of Memcache extension class. Throw error on unavailability
      *
      */
-
     public function __construct()
     {
         if (!class_exists('Memcache')) {
-            throw new \Exception("Memcache extension not available !");
+            throw new \RuntimeException("Memcache extension not available !");
         }
     }
 
@@ -65,34 +63,35 @@ class MemCache implements StorageInterface
      */
     public function create($host = '', $port = '')
     {
-        $this->host = 'localhost';
-        $this->port = 11211;
+        $this->host = ($host != '') ? $host : 'localhost';
+        $this->port = ($port != '') ? $port : 11211;
 
-        if ($host != '' && $port != '') {
-            $this->host = $host;
-            $this->port = $port;
-        }
+        if (is_null($this->memory)) {
 
+            $this->memory = new \Memcache();
+            $this->isEnabled = true;
 
-        if (class_exists('Memcache')) {
-            if ($this->memory == null) {
-                $this->memory = new \Memcache();
-
+            if (!$this->memory->connect($this->host, $this->port)) { // Instead 'localhost' here can be IP
+                $this->memory = null;
                 $this->isEnabled = true;
-
-                if (!$this->memory->connect($this->host, $this->port)) { // Instead 'localhost' here can be IP
-                    $this->memory = null;
-                    $this->isEnabled = true;
-                }
             }
         }
 
         return $this;
     }
 
-    /*
-     * Prevent cloning
-     */
+    public function getMemcache()
+    {
+        return $this->memory;
+    }
+
+    /**
+    * We will return boolean value of connection status
+    */
+    public function isConnected()
+    {
+        return $this->isEnabled;
+    }
 
     /**
      * Store the value in the memcache memory (overwrite if key exists)
@@ -100,7 +99,7 @@ class MemCache implements StorageInterface
      * @false string $key
      * @false mix $value
      * @false bool $compress
-     * @false int $expire (seconds before item excfres)
+     * @false int $expire (seconds before item expires)
      * @param     $key
      * @param     $value
      * @param int $compress
@@ -110,12 +109,8 @@ class MemCache implements StorageInterface
      */
     public function store($key, $value, $compress = 0, $expire_time = 600)
     {
-        if (is_null($key) || $key == "") {
-            throw new \InvalidArgumentException("Invalid key passed MemCache::" . __FUNCTION__);
-        }
-
-        if (is_null($value) || $value == "") {
-            throw new \InvalidArgumentException("Empty value passed MemCache::" . __FUNCTION__);
+        if (is_null($key)) {
+            throw new \InvalidArgumentException("Invalid key passed to MemCache::" . __FUNCTION__);
         }
 
         //Used MEMCACHE_COMPRESSED to store the item compressed (uses zlib).  $this->life_time
@@ -133,6 +128,7 @@ class MemCache implements StorageInterface
     {
         $data = [];
         $data = $this->memory->get($key);
+
         return (false === $data) ? null : $data;
     }
 
