@@ -51,11 +51,11 @@ class File implements StorageInterface
      */
     public function __construct()
     {
-        $config = Config::get('global.config');
+        $config = Config::get('global.config', 'cache');
         $data = [
-            'name' => $config['cache']['name'],
-            'path' => $config['cache']['directory'],
-            'extension' => $config['cache']['extension']
+            'name' => $config['file']['name'],
+            'path' => $config['file']['directory'],
+            'extension' => $config['file']['extension']
         ];
 
         if ($data['path'] == "") {
