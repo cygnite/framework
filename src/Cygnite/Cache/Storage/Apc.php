@@ -29,24 +29,25 @@ if (!defined('CF_SYSTEM')) {
  */
 class Apc implements StorageInterface
 {
-    // default life time
-    private $lifeTime;
-    private $defaultTime = 600; //default time is set 600
-    private $is_enable = false; // is apc enabled
-    private $option = false; // flag set false
+    // life time
+    protected $lifeTime;
+    protected $defaultTime = 10; //default time is set 10 * 60 = 600 sec    
+    protected $option = false; // flag set false
+    protected $isApcUEnabled = false;
 
     /*
-    * Constructor function to check availability of apc, throw exception if not available
+    * Constructor function to check availability of apc extension, 
+    * throws exception if not available
     *
     */
 
     public function __construct()
     {
-        if (extension_loaded('apc')) {
-            $this->is_enable = true;
-        } else {
-            throw new ApcExtensionNotFoundException("Apc extension not loaded !");
+        if (!extension_loaded('apc')) {
+            throw new ApcExtensionNotFoundException("Apc extension not loaded !");    
         }
+
+        $this->isApcUEnabled = (function_exists('apcu_fetch')) ? true : false;
     }
 
     /*
@@ -71,18 +72,15 @@ class Apc implements StorageInterface
      * @throws \Exception
      * @return bool
      */
-    public function store($key, $value)
+    public function store($key, $value, $minute = null)
     {
         if (is_null($key) || $key == "") {
-            throw new \InvalidArgumentException("Empty key passed " . __FUNCTION__);
+            throw new \InvalidArgumentException("Key shouldn't be empty");
         }
 
-        if (is_null($value) || $value == "") {
-            throw new \InvalidArgumentException("Empty value passed " . __FUNCTION__);
-        }
+        $time = (is_null($minute)) ? $this->getLifeTime() : $minute * 60;
 
-        return (apc_store($key, $value, $this->getLifeTime()))
-            ? true : false;
+        return ($this->isApcUEnabled) ? apcu_store($key, $value, $time): apc_store($key, $value, $time);
     }
 
     /*
@@ -90,6 +88,12 @@ class Apc implements StorageInterface
     * @false $default_lifeTime null
     *@return  boolean
     */
+    public function setLifeTime($lifeTime = null)
+    {
+        $this->lifeTime = ((is_null($lifeTime)) ? $this->defaultTime : $lifeTime) * 60;
+
+        return true;
+    }
 
     /**
      * This function is used to get life time of apc cache
@@ -102,14 +106,6 @@ class Apc implements StorageInterface
         return (!is_null($this->lifeTime)) ? $this->lifeTime : $this->defaultTime;
     }
 
-    public function setLifeTime($lifeTime = "")
-    {
-        $this->lifeTime = ($lifeTime == "" || is_null($lifeTime))
-            ? $this->defaultTime : $lifeTime;
-
-        return true;
-    }
-
     /**
      * Get data from memory based on its key
      *
@@ -119,8 +115,23 @@ class Apc implements StorageInterface
      */
     public function get($key)
     {
-        $result = apc_fetch($key, $this->option);
-        return ($this->option) ? $result : null;
+        $data = ($this->isApcUEnabled) ? apcu_fetch($key) : apc_fetch($key);
+
+        if ($data == false) {
+            return null;
+        }
+
+        return $data;
+    }
+
+    public function increment($key, $value)
+    {
+        return ($this->isApcUEnabled) ? apcu_inc($key, $value) : apc_inc($key, $value);
+    }
+
+    public function decrement($key, $value)
+    {
+        return ($this->isApcUEnabled) ? apcu_dec($key, $value) : apc_dec($key, $value);
     }
 
     /**
@@ -133,13 +144,21 @@ class Apc implements StorageInterface
      */
     public function destroy($key)
     {
-        if (is_null($key) || $key == "") {
-            throw new \InvalidArgumentException("Empty key passed " . __FUNCTION__);
+        if (is_null($key)) {
+            throw new \InvalidArgumentException("Key shouldn't be empty");
         }
 
-        apc_fetch($key, $this->option);
+        return ($this->isApcUEnabled) ? apcu_delete($key) : apc_delete($key);
+    }
 
-        return ($this->option) ? apc_delete($key) : true;
+    /**
+     * Remove all items from the cache.
+     *
+     * @return void
+     */
+    public function flush()
+    {
+        ($this->isApcUEnabled) ? apcu_clear_cache() : apc_clear_cache('user');
     }
 
     final private function __clone()
