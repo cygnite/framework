@@ -1082,7 +1082,6 @@ class Builder extends Joins implements QueryBuilderInterface
                     self::cyrus()->getTableName()
                 ) . '.*';
         } else {
-
             if (string_has($column, 'as') || string_has($column, 'AS')) {
                 return $this->selectExpr($column);
             }

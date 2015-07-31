@@ -24,7 +24,7 @@ if (!defined('CF_SYSTEM')) {
 
 class MemcachedConnector
 {
-	/**
+    /**
      * Connect memcache based on its host, port, weight.
      *
      * @false string $host
@@ -38,7 +38,7 @@ class MemcachedConnector
         $this->memcached = $this->getMemcachedInstance();
 
         if (empty($servers)) {
-        	throw new \RuntimeException("Empty server configuration passed!!");
+            throw new \RuntimeException("Empty server configuration passed!!");
         }
 
         foreach ($servers as $server) {
@@ -58,7 +58,7 @@ class MemcachedConnector
 
     public function getMemcachedInstance($uniqueId = false)
     {
-    	return ($uniqueId) ? new Memcached($uniqueId) : new Memcached();
+        return ($uniqueId) ? new Memcached($uniqueId) : new Memcached();
     }
 
     public function memcached()

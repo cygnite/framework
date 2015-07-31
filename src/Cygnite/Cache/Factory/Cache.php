@@ -31,7 +31,6 @@ class Cache
     {
         // Check if $callback is instance of Closure we return callback
         if (!is_null($callback) && $callback instanceof \Closure) {
-
             if (array_key_exists($cache, static::$drivers)) {
                 return static::getCacheDriver($callback, $cache);
             }
@@ -49,7 +48,7 @@ class Cache
     public static function getCacheDriver($callback, $cache)
     {
         if ($cache == 'memcached') {
-             $memcached = static::getMemcahcedDriver();
+            $memcached = static::getMemcahcedDriver();
 
             return $callback(new static::$drivers[$cache]($memcached));
         }
@@ -70,10 +69,10 @@ class Cache
     {
         $config = Config::get('global.config', 'cache');
 
-            $memcached = null;
-            if ($config['memcached']['autoconnnect']) {
-               $memcached = (new MemcachedConnector())->create($config['memcached']['servers']);
-            }
+        $memcached = null;
+        if ($config['memcached']['autoconnnect']) {
+            $memcached = (new MemcachedConnector())->create($config['memcached']['servers']);
+        }
 
         return $memcached;
     }
@@ -85,10 +84,10 @@ class Cache
     {
         $config = Config::get('global.config', 'cache');
 
-            $redis = null;
-            if (isset($config['redis'])) {
-               $redis = new RedisConnector($config['redis']);
-            }
+        $redis = null;
+        if (isset($config['redis'])) {
+            $redis = new RedisConnector($config['redis']);
+        }
 
         return $redis;
     }

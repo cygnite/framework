@@ -137,5 +137,4 @@ class Memcached implements StorageInterface
     {
         $this->memcached()->flush();
     }
-
 }

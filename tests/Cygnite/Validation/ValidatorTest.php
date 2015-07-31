@@ -10,8 +10,7 @@ class ValidatorTest extends PHPUnit_Framework_TestCase
     {
         $input = Input::make();
 
-        $v = Validator::create($input->post(), function ($v)
-        {
+        $v = Validator::create($input->post(), function ($v) {
             return $v;
         });
 
@@ -27,8 +26,7 @@ class ValidatorTest extends PHPUnit_Framework_TestCase
     {
         $input = Input::make();
 
-        $v = Validator::create($input->post(), function ($v)
-        {
+        $v = Validator::create($input->post(), function ($v) {
             $v->addRule('foo', 'required|min:3|max:5')
               ->addRule('bar', 'required|is_int')
               ->addRule('something', 'phone|is_string')
@@ -37,7 +35,7 @@ class ValidatorTest extends PHPUnit_Framework_TestCase
             return $v;
         });
 
-        $this->assertFalse($v->run());        
+        $this->assertFalse($v->run());
     }
 
     
@@ -45,8 +43,7 @@ class ValidatorTest extends PHPUnit_Framework_TestCase
     {
         $input = ['foo' => 'bar', 'bar' => 'foobar','baz' => 'barbaz'];
 
-        $v = Validator::create($input, function ($v)
-        {
+        $v = Validator::create($input, function ($v) {
             $v->addRule('foo', 'required|min:3|max:5')
               ->addRule('bar', 'is_int|phone')
               ->addRule('baz', 'valid_email');
@@ -61,8 +58,7 @@ class ValidatorTest extends PHPUnit_Framework_TestCase
     {
         $input = ['foo' => 'bar', 'bar' => 'foobar','baz' => 'barbaz'];
 
-        $v = Validator::create($input, function ($v)
-        {
+        $v = Validator::create($input, function ($v) {
             $v->addRule('foo', 'required')
               ->addRule('bar', 'is_int')
               ->addRule('baz', 'valid_email');
@@ -70,8 +66,7 @@ class ValidatorTest extends PHPUnit_Framework_TestCase
             return $v;
         });
 
-        $v->after(function ($v)
-        {
+        $v->after(function ($v) {
             $v->setCustomError('foo.error', 'Some Error Occured!!');
             $_SERVER['validator.after.event'] = true;
         });
@@ -86,8 +81,7 @@ class ValidatorTest extends PHPUnit_Framework_TestCase
     {
         $input = ['foo' => 'bar', 'bar' => 1025770,'baz' => 'barbaz@gmail.com'];
 
-        $v = Validator::create($input, function ($v)
-        {
+        $v = Validator::create($input, function ($v) {
             $v->addRule('foo', 'required')
               ->addRule('bar', 'is_int')
               ->addRule('baz', 'valid_email');
@@ -104,8 +98,7 @@ class ValidatorTest extends PHPUnit_Framework_TestCase
     {
         $input = ['foo' => 'bar', 'bar' => 'Hi Bar!','foobar' => 323,'baz' => 'barbaz@gmail.com'];
 
-        $v = Validator::create($input, function ($v)
-        {
+        $v = Validator::create($input, function ($v) {
             $v->addRule('foo', 'required:min:3')
               ->addRule('bar', 'phone|is_int')
               ->addRule('foobar', 'is_string|min:5')
@@ -124,7 +117,7 @@ class ValidatorTest extends PHPUnit_Framework_TestCase
 
     public function testWorkingWithArrayOfRulesFailure()
     {
-        $input = ['foo' => 'bar', 'bar' => 1025770,'baz' => '12.4.11', 
+        $input = ['foo' => 'bar', 'bar' => 1025770,'baz' => '12.4.11',
                   'foobar' => 'foo!#$bar', 'foobaz' => 38025770, 'barbaz' => '12345',
                   'barbar' => 'foo!#$bar_'
                 ];
@@ -158,7 +151,7 @@ class ValidatorTest extends PHPUnit_Framework_TestCase
     public function testWorkingWithArrayOfRulesPassed()
     {
         $input = [
-                  'foo' => 'foobar1', 'bar' => 'Hello World!','baz' => '127.0.0.1', 
+                  'foo' => 'foobar1', 'bar' => 'Hello World!','baz' => '127.0.0.1',
                   'foobar' => 'AbCd1zyZ9', 'foobaz' => 9538025770, 'barbaz' => '2015-07-25'
                 ];
 

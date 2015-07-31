@@ -271,7 +271,6 @@ class Container extends DependencyBuilder implements ContainerAwareInterface, Ar
         // if closure callback given we will create a singleton instance of class
         // and return it to user
         if ($callback instanceof Closure) {
-
             if (!isset($instance[$key])) {
                 $instance[$key] = $callback($this);
             }
@@ -328,7 +327,6 @@ class Container extends DependencyBuilder implements ContainerAwareInterface, Ar
         $constructor = null;
         $constructorArgsCount = '';
         if ($reflectionClass->hasMethod('__construct')) {
-
             $constructor = $reflectionClass->getConstructor();
             $constructorArgsCount = $constructor->getNumberOfParameters();
             $constructor->setAccessible(true);

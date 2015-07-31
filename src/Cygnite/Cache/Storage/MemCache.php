@@ -67,7 +67,6 @@ class MemCache implements StorageInterface
         $this->port = ($port != '') ? $port : 11211;
 
         if (is_null($this->memory)) {
-
             $this->memory = new \Memcache();
             $this->isEnabled = true;
 

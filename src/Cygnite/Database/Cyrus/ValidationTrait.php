@@ -62,7 +62,7 @@ trait ValidationTrait
      */
     public function validate($inputs)
     {
-        if(empty($this->rules)) {
+        if (empty($this->rules)) {
             return false;
         }
 

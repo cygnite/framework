@@ -107,7 +107,7 @@ class Event implements EventInterface
     {
         $exp = explode('@', $callback);
 
-        if ( method_exists($instance = new $exp[0], $exp[1]) ) {
+        if (method_exists($instance = new $exp[0], $exp[1])) {
             return call_user_func_array([$instance, $exp[1]], [$data]);
         }
     }

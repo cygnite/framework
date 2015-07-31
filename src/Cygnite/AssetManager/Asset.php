@@ -202,7 +202,7 @@ class Asset implements \ArrayAccess
         foreach ($this->paths[$this->tag[$this->where]][$name] as $key => $src) {
             if ($name == 'style') {
                 $content .= $this->combineStylesheets($src, $compress);
-            } else if ($name == 'script') {
+            } elseif ($name == 'script') {
                 $content .= $this->combineScripts($src, $compress);
             }
         }
@@ -399,12 +399,12 @@ class Asset implements \ArrayAccess
         $args = func_get_args();
         
         if (isset($args[2])) {
-        $args[2] = array_merge($args[2], ['type' => 'static']);
+            $args[2] = array_merge($args[2], ['type' => 'static']);
         } else {
             $args[2] = ['type' => 'static'];
         }
 
-        return call_user_func_array([new Static, 'link'], $args);
+        return call_user_func_array([new static, 'link'], $args);
     }
 
     /**
@@ -426,7 +426,7 @@ class Asset implements \ArrayAccess
             $args[1] = ['type' => 'static'];
         }
 
-        return call_user_func_array([new Static, 'script'], $args);
+        return call_user_func_array([new static, 'script'], $args);
     }
 
     /**

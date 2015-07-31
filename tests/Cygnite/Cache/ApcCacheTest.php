@@ -4,15 +4,14 @@ use Cygnite\Cache\Factory\Cache;
 
 class ApcCacheTest extends PHPUnit_Framework_TestCase
 {
-	private $apc;
+    private $apc;
 
-	public function setUp()
-	{
-		$this->apc = Cache::make('apc', function ($apc)
-        {
-        	return $apc;    
+    public function setUp()
+    {
+        $this->apc = Cache::make('apc', function ($apc) {
+            return $apc;
         });
-	}
+    }
 
     public function testInstance()
     {
@@ -21,7 +20,7 @@ class ApcCacheTest extends PHPUnit_Framework_TestCase
 
     public function testStoreData()
     {
-    	$this->apc->store('foo', 'Foo Bar');
-    	$this->assertEquals('Foo Bar', $this->apc->get('foo'));
+        $this->apc->store('foo', 'Foo Bar');
+        $this->assertEquals('Foo Bar', $this->apc->get('foo'));
     }
 }

@@ -100,20 +100,18 @@ class Schema
     public static function __callStatic($method, $arguments = [])
     {
         if ($method == 'make' && !empty($arguments)) {
-
             $schema = new self($arguments[0]);
 
             if (is_callable([$schema, 'init'])) {
-
                 if (isset($arguments[1]) && $arguments[1] instanceof Closure) {
                     return $schema->init($arguments[1], $schema);
                 }
 
-                    return $schema->init($schema);
-                }
+                return $schema->init($schema);
             }
+        }
 
-            throw new \Exception(
+        throw new \Exception(
             sprintf('Oops, Undefined method called %s', 'Schema::' . $method)
         );
     }

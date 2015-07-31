@@ -27,11 +27,11 @@ class ApplicationTest extends PHPUnit_Framework_TestCase
     {
         $loader = m::mock("Cygnite\Foundation\Autoloader");
         $app = Application::getInstance($loader);
-		
-		$router = new \Cygnite\Base\Router\Router();
+        
+        $router = new \Cygnite\Base\Router\Router();
         $url = new \Cygnite\Common\UrlManager\Url($router);
-		$madeUrl = $app->make('\Cygnite\Common\UrlManager\Url');
-		
+        $madeUrl = $app->make('\Cygnite\Common\UrlManager\Url');
+        
         $this->assertEquals($url, $madeUrl);
     }
 

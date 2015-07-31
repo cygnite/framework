@@ -19,6 +19,7 @@ if (!defined('CF_SYSTEM')) {
  * Class RedisConnector
  *
  * @package Cygnite\Cache\Storage
+ * @source https://github.com/nrk/predis
  */
 class RedisConnector
 {
@@ -69,7 +70,7 @@ class RedisConnector
      */
     public function connection($key = 'default')
     {
-    	return $this->connections[$key ?: 'default'];
+        return $this->connections[$key ?: 'default'];
     }
 
     /**

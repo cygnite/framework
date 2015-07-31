@@ -259,7 +259,7 @@ abstract class ActiveRecord implements ActiveRecordInterface
 
         if ($class == __CLASS__) {
             throw new DatabaseException(sprintf("Abstract Class %s cannot be instantiated.", __CLASS__));
-            }
+        }
 
         return (!class_exists($class)) ?: new $class();
     }

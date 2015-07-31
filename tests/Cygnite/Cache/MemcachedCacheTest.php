@@ -5,10 +5,10 @@ use Cygnite\Cache\Factory\Cache;
 
 class MemcachedCacheTest extends PHPUnit_Framework_TestCase
 {
-	private $memcached;
+    private $memcached;
 
-	public function setUp()
-	{
+    public function setUp()
+    {
         $configuration = [
             'global.config' => [
                 'cache' => [
@@ -21,17 +21,16 @@ class MemcachedCacheTest extends PHPUnit_Framework_TestCase
                             ['host' => '127.0.0.1', 'port' => 11211, 'weight' => 50]
                         ],
                     ],
-                ]    
+                ]
             ]
         ];
 
         Config::$config = $configuration;
 
-		$this->memcached = Cache::make('memcached', function ($memcached)
-        {
-        	return $memcached;
+        $this->memcached = Cache::make('memcached', function ($memcached) {
+            return $memcached;
         });
-	}
+    }
 
     public function testInstance()
     {
@@ -40,8 +39,8 @@ class MemcachedCacheTest extends PHPUnit_Framework_TestCase
 
     public function testStoreData()
     {
-    	$this->memcached->store('foo', 'Foo Bar');
-    	$this->assertEquals('Foo Bar', $this->memcached->get('foo'));
+        $this->memcached->store('foo', 'Foo Bar');
+        $this->assertEquals('Foo Bar', $this->memcached->get('foo'));
     }
 
     public function testReturnNullIfDataNotFound()
@@ -106,5 +105,4 @@ class MemcachedCacheTest extends PHPUnit_Framework_TestCase
         $this->memcached->flush();
         $this->assertNull($this->memcached->get('bar'));
     }
-
 }

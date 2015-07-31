@@ -5,27 +5,26 @@ use Cygnite\Cache\Factory\Cache;
 
 class RedisCacheTest extends PHPUnit_Framework_TestCase
 {
-	private $redis;
+    private $redis;
 
-	public function setUp()
-	{
+    public function setUp()
+    {
         $configuration = [
             'global.config' => [
                 'cache' => [
                     'redis' => [
                         'connection' => 'default',
                     ],
-                ]    
+                ]
             ]
         ];
 
         Config::$config = $configuration;
 
-		$this->redis = Cache::make('redis', function ($redis)
-        {
-        	return $redis;
+        $this->redis = Cache::make('redis', function ($redis) {
+            return $redis;
         });
-	}
+    }
 
     public function testInstance()
     {
@@ -34,8 +33,8 @@ class RedisCacheTest extends PHPUnit_Framework_TestCase
 
     public function testStoreData()
     {
-    	$this->redis->store('foo', 'Foo Bar');
-    	$this->assertEquals('Foo Bar', $this->redis->get('foo'));
+        $this->redis->store('foo', 'Foo Bar');
+        $this->assertEquals('Foo Bar', $this->redis->get('foo'));
     }
 
     public function testReturnNullWhenItemNotFound()

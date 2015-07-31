@@ -168,8 +168,7 @@ class Application extends Container
         $locale = Config::get('global.config', 'locale');
         $fallbackLocale = Config::get('global.config', 'fallback.locale');
 
-        return Translator::make(function ($trans) use ($locale, $fallbackLocale)
-        {
+        return Translator::make(function ($trans) use ($locale, $fallbackLocale) {
             return $trans->setFallback($fallbackLocale)->locale($locale);
         });
     }

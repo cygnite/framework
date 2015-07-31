@@ -29,7 +29,7 @@ class CollectionTest extends PHPUnit_Framework_TestCase
     
     public function testCollectionMethods()
     {
-        $this->assertEquals($this->data, $this->collection->asArray());   
+        $this->assertEquals($this->data, $this->collection->asArray());
         $this->assertEquals(json_encode($this->data), $this->collection->asJson());
         $this->assertEquals(count($this->data), $this->collection->count());
         $this->assertEquals(serialize($this->data), $this->collection->serialize());
@@ -38,5 +38,5 @@ class CollectionTest extends PHPUnit_Framework_TestCase
     public function tearDown()
     {
         m::close();
-    }   
+    }
 }

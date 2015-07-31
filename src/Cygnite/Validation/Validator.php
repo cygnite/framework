@@ -108,7 +108,7 @@ class Validator implements ValidatorInterface
             throw new ValidatorException(sprintf('Validator::addRules() expect array of rules, %s given.', \gettype($rules)));
         }
 
-        foreach ($rules as $field => $rule ) {
+        foreach ($rules as $field => $rule) {
             $this->addRule($field, $rule);
         }
 
@@ -428,7 +428,6 @@ class Validator implements ValidatorInterface
         }
 
         return true;
-
     }
 
     /**
@@ -547,7 +546,7 @@ class Validator implements ValidatorInterface
             $columnName = 'must be ';
         }
 
-        $date = date_parse($this->param[$key]);        
+        $date = date_parse($this->param[$key]);
         $isDate = checkdate($date['month'], $date['day'], $date['year']);
 
         if (!$isDate) {
@@ -588,12 +587,11 @@ class Validator implements ValidatorInterface
         $files = $this->fileName($key);
 
         if ($files['size'] == 0 && $files['error'] == 0) {
-
             $this->errors[$key.static::ERROR] = $conCate.$columnName.' empty file.';
 
             return false;
-    }
+        }
 
         return true;
-}
+    }
 }

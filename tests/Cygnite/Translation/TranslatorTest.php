@@ -13,8 +13,7 @@ class TranslatorTest extends PHPUnit_Framework_TestCase
 
     public function testTranslatorClouserInstance()
     {
-        $trans = Translator::make(function ($trans)
-        {
+        $trans = Translator::make(function ($trans) {
             $trans->locale('es');
             $trans->setFallback('en');
 
@@ -44,5 +43,4 @@ class TranslatorTest extends PHPUnit_Framework_TestCase
 
     }
     */
-
 }

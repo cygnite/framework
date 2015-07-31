@@ -343,8 +343,7 @@ class Router implements RouterInterface
         $this->routeBasePath .= $groupRoute;
 
         // Call the Closure callback
-        call_user_func(function() use($callback)
-        {
+        call_user_func(function () use ($callback) {
             return $callback($this);
         });
 
