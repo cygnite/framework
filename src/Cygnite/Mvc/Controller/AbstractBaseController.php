@@ -17,8 +17,7 @@ use Cygnite\Common\Encrypt;
 use Cygnite\Common\SessionManager\Session;
 use Cygnite\Foundation\Application as App;
 use Cygnite\Helpers\Inflector;
-use Cygnite\Mvc\View\View;
-use Cygnite\Mvc\View\Template;
+use Cygnite\Mvc\View\ViewFactory;
 
 /**
  * AbstractBaseController.
@@ -27,21 +26,22 @@ use Cygnite\Mvc\View\Template;
  *
  * @author Sanjoy Dey <dey.sanjoy0@gmail.com>
  */
-abstract class AbstractBaseController extends View
+abstract class AbstractBaseController
 {
-    private $validFlashMessage = ['setFlash', 'hasFlash', 'getFlash', 'hasError'];
+    protected $validFlashMessage = ['setFlash', 'hasFlash', 'getFlash', 'hasError'];
+
+    protected $validProperties = ['layout', 'templateEngine', 'templateExtension', 'autoReload', 'twigDebug'];
 
     private $class;
 
     /**
      * Constructor function
      *
-     * @access    public
-     * @return \Cygnite\Mvc\Controller\AbstractBaseController class object
+     * Configure parameters for View
      */
     public function __construct()
     {
-        parent::__construct(new Template);
+        $this->configure();
     }
 
     //prevent clone.
@@ -161,5 +161,46 @@ abstract class AbstractBaseController extends View
     public function getController()
     {
         return isset($this->class) ? $this->class : get_called_class();
+    }
+
+
+    public function configure()
+    {
+        foreach ($this->validProperties as $key => $property) {
+
+            $method = 'set'.ucfirst($property);
+
+            if ($this->property($this, $property)) {
+                ViewFactory::make()->{$method}($this->{$property});
+}
+        }
+    }
+
+    /**
+     * @param $class
+     * @param $property
+     * @return bool
+     */
+    public function property($class, $property)
+    {
+        return property_exists($class, $property);
+    }
+
+    /**
+     * @param       $view
+     * @param array $params
+     * @return mixed
+     */
+    public function render($view, $params = [], $return = false)
+    {
+        return ViewFactory::make()->render($view, $params, $return);
+    }
+
+    /**
+     * @return mixed
+     */
+    public function view()
+    {
+        return ViewFactory::make();
     }
 }
