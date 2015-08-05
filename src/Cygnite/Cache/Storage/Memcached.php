@@ -81,16 +81,32 @@ class Memcached implements StorageInterface
         return $this->memcached()->set($key, $value, $minutes * 60);
     }
 
+    /**
+     * @param     $key
+     * @param     $value
+     * @param int $minutes
+     * @return mixed
+     */
     public function add($key, $value, $minutes = 10)
     {
         return $this->memcached()->add($key, $value, $minutes * 60);
     }
 
+    /**
+     * @param     $key
+     * @param int $value
+     * @return mixed
+     */
     public function increment($key, $value = 1)
     {
         return $this->memcached()->increment($key, $value);
     }
 
+    /**
+     * @param     $key
+     * @param int $value
+     * @return mixed
+     */
     public function decrement($key, $value = 1)
     {
         return $this->memcached()->decrement($key, $value);
