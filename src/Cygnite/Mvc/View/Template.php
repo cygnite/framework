@@ -16,42 +16,38 @@ if (!defined('CF_SYSTEM')) {
  */
 class Template
 {
-    public $properties;
+    public $methods;
     /**
      * @var view
      */
     private $view;
-    private $reflection;
-
     // Set default functions to twig engine
-    private $functions;
-    private $validProperties = [
-        'twigLoader',
-        'autoReload',
-        'twigDebug',
-        'layout',
-        'templateExtension'
+    public $functions;
+
+    private $validMethods = [
+        'getAutoReload',
+        'isDebugModeOn',
+        'getTemplateExtension',
+        'getLayout'
     ];
 
+    public $twig;
     /**
      * @param            $view
-     * @param Reflection $reflection
      */
-    public function init($view, Reflection $reflection)
+    public function configure($view)
     {
         \Twig_Autoloader::register();
-
         $this->view = $view;
 
-        if ($reflection instanceof Reflection) {
-            $this->reflection = $reflection;
-            $this->reflection->setClass($this->view);
-        }
-
-        // we will make accessible all valid properties
-        foreach ($this->validProperties as $key => $property) {
-            if (property_exists($this->view, $property)) {
-                $this->setPropertyAccessible($property);
+        /*
+         | We will get all the necessary user configuration set
+         | in controller by the user and set into template method array.
+         | based on user provided configuration we will set twig environment
+         */
+        foreach ($this->validMethods as $key => $method) {
+            if (method_exists($this->view, $method)) {
+                $this->setValue($method);
             }
         }
     }
@@ -59,9 +55,9 @@ class Template
     /**
      * @param $property
      */
-    public function setPropertyAccessible($property)
+    public function setValue($method)
     {
-        $this->properties[$property] = $this->reflection->makePropertyAccessible($property);
+        $this->methods[$method] = $this->view->{$method}();
     }
 
     /**
@@ -69,16 +65,16 @@ class Template
      */
     public function setEnvironment()
     {
-        $this->properties['twigLoader'] = new \Twig_Loader_Filesystem($this->view->views);
-        $this->template = new \Twig_Environment($this->properties['twigLoader'], array(
+        $this->methods['twigLoader'] = new \Twig_Loader_Filesystem($this->view->getTemplateLocation());
+        $this->twig = new \Twig_Environment($this->methods['twigLoader'], array(
             'cache' => CYGNITE_BASE.DS. 'public'.DS.'storage' . DS . 'temp' . DS . 'twig' . DS . 'tmp' . DS . 'cache',
-            'auto_reload' => $this->properties['autoReload'],
-            'debug' => $this->properties['twigDebug'],
+            'auto_reload' => $this->methods['getAutoReload'],
+            'debug' => $this->methods['isDebugModeOn'],
         ));
 
         $this->setDefaultFunctions();
 
-        return $this->template;
+        return $this->twig;
     }
 
     public function setDefaultFunctions()
@@ -87,7 +83,7 @@ class Template
              ->setTwigBaseUrl(); //set baseUrl() function
 
         foreach ($this->functions as $key => $func) {
-            $this->template->addFunction($func);
+            $this->twig->addFunction($func);
         }
     }
 
@@ -104,11 +100,19 @@ class Template
         return $this;
     }
 
+    /**
+     * @param $name
+     * @param $callback
+     * @return \Twig_SimpleFunction
+     */
     public function getTwigSimpleFunctionInstance($name, $callback)
     {
         return new \Twig_SimpleFunction($name, $callback);
     }
 
+    /**
+     * @return $this
+     */
     private function setLink()
     {
         // We will set default function to twig engine
