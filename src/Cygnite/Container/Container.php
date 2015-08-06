@@ -86,11 +86,11 @@ class Container extends DependencyBuilder implements ContainerAwareInterface, Ar
         return function () use ($callable) {
             static $object;
             $c = $this;
-            if (is_null($object)) {
-                if ($callable instanceof Closure) {
-                    $object = $callable($c);
-                }
+
+            if (is_null($object) && $callable instanceof Closure) {
+                $object = $callable($c);
             }
+
             return $object;
         };
     }
