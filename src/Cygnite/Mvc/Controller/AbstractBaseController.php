@@ -142,7 +142,7 @@ abstract class AbstractBaseController
         $class = array_map('ucfirst', explode('.', $name));
         $className = Inflector::classify(end($class)).'Controller';
         $namespace = str_replace(end($class), '', $class);
-        $class = '\\'.ucfirst(APPPATH).'\\'.implode('\\', $namespace).$className;
+        $class = '\\'.APP_NS.'\\'.implode('\\', $namespace).$className;
 
         return $this->_call(new $class, $method, $arguments);
     }
