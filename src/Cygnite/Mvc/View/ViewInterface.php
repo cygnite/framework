@@ -43,6 +43,13 @@ interface ViewInterface
     public function with(array $params = []);
 
     /**
+     * Return view content
+     *
+     * @return mixed
+     */
+    public function content();
+
+    /**
      * @param $key
      * @param $value
      * @return mixed

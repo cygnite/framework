@@ -12,6 +12,8 @@ if (!defined('CF_SYSTEM')) {
  */
 class Widget implements \ArrayAccess
 {
+    use Output;
+
     public $widget = [];
 
     public $data = [];
@@ -159,15 +161,10 @@ class Widget implements \ArrayAccess
             $path = $this->setupWidget();
         }
 
-        $output = (new Output($this->getWidgetName()))->buffer($path, $this->data)->clean();
+        $output = $this->renderView($path, $this->data);
         $this->setWidget($this->getWidgetName(), $output);
 
-        return $this->getWidget($this->getWidgetName());
-    }
-
-    public function __toString()
-    {
-        return $this->getWidget($this->getWidgetName());
+        return $output;
     }
 
     /**

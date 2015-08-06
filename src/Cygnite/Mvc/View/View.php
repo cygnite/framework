@@ -27,6 +27,8 @@ if (!defined('CF_SYSTEM')) {
 
 class View implements ViewInterface,\ArrayAccess
 {
+    use Output;
+
     public $views;
 
     public $data = [];
@@ -60,8 +62,6 @@ class View implements ViewInterface,\ArrayAccess
     protected $autoReload = false;
 
     protected $widgetName;
-
-    public static $returnOutput = false;
 
     /**
      * @param Template $template
@@ -147,13 +147,13 @@ class View implements ViewInterface,\ArrayAccess
      */
     public static function create($view = null, array $data = [])
     {
-        static::$returnOutput = true;
+        $v = ViewFactory::make();
 
         if (is_null($view)) {
-            return ViewFactory::make();
+            return $v;
         }
 
-        return ViewFactory::make()->render($view, $data)->content();
+        return $v->render($view, $data, true)->content();
     }
 
 
@@ -177,17 +177,16 @@ class View implements ViewInterface,\ArrayAccess
      */
     public static function compose($view, array $data = [], \Closure $callback = null)
     {
-        static::$returnOutput = true;
+        $v = ViewFactory::make();
 
         if ($callback instanceof \Closure) {
 
-            $v = ViewFactory::make();
             $content = $v->render($view, $data, true)->content();
 
             return $callback($v, $content);
         }
 
-        return ViewFactory::make()->render($view, $data)->content();
+        return $v->render($view, $data, true)->content();
     }
 
     /**
@@ -200,13 +199,14 @@ class View implements ViewInterface,\ArrayAccess
      *
      * @param       $view
      * @param array $params
-     * @return $this|mixed
+     * @param bool  $return
      * @throws Exceptions\ViewNotFoundException
+     * @return $this|mixed
      */
     public function render($view, $params = [], $return = false)
     {
         $this->widgetName = $view;
-        static::$returnOutput = $return;
+        $this['__return_output__'] = $return;
         $this->__set('parameters', $params);
 
         $path = $this->getPath(Inflector::toDirectorySeparator($view));
@@ -233,18 +233,16 @@ class View implements ViewInterface,\ArrayAccess
             throw new ViewNotFoundException("Requested view doesn't exists in path $path");
         }
 
-        $this->layout = Inflector::toDirectorySeparator($this->getLayout());//exit;
+        $this->layout = Inflector::toDirectorySeparator($this->getLayout());
 
         if ($this->layout !== '') { // render view page into the layout
-            $this->renderLayoutView($path, 'Views'.DS, $params);
-            $this->displayContent();
+            $this->renderLayoutView($path, 'Views'.DS, $params)->displayContent();
 
             return $this;
         }
 
         $this->viewPath = $path;
-        $this->loadView();
-        $this->displayContent();
+        $this->load()->displayContent();
 
         return $this;
     }
@@ -252,7 +250,7 @@ class View implements ViewInterface,\ArrayAccess
 
     private function displayContent()
     {
-        if (!static::$returnOutput) {
+        if ($this['__return_output__'] == false) {
             echo $this['__content__'];
         }
     }
@@ -278,44 +276,6 @@ class View implements ViewInterface,\ArrayAccess
     }
 
     /**
-     * @param $path
-     * @param $data
-     * @return string
-     */
-    protected function loadViewPage($path, $data)
-    {
-        $obLevel = ob_get_level();
-        ob_start();
-        extract($data);
-
-        /*
-         | We will try to include view file and check content into try catch block
-         | so that if any exception occurs output buffer will get flush out.
-         */
-        try {
-            include $path;
-        } catch (Exception $e) {
-            $this->handleViewException($e, $obLevel);
-        }
-
-        return ltrim(ob_get_clean());
-    }
-
-    /**
-     * @param $e
-     * @param $obLevel
-     * @throws
-     */
-    protected function handleViewException($e, $obLevel)
-    {
-        while (ob_get_level() > $obLevel) {
-            ob_end_clean();
-        }
-
-        throw $e;
-    }
-
-    /**
      * @param $view
      * @param $path
      * @param $params
@@ -325,10 +285,9 @@ class View implements ViewInterface,\ArrayAccess
     {
         $layout = CYGNITE_BASE . DS . APP . DS .$path .$this->layout . '.view' . EXT;
 
-        $data['yield'] = $this->loadViewPage($view, $params);
-        $output = $this->loadViewPage($layout, array_merge($data, $params));
-
-        $this->offsetSet('__content__', $output);
+        $data['yield'] = $this->renderView($view, $params);
+        $output = $this->renderView($layout, array_merge($data, $params));
+        $this['__content__'] = $output;
 
         return $this;
     }
@@ -356,14 +315,14 @@ class View implements ViewInterface,\ArrayAccess
             $this->params = (array)$params;
         }
 
-        return $this->loadView();
+        return $this->load();
     }
 
     /**
      * @return string
      * @throws ViewNotFoundException
      */
-    private function loadView()
+    private function load()
     {
         $data = [];
         $data = array_merge($this->params, $this->__get('parameters'));
@@ -372,8 +331,8 @@ class View implements ViewInterface,\ArrayAccess
             throw new ViewNotFoundException('The view path ' . $this->viewPath . ' is invalid.');
         }
 
-        $output = $this->loadViewPage($this->viewPath, $data);
-        $this->offsetSet('__content__', $output);
+        $output = $this->renderView($this->viewPath, $data);
+        $this['__content__'] = $output;
 
         return $this;
     }
@@ -426,10 +385,13 @@ class View implements ViewInterface,\ArrayAccess
      *
      * @param int|string $offset
      * @param mixed      $value
+     * @return $this|void
      */
     public function offsetSet($offset, $value)
     {
         $this->data[$offset] = $value;
+
+        return $this;
     }
 
     /**
