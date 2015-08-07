@@ -22,8 +22,6 @@ use Cygnite\DependencyInjection\Exceptions\DependencyException;
  */
 abstract class Builder extends SplObjectStorage
 {
-    use DefinitionManagerTrait;
-
     public $definitions = [];
 
     public $controller = false;
@@ -33,6 +31,8 @@ abstract class Builder extends SplObjectStorage
     public $appNamespace;
 
     public $cache = [];
+
+    public $propertyDefinition;
 
     /**
      * @param $namespace
@@ -50,14 +50,16 @@ abstract class Builder extends SplObjectStorage
      */
     public function getAppNamespace()
     {
-        $appNS = str_replace('src/', '\\', APPPATH).$this->controllersNs;
+        $appNS = APP_NS.$this->controllersNs;
         return (isset($this->appNamespace) ? $this->appNamespace : $appNS);
     }
 
     /**
      * Set all definitions into array
+     *
      * @param $propertyInjections
-     * @throws Exceptions\DependencyException
+     * @return $this
+     * @throws \Cygnite\DependencyInjection\Exceptions\DependencyException
      */
     public function setPropertyInjection($propertyInjections)
     {
@@ -74,11 +76,13 @@ abstract class Builder extends SplObjectStorage
                  | it is not already exists
                  */
                 if (!isset($this->cache[$namespace.$controller][$key])) {
-                    $classInstance = Inflector::toNamespace($value);
-                    $this->definitions[$namespace.$controller][$key] = $classInstance;
+                    $classNs = Inflector::toNamespace($value);
+                    $this->definitions['\\'.$namespace.$controller][$key] = $classNs;
                 }
             }
         }
+
+        return $this;
     }
 
     /**
@@ -100,8 +104,8 @@ abstract class Builder extends SplObjectStorage
     }
 
     /**
-     * @param $key
-     * @return null
+     * @param null $key
+     * @return array|null
      */
     public function getDefinitions($key = null)
     {
@@ -113,15 +117,34 @@ abstract class Builder extends SplObjectStorage
     }
 
     /**
+     * @param $definition
+     * @return $this
+     */
+    public function setPropertyDefinition($definition)
+    {
+        $this->propertyDefinition = $definition;
+
+        return $this;
+    }
+
+    /**
+     * @return null
+     */
+    public function getPropertyDefinition()
+    {
+        return isset($this->propertyDefinition) ? $this->propertyDefinition : null;
+    }
+
+    /**
      * @param $controller
      * @return null
      */
-    private function getPropertyDefinition($controller)
+    private function getPropertyDefinitionConfig($controller)
     {
-        $injectableDefinitions = $this->getPropertyDependencies();
-        $this->setPropertyInjection($injectableDefinitions);
+        $injectableDefinitions = $this->getPropertyDefinition();
 
-        return $this->getDefinitions($controller);
+        return $this->setPropertyInjection($injectableDefinitions)
+             ->getDefinitions($controller);
     }
 
     /**
@@ -133,7 +156,7 @@ abstract class Builder extends SplObjectStorage
      */
     public function propertyInjection($controllerInstance, $controller)
     {
-        $dependencies = $this->getPropertyDefinition($controller);
+        $dependencies = $this->getPropertyDefinitionConfig($controller);
 
         if (array_key_exists($controller, $this->definitions)) {
             list($reflection, $reflectionClass) = $this->setReflectionClassAttributes($controller);
@@ -181,7 +204,7 @@ abstract class Builder extends SplObjectStorage
      * @param $class
      * @param $reflectionArray
      * @return array
-     * @throws \Exception
+     * @throws \Cygnite\DependencyInjection\Exceptions\DependencyException
      */
     private function checkPropertyAndMakeObject($controller, $class, $reflectionArray)
     {

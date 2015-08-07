@@ -171,8 +171,8 @@ abstract class AbstractBaseController
             $method = 'set'.ucfirst($property);
 
             if ($this->property($this, $property)) {
-                ViewFactory::make()->{$method}($this->{$property});
-}
+                $this->view()->{$method}($this->{$property});
+            }
         }
     }
 
@@ -193,7 +193,7 @@ abstract class AbstractBaseController
      */
     public function render($view, $params = [], $return = false)
     {
-        return ViewFactory::make()->render($view, $params, $return);
+        return $this->view()->render($view, $params, $return);
     }
 
     /**

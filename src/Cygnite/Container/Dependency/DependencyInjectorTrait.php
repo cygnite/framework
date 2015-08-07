@@ -52,7 +52,7 @@ trait DependencyInjectorTrait
          | and inject into controller constructor
          */
         if (!$reflectionParam->IsInstantiable() && $reflectionParam->isInterface()) {
-            $aliases = $this->registerAlias();
+            $aliases = $this['definition.config']['register.alias'];
             $interface = Inflector::getClassName($reflectionParam->getName());
 
             if (array_key_exists($interface, $aliases)) {

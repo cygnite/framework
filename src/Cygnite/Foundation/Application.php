@@ -159,6 +159,19 @@ class Application extends Container
     }
 
     /**
+     * We will register all class definition for
+     * dependency injections
+     */
+    public function registerClassDefinition()
+    {
+        $path = CYGNITE_BASE.DS.APPPATH.DS;
+        $definitions = include toPath($path.'Configs'.DS.'definitions'.DS.'configuration').EXT;
+        $this->setValue('definition.config', $definitions);
+
+        return $this;
+    }
+
+    /**
      * Set language to the translator
      *
      * @return locale
@@ -168,7 +181,8 @@ class Application extends Container
         $locale = Config::get('global.config', 'locale');
         $fallbackLocale = Config::get('global.config', 'fallback.locale');
 
-        return Translator::make(function ($trans) use ($locale, $fallbackLocale) {
+        return Translator::make(function ($trans) use ($locale, $fallbackLocale)
+        {
             return $trans->setFallback($fallbackLocale)->locale($locale);
         });
     }
@@ -407,6 +421,9 @@ class Application extends Container
         foreach ($this->getCoreAlias() as $key => $class) {
             $this->setValue($key, $this->compose("\\".$class));
         }
+
+        $this->registerClassDefinition()
+             ->setPropertyDefinition($this['definition.config']['property.definition']);
 
         return $this;
     }
