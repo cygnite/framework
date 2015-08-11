@@ -82,13 +82,11 @@ interface QueryBuilderInterface
      * Adding an element in the where array with the value
      * to the bindings
      *
-     * @access public
-     * @param String $key
-     * @param String $operator
-     * @param String $value
-     * @return void
+     * @param $key
+     * @param $value
+     * @return mixed
      */
-    public function whereIn($key, $operator, $value);
+    public function whereIn($key, $value);
 
     /**
      * Adding an element in the where array with the value
@@ -120,6 +118,11 @@ interface QueryBuilderInterface
      */
     public function distinct($column);
 
+    /**
+     * 
+     * @param type $limit
+     * @param type $offset
+     */
     public function limit($limit, $offset = "");
 
     /**
@@ -159,6 +162,22 @@ interface QueryBuilderInterface
      * @return array      or object
      */
     public function findAll($fetchMode = "");
+    
+    /**
+     * This is alias method of findAll()
+     *
+     * @param string $fetchMode
+     * @return mixed
+     */
+    public function findMany($fetchMode = "");
+    
+    /**
+     * This method is alias of findAll, We will get only the
+     * zeroth row from the collection object
+     *
+     * @return object|null
+     */
+    public function findOne($fetchMode = "");
 
     /**
      * Get row count
@@ -184,6 +203,9 @@ interface QueryBuilderInterface
     public function execute();
 
     /**
+     * Will return the single row 
+     * from the table
+     * 
      * @return mixed
      */
     public function get();

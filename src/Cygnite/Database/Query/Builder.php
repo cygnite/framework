@@ -280,8 +280,8 @@ class Builder extends Joins implements QueryBuilderInterface
      */
     public function where($key, $operator, $value)
     {
-        if (strpos($operator, 'IN') !== false) {
-            return $this->whereIn($key, $operator, $value);
+        if (string_has($operator, 'IN') || string_has($operator, 'in')) {
+            return $this->whereIn($key, $value);
         }
 
         $this->where[] = "AND " . $key . ' ' . $operator . ' ' . "?";
@@ -300,10 +300,10 @@ class Builder extends Joins implements QueryBuilderInterface
      * @param String $value
      * @return void
      */
-    public function whereIn($key, $operator, $value)
+    public function whereIn($key, $value)
     {
         $exp = explode(',', $value);
-        $this->where[] = "AND " . $key . ' ' . $operator . ' (' . $this->createPlaceHolder($exp) . ') ';
+        $this->where[] = "AND " . $key . ' IN (' . $this->createPlaceHolder($exp) . ') ';
 
         foreach ($exp as $key => $val) {
             $this->bindings[$key] = $val;
@@ -475,6 +475,30 @@ class Builder extends Joins implements QueryBuilderInterface
         } catch (PDOException $ex) {
             throw new \Exception("Database exceptions: Invalid query x" . $ex->getMessage());
         }
+    }
+
+    /**
+     * This is alias method of findAll()
+     *
+     * @param string $fetchMode
+     * @return mixed
+     */
+    public function findMany($fetchMode = "")
+    {
+        return $this->findAll($fetchMode);
+    }
+
+    /**
+     * This method is alias of findAll, We will get only the
+     * zeroth row from the collection object
+     *
+     * @return object|null
+     */
+    public function findOne($fetchMode = "")
+    {
+        $rows = $this->findAll($fetchMode)->asArray();
+
+        return isset($rows[0]) ? $rows[0] : null;
     }
 
     public function fetchAs($statement, $fetchMode = null)

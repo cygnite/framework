@@ -12,6 +12,11 @@ namespace Cygnite\Database\Connections;
 
 use PDO;
 
+/**
+ * Class Connector
+ *
+ * @package Cygnite\Database\Connections
+ */
 class Connector
 {
     /**
@@ -28,6 +33,9 @@ class Connector
 
     protected $config;
 
+    /**
+     * @param array $config
+     */
     public function __construct(array $config)
     {
         $this->config = $config;
@@ -41,6 +49,11 @@ class Connector
         return new PDO($this->getDsn(), $this->config['username'], $this->config['password'], $this->getOptions());
     }
 
+    /**
+     * Get DSN string
+     *
+     * @return string
+     */
     public function getDsn()
     {
         return ($this->config['port'] !== '')

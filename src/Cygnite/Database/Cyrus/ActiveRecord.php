@@ -18,6 +18,7 @@ namespace Cygnite\Database\Cyrus;
 use Cygnite\Helpers\Inflector;
 use Cygnite\Common\Pagination;
 use Cygnite\Database\Connection;
+use Cygnite\Foundation\Collection;
 use Cygnite\Database\Table\Schema;
 use Cygnite\Database\Query\Builder as QueryBuilder;
 
@@ -25,7 +26,6 @@ abstract class ActiveRecord implements ActiveRecordInterface
 {
     const DEFAULT_FOREIGN_KEY_SUFFIX = '_id';
     public static $ar;
-
     public static $defaultPrimaryKey = 'id';
 
     //set closed property as true is set else false
@@ -39,6 +39,9 @@ abstract class ActiveRecord implements ActiveRecordInterface
         'beforeDelete',
         'afterDelete'
     ];
+
+    // Default foreign key suffix used by relationship methods
+    private $index;
 
     //Hold all your table fields in attributes
     private static $validFinders = [
@@ -71,9 +74,7 @@ abstract class ActiveRecord implements ActiveRecordInterface
     protected $database;
     protected $tableName;
     protected $primaryKey;
-
-    // Default foreign key suffix used by relationship methods
-    private $index;
+    protected $relations = [];
 
     /*
      * Restrict users to create active records object Directly
@@ -91,6 +92,12 @@ abstract class ActiveRecord implements ActiveRecordInterface
         $this->setModelAttributes($model);
     }
 
+    /**
+     * Configure and set all attributes into model class
+     *
+     * @param $model
+     * @throws \InvalidArgumentException
+     */
     private function setModelAttributes($model)
     {
         $this->setModelClass(Inflector::getClassNameFromNamespace($model));
@@ -166,26 +173,55 @@ abstract class ActiveRecord implements ActiveRecordInterface
         $this->primaryKey = $primaryKey;
     }
 
+    /**
+     * Find method to retrive data based on primary key id
+     *
+     * @param $argument
+     * @return mixed
+     */
     public static function find($argument)
     {
         return static::model()->findByPk($argument);
     }
 
+    /**
+     * It will return first row of the table
+     *
+     * @return mixed
+     */
     public static function first()
     {
         return static::model()->fluentQuery()->first();
     }
 
+    /**
+     * Return all collection of model data
+     *
+     * @param array $arguments
+     * @return mixed
+     */
     public static function all($arguments = [])
     {
         return static::model()->fluentQuery()->find('all', $arguments);
     }
 
+    /**
+     * We will return last row of the table
+     *
+     * @return mixed
+     */
     public static function last()
     {
         return static::model()->fluentQuery()->last();
     }
 
+    /**
+     * We will execute raw query into table given by user
+     * and return resultset
+     *
+     * @param string $query
+     * @return object Collection
+     */
     public static function findBySql($query)
     {
         return static::$ar->fluentQuery()->findBySql($query);
@@ -235,8 +271,8 @@ abstract class ActiveRecord implements ActiveRecordInterface
 
                 return self::model()->fluentQuery()->find('findBy', $params);
                 break;
-            case 'with' :
-                return static::$ar->with($class, $arguments);
+            case 'joinWith' :
+                return static::$ar->joinWith($class, $arguments);
                 break;
         }
 
@@ -314,7 +350,13 @@ abstract class ActiveRecord implements ActiveRecordInterface
         return $this;
     }
 
-
+    /**
+     * Set array of attributes directly into model object
+     *
+     * @param array $attributes
+     * @return mixed|void
+     * @throws DatabaseException
+     */
     public function setAttributes($attributes = [])
     {
         if (empty($attributes) || !is_array($attributes)) {
@@ -336,8 +378,23 @@ abstract class ActiveRecord implements ActiveRecordInterface
         return isset($this->attributes) ? $this->attributes : null;
     }
 
+    /**
+     * Getter method
+     *
+     * @param $key
+     * @return null
+     * @throws \Exception
+     */
     public function __get($key)
     {
+        /*
+         | We will check if the key exists into
+         | relations array and return it
+         */
+        if (isset($this->relations[$key])) {
+            return $this->relations[$key];
+        }
+
         try {
             return isset($this->attributes[$key]) ? $this->attributes[$key] : null;
         } catch (\Exception $ex) {
@@ -345,6 +402,12 @@ abstract class ActiveRecord implements ActiveRecordInterface
         }
     }
 
+    /**
+     * Setting method
+     *
+     * @param $key
+     * @param $value
+     */
     public function __set($key, $value)
     {
         $this->attributes[$key] = $value;
@@ -448,6 +511,13 @@ abstract class ActiveRecord implements ActiveRecordInterface
         return isset($this->attributes[$key]);
     }
 
+    /**
+     * Intermediate method to call query builder trash method
+     *
+     * @param      $arguments
+     * @param bool $multiple
+     * @return mixed
+     */
     public function trash($arguments, $multiple = false)
     {
         return $this->fluentQuery()->{__FUNCTION__}($arguments, $multiple);
@@ -640,7 +710,7 @@ abstract class ActiveRecord implements ActiveRecordInterface
         $pagination->setPerPage($number);
     }
 
-    public function with($arguments)
+    public function joinWith($arguments)
     {
         $class = static::model();
 
@@ -701,5 +771,305 @@ abstract class ActiveRecord implements ActiveRecordInterface
     public function getPrimaryKey()
     {
         return $this->primaryKeyValue;
+    }
+
+    /**
+     * @param        $class
+     * @param string $property
+     * @param null   $default
+     * @return null
+     */
+    public function getTableNameFromClass($class, $property = 'tableName', $default = null)
+    {
+        if (!class_exists($class) || !property_exists($class, $property)) {
+            return $default;
+        }
+
+        $properties = get_class_vars($class);
+
+        return $properties[$property];
+    }
+
+    /**
+     * This method is to build one-to-one releationship between
+     * two table
+     *
+     * @param      $associatedClass
+     * @param null $foreignKey
+     * @param null $mappingKeyInBaseTable
+     * @return Query\Builder
+     */
+    protected function hasOne($associatedClass, $foreignKey = null, $mappingKeyInBaseTable = null)
+    {
+        return $this->findHasOneOrMany($associatedClass, $foreignKey, $mappingKeyInBaseTable);
+    }
+
+    /**
+     * This method use to construct one-to-many relationship of model class
+     * We will build relations based on the foreign key mapped in associated table.
+     *
+     * @param      $associatedClass
+     * @param null $foreignKey
+     * @param null $mappingKeyInBaseTable
+     * @return Query\Builder
+     */
+    protected function hasMany($associatedClass, $foreignKey = null, $mappingKeyInBaseTable = null)
+    {
+        return $this->findHasOneOrMany($associatedClass, $foreignKey, $mappingKeyInBaseTable);
+    }
+
+    /**
+     * This method is use to construct one-to-one and one-to-many relationship
+     * Make sure your base table has primary key as 'id' and mapped key table_name_id
+     *
+     * example: user : id , comment_id
+     *          comment: id, commment
+     *
+     * @param      $associatedClass
+     * @param null $foreignKey
+     * @param null $mappingId
+     * @return Query\Builder Object
+     */
+    protected function belongsTo($associatedClass, $foreignKey = null, $mappingId = null)
+    {
+        $associatedTable = $this->getTableNameFromClass($associatedClass);
+        $foreignKey = $this->buildForeignKeyName($foreignKey, $associatedTable);
+        $associatedTableId = $this->$foreignKey;
+
+        if( is_null($mappingId) ) {
+            return (new $associatedClass)->where($this->primaryKey, '=', $associatedTableId);
+        }
+
+        return (new $associatedClass)->where($mappingId, '=', $associatedTableId);
+    }
+
+    /**
+     * This method is use to build queries for hasOne and hasMany methods.
+     *
+     * @param      $associatedClass
+     * @param null $foreignKey
+     * @param null $mappingId
+     * @return Query\Builder Object
+     */
+    protected function findHasOneOrMany($associatedClass, $foreignKey = null, $mappingId = null)
+    {
+        $baseTable = $this->getTableName();
+        $foreignKey = $this->buildForeignKeyName($foreignKey, $baseTable);
+
+        $whereValue = '';
+        $whereValue = $this->{$this->primaryKey};
+
+        if(!is_null($mappingId)) {
+            $whereValue = $this->{$mappingId};
+        }
+
+        /*
+         | We will build query and return Query Builder object
+         | to the user, to either make use of findAll() or findOne() method
+         | to get data
+         */
+        return (new $associatedClass)->where($foreignKey, '=', $whereValue);
+    }
+
+    /**
+     * This method is to build many to many relationships using model classes.
+     *
+     * @param      $associatedClass
+     * @param null $joinModelClass
+     * @param null $baseTableId
+     * @param null $associatedTableId
+     * @param null $firstKey
+     * @param null $secondKey
+     * @return Query\Builder Object
+     *
+     * @note Model Class must contain the property $tableName = 'table_name';
+     */
+    protected function hasManyThrough(
+        $associatedClass,
+        $joinModelClass = null,
+        $baseTableId = null,
+        $associatedTableId = null,
+        $firstKey = null,
+        $secondKey = null
+    )
+    {
+        $baseClass = get_class($this);
+
+        if (is_null($joinModelClass)) {
+            $joinModelClass = $this->getJoinClassName($baseClass, $associatedClass);
+        }
+
+        // Get table names from each model class
+        $classes = [$baseClass, $associatedClass, $joinModelClass];
+        list($baseTable, $associatedTable, $joinTable) = $this->filterTableNameFromClass($classes);
+
+        // Get baseTableId & associatedTableId from the given input
+        $baseTableId = (is_null($firstKey)) ? $this->getIdColumn($baseClass) : $firstKey;
+        $associatedTableId = (is_null($secondKey)) ? $this->getIdColumn($associatedClass) : $secondKey;
+
+        // Get the mappingId and associatedId for joining table
+        $mappingId = $this->buildForeignKeyName($baseTableId, $baseTable);
+        $associatedTableId = $this->buildForeignKeyName($associatedTableId, $associatedTable);
+
+        return (new $associatedClass)
+            ->select("{$associatedTable}.*")
+            ->innerJoin($joinTable, [
+                    "{$associatedTable}.{$associatedTableId}",
+                    '=',
+                    "{$joinTable}.{$associatedTableId}"]
+            )->where("{$joinTable}.{$mappingId}", '=', $this->$baseTableId);
+    }
+
+    /**
+     * @param array $classes
+     * @return array
+     */
+    protected function filterTableNameFromClass(array $classes)
+    {
+        $baseTable = $this->getTableNameFromClass($classes[0]);
+        $associatedTable = $this->getTableNameFromClass($classes[1]);
+        $joinTable = $this->getTableNameFromClass($classes[2]);
+
+        return [$baseTable, $associatedTable, $joinTable];
+    }
+
+    /**
+     * @param $baseClass
+     * @param $associatedClass
+     * @return string
+     */
+    private function getJoinClassName($baseClass, $associatedClass)
+    {
+        $classs = [Inflector::getClassName($baseClass), $associatedClass];
+        sort($classs, SORT_STRING);
+
+        return join("", $classs);
+    }
+
+    /**
+     * @param $foreignKey
+     * @param $baseTable
+     * @return string
+     */
+    protected function buildForeignKeyName($foreignKey, $baseTable)
+    {
+        return (is_null($foreignKey)) ? Inflector::singularize($baseTable). self::DEFAULT_FOREIGN_KEY_SUFFIX : $foreignKey;
+    }
+
+    /**
+     * @param $class
+     * @return null|string
+     */
+    public function getIdColumn($class)
+    {
+        $column = $this->getTableNameFromClass($class, 'primaryKey');
+
+        return (is_null($column) ? $this->getKeyName() : $column);
+    }
+
+    /**
+     * Middleware method to allow user to dynamically change
+     * query before executing and returning back.
+     *
+     * <code>
+     * $book->filter('applyTax')->findMany();
+     *
+     * public function applyTax($query)
+     * {
+     *     return $query->where('tax', '=', '10%');
+     * }
+     * or
+     *
+     * $book->filter('applyTax', 'tax', '10%')->findAll();
+     *
+     * public function applyTax($query, $column, $value)
+     * {
+     *     return $query->where($column, '=', $value);
+     * }
+     *
+     * </code>
+     *
+     * @return mixed
+     */
+    public function filter()
+    {
+        $args = func_get_args();
+        $filterFunction = array_shift($args);
+        array_unshift($args, $this);
+
+        if (method_exists($this->modelClassNs, $filterFunction)) {
+            return static::callDynamicMethod([$this->modelClassNs, $filterFunction], $args);
+        }
+    }
+
+    /**
+     * We will load associated model eagarly, solve n+1 query problem
+     * Only two queries will get executed and build relation
+     * collection object.
+     *
+     * @param $model
+     * @return mixed
+     */
+    public static function with($model)
+    {
+        $data = static::model()->findAll();
+
+        $idKey= null;
+        $whereIn = [];
+        foreach ($data as $key => $value) {
+            $idKey = $value->primaryKey;
+            $whereIn[] = $value->{$value->primaryKey};
+        }
+
+        $associatedModel = new $model;
+        $associatedData = $associatedModel
+            ->where(static::getForeignKey(static::model()->tableName), 'IN', implode(',', $whereIn))
+            ->findAll();
+
+        $data = static::buildRelations($data, $associatedModel, $associatedData);
+
+        return $data;
+    }
+
+    /**
+     * @param $table
+     * @return string
+     */
+    protected static function getForeignKey($table)
+    {
+        return Inflector::singularize($table).self::DEFAULT_FOREIGN_KEY_SUFFIX;
+    }
+
+    /**
+     * @param $data
+     * @param $associatedModel
+     * @param $associatedData
+     * @return mixed
+     */
+    protected static function buildRelations($data, $associatedModel, $associatedData)
+    {
+        foreach($data as $parentKey => &$class) {
+
+            $associateId = static::getForeignKey($class->tableName);
+            $tempArray = [];
+            $i = 0;
+            foreach ($associatedData as $key => $value) {
+
+                if ($value->{$associateId} == $class->{$class->primaryKey}) {
+                    $tempArray[$i] = $value;
+                    $i++;
+                }
+            }
+
+            /*
+             | Check cyrus activerecord has "relations" property and
+             | append the cllection data into it
+             */
+            if (property_exists($class, 'relations')) {
+                $class->relations[$associatedModel->getTableName()] = new Collection($tempArray);
+            }
+        }
+
+        return $data;
     }
 }

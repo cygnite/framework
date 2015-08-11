@@ -130,7 +130,7 @@ interface ActiveRecordInterface extends \ArrayAccess
      * @param $arguments
      * @return mixed
      */
-    public function with($arguments);
+    public function joinWith($arguments);
 
     /**
      * We will get Fluent Query Object
