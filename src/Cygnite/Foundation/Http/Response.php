@@ -17,7 +17,7 @@ use Cygnite\Exception\Http\ResponseException;
  * @package Cygnite\Foundation\Http
  */
 
-class Response
+class Response implements ResponseInterface
 {
     const PROTOCOL = 'HTTP/1.1';
 
