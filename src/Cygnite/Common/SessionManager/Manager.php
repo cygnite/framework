@@ -32,6 +32,34 @@ class Manager extends AbstractPacket implements PacketInterface
     }
 
     /**
+     * @param $key
+     * @param $value
+     */
+    public function __set($key, $value)
+    {
+        $this->set($key, $value);
+    }
+
+    /**
+     * @param $key
+     * @return null
+     */
+    public function __get($key)
+    {
+        return isset($this->storage[$key]) ? $this->storage[$key] : null;
+    }
+
+    /**
+     * @param $key
+     */
+    public function __unset($key)
+    {
+        if (isset($this->storage[$key])) {
+            unset($this->storage[$key]);
+        }
+    }
+
+    /**
      * Sets value to session storage
      *
      * @param string $key
@@ -50,6 +78,7 @@ class Manager extends AbstractPacket implements PacketInterface
             foreach ($key as $key => $value) {
                 $this->storage[$key] = $value;
             }
+
             return $this;
         }
 

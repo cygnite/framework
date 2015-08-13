@@ -101,9 +101,25 @@ class Session
      */
     public static function __callStatic($method, $arguments)
     {
-        $arguments['method'] = $method;
         self::$instance = new static;
-        return call_user_func_array([self::$instance, 'factory'], [$arguments]);
+        $session = self::$instance->factory();
+
+        return call_user_func_array([$session, $method], $arguments);
+    }
+
+    /**
+     * @param callable $callback
+     * @return static
+     */
+    public static function make(\Closure $callback = null)
+    {
+        self::$instance = new static;
+
+        if ($callback instanceof \Closure) {
+            return $callback(self::$instance);
+        }
+
+        return self::$instance;
     }
 
     /**
@@ -112,12 +128,10 @@ class Session
      * @param $args
      * @return mixed
      */
-    protected function factory($args)
+    public function factory()
     {
         $method = $class = null;
         $class = __NAMESPACE__.'\\'.$this->drivers[$this->config['driver']];
-        $method = $args['method'];
-        unset($args['method']);
 
         $name = $this->getName();
         if ($name != 'cygnite-session' && !is_null($this->cacheLimiter())) {
@@ -126,7 +140,7 @@ class Session
             $session = new $class($this->name, null, $this);
         }
 
-        return call_user_func_array(array($session, $method), $args);
+        return $session;
     }
 
     /**

@@ -163,7 +163,7 @@ class Session extends ActiveRecord implements PacketInterface
      */
     public function createTableIfNotExists()
     {
-        Schema::instance(
+        Schema::make(
             $this,
             function ($table) {
                 $table->tableName = $this->getTable();
@@ -261,6 +261,24 @@ class Session extends ActiveRecord implements PacketInterface
     public function close()
     {
         return true;
+    }
+
+    /**
+     * @param $key
+     * @param $value
+     */
+    public function __set($key, $value)
+    {
+        $this->set($key, $value);
+    }
+
+    /**
+     * @param $key
+     * @return null
+     */
+    public function __get($key)
+    {
+        return isset($this->storage[$key]) ? $this->storage[$key] : null;
     }
 
     /**
