@@ -19,6 +19,18 @@ if (!defined('CF_SYSTEM')) {
  */
 class ExceptionHandler implements ExceptionInterface
 {
+    const DEBUG = Debugger::DEBUG;
+    
+    const INFO = Debugger::INFO;
+    
+    const WARNING = Debugger::WARNING;
+    
+    const ERROR = Debugger::ERROR;
+    
+    const EXCEPTION = Debugger::EXCEPTION;
+    
+    const CRITICAL = Debugger::CRITICAL;
+    
     public $name = 'Cygnite Framework';
 
     private static $style = 'pretty';
@@ -30,7 +42,6 @@ class ExceptionHandler implements ExceptionInterface
     public $enableLogger = false;
 
     public $logPath;
-
     /**
      * @param $enableLogger
      * @param $loggerDir
@@ -161,7 +172,7 @@ class ExceptionHandler implements ExceptionInterface
     public static function register(Closure $callback)
     {
         if ($callback instanceof Closure) {
-            return $callback(new Handler);
+            return $callback(new HandlerException);
         }
     }
 

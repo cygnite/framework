@@ -1,4 +1,6 @@
 <?php
+use Tracy\Helpers;
+use Tracy\Debugger;
 use Cygnite\Foundation\Application as App;
 use Cygnite\AssetManager\Html;
 use Cygnite\Translation\Translator;
@@ -226,5 +228,52 @@ if (! function_exists('validate_token')) {
     function validate_token($token)
     {
         return csrf()->validateRequestToken($token);
+    }
+}
+
+if (! function_exists('d')) {
+
+    /**
+     * @param       $data
+     * @param null  $title
+     * @param array $options
+     */
+    function d($data, $title = NULL, array $options = NULL)
+    {
+        Debugger::barDump($data, $title, $options);
+    }
+}
+
+if (! function_exists('logMessage')) {
+
+    /**
+     * @param      $msg
+     * @param null $priority
+     */
+    function logMessage($msg, $priority = ExceptionHandler::INFO)
+    {
+        Debugger::log($msg, $priority);
+    }
+}
+
+if (!function_exists('fire_log')) {
+
+    /**
+     * @param $message
+     */
+    function fire_log($message)
+    {
+        Debugger::fireLog($message);
+    }
+}
+
+if (!function_exists('time_bench')) {
+
+    /**
+     * @param null $name
+     */
+    function time_bench($name = NULL)
+    {
+        Debugger::timer($name);
     }
 }
