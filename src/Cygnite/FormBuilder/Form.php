@@ -243,12 +243,7 @@ class Form extends Elements implements FormInterface
             $elementString .= $this->attributes[self::$formHolder[self::$formName]][self::$formName];
         }
 
-        /*
-         | Build a form and store as string
-         */
-        foreach ($this->elements[self::$formHolder[self::$formName]] as $key => $val) {
-            $elementString .= $val;
-        }
+        $elementString .= $this->getHtmlElements();
 
         $close = null;
         $close = self::$formHolder[self::$formName].'_close';
@@ -258,6 +253,32 @@ class Form extends Elements implements FormInterface
         }
 
         return $this->element[self::$formHolder[self::$formName]] = $elementString;
+    }
+
+    /**
+     * If you wish to get only html elements
+     */
+    public function getHtmlElements()
+    {
+        $elementString = '';
+        /*
+         | Build a form and store as string
+         */
+        foreach ($this->elements[self::$formHolder[self::$formName]] as $key => $val) {
+            $elementString .= $val;
+        }
+
+        return $elementString;
+    }
+
+    /**
+     * We will get csrf token
+     *
+     * @return string
+     */
+    public function csrfToken()
+    {
+        return csrf_token();
     }
 
     //Error occured while using this method
