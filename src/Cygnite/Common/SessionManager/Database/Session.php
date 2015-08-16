@@ -2,12 +2,18 @@
 namespace Cygnite\Common\SessionManager\Database;
 
 use Cygnite\Common\Encrypt;
-use Cygnite\Common\SessionManager\PacketInterface;
-use Cygnite\Common\SessionManager\Session as SessionManager;
-use Cygnite\Database\Cyrus\ActiveRecord;
+use Cygnite\Helpers\String;
 use Cygnite\Database\Schema;
 use Cygnite\Helpers\Config;
+use Cygnite\Database\Cyrus\ActiveRecord;
+use Cygnite\Common\SessionManager\PacketInterface;
+use Cygnite\Common\SessionManager\Session as SessionManager;
 
+/**
+ * Class Session
+ *
+ * @package Cygnite\Common\SessionManager\Database
+ */
 class Session extends ActiveRecord implements PacketInterface
 {
     protected $tableName = 'cf_sessions';
@@ -47,6 +53,13 @@ class Session extends ActiveRecord implements PacketInterface
         }
 
         $this->storage = & $_SESSION;
+
+        /*
+         | Check csrf token already exists into session
+         | else regenerate the token
+         */
+        $this->checkToken();
+
         // This line prevents unexpected effects when using objects as save handlers.
         register_shutdown_function('session_write_close');
     }
@@ -495,5 +508,39 @@ class Session extends ActiveRecord implements PacketInterface
             return false;
         }
         return isset($this->storage[$key]);
+    }
+
+    /**
+     * @reference http://stackoverflow.com/questions/24843309/laravel-4-csrf-token-never-changes
+     */
+    public function checkToken()
+    {
+        /*
+         | We will check if token already exists in session
+         | else we will regenerate token id
+         */
+        if (! $this->has('_token')) {
+            $this->regenerateToken();
+}
+    }
+
+    /**
+     * Regenerate the CSRF token value.
+     *
+     * @return void
+     */
+    public function regenerateToken()
+    {
+        $this->set('_token', String::random('alnum', 32));
+    }
+
+    /**
+     * Get the CSRF token value.
+     *
+     * @return string
+     */
+    public function token()
+    {
+        return $this->get('_token');
     }
 }

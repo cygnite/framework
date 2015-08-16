@@ -2,6 +2,7 @@
 namespace Cygnite\Common\SessionManager\Native;
 
 use Cygnite\Helpers\Config;
+use Cygnite\Helpers\String;
 use Cygnite\Common\SessionManager\Manager;
 use Cygnite\Common\SessionManager\SessionInterface;
 use Cygnite\Common\SessionManager\Session as SessionManager;
@@ -47,6 +48,12 @@ class Session extends Manager implements SessionInterface
         }
 
         $this->storage = & $_SESSION;
+
+        /*
+         | Check csrf token already exists into session
+         | else regenerate the token
+         */
+        $this->checkToken();
     }
 
     /**
@@ -219,6 +226,40 @@ class Session extends Manager implements SessionInterface
         }
 
         return session_cache_limiter();
+    }
+
+    /**
+     * @reference http://stackoverflow.com/questions/24843309/laravel-4-csrf-token-never-changes
+     */
+    public function checkToken()
+    {
+        /*
+         | We will check if token already exists in session
+         | else we will regenerate token id
+         */
+        if (! $this->has('_token')) {
+            $this->regenerateToken();
+        }
+    }
+
+    /**
+     * Regenerate the CSRF token value.
+     *
+     * @return void
+     */
+    public function regenerateToken()
+    {
+        $this->set('_token', String::random('alnum', 32));
+    }
+
+    /**
+     * Get the CSRF token value.
+     *
+     * @return string
+     */
+    public function token()
+    {
+        return $this->get('_token');
     }
 
     /**

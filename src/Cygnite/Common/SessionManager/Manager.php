@@ -1,6 +1,11 @@
 <?php
 namespace Cygnite\Common\SessionManager;
 
+/**
+ * Class Manager
+ *
+ * @package Cygnite\Common\SessionManager
+ */
 class Manager extends AbstractPacket implements PacketInterface
 {
     // Storage property to store session values
