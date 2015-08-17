@@ -164,8 +164,8 @@ class Application extends Container
      */
     public function registerClassDefinition()
     {
-        $path = CYGNITE_BASE.DS.APPPATH.DS;
-        $definitions = include toPath($path.'Configs'.DS.'definitions'.DS.'configuration').EXT;
+        $path = './'.APPPATH.DS;
+        $definitions = include realpath($path.'Configs'.DS.'definitions'.DS.'configuration'.EXT);
         $this->setValue('definition.config', $definitions);
 
         return $this;

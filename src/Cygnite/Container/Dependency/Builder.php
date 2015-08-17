@@ -13,7 +13,7 @@ use SplObjectStorage;
 use Cygnite\Reflection;
 use Cygnite\Helpers\Inflector;
 use Apps\Configs\Definitions\DefinitionManagerTrait;
-use Cygnite\DependencyInjection\Exceptions\DependencyException;
+use Cygnite\Container\Exceptions\DependencyException;
 
 /**
  * Class DependencyExtension
