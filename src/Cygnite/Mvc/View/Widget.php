@@ -28,7 +28,7 @@ class Widget implements \ArrayAccess
      * @param       $name
      * @param array $data
      */
-    public function __construct($name, $data= [])
+    public function __construct($name, array $data= [])
     {
         $this->setWidgetName($name);
         $this->data = $data;
@@ -45,24 +45,24 @@ class Widget implements \ArrayAccess
     }
 
     /**
-     * @param          $var
-     * @param callable $callback
+     * @param          $name
      * @param array    $data
+     * @param callable $callback
      * @return mixed
      */
-    public static function make($var, \Closure $callback = null, $data = [])
+    public static function make($name, array $data = [], \Closure $callback = null)
     {
         /*
          | If second param given as closure then we will
          | return callback
          */
-        if ($callback instanceof \Closure && !is_null($callback)) {
-            return $callback(new Widget($var, $data));
+        if (!is_null($callback) && $callback instanceof \Closure) {
+            return $callback(new Widget($name, $data));
         }
         /*
          | return object
          */
-        return (new Widget($var, $data))->render();
+        return (new Widget($name, $data))->render();
     }
 
     /**
