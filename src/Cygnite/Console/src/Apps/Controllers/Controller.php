@@ -16,8 +16,8 @@ use {%Apps%}\Models\%StaticModelName%;
 
 class %ControllerName%Controller extends AbstractBaseController
 {
-    /* If you are using twig template you don't require to set layout here*/
-    //protected $layout = 'layouts.main.twig';
+    /* If you are using twig template you don't require to set layout */
+    //protected $layout = '';
 
     protected $templateEngine = true;
 
@@ -60,7 +60,7 @@ class %ControllerName%Controller extends AbstractBaseController
             $flash = $this->getFlash('error');
         }
 
-        $this->render('index')->with(
+        $this->render('%controllerName%.index')->with(
             [
                 'records' => $%controllerName%,
                 'flashMessage' => $flash,
@@ -128,8 +128,8 @@ $validate%addRule%
         }
 
         // render view page
-        $this->render('create')->with([
-                'form' => $form->buildForm()->render(),
+        $this->render('%controllerName%.create')->with([
+                'form' => $form->render(),
                 'validation_errors' => $form->errors,
                 'title' => 'Add a new %ControllerName%'
         ]);
@@ -179,8 +179,8 @@ $validate%addRule%
         }
 
          // render view page
-        $this->render('update')->with([
-                'form' => $form->buildForm()->render(),
+        $this->render('%controllerName%.update')->with([
+                'form' => $form->render(),
                 'validation_errors' => $form->errors,
                 'title' => 'Update %ControllerName%'
         ]);
@@ -195,7 +195,7 @@ $validate%addRule%
         $%modelName% = %StaticModelName%::find($id);
 
         // render view page
-        $this->render('show')->with([
+        $this->render('%controllerName%.show')->with([
                 'record' => $%modelName%,
                 'title' => 'Show a %ControllerName%'
         ]);

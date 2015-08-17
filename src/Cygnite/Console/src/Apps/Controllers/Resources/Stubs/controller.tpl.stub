@@ -1,7 +1,9 @@
 <?php
 namespace {%Apps%}\Controllers;
 
-use Cygnite\Foundation\Application as App;
+use Cygnite\Mvc\View\View;
+use Cygnite\Foundation\Http\Response;
+use Cygnite\Foundation\Application;
 use Cygnite\Mvc\Controller\AbstractBaseController;
 
 /**

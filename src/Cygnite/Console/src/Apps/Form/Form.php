@@ -58,6 +58,6 @@ class %controllerName%Form extends Form
      */
     public function render()
     {
-        return $this->getForm();
+        return $this->buildForm()->getForm();
     }
 }
