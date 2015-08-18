@@ -12,6 +12,7 @@ namespace Cygnite\Mvc\View;
 use Cygnite\Reflection;
 use Cygnite\Helpers\Inflector;
 use Cygnite\Mvc\View\ViewInterface;
+use Cygnite\Mvc\ControllerViewBridgeTrait;
 use Cygnite\Mvc\View\Exceptions\ViewNotFoundException;
 
 if (!defined('CF_SYSTEM')) {
@@ -27,7 +28,7 @@ if (!defined('CF_SYSTEM')) {
 
 class View implements ViewInterface,\ArrayAccess
 {
-    use Output;
+    use ControllerViewBridgeTrait, Output;
 
     public $twigTemplateLocation;
 
@@ -371,6 +372,10 @@ class View implements ViewInterface,\ArrayAccess
      */
     public function __call($method, $arguments)
     {
+        if (in_array($method, $this->validFlashMessage)) {
+            return $this->setFlashMessage($method, $arguments);
+        }
+
         throw new \RuntimeException("Method View::$method() doesn't exists");
     }
 

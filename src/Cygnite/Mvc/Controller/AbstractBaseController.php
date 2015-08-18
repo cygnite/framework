@@ -18,6 +18,7 @@ use Cygnite\Common\SessionManager\Session;
 use Cygnite\Foundation\Application as App;
 use Cygnite\Helpers\Inflector;
 use Cygnite\Mvc\View\ViewFactory;
+use Cygnite\Mvc\ControllerViewBridgeTrait;
 
 /**
  * AbstractBaseController.
@@ -28,7 +29,7 @@ use Cygnite\Mvc\View\ViewFactory;
  */
 abstract class AbstractBaseController
 {
-    protected $validFlashMessage = ['setFlash', 'hasFlash', 'getFlash', 'hasError'];
+    use ControllerViewBridgeTrait;
 
     protected $validProperties = ['layout', 'templateEngine', 'templateExtension', 'autoReload', 'twigDebug'];
 
@@ -47,11 +48,6 @@ abstract class AbstractBaseController
     //prevent clone.
     private function __clone()
     {
-    }
-
-    protected function getContainer()
-    {
-        return App::instance();
     }
 
     /**
@@ -74,23 +70,6 @@ abstract class AbstractBaseController
     }
 
     /**
-     * @param $method
-     * @param $arguments
-     * @return AbstractBaseController|mixed
-     */
-    private function setFlashMessage($method, $arguments)
-    {
-        $flashSession = $this->get('cygnite.common.session-manager.flash.flash-message');
-
-        if ($method == 'setFlash') {
-            $this->_call($flashSession, $method, $arguments);
-            return $this;
-        } else {
-            return $this->_call($flashSession, $method, $arguments);
-        }
-    }
-
-    /**
      * @param string $uri
      * @param string $type
      * @param int    $httpResponseCode
@@ -102,27 +81,6 @@ abstract class AbstractBaseController
         $url->redirectTo($uri, $type, $httpResponseCode);
 
         return $this;
-    }
-
-    /**
-     * @param $class
-     * @return object
-     */
-    protected function get($class)
-    {
-        $container = $this->getContainer();
-        return $container->resolve($class);
-    }
-
-    /**
-     * @param       $instance
-     * @param       $method
-     * @param array $arguments
-     * @return mixed
-     */
-    protected function _call($instance, $method, $arguments = [])
-    {
-        return call_user_func_array([$instance, $method], $arguments);
     }
 
     /**
@@ -145,6 +103,11 @@ abstract class AbstractBaseController
         $class = '\\'.APP_NS.'\\'.implode('\\', $namespace).$className;
 
         return $this->_call(new $class, $method, $arguments);
+    }
+
+    public function getContainer()
+    {
+        return App::instance();
     }
 
     /**
