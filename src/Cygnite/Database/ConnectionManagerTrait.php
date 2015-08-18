@@ -29,18 +29,6 @@ trait ConnectionManagerTrait
     public static $connectionConfig = [];
 
     /**
-     * @var array
-     */
-    /*public static $options = array(
-        PDO::ATTR_ERRMODE           =>  PDO::ERRMODE_EXCEPTION,
-        PDO::ATTR_CASE              =>  PDO::CASE_NATURAL,
-        PDO::ATTR_ORACLE_NULLS      =>  PDO::NULL_NATURAL,
-        PDO::ATTR_PERSISTENT        =>  true,
-        PDO::ATTR_STRINGIFY_FETCHES	=>  false,
-        PDO::ATTR_EMULATE_PREPARES  =>  false,
-    );*/
-
-    /**
      * @param $key
      * @return null
      */
@@ -68,20 +56,13 @@ trait ConnectionManagerTrait
         $info['collation']  = (isset($config['collation'])) ? $config['collation'] : '' ;
         $info['prefix']  = (isset($config['prefix'])) ? $config['prefix'] : '' ;
 
-        $config = [];
-
         if ($info['hostname'] == 'unix(') {
             $socketDb = null;
             $socketDb =  $info['hostname'] . '/' .  $info['database'];
             if (preg_match_all('/^unix\((.+)\)\/(.+)$/', $socketDb, $matches) > 0) {
-                show($matches);
-
                 $info['hostname'] = $matches[1][0];
                 $info['database'] = $matches[2][0];
             }
-            echo "unix";
-            show($info);
-            exit;
         }
 
         self::setConnectionConfig($info['database'], $info);
@@ -114,17 +95,19 @@ trait ConnectionManagerTrait
         switch ($config['driver']) {
             case 'mysql':
                 return $connection->setConfig($config)->make('MySql');
-
+                break;
             case 'pgsql':
                 return $connection->setConfig($config)->make('PgSql');
-
+                break;
             case 'sqlite':
                 return $connection->setConfig($config)->make('SqlLite');
-
+                break;
             case 'oracle':
                 return $connection->setConfig($config)->make('Oracle');
+                break;
             case 'sqlsrv':
                 return $connection->setConfig($config)->make('MsSql');
+                break;
         }
 
         throw new InvalidArgumentException("Unsupported driver [{$config['driver']}]");
@@ -137,21 +120,10 @@ trait ConnectionManagerTrait
      */
     public function setConnection($connectionConfig)
     {
-        $config = static::parseUrl($connectionConfig);
-
-        self::$config = $config;
-
-        $dns = $config['driver']
-            .':host='.$config['hostname'].$config['port'].
-            ';dbname='.$config['database'];
+        self::$config = static::parseUrl($connectionConfig);
 
         try {
-
-            //if (!array_key_exists($config['database'], static::$connections)) {
-
-                $connection = static::createConnection($config);
-            //}
-            return $connection;
+            return  static::createConnection(self::$config);
         } catch (\PDOException $e) {
             throw new \Exception($e->getMessage());
         }
@@ -187,10 +159,6 @@ trait ConnectionManagerTrait
                 return self::$connectionObject[$connKey] = $this->setConnection($value);
             }
         }
-
-
-        //exit;
-        //return self::$connectionObject[$connKey];
     }
 
     /**
