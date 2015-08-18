@@ -45,7 +45,7 @@ class Validator implements ValidatorInterface
     protected function __construct($input)
     {
         if (!is_array($input)) {
-            throw new ValidatorException(sprintf('Constructor expect array of input, %s given.', \gettype($key)));
+            throw new ValidatorException(sprintf('Constructor expect array of input, %s given.', \gettype($input)));
         }
 
         $this->param = $input;
