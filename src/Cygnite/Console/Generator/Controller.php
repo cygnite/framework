@@ -125,10 +125,10 @@ class Controller
     private function generateFormElements($value)
     {
         $form = $label = '';
-        $label = Inflector::underscoreToSpace($value->COLUMN_NAME);
+        $label = Inflector::underscoreToSpace($value['COLUMN_NAME']);
         $form .= "\t\t".'->addElement("label", "'.$label.'", array("class" => "col-sm-2 control-label","style" => "width:100%;"))'.PHP_EOL;
 
-        $form .= "\t\t".'->addElement("text", "'.$value->COLUMN_NAME.'", array("value" => (isset($this->model->'.$value->COLUMN_NAME.')) ? $this->model->'.$value->COLUMN_NAME.' : "", "class" => "form-control"))'.PHP_EOL;
+        $form .= "\t\t".'->addElement("text", "'.$value['COLUMN_NAME'].'", array("value" => (isset($this->model->'.$value['COLUMN_NAME'].')) ? $this->model->'.$value['COLUMN_NAME'].' : "", "class" => "form-control"))'.PHP_EOL;
         return $form;
     }
 
@@ -156,7 +156,7 @@ class Controller
     {
         $code = '';
         $code .=
-        "\t\t\t\t".'$'.Inflector::tabilize($this->model).'->'.$value->COLUMN_NAME.' = $postArray["'.$value->COLUMN_NAME.'"];'.PHP_EOL;
+        "\t\t\t\t".'$'.Inflector::tabilize($this->model).'->'.$value['COLUMN_NAME'].' = $postArray["'.$value['COLUMN_NAME'].'"];'.PHP_EOL;
 
         return $code;
     }
@@ -169,7 +169,7 @@ class Controller
     private function generateValidator($value)
     {
         $validationCode = '';
-        $validationCode .= "\t\t\t->addRule('".$value->COLUMN_NAME."', 'required|min:5')".PHP_EOL;
+        $validationCode .= "\t\t\t->addRule('".$value['COLUMN_NAME']."', 'required|min:5')".PHP_EOL;
 
         return $validationCode;
     }
@@ -185,7 +185,9 @@ class Controller
         $form = $this->buildFormOpen();
 
         foreach ($this->columns as $key=> $value) {
-            if ($value->COLUMN_NAME !== 'id') {
+
+            if ($value['COLUMN_NAME'] !== 'id') {
+
                 if ($this->isFormGenerator == false) {
                     $codeDb .= $this->generateDbCode($value);
                 }
@@ -300,11 +302,7 @@ class Controller
             $this->controllerTemplateName();
         $file = $this->getControllerTemplatePath().$controllerTemplate;
 
-        $this->formPath = str_replace(
-                'Controllers\\',
-                '',
-                $this->getControllerTemplatePath()
-        ).'Components'.DS.'Form'.DS;
+        $this->formPath = str_replace('Controllers\\', '', $this->getControllerTemplatePath()).DS.'Form'.DS;
 
         file_exists($file) or die("Controller Template not Exists");
         //file_exists($modelFl ) or die("No Model Exists");
@@ -382,7 +380,7 @@ class Controller
      */
     public function generate()
     {
-        echo $this->applicationDir.DS.'Controllers'.DS.$this->controller.EXT;
+        $this->applicationDir.DS.'Controllers'.DS.$this->controller.EXT;
         /*write operation ->*/
         $writeTmp =fopen(
             $this->applicationDir.DS.'controllers'.DS.$this->controller.EXT,

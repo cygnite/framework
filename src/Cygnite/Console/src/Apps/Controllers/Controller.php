@@ -100,7 +100,7 @@ $validate%addRule%
         //Check is form posted
         if ($input->hasPost('btnSubmit') == true) {
 
-            $validator = $this->setValidationRules($input);
+            $validator = $this->setValidationRules($input->post());
 
             //Run validation
             if ($validator->run()) {
@@ -152,7 +152,7 @@ $validate%addRule%
         //Check is form posted
         if ($input->hasPost('btnSubmit') == true) {
 
-            $validator = $this->setValidationRules($input);
+            $validator = $this->setValidationRules($input->post());
 
             //Run validation
             if ($validator->run()) {

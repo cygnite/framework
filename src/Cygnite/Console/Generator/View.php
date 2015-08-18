@@ -261,16 +261,16 @@ class View
         $column = '';
 
         foreach ($this->getTableColumns() as $key=> $value) {
-            if ($value->COLUMN_NAME !== 'id') {
+            if ($value['COLUMN_NAME'] !== 'id') {
                 if ($type == 'th') {
-                    $tableHead = Inflector::underscoreToSpace($value->COLUMN_NAME);
+                    $tableHead = Inflector::underscoreToSpace($value['COLUMN_NAME']);
                     $column .= "\t\t\t".'<'.$type.'>'.$tableHead.'</'.$type.'>'.PHP_EOL;
                 } else {
                     $rowType = '';
                     if ($this->layoutType == 'php') {
-                        $rowType = '<?php echo $row->'.$value->COLUMN_NAME.'; ?>';
+                        $rowType = '<?php echo $row->'.$value['COLUMN_NAME'].'; ?>';
                     } else {
-                        $rowType = '{{row.'.$value->COLUMN_NAME.'}}';
+                        $rowType = '{{row.'.$value['COLUMN_NAME'].'}}';
                     }
                     $column .= "\t\t\t".'<'.$type.'>'.$rowType.'</'.$type.'>'.PHP_EOL;
                 }
@@ -303,17 +303,17 @@ class View
 
         $column = '';
         foreach ($this->getTableColumns() as $key=> $value) {
-            if ($value->COLUMN_NAME !== 'id') {
+            if ($value['COLUMN_NAME'] !== 'id') {
                 if ($this->layoutType == 'php') {
-                    $rowType = '<?php echo $record->'.$value->COLUMN_NAME.'; ?>';
+                    $rowType = '<?php echo $record->'.$value['COLUMN_NAME'].'; ?>';
                 } else {
-                    $rowType = '{{ record.'.$value->COLUMN_NAME.' }}';
+                    $rowType = '{{ record.'.$value['COLUMN_NAME'].' }}';
                 }
 
                 $column .=
                 "\t\t\t".'<div class="form-group">
                     <label class="col-sm-2 control-label">'.
-                    Inflector::underscoreToSpace($value->COLUMN_NAME).
+                    Inflector::underscoreToSpace($value['COLUMN_NAME']).
                     '</label>
                     <div class="col-sm-10">
                         <p class="form-control-static"><span>'.$rowType.'</span></p>

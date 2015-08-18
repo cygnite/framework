@@ -60,7 +60,7 @@ class %ControllerName%Controller extends AbstractBaseController
                 )*/]
         );
 
-        $content = View::create('{%Apps%}.Views.$%controllerName%.index', [
+        $content = View::create('{%Apps%}.Views.%controllerName%.index', [
                     'records' => $%controllerName%,
                     'links' => '', //%StaticModelName%::createLinks(),
                     'title' => 'Cygnite Framework - Crud Application'
@@ -98,7 +98,7 @@ class %ControllerName%Controller extends AbstractBaseController
         //Check is form posted
         if ($input->hasPost('btnSubmit') == true) {
 
-            $validator = $this->setValidationRules($input);
+            $validator = $this->setValidationRules($input->post());
 
             //Run validation
             if ($validator->run()) {
@@ -126,7 +126,7 @@ class %ControllerName%Controller extends AbstractBaseController
         }
 
         // We can also use same view page for create and update
-        $content = View::create('{%Apps%}.Views.$%controllerName%.create', [
+        $content = View::create('{%Apps%}.Views.%controllerName%.create', [
                     'form' => $form->render(),
                     'validation_errors' => $form->errors,
                     'title' => 'Add a new %ControllerName%'
@@ -152,7 +152,7 @@ class %ControllerName%Controller extends AbstractBaseController
         //Check is form posted
         if ($input->hasPost('btnSubmit') == true) {
 
-            $validator = $this->setValidationRules($input);
+            $validator = $this->setValidationRules($input->post());
 
             //Run validation
             if ($validator->run()) {
@@ -178,7 +178,7 @@ class %ControllerName%Controller extends AbstractBaseController
             $form->validation = $validator;
         }
 
-        $content = View::create('{%Apps%}.Views.$%controllerName%.update', [
+        $content = View::create('{%Apps%}.Views.%controllerName%.update', [
                     'form' => $form->render(),
                     'validation_errors' => $form->errors,
                     'title' => 'Update the %ControllerName%'
@@ -196,7 +196,7 @@ class %ControllerName%Controller extends AbstractBaseController
     {
         $%modelName% = %StaticModelName%::find($id);
 
-        $content = View::create('{%Apps%}.Views.$%controllerName%.show', [
+        $content = View::create('{%Apps%}.Views.%controllerName%.show', [
                         'record' => $%modelName%,
                         'title' => 'Show the %ControllerName%'
         ]);
