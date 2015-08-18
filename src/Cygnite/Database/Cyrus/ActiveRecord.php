@@ -582,16 +582,21 @@ abstract class ActiveRecord implements ActiveRecordInterface
         return ($this->index[$this->primaryKey] == null) ? true : false;
     }
 
+    /**
+     * @param $arguments
+     * @param $method
+     * @return mixed
+     */
     private function setAttributesForInsertOrUpdate($arguments, $method)
     {
-        if (method_exists($this->fluentQuery(), $method)) {
-            if ($method == 'insert') {
-                $arguments = $this->attributes;
-            } else {
-                $arguments[$this->getKeyName()] = $this->index[$this->getKeyName()];
-            }
-            return call_user_func_array([$this->fluentQuery(), $method], [$arguments]);
+        $query = $this->fluentQuery();
+
+        if ($method == 'insert') {
+            return $query->{$method}($this->getAttributes());
         }
+
+        return $query->where($this->getKeyName(), '=', $this->index[$this->getKeyName()])
+                     ->{$method}($this->getAttributes());
     }
 
     /**

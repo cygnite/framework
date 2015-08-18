@@ -147,6 +147,7 @@ class Builder extends Joins implements QueryBuilderInterface
         $sql = $this->getInsertQuery(strtoupper(__FUNCTION__), $ar, $arguments);
         try {
             $statement = $this->getDatabaseConnection()->prepare($sql);
+            static::$queries[] = $statement->queryString;
             // we will bind all parameters into the statement using execute method
             if ($bool = $statement->execute($arguments)) {
                 $ar->{$ar->getKeyName()} = (int)$this->getDatabaseConnection()->lastInsertId();
@@ -160,38 +161,87 @@ class Builder extends Joins implements QueryBuilderInterface
     }
 
     /**
+     * @param $where
+     * @return string
+     */
+    public function buildWherePlaceholderName($where)
+    {
+        $whereStr = '';
+        $i = 0;
+        foreach($where as $key => $value){
+            if ($i == 0) {
+                $whereStr .= "$key = :$key";
+            } else {
+                $whereStr .= " AND $key = :$key";
+            }
+
+            $i++;
+        }
+
+        return ' WHERE '.ltrim($whereStr, ' AND ');
+    }
+
+    /**
+     * @param $where
+     * @return array
+     */
+    private function formatWhereToNamePlaceHolder($where)
+    {
+        $whereStr = '';
+        $whereNew = [];
+        foreach ($where as $key => $value) {
+            $key = trim(str_replace(['AND', '?', '='], ['', '', ''], $key));
+            $whereNew[$key] = $value;
+            $whereStr .= "$key = :$key,";
+        }
+
+        return [$whereNew, rtrim($whereStr, ',')];
+    }
+
+    /**
+     * @return array
+     */
+    private function buildWhereForUpdate()
+    {
+        $whereArray = array_combine($this->where, $this->bindings);
+        list($whereNew, $condition) = $this->formatWhereToNamePlaceHolder($whereArray);
+        return [$whereNew, $this->buildWherePlaceholderName($whereNew)];
+    }
+
+    /**
      * @param $args
      * @return mixed
      * @throws \Exception
      */
-    public function update($args)
+    public function update($data, $where = [])
     {
-        $column = $value = $x = null;
-        $ar = self::cyrus();
         $this->triggerEvent('beforeUpdate');
-
-        if (is_array($args) && !empty($args)) {
-            $x = array_keys($args);
-            $column = $x[0];
-            $value = $args[$x[0]];
+        if (!empty($where)) {
+            $whereStr = $this->buildWherePlaceholderName($where);
         } else {
-            $column = $ar->getKeyName();
-            $value = $args;
+            list($where, $whereStr) = $this->buildWhereForUpdate();
         }
 
-        $sql = $this->getUpdateQuery($column, strtoupper(__FUNCTION__));
+        $sql = $this->getUpdateQuery($data, strtoupper(__FUNCTION__)).$whereStr;
+
         try {
             $statement = $this->getDatabaseConnection()->prepare($sql);
             //Bind all values to query statement
-            foreach (array_merge($ar->attributes, [$column => $value]) as $key => $val) {
+            foreach ($data as $key => $val) {
                 $statement->bindValue(":$key", $val);
             }
+
+            foreach($where as $key => $value){
+                $statement->bindValue(":$key", $value);
+            }
+            static::$queries[] = $statement->queryString;
 
             $affectedRow = $statement->execute();
             $this->triggerEvent('afterUpdate');
 
             return $affectedRow;
         } catch (\PDOException  $exception) {
+
             throw new \Exception($exception->getMessage());
         }
     }
@@ -226,6 +276,7 @@ class Builder extends Joins implements QueryBuilderInterface
         try {
             $stmt = $this->getDatabaseConnection()->prepare($sql);
             $this->bindParam($stmt); //bind parameters
+            static::$queries[] = $stmt->queryString;
             $affectedRow = $stmt->execute();
             $this->triggerEvent('afterDelete');
 
@@ -903,23 +954,28 @@ class Builder extends Joins implements QueryBuilderInterface
     /**
      * Get update sql statement
      *
-     * @access private
-     * @param       $id
-     * @param       $function
-     * @return String
+     * @param $data
+     * @param $function
+     * @return string
      */
-    private function getUpdateQuery($id, $function)
+    private function getUpdateQuery($data, $function)
     {
         $ar = static::cyrus();
+        $data = (empty($data)) ? $ar->getAttributes() : $data;
+        /*
+         | we will unset primary key from given array
+         | This will avoid sql error (SQLSTATE[HY000]: General error: 2031)
+         */
+        unset($data[$ar->getKeyName()]);
+
         $sql = '';
-        foreach ($ar->attributes as $key => $value) {
-            $sql .= $key . '=:' . $key . ',';
+        foreach ($data as $key => $value) {
+            $sql .= "$key = :$key,";
         }
+
         $sql = rtrim($sql, ",");
 
-        return $function . " `" . $ar->getDatabase() . "`.`" . $ar->getTableName() . "` SET " .
-        " " . $sql .
-        " WHERE " . $id . "=:" . $id;
+        return $function . " `" . $ar->getDatabase() . "`.`" . $ar->getTableName() . "` SET " ." " . $sql;
     }
 
     /**
