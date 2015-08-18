@@ -57,22 +57,15 @@ class Table
      */
     public function getColumns()
     {
-        $conn = null;
-        $conn = $this->_connection;
-        $schema = Schema::instance(
-            $this,
-            function ($table) {
+        list($instance, $schema) = Schema::make($this, function ($table) {
                 $table->tableName = $this->tableName;
-                $columns = null;
-                //$table->setDbConnection($this->_connection, $this->database);
-                $table->setTableSchema();
 
-                return $table->schema;
-            }
-        );
+            return [$table, $table->setTableSchema()->schema];
+        });
 
         $columns = $this->query($schema)->getAll();
-        $this->setSchemaInstance($columns);
+
+        $this->setSchemaInstance($instance);
 
         return $columns;
     }
@@ -84,6 +77,31 @@ class Table
     public function setSchemaInstance($instance)
     {
         $this->schemaInstance = $instance;
+    }
+
+    /**
+     * @throws DatabaseException
+     * @return null
+     */
+    public function getPrimaryKey()
+    {
+        $columns = $this->getColumns();
+
+        if (!isset($columns)) {
+            throw new DatabaseException("Column schema not found!");
+        }
+
+        if (count($columns) > 0) {
+            $primaryKey = null;
+            foreach ($columns as $key => $value) {
+                if ($value['COLUMN_KEY'] == 'PRI' || $value['EXTRA'] == 'auto_increment') {
+                    $primaryKey = $value['COLUMN_NAME'];
+                    break;
+                }
+            }
+        }
+
+        return $primaryKey;
     }
 
     /**
