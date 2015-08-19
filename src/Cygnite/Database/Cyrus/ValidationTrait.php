@@ -36,6 +36,16 @@ trait ValidationTrait
     }
 
     /**
+     * Get the validator instance
+     *
+     * @return mixed
+     */
+    public function getValidator()
+    {
+        return $this->validation;
+    }
+
+    /**
      * @return $this
      */
     public function addRule()
@@ -56,6 +66,9 @@ trait ValidationTrait
     }
 
     /**
+     * We will validate for and return boolean
+     * value
+     *
      * @param $inputs
      * @return bool
      * @throws \RuntimeException
