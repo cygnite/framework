@@ -103,7 +103,7 @@ class %ControllerName%Controller extends AbstractBaseController
                 $form->errors = $%modelName%->validationErrors();
             }
 
-            $form->validation = $%modelName%->getValidator();
+            $form->validator = $%modelName%->getValidator();
         }
 
         // We can also use same view page for create and update
@@ -153,7 +153,7 @@ class %ControllerName%Controller extends AbstractBaseController
                 $form->errors = $%modelName%->validationErrors();
             }
 
-            $form->validation = $%modelName%->getValidator();
+            $form->validator = $%modelName%->getValidator();
         }
 
         $content = View::create('{%Apps%}.Views.%controllerName%.update', [

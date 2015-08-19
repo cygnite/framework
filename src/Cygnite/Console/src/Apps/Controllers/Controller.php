@@ -104,7 +104,7 @@ class %ControllerName%Controller extends AbstractBaseController
                 $form->errors = $%modelName%->validationErrors();
             }
 
-            $form->validation = $%modelName%->getValidator();
+            $form->validator = $%modelName%->getValidator();
         }
 
         // render view page
@@ -151,7 +151,7 @@ class %ControllerName%Controller extends AbstractBaseController
                 $form->errors = $%modelName%->validationErrors();
             }
 
-            $form->validation = $%modelName%->getValidator();
+            $form->validator = $%modelName%->getValidator();
         }
 
          // render view page
