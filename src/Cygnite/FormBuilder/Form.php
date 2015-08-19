@@ -182,9 +182,9 @@ class Form extends Elements implements FormInterface
 
             if (isset($val['type']) && in_array($val['type'], $this->validArray)) {
                 if (!in_array('submit', $val)) {
-                    if (is_object($this->validator) && isset($this->validator->errors[$key.'_error'])) {
-                        $this->elements[self::$formHolder[self::$formName]][$key.'_error'] =
-                            '<span class="'.$this->errorClass.'">'.$this->validator->errors[$key.'_error'].'</span>'.PHP_EOL;
+                    if (is_object($this->validator) && isset($this->validator->errors[$key.'.error'])) {
+                        $this->elements[self::$formHolder[self::$formName]][$key.'.error'] =
+                            '<span class="'.$this->errorClass.'">'.$this->validator->errors[$key.'.error'].'</span>'.PHP_EOL;
                     }
                 }
             }
