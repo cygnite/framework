@@ -162,19 +162,6 @@ class Controller
     }
 
     /**
-     * Generate form validation code
-     * @param $value
-     * @return string
-     */
-    private function generateValidator($value)
-    {
-        $validationCode = '';
-        $validationCode .= "\t\t\t->addRule('".$value['COLUMN_NAME']."', 'required|min:5')".PHP_EOL;
-
-        return $validationCode;
-    }
-
-    /**
      * Update the template code
      *
      */
@@ -191,7 +178,7 @@ class Controller
                 if ($this->isFormGenerator == false) {
                     $codeDb .= $this->generateDbCode($value);
                 }
-                $validationCode .= $this->generateValidator($value);
+
                 $form .= $this->generateFormElements($value);
             }
         }
@@ -200,14 +187,12 @@ class Controller
 
         $this->setForm($form);
         $this->setDbCode($codeDb);
-        $this->setValidationCode($validationCode."\t\t\t;");
     }
 
     private function setForm($form)
     {
         $this->form = $form;
     }
-
 
     /**
      * Get the form
@@ -229,26 +214,6 @@ class Controller
     {
         return (is_string($this->dbCode) && $this->dbCode !== '') ?
             $this->dbCode :
-            null;
-    }
-
-    /**
-     * Set validation code
-     * @param $code
-     */
-    private function setValidationCode($code)
-    {
-        $this->validationCode = $code;
-    }
-
-    /**
-     * Get validation code
-     * @return null|string
-     */
-    private function getValidationCode()
-    {
-        return (is_string($this->validationCode) && $this->validationCode !== '') ?
-            $this->validationCode :
             null;
     }
 
@@ -318,7 +283,6 @@ class Controller
 
         $content = str_replace('{%primaryKey%}', $primaryKey, $content);
         $content = str_replace('%modelColumns%', $this->getDbCode().PHP_EOL, $content);
-        $content = str_replace('%addRule%', $this->getValidationCode().PHP_EOL, $content);
         $controllerNameOnly = Inflector::classify(str_replace('Controller', '', $this->controller));
         $content = str_replace('%ControllerName%Form', $controllerNameOnly.'Form', $content);
 

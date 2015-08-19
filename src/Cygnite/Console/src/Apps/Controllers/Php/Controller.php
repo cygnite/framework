@@ -69,22 +69,6 @@ class %ControllerName%Controller extends AbstractBaseController
     }
 
     /**
-    * Set Validation rules for Form
-    * @param $input
-    * @return mixed
-    */
-    private function setValidationRules($input)
-    {
-        //Set Form validation rules
-        return Validator::create($input, function ($validate)
-        {
-            $validate
-%addRule%
-            return $validate;
-        });
-    }
-
-    /**
      * Add a new %controllerName%
      * @return void
      */
@@ -97,17 +81,14 @@ class %ControllerName%Controller extends AbstractBaseController
 
         //Check is form posted
         if ($input->hasPost('btnSubmit') == true) {
-
-            $validator = $this->setValidationRules($input->post());
+            $%modelName% = new %StaticModelName%();
 
             //Run validation
-            if ($validator->run()) {
+            if ($%modelName%->validate($input->post())) {
 
-                $%modelName% = new %StaticModelName%();
                 // get post array value except the submit button
                 $postArray = $input->except('btnSubmit')->post();
 %modelColumns%
-
                 // Save form details
                 if ($%modelName%->save()) {
                     $this->setFlash('success', '%ControllerName% added successfully!')
@@ -118,11 +99,11 @@ class %ControllerName%Controller extends AbstractBaseController
                 }
 
             } else {
-                //validation error here
-                $form->errors = $validator->getErrors();
+                //Set validation error into form builder
+                $form->errors = $%modelName%->validationErrors();
             }
 
-            $form->validation = $validator;
+            $form->validation = $%modelName%->getValidator();
         }
 
         // We can also use same view page for create and update
@@ -142,7 +123,7 @@ class %ControllerName%Controller extends AbstractBaseController
      */
     public function editAction($id)
     {
-        $validator = null; $%controllerName% = [];
+        $%modelName% = null;
         $%modelName% = %StaticModelName%::find($id);
         $form = new %ControllerName%Form($%modelName%, Url::segment(3));
         $form->action = 'edit';
@@ -152,15 +133,12 @@ class %ControllerName%Controller extends AbstractBaseController
         //Check is form posted
         if ($input->hasPost('btnSubmit') == true) {
 
-            $validator = $this->setValidationRules($input->post());
-
             //Run validation
-            if ($validator->run()) {
+            if ($%modelName%->validate($input->post())) {
 
                 // get post array value except the submit button
                 $postArray = $input->except('btnSubmit')->post();
 %modelColumns%
-
                 // Save form information
                 if ($%modelName%->save()) {
                     $this->setFlash('success', '%ControllerName% updated successfully!')
@@ -172,10 +150,10 @@ class %ControllerName%Controller extends AbstractBaseController
 
             } else {
                 //validation error here
-                $form->errors = $validator->getErrors();
+                $form->errors = $%modelName%->validationErrors();
             }
 
-            $form->validation = $validator;
+            $form->validation = $%modelName%->getValidator();
         }
 
         $content = View::create('{%Apps%}.Views.%controllerName%.update', [

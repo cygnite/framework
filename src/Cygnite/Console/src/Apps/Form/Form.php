@@ -19,9 +19,6 @@ class %controllerName%Form extends Form
 
     private $segment;
 
-    //set validator object
-    public $validation;
-
     // We will set action url
     public $action = 'add';
 
@@ -33,6 +30,20 @@ class %controllerName%Form extends Form
     }
 
     /**
+    * Set validator used for displaying validation
+    * errors below each form elements
+    *
+    * @param $validator
+    * @return $this
+    */
+    public function setValidator($validator)
+    {
+        $this->validator = $validator;
+
+        return $this;
+    }
+
+    /**
      *  Build form and return object
      * @return %controllerName%Form
      */
@@ -40,11 +51,10 @@ class %controllerName%Form extends Form
     {
         $id = (isset($this->model->id)) ? $this->model->id : '';
 
-        // Fllowing code is to display validation errors below the input box
-        if (is_object($this->validation)) {
-            $this->validator = $this->validation;// Errors will displayed below to inputs
+        // Below code is to display validation errors below the input box
+        if (is_object($this->validator)) {
             // Set your custom errors
-            //$this->validator->setCustomError('column_name_error', 'Custom Error');
+            //$this->validator->setCustomError('column.error', 'Your Custom Error Message');
         }
 
         {%formElements%}

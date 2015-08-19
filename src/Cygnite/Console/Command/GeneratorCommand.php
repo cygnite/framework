@@ -9,19 +9,19 @@
  */
 namespace Cygnite\Console\Command;
 
-use Cygnite\Console\Command\Command;
-use Cygnite\Console\Generator\Controller;
-use Cygnite\Console\Generator\Model;
-use Cygnite\Console\Generator\View;
-use Cygnite\Database\Table\Table;
-use Cygnite\Foundation\Application;
 use Cygnite\Helpers\Inflector;
-use Symfony\Component\Console\Command\Command as SymfonyCommand;
-use Symfony\Component\Console\Formatter\OutputFormatterStyle;
+use Cygnite\Database\Table\Table;
+use Cygnite\Console\Generator\View;
+use Cygnite\Foundation\Application;
+use Cygnite\Console\Command\Command;
+use Cygnite\Console\Generator\Model;
+use Cygnite\Console\Generator\Controller;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Formatter\OutputFormatterStyle;
+use Symfony\Component\Console\Command\Command as SymfonyCommand;
 
 class GeneratorCommand extends Command
 {
@@ -129,7 +129,7 @@ class GeneratorCommand extends Command
      *
      * @return mixed
      */
-    private function getColumns()
+    public function getColumns()
     {
         $table = $this->table->connect($this->database, Inflector::tabilize($this->model));
 

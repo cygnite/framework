@@ -28,6 +28,8 @@ class Model
 
     private $replacedContent;
 
+    private $validationRule;
+
     /*
      * Since constructor is private you cannot create object
      * for this class directly
@@ -90,8 +92,59 @@ class Model
         $content = str_replace('{%primaryKey%}', $primaryKey, $content);
         $content = str_replace('%modelName%', Inflector::tabilize($this->command->getModel()), $content);
         $content = str_replace('%databaseName%', $this->command->getDatabase(), $content);
+        $content = str_replace('{%rules%}', $this->replaceValidationRules(), $content);
 
         return $content;
+    }
+
+    /**
+     * Set validation code
+     * @param $code
+     * @return $this
+     */
+    private function setValidationRules($code)
+    {
+        $this->validationRule = $code;
+
+        return $this;
+    }
+
+    /**
+     * Get validation code
+     * @return null|string
+     */
+    private function getValidationRules()
+    {
+        return (is_string($this->validationRule) && $this->validationRule !== '') ?
+            $this->validationRule :
+            null;
+    }
+
+    /**
+     * Generate form validation code
+     * @param $value
+     * @return string
+     */
+    private function generateValidatorRules($value)
+    {
+        $rule = '';
+        $rule .= "\t\t'".$value['COLUMN_NAME']."' => 'required|min:5',".PHP_EOL;
+
+        return $rule;
+    }
+
+    public function replaceValidationRules()
+    {
+        $validationCode = '';
+        foreach ($this->command->getColumns() as $key=> $value) {
+
+            if ($value['COLUMN_NAME'] !== 'id') {
+                $validationCode .= $this->generateValidatorRules($value);
+            }
+        }
+
+        return $this->setValidationRules($validationCode."\t")
+             ->getValidationRules();
     }
 
     public function generate()
