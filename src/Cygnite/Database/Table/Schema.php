@@ -175,7 +175,7 @@ class Schema
                 $value['null'] == true
             ) ? ' DEFAULT NULL' : ' NOT NULL';
 
-            switch ($value['type']) {
+            switch (strtolower($value['type'])) {
 
                 case 'int':
                     $len = (isset($value['length'])) ? $value['length'] : 11;
