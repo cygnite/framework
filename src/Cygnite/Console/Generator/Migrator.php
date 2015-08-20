@@ -34,8 +34,6 @@ class Migrator
 
     private $latestFile;
 
-    private $migrationDir;
-
     /*
      * Since constructor is private you cannot create object
      * for this class directly
@@ -92,6 +90,13 @@ class Migrator
             $fileContent
         );
 
+        $content = str_replace('{%database%}', $this->command->getDatabaseName(), $content);
+
+        $content = str_replace('{%table_name%}',
+            Inflector::tabilize($this->command->argumentName),
+            $content
+        );
+
         $contentAppendWith = '';
 
         $contentAppendWith .= '<?php '.PHP_EOL;
@@ -99,11 +104,18 @@ class Migrator
         $this->replacedContent = $contentAppendWith.$content;
     }
 
+    /**
+     * @return mixed
+     */
     private function getAppMigrationDirPath()
     {
         return $this->command->getMigrationPath();
     }
 
+    /**
+     * @param \DateTime $date
+     * @return string
+     */
     public function generate(\DateTime $date)
     {
         $filePath = $appMigrationPath = '';
@@ -136,6 +148,10 @@ class Migrator
         return $file;
     }
 
+    /**
+     * @return $this
+     * @throws \Exception
+     */
     public function getLatestMigration()
     {
         try {
@@ -155,7 +171,7 @@ class Migrator
      * @param $directory
      * @return array
      */
-    private function files($directory)
+    public function files($directory)
     {
         return preg_grep('~\.(php)$~', scandir($directory, SCANDIR_SORT_DESCENDING));
     }
@@ -172,16 +188,18 @@ class Migrator
     }
 
     /**
-     * @param string $file
+     * @param string $fileName
      * @throws \Exception
      */
-    public function setMigrationClassName($file = '')
+    public function setMigrationClassName($fileName = null)
     {
         if ($this->getFileExt($this->latestFile) !== 'php') {
             throw new \Exception(APP_NS."/Resources/Database/Migrations/ must have {xxxx_table_name.php} file types");
         }
 
-        $file = str_replace(EXT, '', $this->latestFile);
+        $fileName = (is_null($fileName)) ? $this->latestFile : $fileName;
+
+        $file = str_replace(EXT, '', $fileName);
         $exp = '';
         $exp =  preg_split('((\d+|\D+))', $file, -1, PREG_SPLIT_DELIM_CAPTURE|PREG_SPLIT_NO_EMPTY);
 
