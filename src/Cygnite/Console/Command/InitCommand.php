@@ -14,6 +14,7 @@ use Cygnite\Helpers\Inflector;
 use Cygnite\Foundation\Application;
 use Cygnite\Console\Generator\Migrator;
 use Cygnite\Console\Command\Command;
+use Cygnite\Database\ConnectionManagerTrait;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -29,6 +30,8 @@ use Symfony\Component\Console\Formatter\OutputFormatterStyle;
  */
 class InitCommand extends Command
 {
+    use ConnectionManagerTrait;
+
     protected $name = 'migrate:init';
 
     protected $description = 'Initializing Migration By Cygnite CLI..';
@@ -65,6 +68,7 @@ class InitCommand extends Command
     protected function configure()
     {
         $this->addArgument('name', null, InputArgument::OPTIONAL, null)
+            ->addArgument('database', InputArgument::OPTIONAL, '')
             ->setHelp("<<<EOT
                 The <info>init</info> command creates a skeleton file and a migrations directory
                 <info>cygnite migrate:init</info>
@@ -105,8 +109,18 @@ class InitCommand extends Command
         }
     }
 
+    /**
+     * @return string
+     */
     public function getMigrationPath()
     {
         return realpath(CYGNITE_BASE.DS.APPPATH.DS.'Resources'.DS.'Database'.DS.'Migrations').DS;
+    }
+
+    public function getDatabaseName()
+    {
+        return ($this->input->getArgument('database') != '') ?
+            $this->input->getArgument('database') :
+            $this->getDefaultConnection();
     }
 }
