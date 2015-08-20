@@ -12,9 +12,9 @@ namespace Cygnite\Console\Command;
 use Cygnite\Database\Table\Table;
 use Cygnite\Foundation\Application;
 use Cygnite\Helpers\Inflector;
-use Cygnite\Database\Connection;
 use Cygnite\Console\Generator\Model;
 use Cygnite\Console\Command\Command;
+use Cygnite\Database\ConnectionManagerTrait;
 use Cygnite\Database\Exceptions\DatabaseException;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
@@ -31,6 +31,8 @@ use Symfony\Component\Console\Formatter\OutputFormatterStyle;
  */
 class ModelGeneratorCommand extends Command
 {
+    use ConnectionManagerTrait;
+
     public $applicationDir;
 
     public $model;
@@ -78,7 +80,7 @@ class ModelGeneratorCommand extends Command
      * We will get all column schema from database
      * @return mixed
      */
-    private function getColumns()
+    public function getColumns()
     {
         $table = $this->table()->connect($this->database, Inflector::tabilize($this->model));
 
@@ -103,8 +105,9 @@ class ModelGeneratorCommand extends Command
     {
         $this->setInput($input)->setOutput($output);
 
+        $table = $input->getArgument('name');
         // Your model name
-        $this->model = Inflector::classify($input->getArgument('name'));
+        $this->model = Inflector::classify($table);
         /*
          | Check for argument database name if not given
          | we will use default database connection
@@ -113,14 +116,15 @@ class ModelGeneratorCommand extends Command
         $this->columns = $this->getColumns();
 
         if (empty($this->columns)) {
-            throw new \Exception("Please check your model name. It seems table doesn't exists into database.");
+            exit($this->error("Please check your model name. It seems table '$table' doesn't exists!"));
         }
 
         $this->applicationDir = CYGNITE_BASE.DS.APPPATH;
         $this->generateModel();
 
         $modelPath = $this->applicationDir.DS.'models'.DS.$this->model.EXT;
-        $output->writeln("Model $this->model generated successfully into ".$modelPath);
+
+        $this->info("Model $this->model generated successfully into ".$modelPath);
     }
 
     /**
@@ -131,7 +135,7 @@ class ModelGeneratorCommand extends Command
     {
         return ($this->input->getArgument('database') != '') ?
             $this->input->getArgument('database') :
-            Connection::getDefaultConnection();
+            $this->getDefaultConnection();
     }
 
     /**
