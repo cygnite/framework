@@ -14,17 +14,55 @@ use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 
 class ControllerGeneratorCommand extends Command
 {
-    public $applicationDir;
-
-    public $controller;
-
-    private $isResourceController;
-
-    public $table;
-
+    /**
+     * Name of your console command
+     *
+     * @var string
+     */
     protected $name = 'controller:create';
 
+    /**
+     * Description of your console command
+     *
+     * @var string
+     */
     protected $description = 'Generate Sample Controller Using Cygnite CLI';
+
+    /**
+     * Console command arguments
+     *
+     * @var array
+     */
+    protected $arguments = [
+        ['name', InputArgument::OPTIONAL, 'Your Controller Name ?'],
+    ];
+
+    /**
+     * @var array
+     */
+    protected $options = [
+        ['resource', null, InputOption::VALUE_NONE, 'If set, will create RESTful resource controller.']
+    ];
+
+    /**
+     * @var Application directory path
+     */
+    public $applicationDir;
+
+    /**
+     * @var Controller name
+     */
+    public $controller;
+
+    /**
+     * @var Controller type
+     */
+    private $isResourceController;
+
+    /**
+     * @var \Cygnite\Database\Table\Table
+     */
+    public $table;
 
     /**
      * @param Table $table
@@ -41,32 +79,20 @@ class ControllerGeneratorCommand extends Command
         $this->table = $table;
     }
 
-
-    protected function configure()
-    {
-        $this->addArgument('name', InputArgument::OPTIONAL, 'Your Controller Name ?')
-             ->addOption('resource', null, InputOption::VALUE_NONE, 'If set, will create RESTful resource controller.')
-        ;
-    }
-
     /**
      * We will execute the controller command and generate classes
      *
-     * @param InputInterface  $input
-     * @param OutputInterface $output
+     * @return mixed|void
      * @throws \Exception
-     * @return int|null|void
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    public function process()
     {
-        $this->setInput($input)->setOutput($output);
-
         // Your controller name
-        $this->controller = Inflector::classify($input->getArgument('name')).'Controller';
+        $this->controller = Inflector::classify($this->argument('name')).'Controller';
 
         // By default we will generate basic controller, if resource set then we will generate
         // REST-ful Resource controller
-        $this->setControllerType($input);
+        $this->setControllerType();
 
         try {
             $this->makeController();
@@ -78,14 +104,17 @@ class ControllerGeneratorCommand extends Command
     }
 
     /**
-     * @param $input
+     * Set controller type
+     *
      */
-    private function setControllerType($input)
+    private function setControllerType()
     {
-        $this->isResourceController = ($input->getOption('resource')) ? true : false;
+        $this->isResourceController = ($this->option('resource')) ? true : false;
     }
 
     /**
+     * Get controller type either normal controller or resource controller
+     *
      * @return null
      */
     public function getControllerType()

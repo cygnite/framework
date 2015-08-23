@@ -29,10 +29,32 @@ use Symfony\Component\Console\Formatter\OutputFormatterStyle;
  */
 class MigrationCommand extends Command
 {
+    /**
+     * Name of your console command
+     *
+     * @var string
+     */
     protected $name = 'migrate';
 
+    /**
+     * Description of your console command
+     *
+     * @var string
+     */
     protected $description = 'Migrate Database By Cygnite CLI';
 
+    /**
+     * Console command arguments
+     *
+     * @var array
+     */
+    protected $arguments = [
+        ['type', null, InputArgument::OPTIONAL, ''],
+    ];
+
+    /**
+     * @var \Cygnite\Database\Table\Table
+     */
     public $table;
 
     /**
@@ -44,28 +66,29 @@ class MigrationCommand extends Command
         parent::__construct();
 
         if (!$table instanceof Table) {
-            throw new \InvalidArgumentException(sprintf('Constructor parameter should be instance of %s.', $table));
+            throw new \InvalidArgumentException(sprintf('Constructor expects instance of Table, given %s.', $table));
         }
 
         $this->table = $table;
     }
 
+    /**
+     * @return Table
+     */
     public function table()
     {
         return $this->table;
     }
 
-    protected function configure()
+    /**
+     * Execute Command To Run Migration
+     *
+     * @return mixed|void
+     */
+    public function process()
     {
-        $this->addArgument('type', null, InputArgument::OPTIONAL, '');
-    }
-
-    protected function execute(InputInterface $input, OutputInterface $output)
-    {
-        $this->setInput($input)->setOutput($output);
-
         // Migrate init - to create migration table
-        $type = $input->getArgument('type');
+        $type = $this->argument('type');
 
         $migration = Migrator::instance($this);
         $migration->getLatestMigration()
@@ -77,9 +100,14 @@ class MigrationCommand extends Command
             $migration->updateMigration('down');
         }
 
-        $this->info("Migration completed Successfully!");
+        $this->info("Migration Completed Successfully!");
     }
 
+    /**
+     * Get Migration Path
+     *
+     * @return string
+     */
     public function getMigrationPath()
     {
         return realpath(CYGNITE_BASE.DS.APPPATH.DS.'Resources'.DS.'Database'.DS.'Migrations').DS;

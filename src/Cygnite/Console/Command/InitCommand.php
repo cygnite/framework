@@ -32,9 +32,29 @@ class InitCommand extends Command
 {
     use ConnectionManagerTrait;
 
+    /**
+     * Name of your console command
+     *
+     * @var string
+     */
     protected $name = 'migrate:init';
 
-    protected $description = 'Initializing Migration By Cygnite CLI..';
+    /**
+     * Description of your console command
+     *
+     * @var string
+     */
+    protected $description = 'Initializing Migration By Cygnite CLI';
+
+    /**
+     * Console command arguments
+     *
+     * @var array
+     */
+    protected $arguments = [
+        ['name', null, InputArgument::OPTIONAL, null],
+        ['database', InputArgument::OPTIONAL, ''],
+    ];
 
     public $argumentName;
 
@@ -63,13 +83,11 @@ class InitCommand extends Command
     }
 
     /**
-     * {@inheritdoc}
+     * Set Help Message for the command
      */
     protected function configure()
     {
-        $this->addArgument('name', null, InputArgument::OPTIONAL, null)
-            ->addArgument('database', InputArgument::OPTIONAL, '')
-            ->setHelp("<<<EOT
+        $this->setHelp("<<<EOT
                 The <info>init</info> command creates a skeleton file and a migrations directory
                 <info>cygnite migrate:init</info>
                 EOT>>>"
@@ -77,15 +95,13 @@ class InitCommand extends Command
     }
 
     /**
-     * @param InputInterface  $input
-     * @param OutputInterface $output
+     * Execute Command To Initialize Migration Class
+     *
      * @return int|null|void
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    public function process()
     {
-        $this->setInput($input)->setOutput($output);
-
-        $this->argumentName = $input->getArgument('name');
+        $this->argumentName = $this->argument('name');
         $this->appDir = CYGNITE_BASE.DS.APPPATH;
         $migrateTemplateDir =
             dirname(dirname(__FILE__)).DS.'src'.DS.'Apps'.DS.'Database'.DS;
@@ -110,6 +126,8 @@ class InitCommand extends Command
     }
 
     /**
+     * Get Migration Path
+     *
      * @return string
      */
     public function getMigrationPath()
@@ -117,10 +135,15 @@ class InitCommand extends Command
         return realpath(CYGNITE_BASE.DS.APPPATH.DS.'Resources'.DS.'Database'.DS.'Migrations').DS;
     }
 
+    /**
+     * Get Database Connection Name
+     *
+     * @return array|mixed|string
+     */
     public function getDatabaseName()
     {
-        return ($this->input->getArgument('database') != '') ?
-            $this->input->getArgument('database') :
+        return ($this->argument('database') != '') ?
+            $this->argument('database') :
             $this->getDefaultConnection();
     }
 }

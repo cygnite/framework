@@ -1,11 +1,12 @@
 <?php use Cygnite\AssetManager\Asset; ?>
 
 <div class="pull-right">
-    <?php echo Asset::anchor('#controllerName#', 'Back', array('class' => 'btn btn-default btn-small btn-inverse')); ?>
+    <?php echo Asset::anchor('#controllerName#', 'Back', ['class' => 'btn btn-default btn-small btn-inverse']); ?>
 </div>
 
 <div class="error">
         <?php
+    if (!empty($validation_errors)) {
             /*
              | Display all validation error messages here
              */
@@ -14,6 +15,7 @@
                 <p style="color:#FF0000;"> <?php echo $message; ?> </p>
         <?php
             }
+    }
         ?>
 </div>
 

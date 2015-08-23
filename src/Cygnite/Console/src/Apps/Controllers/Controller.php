@@ -14,7 +14,7 @@ use Cygnite\Mvc\Controller\AbstractBaseController;
 * You may alter code to fit your needs
 */
 
-class %ControllerName%Controller extends AbstractBaseController
+class {%ControllerClassName%}Controller extends AbstractBaseController
 {
     /* If you are using twig template you don't require to set layout */
     //protected $layout = '';
@@ -189,7 +189,7 @@ class %ControllerName%Controller extends AbstractBaseController
             $this->setFlash('success', '%ControllerName% Deleted Successfully!')
                  ->redirectTo('%controllerName%/');
         } else {
-            $this->setFlash('error', 'Error Occured while deleting %ControllerName%!')
+            $this->setFlash('error', 'Error Occured While Deleting %ControllerName%!')
                  ->redirectTo('%controllerName%/');
         }
     }

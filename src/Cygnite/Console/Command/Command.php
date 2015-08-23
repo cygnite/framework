@@ -17,9 +17,25 @@ use Symfony\Component\Console\Command\Command as SymfonyCommand;
 
 class Command extends SymfonyCommand
 {
+    /**
+     * @var name of the command
+     */
     protected $name;
 
+    /**
+     * @var description of command
+     */
     protected $description;
+
+    /**
+     * @var array
+     */
+    protected $arguments = [];
+
+    /**
+     * @var array
+     */
+    protected $options = [];
 
     /**
      * The input interface implementation.
@@ -28,22 +44,55 @@ class Command extends SymfonyCommand
      */
     protected $input;
 
-    public function __construct()
-    {
-        /*
-         | We will set command name and descriptions here
-         */
-        parent::__construct($this->name);
-
-        $this->setDescription($this->description);
-    }
-
     /**
      * The output interface implementation.
      *
      * @var \Symfony\Component\Console\Output\OutputInterface
      */
     protected $output;
+
+    public function __construct()
+    {
+        /*
+         | We will set command name and descriptions here
+         */
+        parent::__construct($this->name);
+        $this->setConfiguration();
+    }
+
+    /**
+     * Set configuration for console command
+     * We will set command description, arguments and optional
+     * parameters into console command
+     *
+     * @return void
+     */
+    protected function setConfiguration()
+    {
+        $this->setDescription($this->description);
+        $this->configureArguments($this->arguments, 'addArgument');
+        $this->configureArguments($this->options);
+    }
+
+    /**
+     * We will add arguments and optional parameters into console
+     * command
+     *
+     * @param        $consoleInputs
+     * @param string $method
+     */
+    protected function configureArguments($consoleInputs, $method = 'addOption')
+    {
+        /*
+         | We will loop through all the arguments passed from console
+         | and set all required and optional parameters
+         | into console command
+         |
+         */
+        foreach ($consoleInputs as $arguments) {
+            call_user_func_array(array($this, $method), $arguments);
+        }
+    }
 
     /**
      * @param $input
@@ -187,6 +236,11 @@ class Command extends SymfonyCommand
         $this->getOutput()->writeln("<error>$string</error>");
     }
 
+    /**
+     * Set Cygnite Application
+     *
+     * @param $cygnite
+     */
     public function setCygnite($cygnite)
     {
         $this->cygnite = $cygnite;
@@ -205,5 +259,43 @@ class Command extends SymfonyCommand
         $this->setOutput($output);
 
         return parent::run($input, $output);
+    }
+
+    /**
+     * @param InputInterface  $input
+     * @param OutputInterface $output
+     * @return int|null
+     */
+    protected function execute(InputInterface $input, OutputInterface $output)
+    {
+        $method = method_exists($this, 'process') ? 'process' : 'handle';
+
+        return $this->{$method}();
+}
+
+    /**
+     * Get the value from command argument.
+     *
+     * @param  string  $key
+     * @return string|array
+     */
+    public function argument($name)
+    {
+        $input = $this->getInput();
+
+        return (is_null($name)) ? $input->getArguments() : $input->getArgument($name);
+    }
+
+    /**
+     * Get optional parameter from command argument
+     *
+     * @param  string  $key
+     * @return string|array
+     */
+    public function option($name)
+    {
+        $input = $this->getInput();
+
+        return (is_null($name)) ? $input->getOptions() : $input->getOption($name);
     }
 }

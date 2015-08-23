@@ -33,23 +33,51 @@ class ModelGeneratorCommand extends Command
 {
     use ConnectionManagerTrait;
 
-    public $applicationDir;
-
-    public $model;
-
-    public $inflection;
-
-    public $table;
-
-    public $controller;
-
-    public $database;
-
-    private $columns;
-
+    /**
+     * Name of your console command
+     *
+     * @var string
+     */
     protected $name = 'model:create';
 
+    /**
+     * Description of your console command
+     *
+     * @var string
+     */
     protected $description = 'Generate Sample Model Class Using Cygnite CLI';
+
+    /**
+     * Console command arguments
+     *
+     * @var array
+     */
+    protected $arguments = [
+        ['name', InputArgument::OPTIONAL, 'Name Of Your Model Class ?'],
+        ['database', InputArgument::OPTIONAL, ''],
+    ];
+
+    public $applicationDir;
+
+    /**
+     * @var Name of model class
+     */
+    public $model;
+
+    /**
+     * @var \Cygnite\Database\Table\Table
+     */
+    public $table;
+
+    /**
+     * @var Database connection name
+     */
+    public $database;
+
+    /**
+     * @var Set Columns name
+     */
+    private $columns;
 
     /**
      * @param Table $table
@@ -66,11 +94,17 @@ class ModelGeneratorCommand extends Command
         $this->table = $table;
     }
 
+    /**
+     * @return Table
+     */
     public function table()
     {
         return $this->table;
     }
 
+    /**
+     * @return Name of model class
+     */
     public function getModel()
     {
         return $this->model;
@@ -87,25 +121,14 @@ class ModelGeneratorCommand extends Command
         return $table->{__FUNCTION__}();
     }
 
-    protected function configure()
-    {
-        $this->addArgument('name', InputArgument::OPTIONAL, 'Name Of Your Model Class ?')
-             ->addArgument('database', InputArgument::OPTIONAL, '');
-    }
-
     /**
-     * We will execute the crud command and generate files
+     * We will execute the command and generate model class
      *
-     * @param InputInterface  $input
-     * @param OutputInterface $output
-     * @throws \Exception
      * @return int|null|void
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    public function process()
     {
-        $this->setInput($input)->setOutput($output);
-
-        $table = $input->getArgument('name');
+        $table = $this->argument('name');
         // Your model name
         $this->model = Inflector::classify($table);
         /*
@@ -122,9 +145,9 @@ class ModelGeneratorCommand extends Command
         $this->applicationDir = CYGNITE_BASE.DS.APPPATH;
         $this->generateModel();
 
-        $modelPath = $this->applicationDir.DS.'models'.DS.$this->model.EXT;
+        $modelPath = APPPATH.DS.'Models'.DS.$this->model.EXT;
 
-        $this->info("Model $this->model generated successfully into ".$modelPath);
+        $this->info("Model $this->model Generated Successfully Into ".$modelPath);
     }
 
     /**
@@ -133,8 +156,8 @@ class ModelGeneratorCommand extends Command
      */
     public function getDatabase()
     {
-        return ($this->input->getArgument('database') != '') ?
-            $this->input->getArgument('database') :
+        return ($this->argument('database') != '') ?
+            $this->argument('database') :
             $this->getDefaultConnection();
     }
 

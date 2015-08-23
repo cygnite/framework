@@ -42,6 +42,8 @@ class View
 
     private $fields = [];
 
+    private $controller;
+
     /*
      * Since constructor is private you cannot create object
      * for this class directly
@@ -53,6 +55,7 @@ class View
     private function __construct($command = null)
     {
         $this->command = $command;
+        $this->controller = Inflector::deCamelize(str_replace("Controller", "", $command->controller));
     }
 
     public static function __callStatic($method, $arguments = [])
@@ -199,8 +202,7 @@ class View
     public function generateViews()
     {
         $viewPath  = $viewExtension = '';
-        $controller = str_replace("Controller", "", $this->command->controller);
-        $viewDir = $this->command->applicationDir.DS.'Views'.DS.strtolower($controller);
+        $viewDir = $this->command->applicationDir.DS.'Views'.DS.$this->controller;
         $this->hasDirectory($viewDir);
 
         $viewExtension = ($this->layoutType == 'php') ? self::EXTENSION : self::TWIG_EXTENSION;
@@ -224,17 +226,8 @@ class View
         #replace table headers - <th> {%tableColumns%}</th>
         #replace table td - {%controllerColumns%}
 
-        $content = str_replace('#controllerName#',
-            strtolower(str_replace("Controller", "", $this->command->controller)),
-            $content
-        );
-
-        $content = str_replace(
-            '#ControllerName#',
-            Inflector::classify(str_replace("Controller", "", $this->command->controller)),
-            $content
-        );
-
+        $content = str_replace('#controllerName#', $this->controller, $content);
+        $content = str_replace('#ControllerName#', Inflector::classify($this->controller), $content);
         $content = str_replace('{%primaryKey%}',
             $this->command->table()->getPrimaryKey(),
             $content
@@ -288,9 +281,9 @@ class View
         /* Update View Page */
         # replace controller name - #controllerName#
 
-        $controller = str_replace("Controller", "", $this->command->controller);
-        $content = str_replace('#controllerName#', strtolower($controller), $content);
-        $content = str_replace('#Controller#', Inflector::classify($controller), $content);
+        $controller = str_replace("Controller", "", $this->controller);
+        $content = str_replace('#controllerName#', strtolower($this->controller), $content);
+        $content = str_replace('#Controller#', Inflector::classify($this->controller), $content);
 
         return $content;
     }
@@ -322,23 +315,15 @@ class View
             }
         }
 
-        $content = str_replace('#controllerName#',
-            strtolower(str_replace("Controller", "", $this->command->controller)),
-            $content
-        );
-
-        $content = str_replace('{#recordDivElements#}',
-            $column,
-            $content
-        );
+        $content = str_replace('#controllerName#', $this->controller, $content);
+        $content = str_replace('{#recordDivElements#}', $column, $content);
 
         return $content;
     }
 
     private function getApplicationViewPath()
     {
-        return $this->command->applicationDir.DS.'views'.DS.
-        strtolower(str_replace("Controller", "", $this->command->controller)).DS;
+        return $this->command->applicationDir.DS.'Views'.DS.$this->controller.DS;
     }
 
     /**

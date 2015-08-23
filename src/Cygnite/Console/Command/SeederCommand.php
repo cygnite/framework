@@ -27,10 +27,32 @@ use Symfony\Component\Console\Formatter\OutputFormatterStyle;
  */
 class SeederCommand extends Command
 {
+    /**
+     * Name of your console command
+     *
+     * @var string
+     */
     protected $name = 'database:seed';
 
+    /**
+     * Description of your console command
+     *
+     * @var string
+     */
     protected $description = 'Seed Database By Cygnite CLI';
 
+    /**
+     * Console command arguments
+     *
+     * @var array
+     */
+    protected $arguments = [
+        ['name', InputArgument::OPTIONAL, null],
+    ];
+
+    /**
+     * @var \Apps\Resources\Database\Seeding\DatabaseTable
+     */
     private $seeder;
 
     /**
@@ -42,7 +64,7 @@ class SeederCommand extends Command
         parent::__construct();
 
         if (!$seeder instanceof DatabaseTable) {
-            throw new \InvalidArgumentException(sprintf('Constructor parameter should be instance of %s.', $seeder));
+            throw new \InvalidArgumentException(sprintf('Constructor expects instance of DatabaseTable, givem %s.', $seeder));
         }
 
         $this->seeder = $seeder;
@@ -57,27 +79,14 @@ class SeederCommand extends Command
     }
 
     /**
-     * Configure arguments
-     */
-    protected function configure()
-    {
-        //'If set and value given, we will seed only that table.'
-        $this->addArgument('name', InputArgument::OPTIONAL, null);
-    }
-
-    /**
      * Execute the command
      *
-     * @param InputInterface  $input
-     * @param OutputInterface $output
      * @return int|null|void
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    public function process()
     {
-        $this->setInput($input)->setOutput($output);
-
         // Migrate init - to create migration table
-        $name = $this->input->getArgument('name');
+        $name = $this->argument('name');
 
         if (!is_null($name)) {
             if (string_has($name, ',')) {
@@ -92,6 +101,11 @@ class SeederCommand extends Command
         $this->info("Seeding Completed Successfully!");
     }
 
+    /**
+     * Seeder directory path
+     *
+     * @return string
+     */
     public function getSeederPath()
     {
         return realpath(CYGNITE_BASE.DS.APPPATH.DS.'Resources'.DS.'Database'.DS.'Seeding').DS;

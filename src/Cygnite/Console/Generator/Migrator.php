@@ -187,6 +187,20 @@ class Migrator
         return strtolower(pathinfo($file, PATHINFO_EXTENSION));
     }
 
+    public function splitStringByDigit($string)
+    {
+        if (is_array($string)) {
+            $parts = [];
+            foreach ($string as $key => $str) {
+               $parts[$key] = preg_split('((\d+|\D+))', $str, -1, PREG_SPLIT_DELIM_CAPTURE|PREG_SPLIT_NO_EMPTY);
+            }
+
+            return $parts;
+        }
+
+        return preg_split('((\d+|\D+))', $string, -1, PREG_SPLIT_DELIM_CAPTURE|PREG_SPLIT_NO_EMPTY);
+    }
+
     /**
      * @param string $fileName
      * @throws \Exception
