@@ -41,7 +41,7 @@ class Controller implements RouteControllerInterface
             $method = ucfirst(Inflector::pathAction($action));
 
             if (method_exists($this, 'set'.$method.'Route')) {
-                $this->{'set'.$method.'Route'}(lcfirst($controller), $action);
+                $this->{'set'.$method.'Route'}(Inflector::deCamelize($controller), $action);
             }
         }
 
