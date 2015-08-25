@@ -202,7 +202,7 @@ abstract class ActiveRecord implements ActiveRecordInterface
      */
     public static function all($arguments = [])
     {
-        return static::model()->fluentQuery()->find('all', $arguments);
+        return static::model()->fluentQuery()->all($arguments);
     }
 
     /**
@@ -619,15 +619,15 @@ abstract class ActiveRecord implements ActiveRecordInterface
         ];
 
         $fetch = $this->fluentQuery()->find('find', $args);
-        $this->setId($this->getKeyName(), array_shift($arguments));
 
-        if ($fetch == null) {
+        if ($fetch instanceof Collection && empty($fetch->asArray())) {
             return $this->returnEmptyObject();
         }
 
+        $this->setId($this->getKeyName(), array_shift($arguments));
         $this->{$this->getKeyName()} = $fetch[0]->{$this->getKeyName()};
 
-        foreach ($fetch[0]->attributes as $key => $value) {
+        foreach ($fetch[0]->getAttributes() as $key => $value) {
             $this->{$key} = $value;
         }
 
@@ -654,10 +654,7 @@ abstract class ActiveRecord implements ActiveRecordInterface
      */
     public function returnEmptyObject()
     {
-        $class = self::model();
-        $this->index[$this->primaryKey] = null;
-
-        return new $class();
+        return self::model();
     }
 
     /**
@@ -695,9 +692,11 @@ abstract class ActiveRecord implements ActiveRecordInterface
         $this->paginationOffset = intval($offset);
     }
 
-    public function getId($key)
+    public function getId($key = null)
     {
-        return ($this->index[$key] !== null) ? $this->index[$key] : null;
+        return (isset($this->index[$key]) && !is_null($key)) ?
+            $this->index[$key] :
+            $this->index[$this->getKeyName()];
     }
 
     /**
