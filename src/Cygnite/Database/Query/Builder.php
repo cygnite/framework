@@ -16,6 +16,7 @@ use Exception;
 use PDOException;
 use Cygnite\Helpers\Inflector;
 use Cygnite\Common\Pagination;
+use Cygnite\Database\Table\Schema;
 use Cygnite\Foundation\Collection;
 use Cygnite\Database\ConnectionManagerTrait;
 use Cygnite\Database\Cyrus\ActiveRecord;
@@ -1065,8 +1066,8 @@ class Builder extends Joins implements QueryBuilderInterface
         $exceptColumns = $ar->skip();
         $columnArray = [];
         foreach ($columns as $key => $value) {
-            if (!in_array($value->column_name, $exceptColumns)) {
-                $columnArray[] = $value->column_name;
+            if (!in_array($value->COLUMN_NAME, $exceptColumns)) {
+                $columnArray[] = $value->COLUMN_NAME;
             }
         }
         $this->_selectColumns = (string)implode(',', $columnArray);
