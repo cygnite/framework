@@ -242,7 +242,7 @@ class View implements ViewInterface,\ArrayAccess
 
         $this->layout = Inflector::toDirectorySeparator($this->getLayout());
 
-        if (!is_null($this->layout) || $this->layout !== '') { // render view page into the layout
+        if ($this->layout !== '') { // render view page into the layout
             $this->renderLayoutView($path, $this->viewsFilePath.DS, $params)->displayContent();
 
             return $this;
