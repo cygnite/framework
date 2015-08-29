@@ -12,12 +12,13 @@
 namespace Cygnite\Mvc\Controller;
 
 use Exception;
-use Cygnite\Base\EventHandler\Event;
 use Cygnite\Common\Encrypt;
-use Cygnite\Common\SessionManager\Session;
-use Cygnite\Foundation\Application as App;
 use Cygnite\Helpers\Inflector;
 use Cygnite\Mvc\View\ViewFactory;
+use Cygnite\Common\UrlManager\Url;
+use Cygnite\Base\EventHandler\Event;
+use Cygnite\Common\SessionManager\Session;
+use Cygnite\Foundation\Application as App;
 use Cygnite\Mvc\ControllerViewBridgeTrait;
 
 /**
@@ -77,8 +78,7 @@ abstract class AbstractBaseController
      */
     protected function redirectTo($uri = '', $type = 'location', $httpResponseCode = 302)
     {
-        $url = $this->get('cygnite.common.url-manager.url');
-        $url->redirectTo($uri, $type, $httpResponseCode);
+        Url::redirectTo($uri, $type, $httpResponseCode);
 
         return $this;
     }
@@ -157,6 +157,16 @@ abstract class AbstractBaseController
     public function render($view, $params = [], $return = false)
     {
         return $this->view()->render($view, $params, $return);
+    }
+
+    /**
+     * @param       $view
+     * @param array $params
+     * @return mixed
+     */
+    public function template($view, $params = [], $return = false)
+    {
+        return $this->view()->template($view, $params, $return);
     }
 
     /**
