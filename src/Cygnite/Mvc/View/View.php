@@ -107,6 +107,8 @@ class View implements ViewInterface,\ArrayAccess
                 $this->template->addExtension();
             }
         }
+
+        return $this;
     }
 
     public function getControllerName()
@@ -206,8 +208,10 @@ class View implements ViewInterface,\ArrayAccess
      * Render Twig template:
      * ---------------------
      * //path : Views/home/index.html.twig
-     * $this->render('home.index')->with($data);
-     *
+     * $this->render('home.index', $data);
+     * 
+     * $content = $this->render('home.index', $data, true);
+     * return Response::make($content)->send();
      * @param       $view
      * @param array $params
      * @param bool  $return
@@ -216,28 +220,19 @@ class View implements ViewInterface,\ArrayAccess
      */
     public function render($view, $params = [], $return = false)
     {
+        /*
+         * Check if template engine is set as true
+         * then call template and return from here
+         */
+        if ($this->templateEngine !== false) {
+            return $this->template($view, $params, $return);
+        }
+
         $this->widgetName = $view;
         $this['__return_output__'] = $return;
         $this->__set('parameters', $params);
-
         $path = $this->getPath(Inflector::toDirectorySeparator($view));
 
-        if ($this->templateEngine !== false) {
-            $this->setTwigEnvironment();
-            $path = $this->getPath(Inflector::toDirectorySeparator($view), true);
-        }
-
-        /*
-         | We will check if tpl is holding the object of
-         | twig, then we will set twig template
-         | environment
-         */
-        if (
-            is_object($this->tpl) &&
-            is_file($path)
-        ) {
-            return $this->setTwigTemplateInstance($view);
-        }
         /*
          | Throw exception is view file is not readable
          */
@@ -247,8 +242,8 @@ class View implements ViewInterface,\ArrayAccess
 
         $this->layout = Inflector::toDirectorySeparator($this->getLayout());
 
-        if ($this->layout !== '') { // render view page into the layout
-            $this->renderLayoutView($path, 'Views'.DS, $params)->displayContent();
+        if (!is_null($this->layout) || $this->layout !== '') { // render view page into the layout
+            $this->renderLayoutView($path, $this->viewsFilePath.DS, $params)->displayContent();
 
             return $this;
         }
@@ -259,6 +254,40 @@ class View implements ViewInterface,\ArrayAccess
         return $this;
     }
 
+    /**
+     * Render twig templates
+     *
+     * @param       $view
+     * @param array $param
+     * @param bool  $return
+     * @return $this
+     */
+    public function template($view, array $param = [], $return = false)
+    {
+        $this->setTwigEnvironment();
+        $path = $this->getPath(Inflector::toDirectorySeparator($view), true);
+
+        /*
+         | We will check if tpl is holding the object of
+         | twig, then we will set twig template
+         | environment
+         */
+        if (is_object($this->tpl) && is_file($path)) {
+            $this->setTwigTemplateInstance($view);
+        }
+
+        /*
+        | We will check is twig template instance exists
+        | then we will render twig template with parameters
+        */
+        if (is_object($this->tpl) && is_object($this['twig_template'])) {
+            return ($return) ?
+                $this['twig_template']->render($param) :
+                $this['twig_template']->display($param);
+        }
+
+        return $this;
+    }
 
     private function displayContent()
     {
@@ -267,10 +296,15 @@ class View implements ViewInterface,\ArrayAccess
         }
     }
 
+    /**
+     * @param      $path
+     * @param bool $twig
+     * @return mixed|string
+     */
     private function getPath($path, $twig = false)
     {
         if ($twig) {
-            return CYGNITE_BASE . DS .APP.DS.'Views'. DS.$path . $this->templateExtension;
+            return CYGNITE_BASE . DS .APP.DS.$this->viewsFilePath. DS.$path . $this->templateExtension;
         }
 
         return str_replace(APP_NS, APP, CYGNITE_BASE . DS . $path . '.view' . EXT);
@@ -319,14 +353,6 @@ class View implements ViewInterface,\ArrayAccess
      */
     public function with(array $params = [])
     {
-        /*
-         | We will check is twig template instance exists
-         | then we will render twig template with parameters
-         */
-        if (is_object($this->tpl) && is_object($this['twig_template'])) {
-            return $this['twig_template']->display($params);
-        }
-
         if (is_array($params)) {
             $this->params = (array)$params;
         }
@@ -582,6 +608,13 @@ class View implements ViewInterface,\ArrayAccess
     public function getContainer()
     {
         return $this['container'];
+    }
+
+    public function setTwigViewPath($path)
+    {
+        $this->viewsFilePath = $path;
+
+        return $this;
     }
 
     public function getTemplateLocation()
