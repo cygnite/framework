@@ -331,10 +331,10 @@ class Application extends Container
      */
     public function activateEventMiddleWare()
     {
-        $eventMiddleware = Config::get('global.config', 'activate.event.middlewares');
+        $midlewareEvents = Config::get('global.config', 'activate.event.middleware');
 
-        if ($eventMiddleware) {
-            $class = "\\".APP_NS."\\Middlewares\\Events\\Event";
+        if ($midlewareEvents) {
+            $class = "\\".APP_NS."\\Middleware\\Events\\Event";
             return (new $class)->register();
         }
     }
