@@ -60,7 +60,7 @@ interface RouterInterface
      * @param $fn
      * @return mixed
      */
-    public function set404($fn);
+    public function set404Page($fn);
 
     /**
      * Execute after filter after all request processed,

@@ -1,15 +1,41 @@
 <?php
 namespace Cygnite\Proxy;
 
+use Cygnite\Helpers\Inflector;
+
 if (!defined('CF_SYSTEM')) {
     exit('External script access not allowed');
 }
 
+/**
+ * Class Resolver
+ *
+ * We will make use of Resolver to resolve all static calls.
+ *
+ * @package Cygnite\Proxy
+ */
 abstract class StaticResolver
 {
-    public static $cached = array();
+    public static $cached = [];
 
-    public static function __callStatic($method, $arguments = array())
+    protected function getResolver()
+    {
+        $parts = [];
+        $parts = explode('\\', __CLASS__);
+        return end($parts);
+    }
+
+    /**
+     * We will return proxy objects from container
+     *
+     * @return Container
+     */
+    protected static function getContainer()
+    {
+        return Application::instance();
+    }
+
+    public static function __callStatic($method, $arguments = [])
     {
         $class = '\\'.get_called_class();
 
@@ -26,14 +52,29 @@ abstract class StaticResolver
          |  the child class object
          */
         if ($method == 'instance') {
-            self::$cached[$class] = new $class();
-            return new $class;
+            return self::$cached[$class] = new $class();
         }
+
+
 
         /**
          * Access all your protected method directly using facade
          * and return value
          */
-        return self::$cached[$class] = call_user_func_array(array(new $class(), $method), $arguments);
+        // calling the method directly is faster then call_user_func_[] !
+        switch (count($arguments)) {
+            case 0:
+                return (new $class())->$method();
+            case 1:
+                return (new $class())->$method($arguments[0]);
+            case 2:
+                return (new $class())->$method($arguments[0], $arguments[1]);
+            case 3:
+                return (new $class())->$method($arguments[0], $arguments[1], $arguments[2]);
+            case 4:
+                return (new $class())->$method($arguments[0], $arguments[1], $arguments[2], $arguments[3]);
+            default:
+                return call_user_func_array(array(new $class(), $method), $arguments);
+        }
     }
 }

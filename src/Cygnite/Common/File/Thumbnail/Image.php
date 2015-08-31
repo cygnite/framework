@@ -38,13 +38,15 @@ use Cygnite\Inflector;
 class Image
 {
     //defined thumbs array to hold dynamic properties
-    public $thumbs = array();
+    public $thumbs = [];
 
     //Set valid types of images to convert to thumb
-    public $imageTypes = array("jpg","png","jpeg","gif");
+    public $imageTypes = ["jpg", "png", "jpeg", "gif"];
 
     //Set valid type of properties to avoid exceptions
-    private $validProperties = array('directory', 'fixedWidth', 'fixedHeight', 'thumbPath', 'thumbName');
+    private $validProperties = ['directory', 'fixedWidth', 'fixedHeight', 'thumbPath', 'thumbName'];
+
+    public $rootDir;
 
     /**
      * @param $key   name of the property
@@ -67,7 +69,7 @@ class Image
     public function __get($key)
     {
         if (isset($this->thumbs[$key])) {
-              return $this->thumbs[$key];
+            return $this->thumbs[$key];
         }
     }
 
@@ -88,8 +90,8 @@ class Image
      */
     public function resize()
     {
-        $path = array();
-        $src = $this->rootDir.DS.str_replace(array('/','\\'), DS, $this->directory);   /* read the source image */
+        $path = [];
+        $src = $this->rootDir.DS.str_replace(['/', '\\'], DS, $this->directory);   /* read the source image */
 
 
         if (file_exists($src)) {
@@ -97,7 +99,7 @@ class Image
             $path = pathinfo($src);
 
             if (!in_array(strtolower($path['extension']), $this->imageTypes)) {
-                throw new \Exception("File type not supports");
+                throw new \Exception("File type not supported!");
             }
 
             $thumbName = ($this->thumbName == null)
@@ -136,9 +138,8 @@ class Image
             }
 
             return true;
-
         } else {
-              throw new \Exception("404 File not found on given path");
+            throw new \Exception("404 File not found on given path");
         }
     }
 
@@ -156,7 +157,6 @@ class Image
         return (is_callable($func))
             ? $func($src)
             : null;
-
     }
 
     /**
@@ -175,21 +175,18 @@ class Image
 
         /** @var $func TYPE_NAME */
         //if (is_callable($func)) {
-        if ( $func(
+        if ($func(
                 $thumb,
                 $this->rootDir.DS.str_replace(
-                    array(
-                        '/',
-                        '\\'
-                    ),
+                    ['/', '\\'],
                     DS,
                     $this->thumbPath
                 ).$name
              )
             ) {
-                chmod($this->rootDir.DS.str_replace(array('/', '\\'), DS, $this->thumbPath).$name, 0777);
+            chmod($this->rootDir.DS.str_replace(['/', '\\'], DS, $this->thumbPath).$name, 0777);
         } else {
-                throw new \Exception("Unknown Exception  while generating thumb image");
+            throw new \Exception("Unknown Exception while generating thumb image");
         }
     }
 
@@ -198,16 +195,11 @@ class Image
      * @param $sourceImage
      * @param $desiredWidth
      * @param $desiredHeight
-     * @internal param \Apps\Components\Libraries\type $type of the image
-     * @internal param \Apps\Components\Libraries\image $src source
      *
      * @return thumbImage
      */
-    public function changeDimensions(
-        $sourceImage,
-        $desiredWidth,
-        $desiredHeight
-    ) {
+    public function changeDimensions($sourceImage, $desiredWidth, $desiredHeight)
+    {
         $temp = "";
         // find the height and width of the image
         if (imagesx($sourceImage) >= imagesy($sourceImage)

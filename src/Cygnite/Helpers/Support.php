@@ -1,7 +1,13 @@
 <?php
+use Tracy\Helpers;
+use Tracy\Debugger;
 use Cygnite\Foundation\Application as App;
+use Cygnite\AssetManager\Html;
+use Cygnite\Translation\Translator;
+use Cygnite\Foundation\Http\CsrfValidator;
+use Cygnite\Common\SessionManager\Session;
 
-if ( ! function_exists('clear_sanity')) {
+if (! function_exists('clear_sanity')) {
     /*
     * $_POST   = array_map("clear_sanity", $_POST);
     * Strip html encoding out of a string, useful to prevent cross site scripting attacks
@@ -11,14 +17,13 @@ if ( ! function_exists('clear_sanity')) {
     {
         $values = (is_array($values)) ?
             array_map("clear_sanity", $values) :
-            htmlentities($values, ENT_QUOTES, 'UTF-8');
+            Html::santize($values);
 
         return $values;
     }
 }
 
-if ( ! function_exists('days_diff')) {
-
+if (! function_exists('days_diff')) {
     /**
      * @param $date
      * @return int
@@ -40,18 +45,16 @@ if ( ! function_exists('days_diff')) {
     }
 }
 
-if ( ! function_exists('show')) {
-
+if (! function_exists('show')) {
     /**
      * @param array $data
      * @param bool  $hasExit
      */
-    function show($data = array(), $hasExit = false)
+    function show($data = [], $hasExit = false)
     {
         echo '<pre>';
         print_r($data);
         echo '</pre>';
-
         if ($hasExit) {
             exit;
         }
@@ -59,8 +62,7 @@ if ( ! function_exists('show')) {
 }
 
 
-if ( ! function_exists('string_split')) {
-
+if (! function_exists('string_split')) {
     /**
      * @param        $string
      * @param string $needle
@@ -68,15 +70,13 @@ if ( ! function_exists('string_split')) {
      */
     function string_split($string, $needle = '.')
     {
-        $expression = array();
-        $expression = explode($needle,$string);
+        $expression = [];
+        $expression = explode($needle, $string);
         return $expression;
     }
-
 }
 
-if ( ! function_exists('string_has')) {
-
+if (! function_exists('string_has')) {
     /**
      * @param $haystack
      * @param $needle
@@ -88,17 +88,17 @@ if ( ! function_exists('string_has')) {
     }
 }
 
-if ( ! function_exists('app')) {
+if (! function_exists('app')) {
     /*
     * We will get the Application instance
     */
     function app($callback = null)
     {
-        return Application::instance($callback);
+        return App::instance($callback);
     }
 }
 
-if ( ! function_exists('compress')) {
+if (! function_exists('compress')) {
     /**
      * We will remove comments and empty spaces from the resource
      * and compress contents
@@ -117,8 +117,7 @@ if ( ! function_exists('compress')) {
     }
 }
 
-if ( ! function_exists('isCli')) {
-
+if (! function_exists('isCli')) {
     /**
      * Check if code is running via command line interface or web
      * @return bool
@@ -126,5 +125,155 @@ if ( ! function_exists('isCli')) {
     function isCli()
     {
         return (php_sapi_name() == 'cli' && empty($_SERVER['REMOTE_ADDR'])) ? true : false;
+    }
+}
+
+if (! function_exists('e')) {
+    /**
+     * Escape HTML entities in a string.
+     *
+     * @param  string  $value
+     * @return string
+     */
+    function e($value)
+    {
+        return Html::entities($value);
+    }
+}
+
+if (!function_exists('trans')) {
+    /**
+     * trans('Hello, :user', array(':user' => $username));
+     *
+     * The target language is defined by [Translator::$locale].
+     *
+     * @uses     Translator::get()
+     * @param         $key
+     * @param   array $replace values to replace in the translated text
+     * @param string  $locale
+     * @internal param string $string text to translate
+     * @internal param string $lang source language
+     * @return  string
+     */
+    function trans($key, array $replace = null, $locale = 'en-us')
+    {
+        return Translator::make(function ($trans) use ($key, $replace, $locale) {
+            if ($locale !== $trans->locale()) {
+                // The message and target languages are different
+                // Get the translation for this message
+                $key = $trans->get($key);
+            }
+
+            return empty($replace) ? $key : strtr($key, $replace);
+        });
+    }
+}
+
+if (! function_exists('toPath')) {
+    /**
+     * We will replace dot / slash(/) to directory separator
+     *
+     * @param $string
+     * @return string
+     */
+    function toPath($string)
+    {
+        switch ($string) {
+            case string_has($string, '.'):
+                $string = str_replace('.', DS, $string);
+                break;
+            case string_has($string, '/'):
+                $string = str_replace('/', DS, $string);
+                break;
+        }
+
+        return $string;
+    }
+}
+
+if (! function_exists('csrf')) {
+
+    /**
+     * Get Csrfvalidator instance
+     *
+     * @return static
+     */
+    function csrf()
+    {
+        $session = Session::make()->factory();
+        return CsrfValidator::make($session);
+    }
+}
+
+if (! function_exists('csrf_token')) {
+    /**
+     * We will get csrf token generated by CsrfValidator
+     *
+     * @return string
+     */
+    function csrf_token()
+    {
+        return csrf()->token();
+    }
+}
+
+if (! function_exists('validate_token')) {
+
+    /**
+     * Validate csrf token
+     *
+     * @param $token
+     * @return mixed
+     */
+    function validate_token($token)
+    {
+        return csrf()->validateRequestToken($token);
+    }
+}
+
+if (! function_exists('d')) {
+
+    /**
+     * @param       $data
+     * @param null  $title
+     * @param array $options
+     */
+    function d($data, $title = NULL, array $options = NULL)
+    {
+        Debugger::barDump($data, $title, $options);
+    }
+}
+
+if (! function_exists('logMessage')) {
+
+    /**
+     * @param      $msg
+     * @param null $priority
+     */
+    function logMessage($msg, $priority = ExceptionHandler::INFO)
+    {
+        Debugger::log($msg, $priority);
+    }
+}
+
+if (!function_exists('fire_log')) {
+
+    /**
+     * @param $message
+     */
+    function fire_log($message)
+    {
+        Debugger::fireLog($message);
+    }
+}
+
+if (!function_exists('time_bench')) {
+
+    /**
+     * @param null $name
+     */
+    function time_bench($name = NULL)
+    {
+        Debugger::timer($name);
     }
 }

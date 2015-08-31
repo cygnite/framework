@@ -5,54 +5,125 @@ if (!defined('CF_SYSTEM')) {
     exit('External script access not allowed');
 }
 
+/**
+ * Class Widget
+ *
+ * @package Cygnite\Mvc\View
+ */
 class Widget implements \ArrayAccess
 {
-    public $widget = array();
+    use Output;
 
-    public $data = array();
+    public $widget = [];
+
+    public $data = [];
 
     protected $module = false;
 
     protected $widgetName;
 
+    protected $moduleDir = 'Modules';
+
     /**
      * @param       $name
      * @param array $data
      */
-    public function __construct($name, $data= array())
+    public function __construct($name, array $data= [])
     {
-        $this->widgetName = $name;
+        $this->setWidgetName($name);
         $this->data = $data;
     }
 
+    private function setWidgetName($name)
+    {
+        $this->widgetName = $name;
+    }
+
+    private function getWidgetName()
+    {
+        return (isset($this->widgetName)) ? $this->widgetName : null;
+    }
+
     /**
-     * @param          $var
-     * @param callable $callback
+     * @param          $name
      * @param array    $data
+     * @param callable $callback
      * @return mixed
      */
-    public static function make($var, \Closure $callback = null, $data = array())
+    public static function make($name, array $data = [], \Closure $callback = null)
     {
         /*
          | If second param given as closure then we will
          | return callback
          */
-        if ($callback instanceof \Closure && !is_null($callback)) {
-            return $callback(new Widget($var, $data));
+        if (!is_null($callback) && $callback instanceof \Closure) {
+            return $callback(new Widget($name, $data));
         }
-
         /*
          | return object
          */
-        return (new Widget($var, $data))->render();
+        return (new Widget($name, $data))->render();
     }
 
     /**
      * @param $bool
      */
-    public function isModule($bool)
+    public function setModule($bool)
     {
         $this->module = $bool;
+    }
+
+    public function module()
+    {
+        return ($this->module) ? true : false;
+    }
+
+    /**
+     * We will setup module view path
+     * @return string
+     */
+    protected function setupModule()
+    {
+        if (string_has($this->getWidgetName(), ':')) {
+            $exp = [];
+            $exp = explode(':', $this->getWidgetName());
+            $moduleName = $exp[0];
+            $view = $exp[1];
+            $path = $this->getWidgetPath($view, true);
+            $this->setWidgetName(null);
+            $this->setModule(false);
+
+            return $path;
+        }
+    }
+
+    /**
+     * Set up widget view path
+     * @return string
+     */
+    protected function setupWidget()
+    {
+        /*
+         | If widget not belongs to HMVC modules and
+         | has ":" in the view name, we will convert name as path
+         */
+
+        if (string_has($this->getWidgetName(), ':')) {
+            $widget = null;
+            $widget = str_replace(':', DS, $this->getWidgetName());
+            return $this->getWidgetPath($widget);
+        }
+    }
+
+    private function getWidgetPath($widget, $isModule = false)
+    {
+        $moduleName = '';
+        $modulePath = 'Views';
+        if ($isModule) {
+            $modulePath = $this->moduleDir.DS.$moduleName.DS.'Views';
+        }
+
+        return CYGNITE_BASE.DS.APP.DS.$modulePath.DS.$widget.'.view'.EXT;
     }
 
     /**
@@ -67,59 +138,33 @@ class Widget implements \ArrayAccess
          | so that we will understand you are trying to invoke module view
          */
         if ($isModule) {
-            $this->isModule($isModule);
+            $this->setModule($isModule);
         }
 
         /*
-         | We will check if widget is cached, return if already cached
+         | We will return if widget already cached
          */
-        if ($this->has($this->widgetName)) {
-           return $this->getWidget($this->widgetName);
+        if ($this->has($this->getWidgetName())) {
+            return $this->getWidget($this->getWidgetName());
         }
 
         $path = null;
 
-        if ($this->module) {
+        if ($this->module()) {
             /*
              | If widget belongs to HMVC modules and
              | has ":" in the view name, we will think first param
              | as module name and second param as view name
              */
-            if (string_has($this->widgetName, ':')) {
-
-                $exp = array();
-                $exp = explode(':', $this->widgetName);
-                $moduleName = $exp[0];
-                $view = $exp[1];
-                $path = getcwd().DS.APPPATH.DS.'modules'.DS.$moduleName.DS.'Views'.DS.$view.'.view'.EXT;
-
-                $this->widgetName= null;
-                $this->module = false;
-            }
-
-
+            $path = $this->setupModule();
         } else {
-
-            /*
-             | If widget not belongs to HMVC modules and
-             | has ":" in the view name, we will convert name as path
-             */
-            if (string_has($this->widgetName, ':')) {
-                $widget = null;
-                $widget = str_replace(':', DS, $this->widgetName);
-                $path = getcwd().DS.APPPATH.DS.'views'.DS.$widget.'.view'.EXT;
-            }
+            $path = $this->setupWidget();
         }
 
-        $output = (new Output($this->widgetName))->buffer($path, $this->data)->clean();
-        $this->setWidget($this->widgetName, $output);
+        $output = $this->renderView($path, $this->data);
+        $this->setWidget($this->getWidgetName(), $output);
 
-        return $this->getWidget($this->widgetName);
-    }
-
-    public function __toString()
-    {
-        return $this->getWidget($this->widgetName);
+        return $output;
     }
 
     /**

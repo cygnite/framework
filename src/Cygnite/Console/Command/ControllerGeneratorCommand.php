@@ -1,10 +1,11 @@
 <?php
 namespace Cygnite\Console\Command;
 
+use Cygnite\Database\Table\Table;
 use Cygnite\Helpers\Inflector;
 use Cygnite\Foundation\Application;
 use Cygnite\Console\Generator\Controller;
-use Symfony\Component\Console\Command\Command;
+use Cygnite\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -13,44 +14,85 @@ use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 
 class ControllerGeneratorCommand extends Command
 {
+    /**
+     * Name of your console command
+     *
+     * @var string
+     */
+    protected $name = 'controller:create';
+
+    /**
+     * Description of your console command
+     *
+     * @var string
+     */
+    protected $description = 'Generate Sample Controller Using Cygnite CLI';
+
+    /**
+     * Console command arguments
+     *
+     * @var array
+     */
+    protected $arguments = [
+        ['name', InputArgument::OPTIONAL, 'Your Controller Name ?'],
+    ];
+
+    /**
+     * @var array
+     */
+    protected $options = [
+        ['resource', null, InputOption::VALUE_NONE, 'If set, will create RESTful resource controller.']
+    ];
+
+    /**
+     * @var Application directory path
+     */
     public $applicationDir;
 
+    /**
+     * @var Controller name
+     */
     public $controller;
 
+    /**
+     * @var Controller type
+     */
     private $isResourceController;
 
-    public $inflection;
+    /**
+     * @var \Cygnite\Database\Table\Table
+     */
+    public $table;
 
-    public static function make()
+    /**
+     * @param Table $table
+     * @throws \InvalidArgumentException
+     */
+    public function __construct(Table $table)
     {
-        return new ControllerGeneratorCommand();
-    }
+        parent::__construct();
 
-    protected function configure()
-    {
-        $this->setName('controller:create')
-             ->setDescription('Generate Sample Controller Using Cygnite CLI')
-             ->addArgument('name', InputArgument::OPTIONAL, 'Your Controller Name ?')
-             ->addOption('resource', null, InputOption::VALUE_NONE, 'If set, will create RESTful resource controller.')
-        ;
+        if (!$table instanceof Table) {
+            throw new \InvalidArgumentException(sprintf('Constructor parameter should be instance of %s.', $table));
+        }
+
+        $this->table = $table;
     }
 
     /**
      * We will execute the controller command and generate classes
      *
-     * @param InputInterface  $input
-     * @param OutputInterface $output
+     * @return mixed|void
      * @throws \Exception
-     * @return int|null|void
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    public function process()
     {
         // Your controller name
-        $this->controller = Inflector::classify($input->getArgument('name')).'Controller';
+        $this->controller = Inflector::classify($this->argument('name')).'Controller';
 
         // By default we will generate basic controller, if resource set then we will generate
         // REST-ful Resource controller
-        $this->setControllerType($input);
+        $this->setControllerType();
 
         try {
             $this->makeController();
@@ -58,18 +100,21 @@ class ControllerGeneratorCommand extends Command
             throw $e;
         }
 
-        $output->writeln('<info>Controller '.$this->controller.' Generated Successfully By Cygnite Cli.</info>');
+        $this->info('Controller '.$this->controller.' Generated Successfully By Cygnite Cli.');
     }
 
     /**
-     * @param $input
+     * Set controller type
+     *
      */
-    private function setControllerType($input)
+    private function setControllerType()
     {
-        $this->isResourceController = ($input->getOption('resource')) ? true : false;
+        $this->isResourceController = ($this->option('resource')) ? true : false;
     }
 
     /**
+     * Get controller type either normal controller or resource controller
+     *
      * @return null
      */
     public function getControllerType()
@@ -84,7 +129,7 @@ class ControllerGeneratorCommand extends Command
     {
         $controller = null;
         // Create Controller instance
-        $controller = Controller::instance(array(), null, $this);
+        $controller = Controller::instance([], null, $this);
         $resourcePath = 'Resources'.DS.'Stubs'.DS;
         $controllerTemplateDir =
             dirname(dirname(__FILE__)).DS.'src'.DS.ucfirst('apps').DS.'Controllers'.DS.$resourcePath;

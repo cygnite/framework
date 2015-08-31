@@ -35,7 +35,7 @@ class Cookie extends StaticResolver implements CookieInterface
 
     private $httpOnly = false;
 
-    public static $cookies = array();
+    public static $cookies = [];
 
     /*
      * Did cookie has been set already ?
@@ -69,7 +69,7 @@ class Cookie extends StaticResolver implements CookieInterface
      * @param array    $request
      * @return object
      */
-    protected function create(Closure $callback = null, $request = array())
+    protected function create(Closure $callback = null, $request = [])
     {
         if (!empty($request)) {
             static::$cookies = $request['cookie'];
@@ -105,7 +105,6 @@ class Cookie extends StaticResolver implements CookieInterface
         $this->name = (string) $this->security->sanitize($name);
 
         return $this;
-
     }
 
 
@@ -163,12 +162,7 @@ class Cookie extends StaticResolver implements CookieInterface
         $var = null;
         $var = substr($expire, 0, 1);
 
-        if (in_array(
-            $var,
-            array('+','-')
-        )
-        ) {
-
+        if (in_array($var, ['+', '-'])) {
             $this->expire = strtotime($expire);
 
             if ($this->expire === false) {
@@ -176,7 +170,6 @@ class Cookie extends StaticResolver implements CookieInterface
                     'Cookie->setExpire was passed a string it could not parse - "'.$expire.'"'
                 );
             }
-            unset($expire);
 
             return $this;
         }
@@ -184,7 +177,6 @@ class Cookie extends StaticResolver implements CookieInterface
         $this->expire = 0;
 
         return $this;
-
     }
 
     /**
@@ -214,7 +206,6 @@ class Cookie extends StaticResolver implements CookieInterface
         }
 
         return $this;
-
     }
 
 

@@ -20,8 +20,8 @@ use Cygnite\Foundation\Application;
  */
 class Asset
 {
-   public function getResolver()
-   {
-       return 'cygnite.asset-manager.asset';
-   }
+    public function getResolver()
+    {
+        return 'cygnite.asset-manager.asset';
+    }
 }

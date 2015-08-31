@@ -35,8 +35,7 @@ if (!defined('CF_SYSTEM')) {
 
 class Pagination
 {
-
-    private $perPage = '15';
+    protected $perPage = '15';
 
     public $model;
 
@@ -74,7 +73,7 @@ class Pagination
      * @param callable $callback
      * @return Pagination
      */
-    public static function instance($args = array(), Closure $callback = null)
+    public static function make($args = [], Closure $callback = null)
     {
         if ($callback instanceof Closure) {
             return $callback(new self($args));
@@ -89,7 +88,7 @@ class Pagination
     public function setPerPage($number = null)
     {
         if (is_null($number)) {
-            if (property_exists($this->model,'perPage')) {
+            if (property_exists($this->model, 'perPage')) {
                 $this->perPage = $this->model->perPage;
             }
         } else {
@@ -102,16 +101,16 @@ class Pagination
      */
     public function getTotalNumberOfPages()
     {
-       $numRecords = null;
+        $numRecords = null;
 
-       $modelClass = Inflector::getClassNameFromNamespace(get_class($this->model));
-       $table = Inflector::tabilize($modelClass);
+        $modelClass = Inflector::getClassNameFromNamespace(get_class($this->model));
+        $table = Inflector::tabilize($modelClass);
 
-       $numRecords = $this->model
+        $numRecords = $this->model
                           ->query("SELECT ".$this->count()." as ".$this->numCount." FROM `".$table."`")
                           ->getAll();
 
-       return $numRecords[0]->{$this->numCount};
+        return $numRecords[0]->{$this->numCount};
     }
 
     /**
@@ -229,30 +228,25 @@ class Pagination
             $pageNumber = 1;
         }
 
-        if($this->lastPage > 1)
-        {
+        if ($this->lastPage > 1) {
             $content .= "<div class=\"pagination\">";
 
             $content .= $this->renderPreviousLink($pageNumber);
 
             //not enough pages to bother breaking it up
             if ($this->lastPage < 7 + ($this->adjacent * 2)) {
-
                 for ($counter = 1; $counter <= $this->lastPage; $counter++) {
                     $content.= $this->createCurrentActiveLink($pageNumber, $counter);
                 }
-
-            } elseif($this->lastPage > 5 + ($this->adjacent * 2)) {
+            } elseif ($this->lastPage > 5 + ($this->adjacent * 2)) {
                 //close to beginning; only hide later pages
-                if($pageNumber < 1 + ($this->adjacent * 2)) {
-
+                if ($pageNumber < 1 + ($this->adjacent * 2)) {
                     for ($counter = 1; $counter < 4 + ($this->adjacent * 2); $counter++) {
                         $content.= $this->createCurrentActiveLink($pageNumber, $counter);
                     }
                     $content.= "...";
                     $content.= $this->createSecondLink();
-
-                } elseif(
+                } elseif (
                     $this->lastPage - ($this->adjacent * 2) > $pageNumber
                     && $pageNumber > ($this->adjacent * 2)
                 ) {
@@ -270,8 +264,8 @@ class Pagination
                     $content.= "...";
                     $content.= $this->createPrimaryLink();
                     $content.= $this->createSecondLink();
-
-                } else {//close to end; only hide early pages
+                } else {
+                    //close to end; only hide early pages
 
                     $content.= $this->createPrimaryLink();
 
@@ -281,7 +275,6 @@ class Pagination
                         $counter <= $this->lastPage;
                         $counter++
                     ) {
-
                         $content.= $this->createCurrentActiveLink($pageNumber, $counter);
                     }
                 }
@@ -302,7 +295,6 @@ class Pagination
         }
 
         return $content;
-
     }
 
     private function createPrimaryLink()
@@ -335,20 +327,19 @@ class Pagination
         }
 
         return $content;
-
     }
 
     public function renderNextLink($counter, $pageNumber, $content = '')
     {
         //create next link
-        if ($pageNumber < $counter - 1)
+        if ($pageNumber < $counter - 1) {
             $content.= "<a href='".$this->currentPageUrl.'/'.$this->next."'>next </a>";
-        else
+        } else {
             $content.= "<span class=\"disabled\">next </span>";
+        }
         $content.= "</div>\n";
 
         return $content;
-
     }
 
     private function render()

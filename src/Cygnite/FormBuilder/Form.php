@@ -13,6 +13,7 @@ namespace Cygnite\FormBuilder;
 
 use Closure;
 use Cygnite\Common\Input;
+use Cygnite\FormBuilder\Html\Elements;
 
 if (!defined('CF_SYSTEM')) {
     exit('No External script access allowed');
@@ -26,32 +27,29 @@ if (!defined('CF_SYSTEM')) {
  * @author Sanjoy Dey <dey.sanjoy0@gmail.com>
  */
 
-class Form implements FormInterface
+class Form extends Elements implements FormInterface
 {
-
-    private static $formHolder = array();
+    public static $formHolder = [];
 
     public static $formName;
 
     public static $formOpen;
 
-    protected $attributes = array();
+    protected $attributes = [];
 
-    protected  $elements = array();
+    protected $value = [];
 
-    protected $value = array();
+    protected $element = [];
 
-    protected  $element = array();
-
-    private static $object;
-
-    private $validArray = array('text', 'button', 'select', 'textarea');
+    private $validArray = ['text', 'button', 'select', 'textarea'];
 
     public $validator;
 
     protected $errorClass = 'error';
 
-    private static $validMethod = array('make', 'instance');
+    private static $validMethod = ['make', 'instance'];
+
+    public static $elNum = 1;
 
     /**
      * @param       $method
@@ -59,15 +57,15 @@ class Form implements FormInterface
      * @return mixed
      * @throws \Exception
      */
-    public static function __callStatic($method, $arguments = array())
+    public static function __callStatic($method, $arguments = [])
     {
         // Check for valid function name
         if (in_array($method, static::$validMethod)) {
             if (empty($arguments)) {
-                return call_user_func_array(array(new self,'getInstance'), array());
+                return call_user_func_array([new self, 'getInstance'], []);
             } elseif ($arguments[0] instanceof Closure) {
-                return call_user_func_array(array(new self,'getInstance'), $arguments);
-        }
+                return call_user_func_array([new self, 'getInstance'], $arguments);
+            }
         }
 
         throw new \Exception("Undefined $method method called.");
@@ -95,7 +93,7 @@ class Form implements FormInterface
      * @param array $attributes
      * @return $this
      */
-    public function open($formName, $attributes = array())
+    public function open($formName, $attributes = [])
     {
         self::$formName = $formName;
         self::$formHolder[$formName] = $formName;
@@ -114,30 +112,28 @@ class Form implements FormInterface
     * @return $this
     *
     */
-    public function addElement($type, $key, $values = array())
+    public function addElement($type, $key, $array = [])
     {
-        $values['type'] = $type;
-        $this->value[$key] = $values;
+        $array['type'] = $type;
+
+        if ($type == 'openTag') {
+            $key = $key.'_'.mt_rand(1, 2000);
+        }
+
+        if ($type == 'closeTag') {
+            $key = $key.'_'.mt_rand(2000, 4000);
+        }
+
+        $this->value[$key] = $array;
 
         return $this;
-    }
-
-    public function withHtml()
-    {
-        //$this->value[$key] = $values;
-        return $this;
-    }
-
-    public function setValidation()
-    {
-
     }
 
     /**
      * @param array $elements
      * @return $this
      */
-    public function addElements($elements = array())
+    public function addElements($elements = [])
     {
         $this->value = array_shift($elements);
 
@@ -150,7 +146,6 @@ class Form implements FormInterface
     public function createForm()
     {
         foreach ($this->value as $key => $val) {
-
             switch ($val['type']) {
                 case 'textarea':
                     unset($val['type']);
@@ -168,22 +163,31 @@ class Form implements FormInterface
                     unset($val['type']);
                     $this->button($key, $val);
                     break;
+                case 'custom':
+                    unset($val['type']);
+                    $this->custom($key, $val);
+                    break;
+                case 'openTag':
+                    unset($val['type']);
+                    $this->openTag($key, $val);
+                    break;
+                case 'closeTag':
+                    unset($val['type']);
+                    $this->closeTag($key);
+                    break;
                 default:
                     $this->input($key, $val);
                     break;
             }
 
             if (isset($val['type']) && in_array($val['type'], $this->validArray)) {
-
                 if (!in_array('submit', $val)) {
-
-                    if (is_object($this->validator) && isset($this->validator->errors[$key.'_error'])) {
-                        $this->elements[self::$formHolder[self::$formName]][$key.'_error'] =
-                            '<span class="'.$this->errorClass.'">'.$this->validator->errors[$key.'_error'].'</span>'.PHP_EOL;
+                    if (is_object($this->validator) && isset($this->validator->errors[$key.'.error'])) {
+                        $this->elements[self::$formHolder[self::$formName]][$key.'.error'] =
+                            '<span class="'.$this->errorClass.'">'.$this->validator->errors[$key.'.error'].'</span>'.PHP_EOL;
                     }
                 }
             }
-
         }
 
         return $this;
@@ -201,82 +205,13 @@ class Form implements FormInterface
      * @param $key
      * @param $val
      */
-    private function form($key, $val)
+    protected function form($key, $val)
     {
         $type = null;
         $type = strtolower(__FUNCTION__);
 
         $this->attributes[self::$formHolder[self::$formName]][$key] =
             "<$type name='".self::$formName."' ".$this->attributes($val).">".PHP_EOL;
-
-    }
-
-    /**
-     * @param $key
-     * @param $val
-     */
-    private function input($key, $val)
-    {
-        $type = null;
-        $type = strtolower(__FUNCTION__);
-
-        $this->elements[self::$formHolder[self::$formName]][$key] =
-            "<$type name='".$key."' ".$this->attributes($val)." />".PHP_EOL;
-
-    }
-
-    /**
-     * @param $key
-     * @param $val
-     */
-    private function label($key, $val)
-    {
-        $type = null;
-        $type = strtolower(__FUNCTION__);
-
-        $this->elements[self::$formHolder[self::$formName]][$key] =
-            "<$type for='".$key."' ".$this->attributes($val).">".$key."</$type>".PHP_EOL;
-    }
-
-    /**
-     * @param $key
-     * @param $val
-     */
-    private function textarea($key, $val)
-    {
-        $value = '';
-        $value = $val['value'];
-        $type = strtolower(__FUNCTION__);
-        unset($val['value']);
-        $this->elements[self::$formHolder[self::$formName]][$key] =
-            "<".$type." name='".$key."'".$this->attributes($val)." >".$value."</".$type.">".PHP_EOL;
-    }
-
-    /**
-     * @param $key
-     * @param $values
-     */
-    private function select($key, $values)
-    {
-        $select = $selectValue = '';
-        $attributes = array();
-
-        $selectOptions = $values['options'];
-        $selected = $values['selected'];
-        unset($values['options']);
-        unset($values['selected']);
-        $attributes = $values;
-
-        $select .= "<".strtolower(__FUNCTION__)." name='".$key."' ".$this->attributes($attributes).">".PHP_EOL;
-
-        foreach ($selectOptions as $key => $value) {
-            $selectValue = ($selected == $key) ? 'selected="selected"' : '';
-            $select .= "<option $selectValue value='".$key."'>".$value."</option>".PHP_EOL;
-        }
-
-        $select .= '</'.strtolower(__FUNCTION__).'>'.PHP_EOL;
-
-        $this->elements[self::$formHolder[self::$formName]][$key] = $select;
     }
 
     /**
@@ -308,51 +243,59 @@ class Form implements FormInterface
             $elementString .= $this->attributes[self::$formHolder[self::$formName]][self::$formName];
         }
 
-        foreach ($this->elements[self::$formHolder[self::$formName]] as $key => $val) {
-            $elementString .= $val;
+        $elementString .= $this->getHtmlElements();
 
-        }
-
-        $close = "";
+        $close = null;
         $close = self::$formHolder[self::$formName].'_close';
 
         if (isset($this->attributes[$close])) {
             $elementString .= $this->attributes[$close];
         }
 
+        return $this->element[self::$formHolder[self::$formName]] = $elementString;
+    }
 
-        $this->element[self::$formHolder[self::$formName]] = $elementString;
+    /**
+     * If you wish to get only html elements
+     */
+    public function getHtmlElements()
+    {
+        $elementString = '';
+        /*
+         | Build a form and store as string
+         */
+        foreach ($this->elements[self::$formHolder[self::$formName]] as $key => $val) {
+            $elementString .= $val;
+        }
 
-        return $this->element[self::$formHolder[self::$formName]];
+        return $elementString;
+    }
+
+    /**
+     * We will get csrf token
+     *
+     * @return string
+     */
+    public function csrfToken()
+    {
+        return csrf_token();
     }
 
     //Error occured while using this method
     //Have to work on this.
     public function __toString()
     {
-        return $this->element[@self::$formHolder[self::$formName]];
+        return $this->getForm();
     }
 
     /**
-     * @param $attributes
-     * @return string
+     * @return $this
      */
-    protected function attributes($attributes)
-    {
-        $element_str = "";
-
-        foreach ($attributes as $key => $value) {
-            $element_str .= "{$key}='{$value}' ";
-        }
-
-        return $element_str;
-    }
-
     public function close()
     {
         if (self::$formOpen) {
-           $close = trim(self::$formHolder[self::$formName].'_close');
-           $this->{$close} = "</form>".PHP_EOL;
+            $close = trim(self::$formHolder[self::$formName].'_close');
+            $this->{$close} = "</form>".PHP_EOL;
         }
 
         return $this;

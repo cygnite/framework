@@ -7,34 +7,13 @@ use ReflectionProperty;
 if (!defined('CF_SYSTEM')) {
     exit('External script access not allowed');
 }
-/*
- *  Cygnite Framework
- *
- *  An open source application development framework for PHP 5.3x or newer
- *
- *   License
- *
- *   This source file is subject to the MIT license that is bundled
- *   with this package in the file LICENSE.txt.
- *   http://www.cygniteframework.com/license.txt
- *   If you did not receive a copy of the license and are unable to
- *   obtain it through the world-wide-web, please send an email
- *   to sanjoy@hotmail.com so I can send you a copy immediately.
- *
- * @Package             :  Packages
- * @Sub Packages        :
- * @Filename            :  Reflection
- * @Description         :  Reflection class is used to get reflection class variables
- *                         and make accessible for callee
- * @Author              :  Sanjoy Dey
- * @Copyright           :  Copyright (c) 2013 - 2014,
- * @Link                :  http://www.cygniteframework.com
- * @Since               :  Version 1.0
- * @Filesource
- *
- *
- */
 
+/**
+ * Class Reflection
+ * Reflection class is used to get reflection class variables
+ * and make accessible for callee
+ * @package Cygnite
+ */
 class Reflection
 {
     public $reflectionClass;
@@ -57,13 +36,13 @@ class Reflection
         $reflector = null;
 
         if (class_exists($class)) {
-           throw new \Exception(sprintf("Class %s not found", $class));
+            throw new \Exception(sprintf("Class %s not found", $class));
         }
 
         $reflector = new ReflectionClass('\\'.$class);
 
-            return new $reflector->name;
-        }
+        return new $reflector->name;
+    }
 
     /**
      * Set your class to reflection api
@@ -71,17 +50,24 @@ class Reflection
      * @access public
      * @param  $class
      * @return $this
-     *
      */
     public function setClass($class)
     {
         if (is_object($class)) {
             $class = get_class($class);
-    }
+        }
 
         $this->reflectionClass = new ReflectionClass($class);
 
         return $this;
+    }
+
+    /**
+     * @return null
+     */
+    public function getReflectionClass()
+    {
+        return (isset($this->reflectionClass) ? $this->reflectionClass : null);
     }
 
     /**
@@ -94,9 +80,26 @@ class Reflection
      */
     public function makePropertyAccessible($property)
     {
-        $this->reflectionProperty = $this->reflectionClass->getProperty($property);
-        $this->reflectionProperty->setAccessible(true);
+        $reflectionProperty = $this->getReflectionClass()->getProperty($property);
+        $this->setReflectionProperty($reflectionProperty);
+        $reflectionProperty->setAccessible(true);
 
-        return $this->reflectionProperty->getValue($this->reflectionClass);
+        return $reflectionProperty->getValue($this->getReflectionClass());
+    }
+
+    /**
+     * @param $property
+     */
+    public function setReflectionProperty($property)
+    {
+        $this->reflectionProperty = $property;
+    }
+
+    /**
+     * @return null
+     */
+    public function getReflectionProperty()
+    {
+        return (isset($this->reflectionProperty) ? $this->reflectionProperty : null);
     }
 }

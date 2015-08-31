@@ -11,6 +11,7 @@
 namespace Cygnite\Base\EventHandler;
 
 use Closure;
+use Cygnite\Base\EventHandler\EventRegistrarTrait;
 
 /**
  * Class Event
@@ -21,7 +22,11 @@ use Closure;
 
 class Event implements EventInterface
 {
-    protected $events = array();
+    use EventRegistrarTrait;
+
+    protected $events = [];
+
+    protected $listen = [];
 
     /**
      * @param Closure $callback
@@ -31,11 +36,11 @@ class Event implements EventInterface
     {
         // Check if $callback is instance of Closure we return callback
         if (!is_null($callback) && $callback instanceof Closure) {
-            return $callback(new Static);
+            return $callback(new static);
         }
 
         // Return instance of the Event Handler
-        return new Static;
+        return new static;
     }
 
     /**
@@ -43,15 +48,26 @@ class Event implements EventInterface
      *
      * @param $name
      * @param $callback
+     * @return mixed|void
      */
     public function attach($name, $callback)
     {
+        if (is_null($name)) {
+            throw new \RuntimeException(sprintf("Event name cannot be empty in %s", __FUNCTION__));
+        }
+
+        if (is_null($callback)) {
+            throw new \RuntimeException(sprintf("Empty parameter passed as callback in %s function", __FUNCTION__));
+        }
+
 
         if (!isset($this->events[$name])) {
-            $this->events[$name] = array();
+            $this->events[$name] = [];
         }
 
         $this->events[$name][] = $callback;
+
+        return $this;
     }
 
     /**
@@ -60,26 +76,29 @@ class Event implements EventInterface
      *
      * @param       $name
      * @param array $data
+     * @throws \Exception
      * @return mixed
      */
-    public function trigger($name, $data = array())
+    public function trigger($name, $data = [])
     {
+        if (!isset($this->events[$name])) {
+            throw new \Exception("Event '$name' not found in ".__CLASS__." in stack!");
+        }
+
         foreach ($this->events[$name] as $callback) {
-
-            if (is_object($callback) && ($callback instanceof Closure)) {
-                $callback($name, $data);
-            }
-
-            if (strpos($callback, '@')) {
-                return $this->callFunction($callback, $data);
-            }
-
-            if (strpos($callback, '::')) {
-                return $this->callUserFunctionEvent($callback);
-            }
-
-            if (is_string($callback) && strpos($callback, '@') == false) {
-                call_user_func($callback, $data);
+            switch ($callback) {
+                case is_object($callback) && ($callback instanceof Closure):
+                    return $callback($name, $data);
+                    break;
+                case string_has($callback, '@'):
+                    return $this->callFunction($callback, $data);
+                    break;
+                case string_has($callback, '::'):
+                    return $this->callUserFunctionEvent($callback);
+                    break;
+                case is_string($callback) && !string_has($callback, '@'):
+                    call_user_func($callback, $data);
+                    break;
             }
         }
     }
@@ -89,7 +108,7 @@ class Event implements EventInterface
         $exp = explode('@', $callback);
 
         if (method_exists($instance = new $exp[0], $exp[1])) {
-            return call_user_func_array(array($instance, $exp[1]), array($data));
+            return call_user_func_array([$instance, $exp[1]], [$data]);
         }
     }
 
@@ -99,10 +118,10 @@ class Event implements EventInterface
     private function callUserFunctionEvent($callback)
     {
         $class = null;
-        $expression = array();
+        $expression = [];
         $expression = explode('::', $callback);
         $class = '\\' . str_replace('_', '\\', $expression[0]);
-        call_user_func(array(new $class, $expression[1]));
+        call_user_func([new $class, $expression[1]]);
     }
 
     /**

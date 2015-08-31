@@ -1,17 +1,21 @@
 <?php
 namespace Cygnite\Common\SessionManager;
 
-
+/**
+ * Class Manager
+ *
+ * @package Cygnite\Common\SessionManager
+ */
 class Manager extends AbstractPacket implements PacketInterface
 {
     // Storage property to store session values
-    protected $storage = array();
+    protected $storage = [];
 
     /**
      * Constructor of Session Manager
      * @param array $storage
      */
-    public function __construct(array $storage = array())
+    public function __construct(array $storage = [])
     {
         $this->all($storage);
     }
@@ -33,6 +37,34 @@ class Manager extends AbstractPacket implements PacketInterface
     }
 
     /**
+     * @param $key
+     * @param $value
+     */
+    public function __set($key, $value)
+    {
+        $this->set($key, $value);
+    }
+
+    /**
+     * @param $key
+     * @return null
+     */
+    public function __get($key)
+    {
+        return isset($this->storage[$key]) ? $this->storage[$key] : null;
+    }
+
+    /**
+     * @param $key
+     */
+    public function __unset($key)
+    {
+        if (isset($this->storage[$key])) {
+            unset($this->storage[$key]);
+        }
+    }
+
+    /**
      * Sets value to session storage
      *
      * @param string $key
@@ -47,11 +79,11 @@ class Manager extends AbstractPacket implements PacketInterface
             return $this;
         }
 
-        if ( is_array($key) ) {
-
+        if (is_array($key)) {
             foreach ($key as $key => $value) {
                 $this->storage[$key] = $value;
             }
+
             return $this;
         }
 
@@ -109,7 +141,7 @@ class Manager extends AbstractPacket implements PacketInterface
      * @param array $array overwrites values
      * @return array
      */
-    public function all($array = array())
+    public function all($array = [])
     {
         if (!empty($array)) {
             $this->storage = $array;

@@ -52,7 +52,7 @@ interface PacketInterface extends \ArrayAccess, \Iterator, \Countable
      *
      * @return array
      */
-    public function all($array = array());
+    public function all($array = []);
 
     /**
      * Removes all elements

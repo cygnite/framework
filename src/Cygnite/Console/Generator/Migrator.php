@@ -24,13 +24,7 @@ class Migrator
 {
     private $command;
 
-    private $content;
-
-    private $default;
-
     private $templatePath;
-
-    private $filePointer;
 
     private $replacedContent;
 
@@ -39,8 +33,6 @@ class Migrator
     private $migrationClass;
 
     private $latestFile;
-
-    private $migrationDir;
 
     /*
      * Since constructor is private you cannot create object
@@ -56,13 +48,10 @@ class Migrator
         $this->command = $command;
     }
 
-    public static function __callStatic($method, $arguments = array())
+    public static function instance($arguments = [])
     {
-        if ($method == 'instance') {
-            return new self($arguments[0]);
-        }
+        return new self($arguments);
     }
-
 
     public function setTemplateDir($path)
     {
@@ -88,11 +77,7 @@ class Migrator
     {
         #replace with table name - {%className%}
 
-        $file =  str_replace(
-                array('apps', 'database'),
-                array('Apps', 'Database'),
-                $this->getTemplatePath()
-            ).$template.EXT;
+        $file =  $this->getTemplatePath().$template.EXT;
 
         file_exists($file) or die("Base template doesn't exists");
 
@@ -101,8 +86,15 @@ class Migrator
         $fileContent = file_get_contents($file);
 
         $content = str_replace('{%className%}',
-            Inflector::classify(strtolower($this->command->input)),
+            Inflector::classify(strtolower($this->command->argumentName)),
             $fileContent
+        );
+
+        $content = str_replace('{%database%}', $this->command->getDatabaseName(), $content);
+
+        $content = str_replace('{%table_name%}',
+            Inflector::tabilize($this->command->argumentName),
+            $content
         );
 
         $contentAppendWith = '';
@@ -112,24 +104,31 @@ class Migrator
         $this->replacedContent = $contentAppendWith.$content;
     }
 
+    /**
+     * @return mixed
+     */
     private function getAppMigrationDirPath()
     {
-        return $this->command->appDir;
+        return $this->command->getMigrationPath();
     }
 
+    /**
+     * @param \DateTime $date
+     * @return string
+     */
     public function generate(\DateTime $date)
     {
         $filePath = $appMigrationPath = '';
         $date->setTimezone(new \DateTimeZone(SET_TIME_ZONE));
-        $appMigrationPath = $this->getAppMigrationDirPath().DS.'database'.DS.'migrations'.DS;
+        $appMigrationPath = $this->getAppMigrationDirPath();
 
         $this->hasDirectory($appMigrationPath);
 
-        $filePath =  $appMigrationPath.strtolower(
-                Inflector::changeToLower(
-                    $date->format('YmdHis').'_'.$this->command->input.EXT
-                )
-            );
+        $file = strtolower(Inflector::changeToLower(
+                    $date->format('YmdHis').'_'.$this->command->argumentName.EXT
+                ));
+
+        $filePath =  $appMigrationPath.$file;
 
         /*write operation ->*/
         $writeTmp =fopen(
@@ -146,27 +145,75 @@ class Migrator
         fclose($writeTmp);
         $this->replacedContent = '';
 
-        return $filePath;
+        return $file;
     }
 
-    public function getLatestMigration($directory)
+    /**
+     * @return $this
+     * @throws \Exception
+     */
+    public function getLatestMigration()
     {
-        $this->migrationDir = $directory;
+        try {
+            $files = $this->files($this->getAppMigrationDirPath());
+        } catch (\Exception $e) {
+            throw new \Exception(sprintf("Invalid migration directory %s.", $this->getAppMigrationDirPath()));
+        }
 
-        $files = scandir($directory, SCANDIR_SORT_DESCENDING);
-
-        $this->latestFile = $files[0];
+        $this->latestFile = reset($files);
 
         return $this;
     }
 
-    public function setMigrationClassName($file = '')
+    /**
+     * We will scan directory and return only files with .php extension
+     *
+     * @param $directory
+     * @return array
+     */
+    public function files($directory)
     {
-        if (pathinfo($this->latestFile, PATHINFO_EXTENSION) !== 'php') {
-            throw new \Exception(APPPATH."/database/migrations/ must contain only {xxxx_table_name.php} file types");
+        return preg_grep('~\.(php)$~', scandir($directory, SCANDIR_SORT_DESCENDING));
+    }
+
+    /**
+     * Return file extension
+     *
+     * @param $file
+     * @return string
+     */
+    private function getFileExt($file)
+    {
+        return strtolower(pathinfo($file, PATHINFO_EXTENSION));
+    }
+
+    public function splitStringByDigit($string)
+    {
+        if (is_array($string)) {
+            $parts = [];
+            foreach ($string as $key => $str) {
+               $parts[$key] = preg_split('((\d+|\D+))', $str, -1, PREG_SPLIT_DELIM_CAPTURE|PREG_SPLIT_NO_EMPTY);
+            }
+
+            return $parts;
         }
 
-        $file = str_replace(EXT, '',$this->latestFile);
+        return preg_split('((\d+|\D+))', $string, -1, PREG_SPLIT_DELIM_CAPTURE|PREG_SPLIT_NO_EMPTY);
+    }
+
+    /**
+     * @param string $fileName
+     * @throws \Exception
+     */
+    public function setMigrationClassName($fileName = null)
+    {
+        if ($this->getFileExt($this->latestFile) !== 'php') {
+            throw new \Exception(APP_NS."/Resources/Database/Migrations/ must have {xxxx_table_name.php} file types");
+        }
+
+        $fileName = (is_null($fileName)) ? $this->latestFile : $fileName;
+
+        $file = str_replace(EXT, '', $fileName);
         $exp = '';
         $exp =  preg_split('((\d+|\D+))', $file, -1, PREG_SPLIT_DELIM_CAPTURE|PREG_SPLIT_NO_EMPTY);
 
@@ -193,10 +240,10 @@ class Migrator
     {
         $file = $class = null;
 
-        $file = $this->migrationDir.$this->getVersion().$this->getMigrationClass().EXT;
+        $file = $this->getAppMigrationDirPath().$this->getVersion().$this->getMigrationClass();
 
-        if (is_readable($file)) {
-            include_once $file;
+        if (is_readable($file.EXT)) {
+            include_once $file.EXT;
             $class = Inflector::classify($this->getMigrationClass());
         }
 
@@ -204,14 +251,15 @@ class Migrator
             $type = 'up';
         }
 
-        call_user_func_array(array(new $class, $type), array());
+        call_user_func_array([new $class, $type], []);
 
         $this->updateMigrationTable();
 
+        $this->command->info("Migrated: $file OK!");
     }
     
     public function updateMigrationTable()
     {
-        $this->command->table->updateMigrationVersion($this);
+        $this->command->table()->updateMigrationVersion($this);
     }
 }

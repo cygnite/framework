@@ -12,6 +12,7 @@
 namespace Cygnite\Mvc\Controller;
 
 use Cygnite\DependencyInjection\ServiceControllerInterface;
+
 /**
  * ServiceController.
  *
@@ -27,7 +28,7 @@ class ServiceController extends AbstractBaseController implements ServiceControl
      * @var array
      * @access private
      */
-    private $service = array();
+    private $service = [];
 
     public function __construct()
     {
@@ -47,12 +48,11 @@ class ServiceController extends AbstractBaseController implements ServiceControl
             throw new InvalidArgumentException(sprintf('Value "%s" is not defined.', $key));
         }
 
-        $return = isset($this->service[$key]) &&
-        is_callable($this->service[$key]) ?
-            $this->service[$key]($this) :
-            $this->service[$key];
-
-        return $return;
+        return
+            isset($this->service[$key]) &&
+            is_callable($this->service[$key]) ?
+                $this->service[$key]($this) :
+                $this->service[$key];
     }
 
     /**
@@ -62,9 +62,8 @@ class ServiceController extends AbstractBaseController implements ServiceControl
      * @param mixed  The value to set
      * @access public
      */
-    public function __set($key,$value)
+    public function __set($key, $value)
     {
         $this->service[$key] = $value;
     }
-
 }

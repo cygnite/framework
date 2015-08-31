@@ -16,7 +16,6 @@ if (!defined('CF_SYSTEM')) {
 
 class File
 {
-
     private $_mimeType;
     private $filePath;
     private $rootDir;
@@ -269,7 +268,6 @@ class File
         ob_clean();
         ob_end_flush();
         readfile($this->filePath);
-        exit;
     }
 
     public function getMimeType()
@@ -295,7 +293,7 @@ class File
 
     private function getFileInfo($filePath)
     {
-        $pathInfo = array();
+        $pathInfo = [];
         $pathInfo = pathinfo($filePath);
         //$pathInfo['dirname'];$pathInfo['basename'];$pathInfo['extension'];$pathInfo['filename'];
         return $pathInfo;

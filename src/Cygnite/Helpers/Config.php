@@ -1,147 +1,148 @@
 <?php
 namespace Cygnite\Helpers;
 
-use Exception;
 use Cygnite\Proxy\StaticResolver;
-use InvalidArgumentException;
+use Cygnite\Common\ArrayManipulator\ArrayAccessor;
 
 if (defined('CF_SYSTEM') == false) {
     exit('No External script access allowed');
 }
 /**
- * Cygnite Framework
+ * Class Config
+ * This class used to load all configurations files in order to
+ * quick access of user request
  *
- *  An open source application development framework for PHP 5.3x or newer
- *
- *   License
- *
- *   This source file is subject to the MIT license that is bundled
- *   with this package in the file LICENSE.txt.
- *   http://www.cygniteframework.com/license.txt
- *   If you did not receive a copy of the license and are unable to
- *   obtain it through the world-wide-web, please send an email
- *   to sanjoy@hotmail.com so I can send you a copy immediately.
- *
- * @Package              :  Packages
- * @Sub Package          :  Helpers
- * @Filename             :  Config
- * @Description          :  This file is used to load all framework configurations
- *                          via Registry and store it in order to use it later.
- * @Author               :  Cygnite dev team
- * @Copyright            :  Copyright (c) 2013 - 2014,
- * @Link                 :  http://www.cygniteframework.com
- * @Since                :  Version 1.0
- * @Filesource
- * @Warning              :  Any changes in this library can cause
- *                          abnormal behaviour of the framework.
- *
- *
+ * @package Cygnite\Helpers
  */
-
 class Config extends StaticResolver
 {
+    public static $config = [];
 
-    private static $_config = array();
+    public static $paths = [];
 
-    private $configuration = array();
+    public $files = [
+        'global.config'   => 'application',
+        'config.database' => 'database',
+        'config.session'  => 'session',
+        'config.view'     => 'view',
+    ];
 
-
-    /**
-     * Get the configuration.
-     *
-     * @param string $arrKey get config based on key
-     *
-     * @param bool $keyValue get config value
-     *
-     * @return mixed
-     * @throws InvalidArgumentException
-     */
-    protected function get($arrKey, $keyValue = false)
-    {
-        $config = array();
-
-        $config = $this->getConfigItems('config.items');
-
-        if ($arrKey === null) {
-            throw new InvalidArgumentException(
-                'Cannot pass null argument to '.__METHOD__
-            );
-        }
-
-        if (is_array($config)) {
-            if (false !== array_key_exists($arrKey, $config) && $keyValue === false) {
-                return $config[$arrKey];
-            }
-
-            if (false !== array_key_exists($arrKey, $config) && $keyValue !== false) {
-                return $config[$arrKey][$keyValue];
-            }
-        }
-
-    }//end of getConfig()
+    public $default = 'config.items';
 
     /**
-     * Store new configurations
-     * @param       $name
-     * @param array $values
+     *  Get the configuration by index
+     *
+     * @param      $key
+     * @param bool $value
+     * @return mixed|null
+     * @throws \InvalidArgumentException
+     * @throws \Exception
      */
-    protected function set($name, $values = array())
+    protected function get($key, $value = false)
     {
-        self::$_config[$name] = $values;
+        if (is_null($key)) {
+            throw new \InvalidArgumentException('Null argument passed to '.__METHOD__);
+        }
 
+        $config = [];
+        $config = self::$config;
+
+        if (empty($config)) {
+            throw new \Exception('Config stack is empty!');
+        }
+
+        if ($value == false && array_key_exists($key, $config)) {
+            return isset($config[$key]) ? $config[$key] : null;
+        }
+
+        if (array_key_exists($key, $config) && $value == true) {
+            return $config[$key][$value];
+        }
+
+        /*
+         | We will access array value as string with dot separator
+         | 'module.config' => [
+         |    "config"  => [
+         |        "name" => "Welcome To Module"
+         |    ]
+         | ]
+         | Config::get('module-config.config.name');
+         */
+        return ArrayAccessor::make(function ($accessor) use ($key, $config) {
+                return $accessor->set($config)->toString($key);
+            });
     }
 
     /**
-     * @param $key
-     * @return null
-     * @throws \InvalidArgumentException
+     * Set configuration parameter
+     *
+     * @param       $key
+     * @param array $value
      */
-    protected function getConfigItems($key)
+    protected function set($key, $value = [])
     {
-        if (is_null($key) == true) {
-            throw new InvalidArgumentException(
-                'Cannot pass null argument to '.__METHOD__
-            );
-        }
+        self::$config[$key] = $value;
+    }
 
-        return isset(self::$_config[strtolower($key)]) ?
-            self::$_config[strtolower($key)] :
-            null
-            ;
+    /**
+     * @param $paths
+     * @return $this
+     */
+    protected function setPaths($paths)
+    {
+        static::$paths = $paths;
 
+        return $this;
+    }
+
+    protected function addConfigFile($array)
+    {
+        $this->files = array_merge($this->files, $array);
+
+        return $this;
+    }
+
+    /**
+     * @return array
+     */
+    protected function getPaths()
+    {
+        return isset(static::$paths) ? static::$paths : [];
     }
     /*
      * Import application configurations
      */
     protected function load()
     {
-        $config = array();
+        //Set up configurations for your awesome application
+        $this->importConfigurations();
 
-        $this->importConfigurations('global.config', 'application');
-        $this->importConfigurations('config.database', 'database');
-        $this->importConfigurations('config.session', 'session');
-        $this->importConfigurations('config.autoload', 'autoload');
-        $this->importConfigurations('config.router', 'routerconfig', '');
-
-        return $this->configuration;
+        return true;
     }
 
     /**
-     * @param        $name
-     * @param        $fileName
-     * @param string $configDir
-     * @return mixed
+     * @return array
      * @throws \Exception
      */
-    private function importConfigurations($name, $fileName, $configDir = 'configs')
+    private function importConfigurations()
     {
         $configPath = "";
-        $configPath = strtolower(APPPATH).DS.$configDir.DS;
+        $configPath = static::$paths['app.path'].DS.toPath(static::$paths['app.config']['directory']);
+        $files = [];
+        $files = array_merge($this->files, static::$paths['app.config']['files']);
 
-        if (file_exists($configPath.$fileName.EXT)) {
-           $this->configuration[$name] = include_once $configPath.$fileName.EXT;
-        } else {
-            throw new Exception("File not exists on the path ".$configPath.$fileName.EXT);
+        foreach ($files as $key => $file) {
+            if (!file_exists($configPath.$file.EXT)) {
+                throw new \Exception("File doesn't exists in the path ".$configPath.$file.EXT);
+            }
+
+            /**
+            | We will include configuration file into array only
+            | for the first time
+             */
+            if (!isset(self::$config[$key])) {
+                Config::set($key, include $configPath.$file.EXT);
+            }
         }
     }
 }

@@ -13,11 +13,8 @@ namespace Cygnite\Common\Input;
 
 use Closure;
 use Cygnite\Common\Security;
-use Cygnite\Proxy\StaticResolver;
 use InvalidArgumentException;
-use Cygnite\Common\Singleton;
 use Cygnite\Common\CookieManager\Cookie;
-use Cygnite\Common\CookieManager\CookieInterface;
 
 /**
  * Input.
@@ -30,14 +27,7 @@ class Input
 
     private $security;
 
-    public $request = array();
-
-    private static $instance;
-
-    private $cookieInstance;
-
-    private $cookie;
-
+    public $request = [];
 
     /**
      *
@@ -55,13 +45,11 @@ class Input
      */
     public static function make(Closure $callback = null)
     {
-        $security = new Security;
-
         if ($callback instanceof Closure) {
-            return $callback(new self($security));
-        } else {
-            return new self($security);
+            return $callback(new static(new Security()));
         }
+
+        return new static(new Security());
     }
 
     /**
@@ -134,7 +122,7 @@ class Input
 
         if (is_null($key) ===false && is_null($value) === false) {
             try {
-                 //Sets new value for given POST variable.
+                //Sets new value for given POST variable.
                  //@param string $key Post variable name
                  //@param mixed $value     New value to be set.
                 $this->request['post'][$key] = $value;
@@ -169,7 +157,7 @@ class Input
     {
         if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             return 'post';
-        } else if ($_SERVER['REQUEST_METHOD'] == 'GET') {
+        } elseif ($_SERVER['REQUEST_METHOD'] == 'GET') {
             return 'get';
         }
 
@@ -181,11 +169,7 @@ class Input
      */
     protected function getRequest()
     {
-        return array(
-            'get'       => $_GET,
-            'post'      => $_POST,
-            'cookie'    => $_COOKIE
-        );
+        return [ 'get' => $_GET, 'post' => $_POST, 'cookie' => $_COOKIE ];
     }
 
     /**
@@ -225,6 +209,5 @@ class Input
         }
 
         return Cookie::create();
-
     }
 }

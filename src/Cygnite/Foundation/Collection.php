@@ -13,13 +13,13 @@ class Collection implements Countable, IteratorAggregate, ArrayAccess, Serializa
      * The current result set as an array
      * @var array
      */
-    protected $data = array();
+    protected $data = [];
 
     /**
      * Optionally set the contents of the result set by passing in array
      * @param array $data
      */
-    public function __construct(array $data = array())
+    public function __construct(array $data = [])
     {
         $this->setData($data);
     }
@@ -142,16 +142,16 @@ class Collection implements Countable, IteratorAggregate, ArrayAccess, Serializa
      * chaining such as setting a property on all models in a result set or
      * any other batch operation across models.
      *
-     * @param  string                             $method
-     * @param  array                              $params
+     * @param  string   $method
+     * @param  array    $params
      * @throws ActiveRecordMethodMissingException
-     * @return dataet
+     * @return dataset
      */
-    public function __call($method, $params = array())
+    public function __call($method, $params = [])
     {
         foreach ($this->data as $model) {
             if (method_exists($model, $method)) {
-                call_user_func_array(array($model, $method), $params);
+                call_user_func_array([$model, $method], $params);
             } else {
                 throw new ActiveRecordMethodMissingException("Method $method() does not exist in class " . get_class($this));
             }

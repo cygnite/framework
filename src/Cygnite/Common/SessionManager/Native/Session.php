@@ -2,6 +2,7 @@
 namespace Cygnite\Common\SessionManager\Native;
 
 use Cygnite\Helpers\Config;
+use Cygnite\Helpers\String;
 use Cygnite\Common\SessionManager\Manager;
 use Cygnite\Common\SessionManager\SessionInterface;
 use Cygnite\Common\SessionManager\Session as SessionManager;
@@ -47,6 +48,12 @@ class Session extends Manager implements SessionInterface
         }
 
         $this->storage = & $_SESSION;
+
+        /*
+         | Check csrf token already exists into session
+         | else regenerate the token
+         */
+        $this->checkToken();
     }
 
     /**
@@ -72,9 +79,7 @@ class Session extends Manager implements SessionInterface
         /*
          | Get user configuration
          */
-        $configItem = array();
-        $configItem = Config::getConfigItems('config.items');
-        $config = $configItem['config.session'];
+        $config = Config::get('config.session');
         $sessionManager = $this->getWrapper();
         $sessionManager->setHash(); // set session hash
 
@@ -96,7 +101,7 @@ class Session extends Manager implements SessionInterface
     protected function startSession()
     {
         if (@session_status() === \PHP_SESSION_ACTIVE) {
-          throw new SessionNotStartedException('Session started already!');
+            throw new SessionNotStartedException('Session started already!');
         }
 
         if (ini_get('session.use_cookies') && headers_sent($file, $line)) {
@@ -122,7 +127,7 @@ class Session extends Manager implements SessionInterface
     public function destroy()
     {
         unset($this->storage);
-        $_SESSION = array();
+        $_SESSION = [];
 
         /*
          |We will destroy existing session and start
@@ -144,14 +149,12 @@ class Session extends Manager implements SessionInterface
     protected function checkReferer()
     {
         if (!empty($_SERVER['HTTP_REFERER'])) {
-
             $url = parse_url($_SERVER['HTTP_REFERER']);
 
             if ($url['host'] != $_SERVER['HTTP_HOST']) {
                 session_destroy(); // destroy fake session
             }
         }
-
     }
     /**
      * Regenerate the session ID
@@ -226,6 +229,40 @@ class Session extends Manager implements SessionInterface
     }
 
     /**
+     * @reference http://stackoverflow.com/questions/24843309/laravel-4-csrf-token-never-changes
+     */
+    public function checkToken()
+    {
+        /*
+         | We will check if token already exists in session
+         | else we will regenerate token id
+         */
+        if (! $this->has('_token')) {
+            $this->regenerateToken();
+        }
+    }
+
+    /**
+     * Regenerate the CSRF token value.
+     *
+     * @return void
+     */
+    public function regenerateToken()
+    {
+        $this->set('_token', String::random('alnum', 32));
+    }
+
+    /**
+     * Get the CSRF token value.
+     *
+     * @return string
+     */
+    public function token()
+    {
+        return $this->get('_token');
+    }
+
+    /**
      * We will call Manager method
      *
      * @param $method
@@ -234,6 +271,6 @@ class Session extends Manager implements SessionInterface
      */
     public function __call($method, $args)
     {
-        return call_user_func_array(array(new Manager(), $method), array($args));
+        return call_user_func_array([new Manager(), $method], [$args]);
     }
 }

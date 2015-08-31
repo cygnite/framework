@@ -42,13 +42,32 @@ class Encrypt
     */
     public function __construct()
     {
-        $encryptKey = Config::get('global.config', 'cf_encryption_key');
+        $encryptKey = Config::get('global.config', 'encryption.key');
+
+        $this->checkMCryptExists();
 
         if (is_null($encryptKey)) {
-            $config = include_once CYGNITE_BASE.DS.APPPATH.DS.'configs'.DS.'application'.EXT;
-            $this->setSaltKey($config['cf_encryption_key']);
+            $config = include_once CYGNITE_BASE.DS.APPPATH.DS.'Configs'.DS.'application'.EXT;
+            $this->setSaltKey($config['encryption.key']);
         } else {
             $this->setSaltKey($encryptKey);
+        }
+    }
+
+    private function checkMCryptExists()
+    {
+        /*
+        |--------------------------------------------------------------------------
+        | Check Extensions
+        |--------------------------------------------------------------------------
+        |
+        | Cygnite Encrypt requires a few extensions to function. We will check if
+        | extensions loaded. If not we'll just exit from here.
+        |
+        */
+        if (! extension_loaded('mcrypt')) {
+            echo 'Encrypt library requires Mcrypt PHP extension.'.PHP_EOL;
+            exit(1);
         }
     }
 
@@ -127,19 +146,18 @@ class Encrypt
         return $this->value;
     }
 
-    public function __call($method, $arguments = array())
+    public function __call($method, $arguments = [])
     {
     }
 
-    public static function __callStatic($method, $arguments = array())
+    public static function __callStatic($method, $arguments = [])
     {
         if ($method == 'create') {
-
             if (self::$instance === null) {
                 self::$instance = new self();
             }
             // we will return $this for method chaining
-            return call_user_func_array(array(self::$instance, 'getInstance'), array($arguments));
+            return call_user_func_array([self::$instance, 'getInstance'], [$arguments]);
         }
     }
 

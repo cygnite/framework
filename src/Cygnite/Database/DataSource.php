@@ -3,5 +3,4 @@ namespace Cygnite\Database;
 
 class DataSource
 {
-
 }

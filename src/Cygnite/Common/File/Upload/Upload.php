@@ -21,7 +21,6 @@ use InvalidArgumentException;
  */
 class Upload implements FileUploadInterface
 {
-
     /**
      * Set the file types to upload files
      *
@@ -30,8 +29,8 @@ class Upload implements FileUploadInterface
      *     provision to user to set file extensions type not here.
      * @type array
      */
-    protected $fileInfo = array(
-        'ext' => array(
+    protected $fileInfo = [
+        'ext' => [
             'jpeg',
             'png',
             'jpg',
@@ -44,53 +43,46 @@ class Upload implements FileUploadInterface
             'xls',
             'ppt',
             'pptx',
-        ),
-        'params' => array(),
-        'file' => array()
-    );
+        ],
+        'params' => [],
+        'file' => []
+    ];
 
     /**
      * @access private
      * @type    array
      */
-    private $_prefix = array(
-        'byte',
-        'kb',
-        'mb',
-        'gb',
-        'tb',
-        'pb',
-    );
+    private $_prefix = ['byte', 'kb', 'mb', 'gb', 'tb', 'pb'];
 
     /**
      * @description array validations
      * @access      :  private
      * @type        :  array
      */
-    private $_validationArray = array(
-        'size' => array(
+    private $_validationArray = [
+        'size' => [
             'func' => 'is_string',
             'msg' => 'Size must be valid string',
-        ),
-        'file' => array(
+        ],
+        'file' => [
             'func' => 'is_array',
             'msg' => 'File must be valid array',
-        ),
-        'params' => array(
+        ],
+        'params' => [
             'func' => 'is_array',
             'msg' => 'Array values only valid',
-        ),
-        'ext' => array(
+        ],
+        'ext' => [
             'func' => 'is_array',
             'msg' => 'File Extensions must be valid array',
-        )
-    );
+        ]
+    ];
 
     private $rootDir;
 
     private $filePathInfo;
 
-    private $error = array();
+    private $error = [];
 
 
     /**
@@ -127,7 +119,7 @@ class Upload implements FileUploadInterface
         if ($rootPath) {
             $this->rootDir = $rootPath;
         } else {
-            $this->rootDir = getcwd() . DS;
+            $this->rootDir = CYGNITE_BASE . DS;
         }
     }
 
@@ -171,10 +163,7 @@ class Upload implements FileUploadInterface
     }
 
     /**
-     *
-     * @throws \ErrorException
-     * @throws \OutOfRangeException
-     * @throws \InvalidArgumentException
+     * @param $options
      * @return bool
      */
     protected function uploadFile($options)
@@ -200,7 +189,7 @@ class Upload implements FileUploadInterface
                 array_map('strtolower', $this->fileInfo['ext'])
             )
             ) {
-                $this->error[] = "Invalid file format. Valid file format: ".implode(',', $this->fileInfo['ext']);
+                $this->error[] = "Invalid file format. Valid file format: " . implode(',', $this->fileInfo['ext']);
                 return false;
             }
         }
@@ -211,7 +200,7 @@ class Upload implements FileUploadInterface
             $path = str_replace(
                 '/',
                 DS,
-                $this->getRootDir().DS.$this->fileInfo['params']['destination'].DS.$this->getFileName($options)
+                $this->getRootDir() . DS . $this->fileInfo['params']['destination'] . DS . $this->getFileName($options)
             );
 
             try {
@@ -226,7 +215,7 @@ class Upload implements FileUploadInterface
         } else {
             // If file size was too large  OutofRange exception will throw.
             $this->error[] =
-                $this->fileInfo['file']['name'] .' is too large.Exceeds upload limit '.$this->fileInfo['size'];
+                $this->fileInfo['file']['name'] . ' is too large.Exceeds upload limit ' . $this->fileInfo['size'];
             return false;
         }
     }
@@ -243,26 +232,27 @@ class Upload implements FileUploadInterface
 
         if ($key == 'file') {
             $value = $_FILES[$value];
-        } else if ($key == 'size') {
-            $this->setUploadSize($value);
+        } else {
+            if ($key == 'size') {
+                $this->setUploadSize($value);
+            }
         }
 
         if (!call_user_func($this->_validationArray[$key]['func'], $value)) {
-            $this->error[] = 'Invalid type : '.__CLASS__.'::$'.$key.' '.$this->_validationArray[$key]['msg'];
+            $this->error[] = 'Invalid type : ' . __CLASS__ . '::$' . $key . ' ' . $this->_validationArray[$key]['msg'];
             return false;
         }
 
         $this->fileInfo[$key] = $value;
-
     }
 
 
     public function __call($function, $arguments)
     {
         if ($function !== 'save') {
-            throw new \ErrorException('Undefined function call :'.__CLASS__."::{$function} function name undefined");
-        } else if (empty($arguments)) {
-            throw new \ErrorException("Empty argument passed to method: ".__CLASS__."::{$function}");
+            throw new \ErrorException('Undefined function call :' . __CLASS__ . "::{$function} function name undefined");
+        } elseif (empty($arguments)) {
+            throw new \ErrorException("Empty argument passed to method: " . __CLASS__ . "::{$function}");
         }
 
         $this->setFileOptions('params', !isset($arguments[0]) ? : $arguments[0]);
@@ -273,15 +263,12 @@ class Upload implements FileUploadInterface
         $tempArguments = $this->fileInfo['file'];
 
         if (isset($arguments[0]) && isset($arguments[0]['multiUpload']) === true) {
-
             foreach ($tempArguments as $key => $value) {
-
                 $this->fileInfo['file'] = $value;
-                $status[] = call_user_func_array(array($this, 'uploadFile'), array());
+                $status[] = call_user_func_array([$this, 'uploadFile'], []);
             }
-
         } else {
-            return call_user_func_array(array($this, 'uploadFile'), $arguments);
+            return call_user_func_array([$this, 'uploadFile'], $arguments);
         }
 
         return $status;
@@ -376,7 +363,6 @@ class Upload implements FileUploadInterface
         } else {
             return 'NaN';
         }
-
     }
 
     /**
@@ -394,7 +380,7 @@ class Upload implements FileUploadInterface
     {
         $bytes = 0;
         $str = strtoupper($str);
-        $bytesArray = array(
+        $bytesArray = [
             'B' => 0,
             'K' => 1,
             'M' => 2,
@@ -406,7 +392,7 @@ class Upload implements FileUploadInterface
             'GB' => 3,
             'TB' => 4,
             'PB' => 5,
-        );
+        ];
 
         $bytes = floatval($str);
 
@@ -427,6 +413,6 @@ class Upload implements FileUploadInterface
      */
     public function reset()
     {
-        $this->fileInfo = array();
+        $this->fileInfo = [];
     }
 }

@@ -12,13 +12,15 @@ namespace Cygnite\Foundation;
 
 use Closure;
 use Exception;
-use Cygnite\Strapper;
 use Cygnite\Base\Router\Router;
 use Cygnite\Helpers\Config;
 use Cygnite\Helpers\Inflector;
 use Cygnite\Base\Request\Dispatcher;
 use Cygnite\Common\UrlManager\Url;
-use Cygnite\DependencyInjection\Container;
+use Cygnite\Translation\Translator;
+use Cygnite\Container\Container;
+use Cygnite\Exception\Handler as ExceptionHandler;
+use Tracy\Helpers;
 
 if (!defined('CF_SYSTEM')) {
     exit('External script access not allowed');
@@ -28,8 +30,8 @@ class Application extends Container
 {
     protected static $loader;
     private static $instance;
-    private static $version = 'v1.3.2';
-    public $aliases = array();
+    private static $version = 'v2.0';
+    public $aliases = [];
     public $namespace = '\\Controllers\\';
 
     /**
@@ -62,11 +64,9 @@ class Application extends Container
     public static function instance(Closure $callback = null)
     {
         if (!is_null($callback) && $callback instanceof Closure) {
-
             if (static::$instance instanceof Application) {
                 return $callback(static::$instance);
             }
-
         } elseif (static::$instance instanceof Application) {
             return static::$instance;
         }
@@ -134,29 +134,12 @@ class Application extends Container
     public static function service(Closure $callback)
     {
         if (!$callback instanceof Closure) {
-            throw new Exception("Application::service() accept only valid closure callback");
+            throw new \Exception("Application::service() accept only valid closure callback");
         }
 
         return $callback(static::$instance);
     }
 
-    /**
-     * Set up all required configurations
-     *
-     * @param $config
-     * @return $this
-     */
-    public function setConfiguration($config)
-    {
-        $this->importHelpers();
-
-        $this->setValue('config', $config)
-             ->setValue('boot', new Strapper)
-             ->setValue('router', new Router)
-             ->setServices();
-
-        return $this;
-    }
 
     /**
      * @param $key
@@ -176,13 +159,43 @@ class Application extends Container
     }
 
     /**
+     * We will register all class definition for
+     * dependency injections
+     */
+    public function registerClassDefinition()
+    {
+        $path = './'.APPPATH.DS;
+        $definitions = include realpath($path.'Configs'.DS.'definitions'.DS.'configuration'.EXT);
+        $this->setValue('definition.config', $definitions);
+
+        return $this;
+    }
+
+    /**
+     * Set language to the translator
+     *
+     * @return locale
+     */
+    public function setLocale()
+    {
+        $locale = Config::get('global.config', 'locale');
+        $fallbackLocale = Config::get('global.config', 'fallback.locale');
+
+        return Translator::make(function ($trans) use ($locale, $fallbackLocale)
+        {
+            return $trans->setFallback($fallbackLocale)->locale($locale);
+        });
+    }
+
+    /**
      * We will include services
      * @return $this
      */
     public function setServices()
     {
         $this['service.provider'] = function () {
-            return include APPPATH . DS . 'configs' . DS . 'services' . EXT;
+            $paths = Config::getPaths();
+            return include $paths['app.path']. DS.$paths['app.config']['directory'] .'services' . EXT;
         };
 
         return $this;
@@ -198,51 +211,12 @@ class Application extends Container
     }
 
     /**
-     * @param      $class
-     * @param      $dir
-     * @return string
-     */
-    public function getController($class, $dir = '')
-    {
-        $dir = ($dir !== '') ? $dir . '\\' : '';
-
-        return
-            "\\" . ucfirst(APPPATH) . $this->namespace . $dir . Inflector::classify(
-                $class
-            ) . 'Controller';
-    }
-
-    /**
-     * @param $actionName
-     * @return string
-     */
-    public function getActionName($actionName)
-    {
-        return Inflector::camelize(
-            (!isset($actionName)) ? 'index' : $actionName
-        ) . 'Action';
-    }
-
-    /**
-     * @return callable
-     */
-    public function getDefinition()
-    {
-        $this['config.definition'] = function () {
-            $class = "\\" . ucfirst(APPPATH) . "\Configs\Definitions\DefinitionManager";
-            return new $class;
-        };
-
-        return $this['config.definition'];
-    }
-
-    /**
      * We will register all service providers into application
      *
      * @param array $services
      * @return $this
      */
-    public function registerServiceProvider($services = array())
+    public function registerServiceProvider($services = [])
     {
         foreach ($services as $key => $serviceProvider) {
             $this->createProvider('\\' . $serviceProvider)->register($this);
@@ -289,40 +263,227 @@ class Application extends Container
     }
 
     /**
-     * Start booting and handler all user request
+     * Set up all required configurations
      *
-     * @return Dispatcher
+     * @internal param $config
+     * @return $this
      */
-    public function boot()
+    public function configure()
     {
-        //Set up configurations for your awesome application
-        Config::set('config.items', $this['config']);
-        //Set URL base path.
-        Url::setBase(
-            (Config::get('global.config', 'base_path') == '') ?
-                $this['router']->getBaseUrl() :
-                Config::get('global.config', 'base_path')
-        );
+        //$this->importHelpers();
+        $this->setPaths(realpath(CYGNITE_BASE.DS.CF_BOOTSTRAP.DS.'config.paths'.EXT));
 
-        $this['service.provider']();
-        //initialize framework
-        $this['boot']->initialize($this);
-        $this['boot']->terminate();
+        //Set up configurations for your awesome application
+        \Cygnite\Helpers\Config::load();
+
+        $this->setServices();
 
         return $this;
     }
 
     /**
-     * @return Dispatcher
+     * @param $path
+     * @return $this
+     */
+    public function setPaths($path)
+    {
+        Config::setPaths(require $path);
+
+        return $this;
+    }
+
+    /**
+     * Set all configurations and boot application
+     *
+     * @return $this
+     */
+    public function bootApplication()
+    {
+        /*
+        | -------------------------------------------------------------------
+        | Check if script is running via cli and return false
+        | -------------------------------------------------------------------
+        |
+        | We will check if script running via console
+        | then we will return from here, else application
+        | fall back down
+        */
+        if (isCli()) {
+            return $this;
+        }
+    
+        $this->registerCoreAlias();
+        $this->setEnvironment();
+        $this->beforeBootingApplication();
+        
+        $this['debugger']->handleException();
+        $this['service.provider']();
+
+        $this->afterBootingApplication();
+
+        return $this;
+    }
+
+    /**
+     * We will activate middle ware events if set as true in
+     * Configs/application.php
+     * @return mixed
+     */
+    public function activateEventMiddleWare()
+    {
+        $midlewareEvents = Config::get('global.config', 'activate.event.middleware');
+
+        if ($midlewareEvents) {
+            $class = "\\".APP_NS."\\Middleware\\Events\\Event";
+            return (new $class)->register();
+        }
+    }
+
+
+    /**
+     * Attach all application events to event handler.
+     *
+     */
+    public function attachEvents()
+    {
+        if (!empty($this['event']->getAppEvents())) {
+            $events = [];
+            $events = $this['event']->getAppEvents();
+
+            foreach ($events as $event => $namespace) {
+                // attach all before and after event to handler
+                $this['event']->attach("$event", $namespace);
+            }
+        }
+    }
+
+    /**
+     * We will trigger after booting application event if it is
+     * activated in Event Middleware
+     *
+     * @return bool
+     */
+    public function beforeBootingApplication()
+    {
+        if ($this['event']->getAppEvents() == false) {
+            return true;
+        }
+
+        $this->attachEvents();
+
+        return $this['event']->trigger(__FUNCTION__, $this);
+    }
+
+    /**
+     * We will trigger after booting application event if it is
+     * activated in Event Middleware
+     *
+     * @return bool
+     */
+    public function afterBootingApplication()
+    {
+        if ($this['event']->getAppEvents() == false) {
+            return true;
+        }
+
+        return $this['event']->trigger(__FUNCTION__, $this);
+    }
+
+    /**
+     * @return array
+     */
+    public function getCoreAlias()
+    {
+        return [
+            'router'     => 'Cygnite\Base\Router\Router',
+            'debugger'   => 'Cygnite\Exception\ExceptionHandler',
+            'event'      => 'Cygnite\Base\EventHandler\Event',
+        ];
+    }
+
+    /**
+     * Create an instance of the class and return it
+     *
+     * @param $class
+     * @return mixed
+     */
+    public function compose($class)
+    {
+        return $this->makeInstance($class);
+    }
+
+    /**
+     * We will register all core class into container
+     * @return $this
+     */
+    public function registerCoreAlias()
+    {
+        foreach ($this->getCoreAlias() as $key => $class) {
+            $this->setValue($key, $this->compose("\\".$class));
+        }
+
+        $this->registerClassDefinition()
+             ->setPropertyDefinition($this['definition.config']['property.definition']);
+
+        return $this;
+    }
+
+    /**
+     * @return mixed
+     */
+    private function setEnvironment()
+    {
+        $app = $this;
+        return include __DIR__ . '/../'.'BootStrap'.EXT;
+    }
+
+    /**
+     * @return mixed
+     * @throws \Exception
      */
     public function run()
     {
+        /**
+         | We will check if script running via console
+         | then we will return out from here, else application
+         | fall back down
+         */
+        if (isCli()) {
+            return $this;
+        }
+
+        try {
+            return $this->handle();
+        } catch (\Exception $e) {
+            if (ENV == 'development') {
+                throw $e;
+            }
+
+            if (ENV == 'production') {
+
+                /**
+                 * We will log exception if logger enabled
+                 */
+                if ($this['debugger']->isLoggerEnabled()) {
+                    $this['debugger']->log($e);
+                }
+
+                $this['debugger']->renderErrorPage($e);
+            }
+        }
+    }
+
+    /**
+     * @return mixed
+     */
+    public function handle()
+    {
+        $this->activateEventMiddleWare();
         /**-------------------------------------------------------
          * Booting completed. Lets handle user request!!
          * Lets Go !!
          * -------------------------------------------------------
          */
-        $dispatcher = new Dispatcher($this);
-        return $dispatcher->run();
+        return (new Dispatcher($this))->run();
     }
 }

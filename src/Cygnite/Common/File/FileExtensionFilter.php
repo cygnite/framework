@@ -12,11 +12,11 @@
 namespace Cygnite\Common\File;
 
 // import SPL classes/interfaces into local scope
-use DirectoryIterator,
-    FilterIterator,
-    RecursiveIterator,
-    RecursiveDirectoryIterator,
-    RecursiveIteratorIterator;
+use DirectoryIterator;
+use FilterIterator;
+use RecursiveIterator;
+use RecursiveDirectoryIterator;
+use RecursiveIteratorIterator;
 
 if (!defined('CF_SYSTEM')) {
     exit('External script access not allowed');
@@ -29,20 +29,19 @@ class FileExtensionFilter extends FilterIterator
 
     public function __construct($dirOrIterator)
     {
+        $iterator = $dirOrIterator;
         if ($dirOrIterator instanceof \RecursiveIterator) {
             $iterator = new \RecursiveIteratorIterator($dirOrIterator);
-        } else {
-            $iterator = $dirOrIterator;
         }
 
         parent::__construct($iterator);
-    }   
+    }
 
  
     // an abstract method which must be implemented in subclass
-    public function accept() {
-
-     $file = $this->getInnerIterator()->current();
+    public function accept()
+    {
+        $file = $this->getInnerIterator()->current();
 
         // If we somehow have something other than an SplFileInfo object, just 
         // return false
@@ -60,6 +59,6 @@ class FileExtensionFilter extends FilterIterator
             return false;
         }
         
-    return in_array($this->getExtension(), $this->ext);
+        return in_array($this->getExtension(), $this->ext);
     }
 }

@@ -12,13 +12,14 @@
 namespace Cygnite\Mvc\Controller;
 
 use Exception;
-use Cygnite\Base\EventHandler\Event;
 use Cygnite\Common\Encrypt;
+use Cygnite\Helpers\Inflector;
+use Cygnite\Mvc\View\ViewFactory;
+use Cygnite\Common\UrlManager\Url;
+use Cygnite\Base\EventHandler\Event;
 use Cygnite\Common\SessionManager\Session;
 use Cygnite\Foundation\Application as App;
-use Cygnite\Helpers\Inflector;
-use Cygnite\Mvc\View\CView;
-use Cygnite\Mvc\View\Template;
+use Cygnite\Mvc\ControllerViewBridgeTrait;
 
 /**
  * AbstractBaseController.
@@ -27,32 +28,27 @@ use Cygnite\Mvc\View\Template;
  *
  * @author Sanjoy Dey <dey.sanjoy0@gmail.com>
  */
-abstract class AbstractBaseController extends CView
+abstract class AbstractBaseController
 {
-    private $validFlashMessage = array('setFlash', 'hasFlash', 'getFlash', 'hasError');
+    use ControllerViewBridgeTrait;
+
+    protected $validProperties = ['layout', 'templateEngine', 'templateExtension', 'autoReload', 'twigDebug'];
 
     private $class;
 
     /**
      * Constructor function
      *
-     * @access    public
-     * @return \Cygnite\Mvc\Controller\AbstractBaseController class object
+     * Configure parameters for View
      */
     public function __construct()
     {
-        parent::__construct(new Template);
+        $this->configure();
     }
 
     //prevent clone.
     private function __clone()
     {
-
-    }
-
-    protected function getContainer()
-    {
-        return App::instance();
     }
 
     /**
@@ -75,23 +71,6 @@ abstract class AbstractBaseController extends CView
     }
 
     /**
-     * @param $method
-     * @param $arguments
-     * @return AbstractBaseController|mixed
-     */
-    private function setFlashMessage($method, $arguments)
-    {
-        $flashSession = $this->get('cygnite.common.session-manager.flash.flash-message');
-
-        if ($method == 'setFlash') {
-            $this->_call($flashSession, $method, $arguments);
-            return $this;
-        } else {
-            return $this->_call($flashSession, $method, $arguments);
-        }
-    }
-
-    /**
      * @param string $uri
      * @param string $type
      * @param int    $httpResponseCode
@@ -99,31 +78,9 @@ abstract class AbstractBaseController extends CView
      */
     protected function redirectTo($uri = '', $type = 'location', $httpResponseCode = 302)
     {
-        $url = $this->get('cygnite.common.url-manager.url');
-        $url->redirectTo($uri, $type, $httpResponseCode);
+        Url::redirectTo($uri, $type, $httpResponseCode);
 
         return $this;
-    }
-
-    /**
-     * @param $class
-     * @return object
-     */
-    protected function get($class)
-    {
-        $container = $this->getContainer();
-        return $container->resolve($class);
-    }
-
-    /**
-     * @param       $instance
-     * @param       $method
-     * @param array $arguments
-     * @return mixed
-     */
-    protected function _call($instance, $method, $arguments = array())
-    {
-        return call_user_func_array(array($instance, $method), $arguments);
     }
 
     /**
@@ -135,7 +92,7 @@ abstract class AbstractBaseController extends CView
      *   $response = $this->call('modules.admin.user@profile', $arguments);
      * </code>
      */
-    public function call($resource, $arguments = array())
+    public function call($resource, $arguments = [])
     {
         list($name, $method) = explode('@', $resource);
 
@@ -143,9 +100,14 @@ abstract class AbstractBaseController extends CView
         $class = array_map('ucfirst', explode('.', $name));
         $className = Inflector::classify(end($class)).'Controller';
         $namespace = str_replace(end($class), '', $class);
-        $class = '\\'.ucfirst(APPPATH).'\\'.implode('\\', $namespace).$className;
+        $class = '\\'.APP_NS.'\\'.implode('\\', $namespace).$className;
 
         return $this->_call(new $class, $method, $arguments);
+    }
+
+    public function getContainer()
+    {
+        return App::instance();
     }
 
     /**
@@ -162,5 +124,56 @@ abstract class AbstractBaseController extends CView
     public function getController()
     {
         return isset($this->class) ? $this->class : get_called_class();
+    }
+
+
+    public function configure()
+    {
+        foreach ($this->validProperties as $key => $property) {
+
+            $method = 'set'.ucfirst($property);
+
+            if ($this->property($this, $property)) {
+                $this->view()->{$method}($this->{$property});
+            }
+        }
+    }
+
+    /**
+     * @param $class
+     * @param $property
+     * @return bool
+     */
+    public function property($class, $property)
+    {
+        return property_exists($class, $property);
+    }
+
+    /**
+     * @param       $view
+     * @param array $params
+     * @return mixed
+     */
+    public function render($view, $params = [], $return = false)
+    {
+        return $this->view()->render($view, $params, $return);
+    }
+
+    /**
+     * @param       $view
+     * @param array $params
+     * @return mixed
+     */
+    public function template($view, $params = [], $return = false)
+    {
+        return $this->view()->template($view, $params, $return);
+    }
+
+    /**
+     * @return mixed
+     */
+    public function view()
+    {
+        return ViewFactory::make();
     }
 }

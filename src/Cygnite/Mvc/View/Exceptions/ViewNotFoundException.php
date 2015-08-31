@@ -7,5 +7,4 @@ if (!defined('CF_SYSTEM')) {
 
 class ViewNotFoundException extends \Exception
 {
-
 }

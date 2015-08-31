@@ -11,13 +11,13 @@ namespace Cygnite\Console\Command;
 
 use Cygnite\Foundation\Application;
 use Cygnite\Helpers\Inflector;
-use Cygnite\Database;
+use Cygnite\Database\Table\Table;
 use Cygnite\Database\Schema;
 use Cygnite\Console\Generator\Form;
 use Cygnite\Console\Generator\Model;
 use Cygnite\Console\Generator\View;
 use Cygnite\Console\Generator\Controller;
-use Symfony\Component\Console\Command\Command;
+use Cygnite\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -33,46 +33,101 @@ use Symfony\Component\Console\Formatter\OutputFormatterStyle;
  */
 class FormGeneratorCommand extends Command
 {
+    /**
+     * Name of your console command
+     *
+     * @var string
+     */
+    protected $name = 'form:create';
 
-    private $tableSchema;
+    /**
+     * Description of your console command
+     *
+     * @var string
+     */
+    protected $description = 'Generate Form Class Using Cygnite CLI';
 
+    /**
+     * Console command arguments
+     *
+     * @var array
+     */
+    protected $arguments = [
+        ['name', InputArgument::OPTIONAL, ''],
+        ['database', InputArgument::OPTIONAL, ''],
+    ];
+
+    /**
+     * @var Application Directory Path
+     */
     public $applicationDir;
 
-    public $controller;
-
+    /**
+     * @var \Cygnite\Database\Table\Table
+     */
     public $table;
 
+    /**
+     * @var Table Name
+     */
+    public $tableName;
+
+    /**
+     * @var Database connection name
+     */
     public $database;
-
-    private $inflect;
-
+    /**
+     * @var Table Columns
+     */
     public $columns;
 
-    private $output;
-
-    private $viewType;
-
-    public static function __callStatic($method, $arguments = array())
+    /**
+     * @param Table $table
+     * @throws \InvalidArgumentException
+     */
+    public function __construct(Table $table)
     {
-        if ($method == 'instance') {
-            return new self();
+        parent::__construct();
+
+        if (!$table instanceof Table) {
+            throw new \InvalidArgumentException(sprintf('Constructor parameter should be instance of %s.', $table));
         }
-    }
 
-    public function setSchema($table)
-    {
-        $this->tableSchema = $table;
+        $this->table = $table;
     }
 
     /**
-     * Configure the form generate command
+     * @return Table
      */
-    protected function configure()
+    public function table()
     {
-        $this->setName('generate:form')
-             ->setDescription('Generate Form using Cygnite CLI')
-             ->addArgument('name', InputArgument::OPTIONAL, '')
-             ->addArgument('database', InputArgument::OPTIONAL, '');
+        return $this->table;
+    }
+
+    /**
+     * We will execute the crud command and generate files
+     *
+     * @return int|null|void
+     */
+    public function process()
+    {
+        /**
+         | Check for argument database name if not given we will use default
+         |  database connection
+         */
+        $this->database = (!is_null($this->argument('database'))) ?
+            $this->argument('database') :
+            $this->table()->getDefaultDatabaseConnection();
+
+        $this->tableName = (!is_null($this->argument('name'))) ?
+            $this->argument('name') :
+            'Form';
+
+        $this->columns = $this->getColumns();
+        $this->applicationDir = realpath(CYGNITE_BASE.DS.APPPATH);
+        $this->generateForm();
+
+        $this->info("Form ".APPPATH."/Form/".Inflector::classify($this->tableName)."Form".EXT." Generated Successfully!.");
     }
 
     /**
@@ -81,38 +136,10 @@ class FormGeneratorCommand extends Command
      */
     private function getColumns()
     {
-        return $this->tableSchema->connect(
-            $this->database,
-            Inflector::tabilize($this->table)
-        )->getColumns();
+        $table = $this->table()->connect($this->database, Inflector::tabilize($this->tableName));
+
+        return $table->{__FUNCTION__}();
     }
-
-    /**
-     * We will execute the crud command and generate files
-     * @param InputInterface  $input
-     * @param OutputInterface $output
-     * @return int|null|void
-     */
-    protected function execute(InputInterface $input, OutputInterface $output)
-    {
-        /** Check for argument database name if not given we will use default
-         *  database connection
-         */
-        $this->database = (!is_null($input->getArgument('database'))) ?
-            $input->getArgument('database') :
-            $this->tableSchema->getDefaultDatabaseConnection();
-
-        $this->table = (!is_null($input->getArgument('name'))) ?
-            $input->getArgument('name') :
-            'Form';
-
-        $this->columns = $this->getColumns();
-        $this->applicationDir = CYGNITE_BASE.DS.APPPATH;
-        $this->generateForm();
-
-        $output->writeln("<info>Form ".APPPATH."/components/form/".Inflector::classify($this->table)."Form".EXT." Generated Successfully By Cygnite Cli.</info>");
-    }
-
 
     /**
      * We will generate Form
@@ -120,12 +147,12 @@ class FormGeneratorCommand extends Command
     private function generateForm()
     {
         // Generate Form Component class
-        $controllerInstance = Controller::instance($this->columns, $this->viewType, $this);
+        $controllerInstance = Controller::instance($this->columns, null, $this);
 
         $formTemplateDir =
-            dirname(dirname(__FILE__)).DS.'src'.DS.ucfirst('apps').DS.ucfirst('components').DS.'Form'.DS;
+            dirname(dirname(__FILE__)).DS.'src'.DS.'Apps'.DS.'Form'.DS;
 
-        $form = new Form($controllerInstance, $this, $this->inflect);
+        $form = new Form($controllerInstance, $this);
         $form->setFormTemplatePath($formTemplateDir);
 
         $form->generate();

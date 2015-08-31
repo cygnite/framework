@@ -9,11 +9,13 @@
  */
 namespace Cygnite\Console\Command;
 
+use Cygnite\Database\Table\Table;
 use Cygnite\Foundation\Application;
 use Cygnite\Helpers\Inflector;
-use Cygnite\Database\Connection;
 use Cygnite\Console\Generator\Model;
-use Symfony\Component\Console\Command\Command;
+use Cygnite\Console\Command\Command;
+use Cygnite\Database\ConnectionManagerTrait;
+use Cygnite\Database\Exceptions\DatabaseException;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
@@ -29,110 +31,134 @@ use Symfony\Component\Console\Formatter\OutputFormatterStyle;
  */
 class ModelGeneratorCommand extends Command
 {
+    use ConnectionManagerTrait;
+
+    /**
+     * Name of your console command
+     *
+     * @var string
+     */
+    protected $name = 'model:create';
+
+    /**
+     * Description of your console command
+     *
+     * @var string
+     */
+    protected $description = 'Generate Sample Model Class Using Cygnite CLI';
+
+    /**
+     * Console command arguments
+     *
+     * @var array
+     */
+    protected $arguments = [
+        ['name', InputArgument::OPTIONAL, 'Name Of Your Model Class ?'],
+        ['database', InputArgument::OPTIONAL, ''],
+    ];
+
     public $applicationDir;
 
+    /**
+     * @var Name of model class
+     */
     public $model;
 
-    public $inflection;
+    /**
+     * @var \Cygnite\Database\Table\Table
+     */
+    public $table;
 
-    private $tableSchema;
-
-    public $controller;
-
+    /**
+     * @var Database connection name
+     */
     public $database;
 
+    /**
+     * @var Set Columns name
+     */
     private $columns;
 
-    public static function make()
+    /**
+     * @param Table $table
+     * @throws \InvalidArgumentException
+     */
+    public function __construct(Table $table)
     {
-        return new ModelGeneratorCommand();
+        parent::__construct();
+
+        if (!$table instanceof Table) {
+            throw new \InvalidArgumentException(sprintf('Constructor parameter should be instance of %s.', $table));
+        }
+
+        $this->table = $table;
     }
 
-    public function setSchema($table)
+    /**
+     * @return Table
+     */
+    public function table()
     {
-        $this->tableSchema = $table;
+        return $this->table;
+    }
+
+    /**
+     * @return Name of model class
+     */
+    public function getModel()
+    {
+        return $this->model;
     }
 
     /**
      * We will get all column schema from database
      * @return mixed
      */
-    private function getColumns()
+    public function getColumns()
     {
-        return $this->tableSchema->connect(
-                    $this->database,
-                    Inflector::tabilize($this->model)
-                )->getColumns();
+        $table = $this->table()->connect($this->database, Inflector::tabilize($this->model));
+
+        return $table->{__FUNCTION__}();
     }
 
     /**
-     * Get primary key of the table
-     * @return null
-     */
-    public function getPrimaryKey()
-    {
-        $primaryKey = null;
-
-        if (count($this->columns) > 0) {
-            foreach ($this->columns as $key => $value) {
-                if ($value->column_key == 'PRI' || $value->extra == 'auto_increment') {
-                    $primaryKey = $value->column_name;
-                    break;
-                }
-            }
-        }
-
-        return $primaryKey;
-    }
-
-    protected function configure()
-    {
-        $this->setName('model:create')
-             ->setDescription('Generate Sample Model Class Using Cygnite CLI')
-             ->addArgument('name', InputArgument::OPTIONAL, 'Name Of Your Model Class ?')
-             ->addArgument('database', InputArgument::OPTIONAL, 'If not specified we will take default database as connection.')
-        ;
-    }
-
-    /**
-     * We will execute the crud command and generate files
+     * We will execute the command and generate model class
      *
-     * @param InputInterface  $input
-     * @param OutputInterface $output
-     * @throws \Exception
      * @return int|null|void
      */
-    protected function execute(InputInterface $input, OutputInterface $output)
+    public function process()
     {
+        $table = $this->argument('name');
         // Your model name
-        $this->model = Inflector::classify($input->getArgument('name'));
-
-        // Check for argument database name if not given we will use default
-        // database connection
-        $this->database = $this->getDatabase($input);
-
+        $this->model = Inflector::classify($table);
+        /*
+         | Check for argument database name if not given
+         | we will use default database connection
+         */
+        $this->database = $this->getDatabase();
         $this->columns = $this->getColumns();
 
         if (empty($this->columns)) {
-            throw new \Exception("Please check your model name. It seems doesn't exists in the database.");
+            exit($this->error("Please check your model name. It seems table '$table' doesn't exists!"));
         }
 
         $this->applicationDir = CYGNITE_BASE.DS.APPPATH;
         $this->generateModel();
 
-        $modelPath = $this->applicationDir.DS.'models'.DS.$this->model.EXT;
-        $output->writeln("Model $this->model generated successfully into ".$modelPath);
+        $modelPath = APPPATH.DS.'Models'.DS.$this->model.EXT;
+
+        $this->info("Model $this->model Generated Successfully Into ".$modelPath);
     }
 
     /**
-     * @param $input
+     * Get Database name
      * @return mixed
      */
-    private function getDatabase($input)
+    public function getDatabase()
     {
-        return ($input->getArgument('database') != '') ?
-            $input->getArgument('database') :
-            Connection::getDefaultConnection();
+        return ($this->argument('database') != '') ?
+            $this->argument('database') :
+            $this->getDefaultConnection();
     }
 
     /**
@@ -147,6 +173,7 @@ class ModelGeneratorCommand extends Command
         $modelInstance->setModelTemplatePath($modelTemplateDir);
         $modelInstance->updateTemplate();
         $modelInstance->generate();
+
         return true;
     }
 }

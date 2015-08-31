@@ -5,77 +5,48 @@ if (!defined('CF_SYSTEM')) {
     exit('External script access not allowed');
 }
 
-class Output
+/**
+ * trait Output
+ *
+ * @package Cygnite\Mvc\View
+ */
+trait Output
 {
-    private $output = array();
-
-    private $name;
-
     /**
-     * @param $name
+     * @param $path
+     * @param $data
+     * @return string
      */
-    public function __construct($name)
+    protected function renderView($path, $data)
     {
-        $this->name = $name;
-    }
-
-    /**
-     * @param       $file
-     * @param array $data
-     * @return $this
-     */
-    public function buffer($file, $data = array())
-    {
+        $obLevel = ob_get_level();
         ob_start();
-
-        if (!empty($data) || $data !== '') {
             extract($data);
+
+        /*
+         | We will try to include view file and check content into try catch block
+         | so that if any exception occurs output buffer will get flush out.
+        */
+        try {
+            include $path;
+        } catch (Exception $e) {
+            $this->handleViewException($e, $obLevel);
         }
 
-        if (is_readable($file)) {
-            include_once $file;
+        return ltrim(ob_get_clean());
+    }
+
+    /**
+     * @param $e
+     * @param $obLevel
+     * @throws
+     */
+    protected function handleViewException($e, $obLevel)
+    {
+        while (ob_get_level() > $obLevel) {
+            ob_end_clean();
         }
 
-        return $this;
-    }
-
-    /**
-     * @param $name
-     * @param $value
-     */
-    public function setOutput($name, $value)
-    {
-        $this->output[$name] = $value;
-    }
-
-    /**
-     * @param $name
-     * @return null
-     */
-    public function getOutput($name)
-    {
-        return isset($this->output[$name]) ? $this->output[$name] : null;
-    }
-
-    /**
-     * @return null
-     */
-    public function __toString()
-    {
-        return $this->getOutput($this->name);
-    }
-
-    /**
-     * @return $this
-     */
-    public function clean()
-    {
-        $output = ob_get_contents();
-        ob_get_clean();
-        //ob_end_flush();
-
-        $this->setOutput($this->name, $output);
-
-        return $this;
+        throw $e;
     }
 }

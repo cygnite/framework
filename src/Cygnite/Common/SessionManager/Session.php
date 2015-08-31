@@ -22,13 +22,13 @@ class Session
      * Available drivers for session storage
      * @var array
      */
-    protected $drivers = array(
+    protected $drivers = [
         'native' => 'Native\\Session',
         'database' => 'Database\\Session',
-        'redis' => 'Memory\\Redis',
-    );
+        'redis' => 'Memory\\Redis'
+    ];
 
-    protected $config = array();
+    protected $config = [];
 
     // Default session name
     public $name = 'cygnite-session';
@@ -42,15 +42,12 @@ class Session
      */
     public function __construct()
     {
-        $config = array();
-        $config =  Config::getConfigItems('config.items');
-
         /*
          | We will set session configuration into config property
          | Based on user defined configuration we will load the session
          | driver
          */
-        $this->config = $config['config.session'];
+        $this->config = Config::get('config.session');
 
         $this->setName($this->config['session_name']);
     }
@@ -104,9 +101,25 @@ class Session
      */
     public static function __callStatic($method, $arguments)
     {
-        $arguments['method'] = $method;
-        self::$instance = new Static;
-        return call_user_func_array(array(self::$instance, 'factory'), array($arguments));
+        self::$instance = new static;
+        $session = self::$instance->factory();
+
+        return call_user_func_array([$session, $method], $arguments);
+    }
+
+    /**
+     * @param callable $callback
+     * @return static
+     */
+    public static function make(\Closure $callback = null)
+    {
+        self::$instance = new static;
+
+        if ($callback instanceof \Closure) {
+            return $callback(self::$instance);
+        }
+
+        return self::$instance;
     }
 
     /**
@@ -115,12 +128,10 @@ class Session
      * @param $args
      * @return mixed
      */
-    protected function factory($args)
+    public function factory()
     {
         $method = $class = null;
         $class = __NAMESPACE__.'\\'.$this->drivers[$this->config['driver']];
-        $method = $args['method'];
-        unset($args['method']);
 
         $name = $this->getName();
         if ($name != 'cygnite-session' && !is_null($this->cacheLimiter())) {
@@ -129,7 +140,7 @@ class Session
             $session = new $class($this->name, null, $this);
         }
 
-        return call_user_func_array(array($session, $method), $args);
+        return $session;
     }
 
     /**

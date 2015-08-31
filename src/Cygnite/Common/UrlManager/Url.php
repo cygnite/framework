@@ -22,7 +22,6 @@ use InvalidArgumentException;
 
 class Url
 {
-
     public static $base;
     private static $instance = 'make';
     private static $router;
@@ -63,7 +62,7 @@ class Url
      */
     public static function redirectTo($uri = '', $type = 'location', $httpResponseCode = 302)
     {
-        $uri = str_replace(array('.', '/'), '/', $uri);
+        $uri = str_replace(['.', '/'], '/', $uri);
 
         if (!preg_match('#^https?://#i', $uri)) {
             $uri = self::sitePath($uri);
@@ -101,10 +100,10 @@ class Url
      * @return mixed|string
      * @throws \InvalidArgumentException
      */
-    public static function __callStatic($method, $args = array())
+    public static function __callStatic($method, $args = [])
     {
-        $arguments = array('method' => $method, 'args' => $args, 'instance' => Url::make());
-        return call_user_func_array(array(Url::make(), 'call'), array($arguments));
+        $arguments = ['method' => $method, 'args' => $args, 'instance' => Url::make()];
+        return call_user_func_array([Url::make(), 'call'], [$arguments]);
     }
 
     /** Return Url Instance
@@ -114,7 +113,7 @@ class Url
     public static function make()
     {
         $app = App::instance();
-        return new Static($app['router']);
+        return new static($app['router']);
     }
 
     /**
@@ -136,18 +135,18 @@ class Url
      * @param array|int $segment
      * @return string
      */
-    public function getSegment($segment = array())
+    public function getSegment($segment = [])
     {
         $segment = (!is_null($segment[0])) ? $segment[0] : 1;
         $uri = $this->getRoute()->getCurrentUri();
         $urlArray = array_filter(explode('/', $uri));
-
         $indexCount = array_search('index.php', $urlArray);
 
         if ($indexCount == true) {
-            return @$urlArray[$indexCount + $segment];
+            $num = $indexCount + $segment;
+            return (isset($urlArray[$num]) ? $urlArray[$num] : null);
         } else {
-            return @$urlArray[$segment];
+            return (isset($urlArray[$segment]) ? $urlArray[$segment] : null);
         }
     }
 
@@ -211,7 +210,6 @@ class Url
         } else {
             throw new \InvalidArgumentException("Url::{$property} doesn't exist");
         }
-
     }
 
     /**
@@ -236,10 +234,13 @@ class Url
      */
     public function isSecure()
     {
+        $scheme = $protocol = "";
+        $scheme = (!isset($_SERVER['REQUEST_SCHEME'])) ?: $_SERVER['REQUEST_SCHEME'];
+        $protocol = (!isset($_SERVER['SERVER_PROTOCOL'])) ?: $_SERVER['SERVER_PROTOCOL'];
+
         if (
             (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') ||
-            stripos(@$_SERVER['REQUEST_SCHEME'], 'https') ||
-            stripos(@$_SERVER['SERVER_PROTOCOL'], 'https')
+            stripos($scheme, 'https') || stripos($protocol, 'https')
         ) {
             // SSL connection
             return true;
@@ -267,8 +268,8 @@ class Url
                 break;
             default:
                 if (preg_match('/^([gs]et)([A-Z])(.*)$/', $method, $match)) {
-                    $parameters = array('args' => $args, 'match' => $match);
-                    return call_user_func_array(array($url, 'configureBase'), array($parameters));
+                    $parameters = ['args' => $args, 'match' => $match];
+                    return call_user_func_array([$url, 'configureBase'], [$parameters]);
                 }
                 break;
         }
