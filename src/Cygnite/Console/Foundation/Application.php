@@ -41,7 +41,7 @@ class Application extends SymfonyApplication implements ConsoleApplicationInterf
         'Cygnite\Console\Command\GeneratorCommand',
         'Cygnite\Console\Command\MigrationCommand',
         'Cygnite\Console\Command\FormGeneratorCommand',
-        'Cygnite\Console\Command\MigrationResetCommand',
+        //'Cygnite\Console\Command\MigrationResetCommand',
         'Cygnite\Console\Command\ModelGeneratorCommand',
         'Cygnite\Console\Command\ControllerGeneratorCommand',
     ];
