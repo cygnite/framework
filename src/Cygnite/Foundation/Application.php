@@ -12,26 +12,49 @@ namespace Cygnite\Foundation;
 
 use Closure;
 use Exception;
-use Cygnite\Base\Router\Router;
+use Tracy\Helpers;
 use Cygnite\Helpers\Config;
 use Cygnite\Helpers\Inflector;
-use Cygnite\Base\Request\Dispatcher;
+use Cygnite\Base\Router\Router;
+use Cygnite\Container\Container;
 use Cygnite\Common\UrlManager\Url;
 use Cygnite\Translation\Translator;
-use Cygnite\Container\Container;
+use Cygnite\Base\Request\Dispatcher;
 use Cygnite\Exception\Handler as ExceptionHandler;
-use Tracy\Helpers;
+
 
 if (!defined('CF_SYSTEM')) {
     exit('External script access not allowed');
 }
 
-class Application extends Container
+class Application extends Container implements ApplicationInterface
 {
-    protected static $loader;
-    private static $instance;
-    private static $version = 'v2.0';
+    /**
+     * Store instance of the Application
+     *
+     * @var instance
+     */
+    public static $instance;
+    /**
+     * The Cygnite Framework Version.
+     * @var string
+     */
+    const VERSION = 'v2.0';
+    /**
+     * @var array
+     */
     public $aliases = [];
+
+    /**
+     * Indicates if the application is "booted" or not.
+     *
+     * @var bool
+     */
+    protected $booted = false;
+
+    /**
+     * @var string
+     */
     public $namespace = '\\Controllers\\';
 
     /**
@@ -42,36 +65,28 @@ class Application extends Container
      * instance method will dynamically return you instance of
      * Application
      *
-     * @param Autoloader $loader
+     * @param $argument
      * @return \Cygnite\Foundation\Application
      */
 
-    protected function __construct(Autoloader $loader = null)
+    protected function __construct($argument = [])
     {
-        self::$loader = $loader ? : new AutoLoader();
     }
 
     /**
-     * ----------------------------------------------------
-     *  Instance
-     * ----------------------------------------------------
-     *
-     * Returns a Instance for a Closure Callback and general calls.
+     * Returns a Instance of Application either as Closure
+     * or static instance.
      *
      * @param Closure $callback
      * @return Application
      */
-    public static function instance(Closure $callback = null)
+    public static function instance(Closure $callback = null, $argument = [])
     {
         if (!is_null($callback) && $callback instanceof Closure) {
-            if (static::$instance instanceof Application) {
-                return $callback(static::$instance);
-            }
-        } elseif (static::$instance instanceof Application) {
-            return static::$instance;
+            return $callback(static::getInstance($argument));
         }
 
-        return static::getInstance();
+        return static::getInstance($argument);
     }
 
     /**
@@ -82,15 +97,13 @@ class Application extends Container
      * @param Autoloader $loader
      * @return Application object
      */
-    public static function getInstance(Autoloader $loader = null)
+    public static function getInstance($argument)
     {
         if (static::$instance instanceof Application) {
             return static::$instance;
         }
 
-        $loader = $loader ? : new AutoLoader();
-
-        return static::$instance = new Application($loader);
+        return static::$instance = new Application($argument);
     }
 
     /**
@@ -100,7 +113,7 @@ class Application extends Container
      */
     public static function version()
     {
-        return static::$version;
+        return static::VERSION;
     }
 
     /**
@@ -109,7 +122,7 @@ class Application extends Container
      */
     public static function poweredBy()
     {
-        return 'Cygnite Framework - ' . static::$version . ' (<a href="http://www.cygniteframework.com">
+        return 'Cygnite PHP Framework - ' . static::version() . ' (<a href="http://www.cygniteframework.com">
             http://www.cygniteframework.com
             </a>)';
     }
@@ -122,7 +135,7 @@ class Application extends Container
      */
     public static function import($path)
     {
-        return self::$loader->import($path);
+        return (new AutoLoader())->import($path);
     }
 
     /**
@@ -142,15 +155,15 @@ class Application extends Container
 
 
     /**
+     * Override parent method
+     *
      * @param $key
      * @param $value
      * @return $this
      */
-    public function setValue($key, $value)
+    public function set($key, $value)
     {
-        $this->offsetSet($key, $value);
-
-        return $this;
+        return parent::set($key, $value);
     }
 
     public function getAliases($key)
@@ -166,7 +179,7 @@ class Application extends Container
     {
         $path = './'.APPPATH.DS;
         $definitions = include realpath($path.'Configs'.DS.'definitions'.DS.'configuration'.EXT);
-        $this->setValue('definition.config', $definitions);
+        $this->set('definition.config', $definitions);
 
         return $this;
     }
@@ -207,7 +220,7 @@ class Application extends Container
      */
     public function registerDirectories($directories)
     {
-        return self::$loader->registerDirectories($directories);
+        return (new AutoLoader())->registerDirectories($directories);
     }
 
     /**
@@ -255,7 +268,7 @@ class Application extends Container
     /**
      * We will include Supporting Helpers
      * @return mixed
-     * @issue Path Issue Fixed And Code Suggested By Peter Moulding https://www.linkedin.com/profile/view?id=1294355
+     * @issue Path Issue Fixed And Identified By Peter Moulding https://www.linkedin.com/profile/view?id=1294355
      */
     public function importHelpers()
     {
@@ -311,17 +324,38 @@ class Application extends Container
         if (isCli()) {
             return $this;
         }
-    
+
+        $this->bootInternals();
+        $this->booted = true;
+
+        return $this;
+    }
+
+    /**
+     * @return $this
+     */
+    private function bootInternals()
+    {
+        if ($this->booted) return;
+
         $this->registerCoreAlias();
         $this->setEnvironment();
         $this->beforeBootingApplication();
-        
         $this['debugger']->handleException();
         $this['service.provider']();
-
         $this->afterBootingApplication();
 
         return $this;
+    }
+
+    /**
+     * Indicate if Application booted or not
+     *
+     * @return bool
+     */
+    public function isBooted()
+    {
+        return $this->booted;
     }
 
     /**
@@ -331,9 +365,9 @@ class Application extends Container
      */
     public function activateEventMiddleWare()
     {
-        $midlewareEvents = Config::get('global.config', 'activate.event.middleware');
+        $eventMiddleware = Config::get('global.config', 'activate.event.middleware');
 
-        if ($midlewareEvents) {
+        if ($eventMiddleware) {
             $class = "\\".APP_NS."\\Middleware\\Events\\Event";
             return (new $class)->register();
         }
@@ -407,9 +441,9 @@ class Application extends Container
      * @param $class
      * @return mixed
      */
-    public function compose($class)
+    public function compose($class, $arguments = [])
     {
-        return $this->makeInstance($class);
+        return $this->makeInstance($class, $arguments);
     }
 
     /**
@@ -419,11 +453,11 @@ class Application extends Container
     public function registerCoreAlias()
     {
         foreach ($this->getCoreAlias() as $key => $class) {
-            $this->setValue($key, $this->compose("\\".$class));
+            $this->set($key, $this->compose("\\".$class));
         }
 
         $this->registerClassDefinition()
-             ->setPropertyDefinition($this['definition.config']['property.definition']);
+            ->setPropertyDefinition($this['definition.config']['property.definition']);
 
         return $this;
     }
@@ -438,15 +472,18 @@ class Application extends Container
     }
 
     /**
+     * Application booting completed!
+     * Lets run our awesome Application
+     *
      * @return mixed
      * @throws \Exception
      */
     public function run()
     {
         /**
-         | We will check if script running via console
-         | then we will return out from here, else application
-         | fall back down
+        | We will check if script running via console
+        | then we will return out from here, else application
+        | fall back down
          */
         if (isCli()) {
             return $this;
@@ -485,5 +522,23 @@ class Application extends Container
          * -------------------------------------------------------
          */
         return (new Dispatcher($this))->run();
+    }
+
+    /**
+     * Throw an HttpException with the given message.
+     *
+     * @param  int     $code
+     * @param  string  $message
+     * @param  array   $headers
+     * @return void
+     *
+     */
+    public function abort($code, $message = '', array $headers = array())
+    {
+        if ($code == 404) {
+            throw new \Cygnite\Exception\Http\HttpNotFoundException($message);
+        }
+
+        throw new \Cygnite\Exception\Http\HttpException($code, $message, null, $headers);
     }
 }
