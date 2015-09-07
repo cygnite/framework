@@ -97,7 +97,7 @@ class Application extends Container implements ApplicationInterface
      * @param Autoloader $loader
      * @return Application object
      */
-    public static function getInstance($argument)
+    public static function getInstance($argument = [])
     {
         if (static::$instance instanceof Application) {
             return static::$instance;
@@ -480,7 +480,7 @@ class Application extends Container implements ApplicationInterface
      */
     public function run()
     {
-        /**
+        /*
         | We will check if script running via console
         | then we will return out from here, else application
         | fall back down
