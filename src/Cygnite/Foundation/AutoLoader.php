@@ -48,9 +48,7 @@ class AutoLoader
 
     private static function changeCase($string, $isLower = false)
     {
-        return ($isLower === false)
-            ? $string
-            : ucfirst($string);
+        return ($isLower === false) ? $string : ucfirst($string);
     }
 
     /**
@@ -167,18 +165,18 @@ class AutoLoader
     */
     public function import($path)
     {
-        if (is_null($path) || $path == "") {
+        if (is_null($path)) {
             throw new \InvalidArgumentException("Empty path passed on ".__METHOD__);
         }
 
         $dirPath = null;
         $dirPath = CYGNITE_BASE.DS.str_replace('.', DS, $path).EXT;
 
-        if (is_readable($dirPath) && file_exists($dirPath)) {
-            return include $dirPath;
-        } else {
+        if (!is_readable($dirPath) && !file_exists($dirPath)) {
             throw new \Exception("Requested file doesn't exist in following path $dirPath ".__METHOD__);
         }
+
+        return include $dirPath;
     }
 
     /**

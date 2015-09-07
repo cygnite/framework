@@ -39,10 +39,43 @@ interface ContainerAwareInterface
     public function has($name);
 
     /**
+     * Resolve all dependencies of your class and return instance of
+     * your class
+     *
      * @param $class
      * @return mixed
+     * @throws \Cygnite\Container\Exceptions\ContainerException
      */
-    public function make($class);
+    public function make($class, $arguments = []);
+
+    /**
+     * Resolve the class. We will create and return instance if already
+     * not exists.
+     *
+     * @param       $class
+     * @param array $arguments
+     * @return object
+     */
+    public function resolve($class, $arguments = []);
+
+    /**
+     * Get singleton instance of your class
+     *
+     * @param      $key
+     * @param null $callback
+     * @return mixed
+     */
+    public function singleton($key, $callback = null);
+
+    /**
+     * Reference
+     * http://fabien.potencier.org/article/17/on-php-5-3-lambda-functions-and-closures
+     *
+     * @param Closure $callable
+     * @internal param $callable
+     * @return type
+     */
+    public function share(\Closure $callable);
 
     /**
      * @param          $key
@@ -50,4 +83,14 @@ interface ContainerAwareInterface
      * @return mixed
      */
     public function extend($key, \Closure $callable);
+
+    /**
+     * Create new instance
+     *
+     * @param       $class
+     * @param array $arguments
+     * @throws Exceptions\ContainerException
+     * @return mixed
+     */
+    public function makeInstance($class, $arguments = []);
 }

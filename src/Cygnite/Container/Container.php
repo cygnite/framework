@@ -250,6 +250,8 @@ class Container extends DependencyBuilder implements ContainerAwareInterface, Ar
     public function set($key, $instance)
     {
         $this[$key] = $instance;
+
+        return $this;
     }
 
     public function getRegisteredInstance()
@@ -288,18 +290,20 @@ class Container extends DependencyBuilder implements ContainerAwareInterface, Ar
 
         return $instance[$key];
     }
+
     /**
      * Resolve the class. We will create and return instance if already
      * not exists.
      *
-     * @param $class
+     * @param       $class
+     * @param array $arguments
      * @return object
      */
-    public function resolve($class)
+    public function resolve($class, $arguments = [])
     {
         $class = Inflector::toNamespace($class);
 
-        return $this->make($class);
+        return $this->make($class, $arguments);
     }
 
     /**
@@ -310,83 +314,124 @@ class Container extends DependencyBuilder implements ContainerAwareInterface, Ar
      * @return mixed
      * @throws \Cygnite\Container\Exceptions\ContainerException
      */
-    public function make($class)
+    public function make($class, $arguments = [])
     {
-        $reflectionClass = $reflection = null;
-        $reflection = new Reflection();
-        $reflection->setClass($class);
-        $reflectionClass = $reflection->getReflectionClass();
+        /*
+         * If instance of the class already created and stored into
+         * stack then simply return from here
+         */
+        if (isset($this[$class])) {
+            return $this[$class];
+        }
 
-        if (false === $reflectionClass->isInstantiable()) {
-            throw new ContainerException(
-                "Cannot instantiate " .
-                ($reflection->reflectionClass->isInterface() ? 'interface' : 'class') . " '$class'"
-            );
+        $reflection = new Reflection();
+        $reflectionClass = $reflection->setClass($class)->getReflectionClass();
+
+        /*
+         * Check if reflection class is not instantiable then throw ContainerException
+         */
+        if (!$reflectionClass->isInstantiable()) {
+            $type = ($reflection->reflectionClass->isInterface() ? 'interface' : 'class');
+            throw new ContainerException("Cannot instantiate $type $class");
         }
 
         $constructor = null;
-        $constructorArgsCount = '';
+        $constructorArgsCount = 0;
         if ($reflectionClass->hasMethod('__construct')) {
             $constructor = $reflectionClass->getConstructor();
-            $constructorArgsCount = $constructor->getNumberOfParameters();
             $constructor->setAccessible(true);
+            $constructorArgsCount = $constructor->getNumberOfParameters();
         }
 
         // if class does not have explicitly defined constructor or constructor does not have parameters
         // get the new instance
         if (!isset($constructor) && is_null($constructor) || $constructorArgsCount < 1) {
-            $this->stack[$class] = $reflectionClass->newInstance();
-        } else {
-            $dependencies = $constructor->getParameters();
-            $constructorArgs = [];
-
-            foreach ($dependencies as $dependency) {
-                if (!is_null($dependency->getClass())) {
-                    list($resolveClass, $reflectionParam) = $this->getReflectionParam($dependency);
-
-                    // Application and Container cannot be injected into controller currently
-                    // since Application constructor is protected
-                    if ($reflectionParam->IsInstantiable()) {
-                        $constructorArgs[] = $this->makeInstance($resolveClass);
-                    } else {
-                        $constructorArgs[] = $this->interfaceInjection($reflectionParam);
-                    }
-                } else {
-                    /*
-                     | We will check if construct has default value
-                     | if exists we will simply assign it and continue
-                     | for next argument
-                     */
-                    if ($dependency->isDefaultValueAvailable()) {
-                        $constructorArgs[] = $dependency->getDefaultValue();
-                        continue;
-                    }
-                    /*
-                     | Check parameters are optional or not
-                     | if it is optional we will set the default value
-                     */
-                    $constructorArgs[] = $this->isOptionalArgs($dependency);
-                }
-            }
-
-            $this->stack[$class] = $reflectionClass->newInstanceArgs($constructorArgs);
+            return $this[$class] = $reflectionClass->newInstance();
         }
 
-        return $this->stack[$class];
+        $dependencies = $constructor->getParameters();
+        $constructorArgs = [];
+
+        foreach ($dependencies as $dependency) {
+
+            if (!is_null($dependency->getClass())) {
+                $constructorArgs[] = $this->resolverClass($dependency, $arguments);
+            } else {
+                /*
+                 | Check if construct has default value
+                 | if exists we will simply assign it into array and continue
+                 | for next argument
+                 */
+                if ($dependency->isDefaultValueAvailable()) {
+
+                    $constructorArgs[] = $this->checkIfConstructorHasDefaultArgs($dependency, $arguments);
+                    continue;
+                }
+
+                /*
+                 | Check parameters are optional or not
+                 | if it is optional we will set the default value
+                 */
+                $constructorArgs[] = $this->isOptionalArgs($dependency);
+            }
+        }
+
+        return $this[$class] = $reflectionClass->newInstanceArgs($constructorArgs);
     }
 
     /**
-     * @param $resolvedClass
-     * @return mixed
-     * @throws Exceptions\ContainerException
+     * @param $dependency
+     * @param $arguments
+     * @return array|mixed
      */
-    public function makeInstance($resolvedClass)
+    private function resolverClass($dependency, $arguments)
     {
-        if (!class_exists($resolvedClass)) {
-            throw new ContainerException(sprintf('Class "%s" not exists.', $resolvedClass));
+        list($resolveClass, $reflectionParam) = $this->getReflectionParam($dependency);
+
+        // Application and Container cannot be injected into controller currently
+        // since Application constructor is protected
+        if ($reflectionParam->IsInstantiable()) {
+            return $this->makeInstance($resolveClass, $arguments);
         }
 
-        return $this->stack[$resolvedClass] = new $resolvedClass;
+        return $this->interfaceInjection($reflectionParam);
+    }
+
+    /**
+     * @param $dependency
+     * @param $arguments
+     * @return mixed
+     */
+    private function checkIfConstructorHasDefaultArgs($dependency, $arguments)
+    {
+        $parameters = $dependency->getDefaultValue();
+
+        if (empty($dependency->getDefaultValue()) && !empty($arguments)) {
+            $parameters = $arguments;
+        }
+
+        return $parameters;
+    }
+
+    /**
+     * Create new instance
+     *
+     * @param       $class
+     * @param array $arguments
+     * @throws Exceptions\ContainerException
+     * @return mixed
+     */
+    public function makeInstance($class, $arguments = [])
+    {
+        if (!class_exists($class)) {
+            throw new ContainerException(sprintf('Class "%s" not exists.', $class));
+        }
+        
+        if ($this->offsetExists($class)) {
+        	return $this[$class];
+        }
+
+        return $this[$class] = new $class($arguments);
     }
 
     /**

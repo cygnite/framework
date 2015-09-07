@@ -11,7 +11,7 @@
 
 namespace Cygnite\Mvc\Controller;
 
-use Cygnite\DependencyInjection\ServiceControllerInterface;
+use Cygnite\Mvc\Controller\ServiceControllerInterface;
 
 /**
  * ServiceController.
