@@ -16,7 +16,7 @@ if (!defined('CF_SYSTEM')) {
 }
 
 /**
- * Cygnite Memcache Cache Wrapper Class
+ * Cygnite Memcached Cache Connection Wrapper Class
  *
  * @author Sanjoy Dey <dey.sanjoy0@gmail.com>
  *
@@ -24,13 +24,27 @@ if (!defined('CF_SYSTEM')) {
 
 class MemcachedConnector
 {
+    protected $memcached;
+
     /**
-     * Connect memcache based on its host, port, weight.
+     * Set Memcached Instance
      *
-     * @false string $host
-     * @false mix $port
-     * @param string $host
-     * @param string $port
+     * @param $memCached Memcached
+     */
+    public function __construct($memCached)
+    {
+        $this->memcached = $memCached;
+    }
+
+    /**
+     * Connect Memcached based on its host, port, weight.
+     *
+     * @false    string $host
+     * @false    mix $port
+     * @param array $servers
+     * @throws \RuntimeException
+     * @internal param string $host
+     * @internal param string $port
      * @return void
      */
     public function create(array $servers)
@@ -38,7 +52,7 @@ class MemcachedConnector
         $this->memcached = $this->getMemcachedInstance();
 
         if (empty($servers)) {
-            throw new \RuntimeException("Empty server configuration passed!!");
+            throw new \RuntimeException(sprintf("Empty configuration passed to %s::create() method.", __CLASS__));
         }
 
         foreach ($servers as $server) {
@@ -56,11 +70,11 @@ class MemcachedConnector
         return $this->memcached;
     }
 
-    public function getMemcachedInstance($uniqueId = false)
-    {
-        return ($uniqueId) ? new Memcached($uniqueId) : new Memcached();
-    }
-
+    /**
+     * Connection object
+     *
+     * @return Memcached
+     */
     public function memcached()
     {
         return $this->memcached;
