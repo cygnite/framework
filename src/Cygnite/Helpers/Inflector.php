@@ -24,7 +24,6 @@ if (!defined('CF_SYSTEM')) {
 
 class Inflector extends StaticResolver
 {
-    private static $instance;
     /********************* Inflections ******************/
 
     /**
@@ -55,7 +54,7 @@ class Inflector extends StaticResolver
      * @param $s
      * @return string
      */
-    protected static function actionPath($s)
+    protected function actionPath($s)
     {
         $s = preg_replace('#(.)(?=[A-Z])#', '$1-', $s);
         $s = strtolower($s);
@@ -72,7 +71,7 @@ class Inflector extends StaticResolver
      * @param $s
      * @return string
      */
-    protected static function pathAction($s)
+    protected function pathAction($s)
     {
         $s = strtolower($s);
         $s = preg_replace('#-(?=[a-z])#', ' ', $s);
@@ -103,7 +102,7 @@ class Inflector extends StaticResolver
      * @param $s
      * @return string
      */
-    private static function controllerPath($s)
+    protected function controllerPath($s)
     {
         $s = strtr($s, ':', '.');
         $s = preg_replace('#([^.])(?=[A-Z])#', '$1-', $s);
@@ -120,7 +119,7 @@ class Inflector extends StaticResolver
      * @param $s
      * @return string
      */
-    private static function pathView($s)
+    protected function pathView($s)
     {
         $s = strtolower($s);
         $s = preg_replace('#([.-])(?=[a-z])#', '$1 ', $s);
