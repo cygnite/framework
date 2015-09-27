@@ -12,12 +12,27 @@ class ArrayAccessor implements ArrayAccessorInterface
     protected $defaultIdentifier = '.';
 
     /**
-     * @param callable $callback
+     * @param array $array
+     */
+    public function __construct(array $array)
+    {
+        $this->set($array);
+    }
+
+    /**
+     * Get the instance of ArrayAccessor
+     *
+     * @param array  $array
+     * @param callable|null $callback
      * @return mixed
      */
-    public static function make(\Closure $callback)
+    public static function make(array $array,\Closure $callback = null)
     {
-        return $callback(new static());
+        if ($callback instanceof \Closure) {
+            return $callback(new static($array));
+        }
+
+        return new static($array);
     }
 
     /**
@@ -71,9 +86,34 @@ class ArrayAccessor implements ArrayAccessorInterface
      */
     public function has($key)
     {
-        $array = $this->getArray();
+        return $this->keyExists($key, $this->getArray());
+    }
 
-        return (isset($array[$key])) ? true : false;
+    /**
+     * Determine if array key exists from multi-dimensional array
+     *
+     * @param $key
+     * @param $array
+     * @return bool
+     */
+    public function keyExists($key, $array)
+    {
+        if (array_key_exists($key, $array)) {
+            return true;
+        }
+
+        foreach ($array as $k => $value) {
+
+            if (!is_array($value)) {
+                continue;
+            }
+
+            if (array_key_exists($key, $value)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     private function formatArray($array, $chunks)
@@ -107,7 +147,7 @@ class ArrayAccessor implements ArrayAccessorInterface
      *
      * @return string
      */
-    public function arrayAsJson()
+    public function toJson()
     {
         return json_encode($this->getArray());
     }

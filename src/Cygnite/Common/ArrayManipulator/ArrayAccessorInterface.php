@@ -4,10 +4,11 @@ namespace Cygnite\Common\ArrayManipulator;
 interface ArrayAccessorInterface
 {
     /**
+     * @param          $array
      * @param callable $callback
      * @return mixed
      */
-    public static function make(\Closure $callback);
+    public static function make(array $array, \Closure $callback);
 
     /**
      * @param array $array
@@ -36,7 +37,7 @@ interface ArrayAccessorInterface
      *
      * @return string
      */
-    public function arrayAsJson();
+    public function toJson();
 
     /**
      * @param string $key
