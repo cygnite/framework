@@ -8,14 +8,14 @@ class ValidatorTest extends PHPUnit_Framework_TestCase
 {
     public function testValidatorInstance()
     {
-        $input = Input::make();
+        $input = ['foo' => 'bar', 'bar' => 322];
 
-        $v = Validator::create($input->post(), function ($v) {
+        $v = Validator::create($input, function ($v) {
             return $v;
         });
 
         $this->assertInstanceOf('Cygnite\Validation\Validator', $v);
-        $this->assertEquals($v, Validator::create($input->post()));
+        $this->assertEquals($v, Validator::create($input));
     }
 
     /**
@@ -152,7 +152,7 @@ class ValidatorTest extends PHPUnit_Framework_TestCase
     {
         $input = [
                   'foo' => 'foobar1', 'bar' => 'Hello World!','baz' => '127.0.0.1',
-                  'foobar' => 'AbCd1zyZ9', 'foobaz' => 9538025770, 'barbaz' => '2015-07-25'
+                  'foobar' => 'AbCd1zyZ9', 'foobaz' => 8189814854, 'barbaz' => '2015-07-25'
                 ];
 
         $rules = [
