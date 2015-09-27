@@ -47,8 +47,6 @@ class Form extends Elements implements FormInterface
 
     protected $errorClass = 'error';
 
-    private static $validMethod = ['make', 'instance'];
-
     public static $elNum = 1;
 
     /**
@@ -59,31 +57,35 @@ class Form extends Elements implements FormInterface
      */
     public static function __callStatic($method, $arguments = [])
     {
-        // Check for valid function name
-        if (in_array($method, static::$validMethod)) {
-            if (empty($arguments)) {
-                return call_user_func_array([new self, 'getInstance'], []);
-            } elseif ($arguments[0] instanceof Closure) {
-                return call_user_func_array([new self, 'getInstance'], $arguments);
-            }
+        if (!method_exists(new static, $method)) {
+            throw new \Exception("Undefined $method method called.");
         }
-
-        throw new \Exception("Undefined $method method called.");
     }
 
     /**
      * Get the form builder instance to build form
      *
      * @param callable $callback
-     * @return Form
+     * @return static
      */
-    protected function getInstance(Closure $callback = null)
+    public static function make(Closure $callback = null)
     {
         if ($callback instanceof Closure) {
-            return $callback(new self);
+            return $callback(new static);
         }
 
-        return new self;
+        return new static;
+    }
+
+    /**
+     * Alias method of make
+     *
+     * @param callable $callback
+     * @return callable
+     */
+    public static function instance(Closure $callback = null)
+    {
+        return static::make($callback);
     }
 
     /**
