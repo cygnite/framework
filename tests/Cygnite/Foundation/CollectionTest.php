@@ -17,8 +17,7 @@ class CollectionTest extends PHPUnit_Framework_TestCase
     
     public function testCollectionInstance()
     {
-        $collection = m::mock('Cygnite\Foundation\Collection');
-        $this->assertInstanceOf('Cygnite\Foundation\Collection', $collection);
+        $this->assertInstanceOf('Cygnite\Foundation\Collection', $this->collection);
     }
     
     public function testGetDataCollection()

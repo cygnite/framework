@@ -18,9 +18,8 @@ class AssetTest extends PHPUnit_Framework_TestCase
 
     private function setUpAssetConfig()
     {
-        $loader = m::mock("Cygnite\Foundation\Autoloader");
-        $app = Application::getInstance($loader);
-        $app['router'] = m::mock("Cygnite\Base\Router\Router");
+        $app = Application::instance();
+        $app['router'] = new \Cygnite\Base\Router\Router;
 
         $_SERVER['REQUEST_URI'] = '/hello/user';
         $_SERVER['HTTP_HOST'] = 'localhost';

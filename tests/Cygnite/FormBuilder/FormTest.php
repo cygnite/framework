@@ -15,9 +15,6 @@ class FormTest extends PHPUnit_Framework_TestCase
         $form = Form::make();
         $this->assertInstanceOf('Cygnite\FormBuilder\Form', $form);
 
-        $formMock = m::mock('Cygnite\FormBuilder\Form');
-        $this->assertInstanceOf('Cygnite\FormBuilder\Form', $formMock);
-
         $formInstance = Form::instance();
         $this->assertInstanceOf('Cygnite\FormBuilder\Form', $formInstance);
     }
@@ -33,9 +30,8 @@ class FormTest extends PHPUnit_Framework_TestCase
 
     private function setUpAssetConfig()
     {
-        $loader = m::mock("Cygnite\Foundation\Autoloader");
-        $app = Application::getInstance($loader);
-        $app['router'] = m::mock("Cygnite\Base\Router\Router");
+        $app = Application::instance();
+        $app['router'] = new \Cygnite\Base\Router\Router();
 
         $_SERVER['REQUEST_URI'] = '/hello/user/';
         $_SERVER['HTTP_HOST'] = 'localhost';

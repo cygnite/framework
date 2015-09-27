@@ -14,6 +14,7 @@ class ApplicationTest extends PHPUnit_Framework_TestCase
 
     public function testSetValueToContainer()
     {
+        $loader = m::mock('Cygnite\Foundation\Autoloader');
         $app = Application::instance();
         $app->set('greet', 'Hello Application');
 
@@ -27,7 +28,7 @@ class ApplicationTest extends PHPUnit_Framework_TestCase
         $router = new \Cygnite\Base\Router\Router();
         $url = new \Cygnite\Common\UrlManager\Url($router);
         $madeUrl = $app->make('\Cygnite\Common\UrlManager\Url');
-
+        
         $this->assertEquals($url, $madeUrl);
     }
 
@@ -35,11 +36,11 @@ class ApplicationTest extends PHPUnit_Framework_TestCase
     {
         $app = Application::instance();
         $app->service(function($app)
-            {
-                $app->registerServiceProvider(['FooBarServiceProvider']);
+        {
+            $app->registerServiceProvider(['FooBarServiceProvider']);
 
-                $app->setServiceController('bar.controller', 'BarController');
-            });
+            $app->setServiceController('bar.controller', 'BarController');
+        });
 
         $this->assertInstanceOf('\FooBar', $app['foo.bar']());
         $this->assertNotNull($app['foo.bar']()->greet());
@@ -71,8 +72,8 @@ class FooBarServiceProvider
     public function register(Application $app)
     {
         $app['foo.bar'] = $app->share(function ($c) {
-                return new FooBar();
-            });
+             return new FooBar();
+        });
     }
 }
 

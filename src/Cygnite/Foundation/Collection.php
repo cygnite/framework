@@ -5,7 +5,7 @@ use Countable;
 use ArrayAccess;
 use Serializable;
 use IteratorAggregate;
-use Cygnite\Database\Exceptions\ActiveRecordMethodMissingException;
+use BadMethodCallException;
 
 class Collection implements Countable, IteratorAggregate, ArrayAccess, Serializable
 {
@@ -25,6 +25,17 @@ class Collection implements Countable, IteratorAggregate, ArrayAccess, Serializa
     }
 
     /**
+     * Create a new collection instance with data.
+     *
+     * @param  mixed $data
+     * @return static
+     */
+    public static function create($data = [])
+    {
+        return new static($data);
+    }
+
+    /**
      * Set the contents of the result set by passing in array
      * @param array $data
      */
@@ -35,11 +46,22 @@ class Collection implements Countable, IteratorAggregate, ArrayAccess, Serializa
 
     /**
      * Get the current result set as an array
+     *
      * @return array
      */
     public function getData()
     {
         return $this->data;
+    }
+
+    /**
+     * Alias method of getData
+     *
+     * @return array
+     */
+    public function all()
+    {
+        return $this->getData();
     }
 
     /**
@@ -138,23 +160,134 @@ class Collection implements Countable, IteratorAggregate, ArrayAccess, Serializa
     }
 
     /**
+     * Filter over array element
+     *
+     * @param  \Closure|null $callback
+     * @return static
+     */
+    public function filter(\Closure $callback = null)
+    {
+        if ($callback) {
+            return static::create(array_filter($this->data, $callback));
+        }
+
+        return static::create(array_filter($this->data));
+    }
+
+    /**
+     * Flip the array elements in the collection.
+     *
+     * @return static
+     */
+    public function flip()
+    {
+        return static::create(array_flip($this->data));
+    }
+
+    /**
+     * @param $key
+     * @return $this
+     */
+    public function remove($key)
+    {
+        $this->offsetUnset($key);
+
+        return $this;
+    }
+
+    /**
+     * Get an row from the collection by key.
+     *
+     * @param  mixed  $key
+     * @param  mixed  $default
+     * @return mixed
+     */
+    public function get($key, $default = null)
+    {
+        if ($this->has($key)) {
+            return $this->data[$key];
+        }
+
+        return $default;
+    }
+
+    /**
+     * Get keys from Collection object
+     *
+     * @return static keys
+     */
+    public function keys()
+    {
+        return static::create(array_keys($this->data));
+    }
+
+    /**
+     * Map array elements and return as Collection object
+     *
+     * @param  \Closure $callback
+     * @return static
+     */
+    public function map(\Closure $callback)
+    {
+        $keys = array_keys($this->data);
+        $values = array_map($callback, $this->data, $keys);
+
+        return static::create(array_combine($keys, $values));
+    }
+
+    /**
+     * Return CachingIterator instance.
+     *
+     * @param  int  $flags
+     * @return \CachingIterator
+     */
+    public function getCachingIterator($flags = \CachingIterator::CALL_TOSTRING)
+    {
+        return new \CachingIterator($this->getIterator(), $flags);
+    }
+
+    /**
+     * Check key exists in the Collection object
+     *
+     * @param $key
+     * @return bool
+     */
+    public function has($key)
+    {
+        return $this->offsetExists($key);
+    }
+
+    /**
+     * Find if the collection is empty or not.
+     *
+     * @return bool
+     */
+    public function isEmpty()
+    {
+        return empty($this->all());
+    }
+
+    /**
      * Call a method on all models in a result set. This allows for method
      * chaining such as setting a property on all models in a result set or
      * any other batch operation across models.
      *
-     * @param  string   $method
-     * @param  array    $params
-     * @throws ActiveRecordMethodMissingException
-     * @return dataset
+     * @param  string $method
+     * @param  array  $params
+     * @throws \BadMethodCallException
+     * @return $this
      */
     public function __call($method, $params = [])
     {
-        foreach ($this->data as $model) {
-            if (method_exists($model, $method)) {
-                call_user_func_array([$model, $method], $params);
-            } else {
-                throw new ActiveRecordMethodMissingException("Method $method() does not exist in class " . get_class($this));
+        foreach ($this->data as $class) {
+
+            if (!method_exists($class, $method)) {
+                throw new BadMethodCallException(
+                    sprintf('Method %s() doesn\'t exists in class %s', $method, get_class($this))
+                );
             }
+
+            call_user_func_array([$class, $method], $params);
         }
 
         return $this;

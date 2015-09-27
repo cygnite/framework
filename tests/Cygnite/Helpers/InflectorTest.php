@@ -6,9 +6,7 @@ class InflectorTest extends PHPUnit_Framework_TestCase
 {
     public function testInflectionInstance()
     {
-        $inflector = m::mock('Cygnite\Helpers\Inflector');
-
-        $this->assertInstanceOf('Cygnite\Helpers\Inflector', $inflector);
+        $this->assertInstanceOf('Cygnite\Helpers\Inflector', new Cygnite\Helpers\Inflector);
     }
 
     public function testClassifyMethod()

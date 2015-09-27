@@ -262,33 +262,33 @@ class Container extends DependencyBuilder implements ContainerAwareInterface, Ar
     /**
      * Get singleton instance of your class
      *
-     * @param      $key
+     * @param      $name
      * @param null $callback
      * @return mixed
      */
-    public function singleton($key, $callback = null)
+    public function singleton($name, $callback = null)
     {
         static $instance = [];
 
         // if closure callback given we will create a singleton instance of class
         // and return it to user
         if ($callback instanceof Closure) {
-            if (!isset($instance[$key])) {
-                $instance[$key] = $callback($this);
+            if (!isset($instance[$name])) {
+                $instance[$name] = $callback($this);
             }
 
-            return $this->stack[$key] = $instance[$key];
+            return $this->stack[$name] = $instance[$name];
         }
 
         /*
          | If callback is not instance of closure then we will simply
          | create a singleton instance and return it
          */
-        if (!isset($instance[$key])) {
-            $instance[$key] = new $callback();
+        if (!isset($instance[$name])) {
+            $instance[$name] = new $name();
         }
 
-        return $instance[$key];
+        return $instance[$name];
     }
 
     /**
