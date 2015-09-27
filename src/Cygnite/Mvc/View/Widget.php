@@ -232,4 +232,14 @@ class Widget implements \ArrayAccess
     {
         unset($this->data[$offset]);
     }
+
+    /**
+     * Get data set into Widget
+     *
+     * @return array
+     */
+    public function getData()
+    {
+        return $this->data;
+    }
 }
