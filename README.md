@@ -38,3 +38,9 @@ Contribute on the development or its documentation, learn, get help and help oth
 You can contribute into cygnite development different ways. Read more in official website-
 
 http://www.cygniteframework.com/
+
+
+###License
+--------------
+
+The Cygnite framework is open-sourced software licensed under the [MIT license](http://opensource.org/licenses/MIT).
