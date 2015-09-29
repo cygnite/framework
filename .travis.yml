@@ -7,21 +7,18 @@ php:
   - 7.0
   - hhvm
 
+matrix:
+    allow_failures:
+        - php: 7.0
+
 sudo: false
 
 before_script:
   - composer self-update
 
-matrix:
-  allow_failures:
-    - php: 7
-    - php: hhvm	
-
 install: travis_retry composer install --no-interaction --prefer-source
-	
-script:
-  - ./vendor/bin/phpcs lib --standard=PSR2
-  - ./vendor/bin/phpunit
-  
-  notifications:
+
+script: vendor/bin/phpunit
+
+notifications:
   email: false
