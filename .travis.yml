@@ -9,6 +9,9 @@ php:
 
 sudo: false
 
+before_script:
+  - composer self-update
+
 matrix:
   allow_failures:
     - php: 7
@@ -17,4 +20,6 @@ matrix:
 
 install: travis_retry composer install --no-interaction --prefer-source
 	
-script: vendor/bin/phpunit
+script:
+  - ./vendor/bin/phpcs lib --standard=PSR2
+  - ./vendor/bin/phpunit
