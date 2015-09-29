@@ -405,8 +405,9 @@ class Container extends DependencyBuilder implements ContainerAwareInterface, Ar
     private function checkIfConstructorHasDefaultArgs($dependency, $arguments)
     {
         $parameters = $dependency->getDefaultValue();
+        $defaultValue = $dependency->getDefaultValue();
 
-        if (empty($dependency->getDefaultValue()) && !empty($arguments)) {
+        if (empty($defaultValue) && !empty($arguments)) {
             $parameters = $arguments;
         }
 
