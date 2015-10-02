@@ -23,6 +23,8 @@ if (!defined('CF_SYSTEM')) {
  */
 class RedisConnector
 {
+    protected $redisClient;
+
     public $config = [];
 
     public $connections = [];
@@ -30,15 +32,16 @@ class RedisConnector
     /**
      * @param array $config
      */
-    public function __construct(array $config)
+    public function __construct($client, array $config)
     {
+        $this->redisClient = $client;
         $this->config = $config;
 
         if ($config['connection'] !== 'deafult' && isset($config['connection']['servers'])) {
             $this->connect($config['connection']['servers']);
+        } else {
+            $this->connectDefault();
         }
-
-        $this->connectDefault();
     }
 
     /**
@@ -47,10 +50,11 @@ class RedisConnector
      */
     public function connect(array $servers)
     {
+        $class = $this->redisClient;
         $options = isset($servers['options']) ? (array) $servers['options'] : [];
 
         foreach ($servers as $key => $server) {
-            $this->connections[$key] = new RedisClient($server, $options);
+            $this->connections[$key] = new $class($server, $options);
         }
 
         return $this->connections;
@@ -59,9 +63,18 @@ class RedisConnector
     /**
      * @return RedisClient
      */
+    public function getRedis()
+    {
+        return $this->redisClient;
+    }
+
+    /**
+     * @return RedisClient
+     */
     public function connectDefault()
     {
-        return $this->connections['default'] = new RedisClient();
+        $class = $this->redisClient;
+        return $this->connections['default'] = new $class();
     }
 
     /**
