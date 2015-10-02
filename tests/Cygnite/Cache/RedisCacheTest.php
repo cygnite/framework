@@ -5,81 +5,39 @@ use Cygnite\Cache\Factory\Cache;
 
 class RedisCacheTest extends PHPUnit_Framework_TestCase
 {
-    private $redis;
-
-    public function setUp()
+    public function testGetMethodReturnNull()
     {
-        $configuration = [
-            'global.config' => [
-                'cache' => [
-                    'redis' => [
-                        'connection' => 'default',
-                    ],
-                ]
-            ]
+        $config = [
+            'connection' => 'default',
         ];
 
-        Config::$config = $configuration;
+        $stdClass = $this->getMock('StdClass', ['get']);
 
-        $this->redis = Cache::make('redis', function ($redis) {
-            return $redis;
-        });
+        $redisConnnector = $this->getMockBuilder('\Cygnite\Cache\Storage\RedisConnector')
+            ->setConstructorArgs([$stdClass, $config])
+            ->setMethods(['get'])
+            ->getMock();
+
+        $redisConnnector->expects($this->any())->method('get')->will($this->returnValue(null));
+        $cache = new Cygnite\Cache\Storage\Redis($redisConnnector);
+
+        $this->assertNull($cache->get('foo'));
     }
 
-    public function testInstance()
+    public function testGetMethodReturnValue()
     {
-        $this->assertInstanceOf('\Cygnite\Cache\Storage\Redis', $this->redis);
+        $config = [
+                        'connection' => 'default',
+        ];
+
+        $stdClass = $this->getMock('StdClass', ['get']);
+        $redisConnnector = $this->getMockBuilder('\Cygnite\Cache\Storage\RedisConnector')
+            ->setConstructorArgs([$stdClass, $config])
+            ->getMock();
+        $stub = $this->getMock('Cygnite\Cache\Storage\Redis', ['get', 'setConnection']);
+        $stub->expects($this->any())->method('get')->will($this->returnValue('foo'));
+        $this->assertEquals('foo', $stub->get('foo'));
+        $this->assertNotNull($stub->get('foo'));
     }
 
-    public function testStoreData()
-    {
-        $this->redis->store('foo', 'Foo Bar');
-        $this->assertEquals('Foo Bar', $this->redis->get('foo'));
-    }
-
-    public function testReturnNullWhenItemNotFound()
-    {
-        $this->redis->store('foobar', 'Hello Foo!');
-        $this->assertNull($this->redis->get('bar'));
-    }
-
-    public function testReternEqualValue()
-    {
-        $this->redis->store('foo.baz', 'Hello FooBaz!');
-        $this->assertEquals('Hello FooBaz!', $this->redis->get('foo.baz'));
-    }
-
-    public function testReturnNumericValue()
-    {
-        $this->redis->store('baz', 3);
-        $this->assertEquals('3', $this->redis->get('baz'));
-    }
-
-    public function testIncrementMethod()
-    {
-        $this->redis->store('baz', 3);
-        $this->redis->increment('baz');
-        
-        $this->assertEquals('4', $this->redis->get('baz'));
-    }
-
-    public function testDecrementMethod()
-    {
-        $this->redis->store('baz', 3);
-        $this->redis->decrement('baz');
-        
-        $this->assertEquals('2', $this->redis->get('baz'));
-    }
-
-    public function testDestroyMethod()
-    {
-        $this->redis->store('foobaz', 'Hello');
-        $this->redis->destroy('foobaz');
-        $this->assertNull($this->redis->get('foobaz'));
-    }
-
-    public function tearDown()
-    {
-        m::close();
-    }
 }

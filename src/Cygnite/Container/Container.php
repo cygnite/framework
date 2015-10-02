@@ -406,7 +406,7 @@ class Container extends DependencyBuilder implements ContainerAwareInterface, Ar
     {
         $parameters = $dependency->getDefaultValue();
 
-        if (empty($dependency->getDefaultValue()) && !empty($arguments)) {
+        if (empty($parameters) && !empty($arguments)) {
             $parameters = $arguments;
         }
 

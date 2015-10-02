@@ -130,12 +130,9 @@ class RouterTest extends PHPUnit_Framework_TestCase
         $this->obBufferClean();
     }
 
+
     private function headRequest($output = '')
     {
-        $this->router->head('/', function () {
-            echo "head";
-        });
-
         // Test POST REQUEST with Param
         $this->obStart();
         $this->requestMethod('HEAD');
