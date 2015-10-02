@@ -380,11 +380,11 @@ class Application extends Container implements ApplicationInterface
      */
     public function attachEvents()
     {
-        if (!empty($this['event']->getAppEvents())) {
-            $events = [];
-            $events = $this['event']->getAppEvents();
+        $appEvents = $this['event']->getAppEvents();
 
-            foreach ($events as $event => $namespace) {
+        if (!empty($appEvents)) {
+
+            foreach ($appEvents as $event => $namespace) {
                 // attach all before and after event to handler
                 $this['event']->attach("$event", $namespace);
             }

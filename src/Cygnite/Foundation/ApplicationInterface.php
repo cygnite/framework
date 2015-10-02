@@ -18,7 +18,7 @@ interface ApplicationInterface extends ContainerAwareInterface
      * @param array   $argument
      * @return Application
      */
-    public static function create(\Closure $callback = null, $argument = []);
+    public static function instance(\Closure $callback = null, $argument = []);
 
     /**
      * Create an instance of the class and return it

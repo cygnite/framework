@@ -77,6 +77,8 @@ class Redis implements StorageInterface
     }
 
     /**
+     * Store item with prefix
+     *
      * @param $key
      * @param $value
      * @return mixed
@@ -88,6 +90,12 @@ class Redis implements StorageInterface
         return $this->connection()->set($this->prefix.$key, $value);
     }
 
+    /**
+     * Get the item from redis memory
+     *
+     * @param $key
+     * @return int|mixed|null|string
+     */
     public function get($key)
     {
         $data = $this->connection()->get($this->prefix.$key);

@@ -79,7 +79,7 @@ class Collection implements Countable, IteratorAggregate, ArrayAccess, Serializa
      */
     public function asJson()
     {
-        return json_encode($this->getData());
+        return json_encode($this->data);
     }
 
     /**
@@ -264,7 +264,8 @@ class Collection implements Countable, IteratorAggregate, ArrayAccess, Serializa
      */
     public function isEmpty()
     {
-        return empty($this->all());
+        $collection = $this->all();
+        return empty($collection);
     }
 
     /**

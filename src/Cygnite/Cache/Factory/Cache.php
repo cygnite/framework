@@ -2,8 +2,10 @@
 namespace Cygnite\Cache\Factory;
 
 use Cygnite\Helpers\Config;
-use Cygnite\Cache\Storage\MemcachedConnector;
+use Predis\Client as RedisClient;
+use Cygnite\Cache\Storage\ApcWarpper;
 use Cygnite\Cache\Storage\RedisConnector;
+use Cygnite\Cache\Storage\MemcachedConnector;
 
 if (!defined('CF_SYSTEM')) {
     exit('External script access not allowed');
@@ -25,19 +27,17 @@ class Cache
      *
      * @param          $cache
      * @param callable $callback
+     * @throws RuntimeException
      * @return mixed
      */
-    public static function make($cache, \Closure $callback = null)
+    public static function make($cache, \Closure $callback)
     {
-        // Check if $callback is instance of Closure we return callback
-        if (!is_null($callback) && $callback instanceof \Closure) {
-            if (array_key_exists($cache, static::$drivers)) {
-                return static::getCacheDriver($callback, $cache);
-            }
+        // Return Closure callback
+        if (array_key_exists($cache, static::$drivers)) {
+            return static::getCacheDriver($callback, $cache);
         }
 
-        // Return instance of the Cache Driver
-        return isset(static::$drivers[$cache]) ? new static::$drivers[$cache] : null;
+        throw new RuntimeException("Cache driver not found!");
     }
 
     /**
@@ -47,19 +47,24 @@ class Cache
      */
     public static function getCacheDriver($callback, $cache)
     {
-        if ($cache == 'memcached') {
-            $memcached = static::getMemcahcedDriver();
+        switch ($cache) {
+            case 'apc':
+                return $callback(new static::$drivers[$cache](new ApcWarpper()));
+                break;
+            case 'memcached':
+                $memcached = static::getMemcahcedDriver();
+                return $callback(new static::$drivers[$cache]($memcached));
 
-            return $callback(new static::$drivers[$cache]($memcached));
+                break;
+            case 'redis':
+                $redis = static::getRedisDriver();
+                return $callback(new static::$drivers[$cache]($redis));
+
+                break;
+            default:
+                return $callback(new static::$drivers[$cache]());
+                break;
         }
-
-        if ($cache == 'redis') {
-            $redis = static::getRedisDriver();
-
-            return $callback(new static::$drivers[$cache]($redis));
-        }
-
-        return $callback(new static::$drivers[$cache]());
     }
 
     /**
@@ -90,7 +95,7 @@ class Cache
 
         $redis = null;
         if (isset($config['redis'])) {
-            $redis = new RedisConnector($config['redis']);
+            $redis = new RedisConnector(new RedisClient(), $config['redis']);
         }
 
         return $redis;

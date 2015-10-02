@@ -9,9 +9,9 @@
  */
 namespace Cygnite\Cache\Storage;
 
-use Cygnite\Cache\Exceptions\ApcExtensionNotFoundException;
-use Cygnite\Cache\StorageInterface;
 use Exception;
+use Cygnite\Cache\StorageInterface;
+use Cygnite\Cache\Storage\ApcWarpper;
 
 if (!defined('CF_SYSTEM')) {
     exit('External script access not allowed');
@@ -24,16 +24,9 @@ if (!defined('CF_SYSTEM')) {
  *
  */
 
-/**
- * @require StorageInterface to implement APC Cache
- */
 class Apc implements StorageInterface
 {
-    // life time
-    protected $lifeTime;
-    protected $defaultTime = 10; //default time is set 10 * 60 = 600 sec    
-    protected $option = false; // flag set false
-    protected $isApcUEnabled = false;
+    protected $apc;
 
     /*
     * Constructor function to check availability of apc extension, 
@@ -41,58 +34,46 @@ class Apc implements StorageInterface
     *
     */
 
-    public function __construct()
+    public function __construct(ApcWrapper $apc)
     {
-        if (!extension_loaded('apc')) {
-            throw new ApcExtensionNotFoundException("Apc extension not loaded !");
+        $this->apc = $apc;
+    }
+
+    /**
+     * @param callable $callback
+     * @return static
+     */
+    public static function make(callable $callback = null)
+    {
+        if (is_callable($callback) && !is_null($callback)) {
+            return $callback(new static(new ApcWarpper));
         }
 
-        $this->isApcUEnabled = (function_exists('apcu_fetch')) ? true : false;
-    }
-
-    /*
-    * Prevent cloning
-    */
-
-    /**
-     * @return Apc
-     */
-    public static function make()
-    {
-        return new self();
+        return new static(new ApcWarpper);
     }
 
     /**
-     * Store the value in the apc memory
+     * Store item into apc memory
      *
-     * @false string $key
-     * @false mix $value
-     * @param $key
-     * @param $value
-     * @throws \Exception
-     * @return bool
+     * @param      $key
+     * @param      $value
+     * @param null $minute
+     * @return mixed
      */
     public function store($key, $value, $minute = null)
     {
-        if (is_null($key) || $key == "") {
-            throw new \InvalidArgumentException("Key shouldn't be empty");
-        }
-
-        $time = (is_null($minute)) ? $this->getLifeTime() : $minute * 60;
-
-        return ($this->isApcUEnabled) ? apcu_store($key, $value, $time): apc_store($key, $value, $time);
+        return $this->apc->store($key, $value, $minute = null);
     }
 
-    /*
+    /**
     * This function is used to set default life time
-    * @false $default_lifeTime null
-    *@return  boolean
+     *
+     * @param null $lifeTime
+     * @return mixed
     */
     public function setLifeTime($lifeTime = null)
     {
-        $this->lifeTime = ((is_null($lifeTime)) ? $this->defaultTime : $lifeTime) * 60;
-
-        return true;
+        return $this->apc->setLifeTime($lifeTime);
     }
 
     /**
@@ -103,52 +84,49 @@ class Apc implements StorageInterface
 
     public function getLifeTime()
     {
-        return (!is_null($this->lifeTime)) ? $this->lifeTime : $this->defaultTime;
+        return $this->apc->getLifeTime();
     }
 
     /**
      * Get data from memory based on its key
      *
-     * @false string $key
      * @param $key
-     * @return bool
+     * @return mixed
      */
     public function get($key)
     {
-        $data = ($this->isApcUEnabled) ? apcu_fetch($key) : apc_fetch($key);
-
-        if ($data == false) {
-            return null;
-        }
-
-        return $data;
+        return $this->apc->get($key);
     }
 
+    /**
+     * @param $key
+     * @param $value
+     * @return mixed
+     */
     public function increment($key, $value)
     {
-        return ($this->isApcUEnabled) ? apcu_inc($key, $value) : apc_inc($key, $value);
+        return $this->apc->increment($key, $value);
     }
 
+    /**
+     * @param $key
+     * @param $value
+     * @return mixed
+     */
     public function decrement($key, $value)
     {
-        return ($this->isApcUEnabled) ? apcu_dec($key, $value) : apc_dec($key, $value);
+        return $this->apc->decrement($key, $value);
     }
 
     /**
      * Delete values from memory based on its key
      *
-     * @false string $key
      * @param $key
-     * @throws \Exception
-     * @return bool
+     * @return mixed
      */
     public function destroy($key)
     {
-        if (is_null($key)) {
-            throw new \InvalidArgumentException("Key shouldn't be empty");
-        }
-
-        return ($this->isApcUEnabled) ? apcu_delete($key) : apc_delete($key);
+        return $this->apc->destroy($key);
     }
 
     /**
@@ -158,10 +136,6 @@ class Apc implements StorageInterface
      */
     public function flush()
     {
-        ($this->isApcUEnabled) ? apcu_clear_cache() : apc_clear_cache('user');
-    }
-
-    final private function __clone()
-    {
+        return $this->apc->flush();
     }
 }
