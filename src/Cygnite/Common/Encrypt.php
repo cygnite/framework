@@ -19,8 +19,9 @@ if (!defined('CF_SYSTEM')) {
  * Common Encrypt.
  *
  * This class used to encode and decode user input based on the salt key
- * provided in configuration
+ * provided in configuration.
  *
+ * @note For better security use Cygnite/Hash/ByCrypt component
  * @author Sanjoy Dey <dey.sanjoy0@gmail.com>
  */
 class Encrypt
@@ -40,10 +41,8 @@ class Encrypt
     * @false string - encryption key
     *
     */
-    public function __construct()
+    public function __construct($encryptKey = null)
     {
-        $encryptKey = Config::get('global.config', 'encryption.key');
-
         $this->checkMCryptExists();
 
         if (is_null($encryptKey)) {
@@ -78,7 +77,7 @@ class Encrypt
      */
     private function setSaltKey($key)
     {
-        $this->set($key);
+        $this->setKey($key);
 
         if (!function_exists('mcrypt_create_iv')) {
             throw new \BadFunctionCallException("Mcrypt extension library not loaded");
@@ -90,7 +89,7 @@ class Encrypt
     /**
      * @param $encryptKey
      */
-    public function set($encryptKey)
+    public function setKey($encryptKey)
     {
         $this->secureKey = hash('sha256', $encryptKey, true);
     }
@@ -99,15 +98,16 @@ class Encrypt
      * Get Encryption key
      * @return mixed
      */
-    public function get()
+    public function getKey()
     {
         return $this->secureKey;
     }
 
-    /*
-     *  This function is to encrypt string
+    /**
+     * This function is to encrypt string
+     *
      * @access  public
-     *  @false string
+     * @param string
      * @return encrypted hash
      */
     public function encode($input)
@@ -125,10 +125,11 @@ class Encrypt
         return $this->value;
     }
 
-    /*
+    /**
      * This function is to decrypt the encoded string
+     *
      * @access  public
-     * @false string
+     * @param string
      * @return decrypted string
      */
     public function decode($input)
@@ -146,32 +147,17 @@ class Encrypt
         return $this->value;
     }
 
-    public function __call($method, $arguments = [])
-    {
-    }
-
-    public static function __callStatic($method, $arguments = [])
-    {
-        if ($method == 'create') {
-            if (self::$instance === null) {
-                self::$instance = new self();
-            }
-            // we will return $this for method chaining
-            return call_user_func_array([self::$instance, 'getInstance'], [$arguments]);
-        }
-    }
-
     /**
-     * @return $this
+     * @return static
      */
-    public function getInstance()
+    public static function create()
     {
-        return $this;
-    }
+        $encryptKey = Config::get('global.config', 'encryption.key');
 
-    public function __destruct()
-    {
-        unset($this->secureKey);
-        unset($this->iv);
+        if (self::$instance === null) {
+           self::$instance = new static($encryptKey);
+        }
+
+        return self::$instance;
     }
 }
