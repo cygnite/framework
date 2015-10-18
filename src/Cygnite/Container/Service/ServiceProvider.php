@@ -1,7 +1,7 @@
 <?php
 namespace Cygnite\Container\Service;
 
-use Cygnite\Foundation\Application as App;
+use Cygnite\Foundation\Application;
 
 /**
  * Class Container
@@ -30,5 +30,5 @@ abstract class ServiceProvider
      * @param \Cygnite\Foundation\Application $app
      * @return void
      */
-    abstract public function register(App $app);
+    abstract public function register(Application $app);
 }
