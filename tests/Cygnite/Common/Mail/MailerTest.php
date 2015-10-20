@@ -56,6 +56,23 @@ class MailerTest extends PHPUnit_Framework_TestCase
         $this->assertEquals(['dey.sanjoy0@gmail.com'], $mailer->failedRecipients());
     }
 
+    public function testSetMessageContentProperlyIntoMessageObject()
+    {
+        $transport = m::mock('Swift_Transport');
+        $message = m::mock('Swift_Message[getBody]');
+        $mailer = $this->getMock('Cygnite\Common\Mail\Mailer', ['message'], [$message]);
+        $mailer->getSwiftMailer()->shouldReceive('getTransport')->andReturn($transport);
+        $transport->shouldReceive('stop');
+        //$mailer->expects($this->once())->method('message')->will($this->returnValue($message));
+        //$swiftMessage = $mailer->message();
+
+        $message->shouldReceive('setBody')->once()->with('rendered.view', 'text/html');
+        $message->shouldReceive('getBody')->andReturn("rendered.view");
+        $message->shouldReceive('setFrom')->never();
+
+        $this->assertEquals("rendered.view", $message->getBody());
+    }
+
     private function createTransport()
     {
         return m::mock('Swift_Transport')->shouldIgnoreMissing();
