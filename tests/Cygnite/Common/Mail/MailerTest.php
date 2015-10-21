@@ -66,7 +66,7 @@ class MailerTest extends PHPUnit_Framework_TestCase
         //$mailer->expects($this->once())->method('message')->will($this->returnValue($message));
         //$swiftMessage = $mailer->message();
 
-        $message->shouldReceive('setBody')->once()->with('rendered.view', 'text/html');
+        $message->shouldReceive('setBody')->with('rendered.view', 'text/html');
         $message->shouldReceive('getBody')->andReturn("rendered.view");
         $message->shouldReceive('setFrom')->never();
 
