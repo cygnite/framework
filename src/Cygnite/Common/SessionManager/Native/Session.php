@@ -2,7 +2,7 @@
 namespace Cygnite\Common\SessionManager\Native;
 
 use Cygnite\Helpers\Config;
-use Cygnite\Helpers\String;
+use Cygnite\Helpers\String as Str;
 use Cygnite\Common\SessionManager\Manager;
 use Cygnite\Common\SessionManager\SessionInterface;
 use Cygnite\Common\SessionManager\Session as SessionManager;
@@ -249,7 +249,7 @@ class Session extends Manager implements SessionInterface
      */
     public function regenerateToken()
     {
-        $this->set('_token', String::random('alnum', 32));
+        $this->set('_token', Str::random('alnum', 32));
     }
 
     /**
