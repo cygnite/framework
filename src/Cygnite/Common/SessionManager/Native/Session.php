@@ -2,7 +2,7 @@
 namespace Cygnite\Common\SessionManager\Native;
 
 use Cygnite\Helpers\Config;
-use Cygnite\Helpers\String as Str;
+use Cygnite\Helpers\Str;
 use Cygnite\Common\SessionManager\Manager;
 use Cygnite\Common\SessionManager\SessionInterface;
 use Cygnite\Common\SessionManager\Session as SessionManager;
