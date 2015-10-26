@@ -14,11 +14,13 @@ namespace Cygnite\Common\Input;
 use Closure;
 use Cygnite\Common\Security;
 use InvalidArgumentException;
-use Cygnite\Common\CookieManager\Cookie;
+use Cygnite\Common\Input\CookieManager\Cookie;
+use Cygnite\Common\ArrayManipulator\ArrayAccessor;
 
 /**
- * Input.
+ * Class Input
  *
+ * @package Cygnite\Common\Input
  * @author Sanjoy Dey <dey.sanjoy0@gmail.com>
  */
 class Input
@@ -46,10 +48,10 @@ class Input
     public static function make(Closure $callback = null)
     {
         if ($callback instanceof Closure) {
-            return $callback(new static(new Security()));
+            return $callback(new static(Security::create()));
         }
 
-        return new static(new Security());
+        return new static(Security::create());
     }
 
     /**
@@ -70,6 +72,7 @@ class Input
     public function except($key)
     {
         $this->except = $this->security->sanitize($key);
+
         return $this;
     }
 
@@ -82,15 +85,12 @@ class Input
     public function post($key = null, $value = null)
     {
         if (!is_null($this->except)) {
-            unset($this->request['post'][$this->except]);
+            $this->skip();
         }
 
-        $postValue = '';
+        if (!is_null($key) && !string_has($key, '.') && is_null($value)) {
 
-        if ($key !== null &&
-            strpos($key, '.') == false &&
-            is_null($value) == true
-        ) {
+        $postValue = '';
             $key = $this->security->sanitize($key);
             $postValue = $this->security->sanitize($this->request['post'][$key]);
             $this->request['post'][$key] = $postValue;
@@ -99,45 +99,55 @@ class Input
                 return $this->request['post'][$key];
             }
 
-            throw new InvalidArgumentException("Invalid $key passed to ".__METHOD__);
+            throw new InvalidArgumentException("Invalid key $key passed to ".__METHOD__);
         }
 
-        if ($key !== null &&
-           strpos($key, '.') == true &&
-           is_null($value) == true
-        ) {
-            $expression = explode('.', $key);
-            $firstKey = $this->security->sanitize($expression[0]);
-            $secondKey = $this->security->sanitize($expression[1]);
+        /*
+         | User can access post array element by passing
+         | key as dot separator with index
+         | ['user' => ['name' => 'foo']]
+         |
+         | $input->post('user.name'); // output: foo
+         */
+        if (!is_null($key) && string_has($key, '.') && is_null($value)) {
 
-            if (isset($expression[2])) {
-                throw new InvalidArgumentException('Post doesn\'t allows more than one key');
+            $arr = ArrayAccessor::make($this->request['post']);
+
+            return $arr->toString($this->security->sanitize($key));
             }
 
-            $postValue = $this->security->sanitize($this->request['post'][$firstKey][$secondKey]);
-            $this->request['post'][$firstKey][$secondKey] = $postValue;
+        $this->setPostValue($key, $value);
 
-            return $this->request['post'][$firstKey][$secondKey];
+        if (is_null($key)) {
+            $postArr = $this->security->sanitize($this->request['post']);
+
+            return (!empty($postArr)) ? $postArr : null;
         }
+    }
 
-        if (is_null($key) ===false && is_null($value) === false) {
-            try {
+    public function setPostValue($key, $value)
+    {
+        if (!is_null($key) && !is_null($value)) {
+
                 //Sets new value for given POST variable.
                  //@param string $key Post variable name
                  //@param mixed $value     New value to be set.
                 $this->request['post'][$key] = $value;
-            } catch (InvalidArgumentException $ex) {
-                echo $ex->getMessage();
-            }
 
             return true;
         }
+    }
 
-        if (is_null($key)) {
-            $postArray = $this->security->sanitize($this->request['post']);
-            return (!empty($postArray)) ?
-                $postArray :
-                null;
+    public function skip()
+    {
+        if (string_has($this->except, '.')) {
+            $arr = explode('.', $this->except);
+
+            foreach ($arr as $key => $value) {
+                unset($this->request['post'][$value]);
+            }
+        } else {
+            unset($this->request['post'][$this->except]);
         }
     }
 
@@ -165,9 +175,18 @@ class Input
     }
 
     /**
+     * @param        $type
+     * @param string $request
+     */
+    public function setRequest($type, $request = 'get')
+    {
+        $this->request[$type] = $request;
+    }
+
+    /**
      * @return array
      */
-    protected function getRequest()
+    public function getRequest()
     {
         return [ 'get' => $_GET, 'post' => $_POST, 'cookie' => $_COOKIE ];
     }

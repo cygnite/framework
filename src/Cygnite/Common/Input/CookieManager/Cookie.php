@@ -13,10 +13,14 @@ namespace Cygnite\Common\Input\CookieManager;
 
 use Closure;
 use Cygnite\Common\Security;
-use Cygnite\Common\Singleton;
-use Cygnite\Proxy\StaticResolver;
 
-class Cookie extends StaticResolver implements CookieInterface
+/**
+ * Class Cookie
+ *
+ * @package Cygnite\Common\Input\CookieManager
+ */
+
+class Cookie implements CookieInterface
 {
     /**
      * Cookie attributes
@@ -38,52 +42,44 @@ class Cookie extends StaticResolver implements CookieInterface
     public static $cookies = [];
 
     /*
-     * Did cookie has been set already ?
+     * Cookie set already ?
      */
     private $setCookie = false;
 
     //Property to hold security instance.
     private $security;
 
-    /*
-     * Constructor of the Cookie.
-     * @access private
-     * You can not create instance directly.
-     * Use Cookie::instance(); to get the object
+    /**
+     * Cookie class Constructor.
      *
-     * @return void
+     * @param Security $security
+     * @param array    $request
      */
-    protected function __construct()
+    public function __construct(Security $security, $request = [])
     {
         //Get the security instance and provide security to cookies
-        $this->security = Security::instance(
-            function ($instance) {
-                return $instance;
-            }
-        );
-    }
+        $this->security = $security;
 
-
-    /**
-     * @param callable $callback
-     * @param array    $request
-     * @return object
-     */
-    protected function create(Closure $callback = null, $request = [])
-    {
         if (!empty($request)) {
             static::$cookies = $request['cookie'];
         } else {
             static::$cookies = $_COOKIE;
         }
+    }
 
-        $crypt = null;
 
-        if (is_object($crypt)) {
-            self::$encrypt = $crypt;
-        }
-
-        return (is_callable($callback)) ? $callback(new self) : new self;
+    /**
+     * Create Cookie Instance and return to user
+     *
+     * @param callable $callback
+     * @param array    $request
+     * @return object
+     */
+    public static function create(Closure $callback = null, $request = [])
+    {
+        return (is_callable($callback)) ?
+            $callback(new static(Security::create(), $request)) :
+            new static(Security::create(), $request);
     }
 
     /**
@@ -94,7 +90,7 @@ class Cookie extends StaticResolver implements CookieInterface
      * @throws \InvalidCookieException
      * @return mixed obj or bool false
      */
-    public function setName($name)
+    public function name($name)
     {
         if (is_null($name)) {
             throw new \InvalidCookieException("Cookie name cannot be null");
@@ -117,33 +113,24 @@ class Cookie extends StaticResolver implements CookieInterface
      * @internal param bool $encrypt
      * @return bool whether the string was a string
      */
-    public function setValue($value = null)
+    public function value($value = null)
     {
         if (is_null($value)) {
             throw new \InvalidCookieException("Cookie value cannot be null.");
-            return false;
         }
 
         if (is_array($value)) {
             $value = json_encode($this->security->sanitize($value));
         }
 
-        //$data = $this->encrypt->encode($value);
-        $data = $value;
-
-        $length = null;
-
-        $length = (function_exists('mb_strlen')?
-            mb_strlen($data) :
-            strlen($data));
+        $length = (function_exists('mb_strlen')? mb_strlen($value) : strlen($value));
 
         if ($length > 4096) {
             throw new \InvalidCookieException('Cookie maximum size exceeds 4kb');
             return false;
         }
 
-        $this->value = $this->security->sanitize($data);
-        unset($data);
+        $this->value = $this->security->sanitize($value);
 
         return $this;
     }
@@ -157,7 +144,7 @@ class Cookie extends StaticResolver implements CookieInterface
      * @internal param string $time +1 day, etc.
      * @return bool whether the string was a string
      */
-    public function setExpire($expire = 0)
+    public function expire($expire = 0)
     {
         $var = null;
         $var = substr($expire, 0, 1);
@@ -184,7 +171,7 @@ class Cookie extends StaticResolver implements CookieInterface
      * @param string $path The cookie path
      * @return $this
      */
-    public function setPath($path = '/')
+    public function path($path = '/')
     {
         $this->path = (string) $path;
 
@@ -199,7 +186,7 @@ class Cookie extends StaticResolver implements CookieInterface
      * @return $this
      */
 
-    public function setDomain($domain = null)
+    public function domain($domain = null)
     {
         if ($domain !== null) {
             $this->domain = (string) $domain;
@@ -208,15 +195,14 @@ class Cookie extends StaticResolver implements CookieInterface
         return $this;
     }
 
-
-    /*
+    /**
      * Set the cookie status to be secure or not
      *
      * @param bool $bool true/false if secure
      * @return $this
      */
 
-    public function setSecure($bool = false)
+    public function secure($bool = false)
     {
         $this->secure = (bool)$bool;
 
@@ -224,13 +210,12 @@ class Cookie extends StaticResolver implements CookieInterface
     }
 
 
-    /*
-
+    /**
      * Set the cookie type http only, or not
      * @param bool $bool true/false if http only
      * @return $this
      */
-    public function setHttpOnly($bool = false)
+    public function httpOnly($bool = false)
     {
         $this->httpOnly = (bool)$bool;
 
@@ -238,7 +223,7 @@ class Cookie extends StaticResolver implements CookieInterface
     }
 
 
-    /*
+    /**
      * Get a cookie's value
      *
      * @param string $name The cookie name
@@ -252,37 +237,30 @@ class Cookie extends StaticResolver implements CookieInterface
 
         $name = $this->security->sanitize($name);
 
-        $value = null;
-
-        if (isset(static::$cookies[$name]) && is_array(static::$cookies[$name])) {
-            $value = json_decode(static::$cookies[$name]);
+        if (!isset(static::$cookies[$name])) {
+            throw new InvalidCookieException("Cookie ".$name.' not found');
         }
 
         if (isset(static::$cookies[$name])) {
-            $value = $this->security->sanitize(static::$cookies[$name]);
 
-            return  $value;
-            //json_decode($this->encrypt->decode(static::$cookies[$name])) :
+            if (is_array(static::$cookies[$name])) {
+                return json_decode(static::$cookies[$name]);
         }
 
-        if (!isset(static::$cookies[$name])) {
-            throw new InvalidCookieException($name.' not found');
-            return false;
+            return $this->security->sanitize(static::$cookies[$name]);
         }
     }
 
-    /*
+    /**
      * Set the cookie
      *
      * @return bool
      * @throws \Exceptions  Cookies already set
      */
-    public function save()
+    public function store()
     {
         if ($this->name && $this->setCookie == true) {
-            throw new InvalidCookieException(
-                'Cookie->setCookie has already been called. Cookies can only set once.'
-            );
+            throw new InvalidCookieException('Cookies can only set once.');
         }
 
         $bool = setcookie(
@@ -303,6 +281,8 @@ class Cookie extends StaticResolver implements CookieInterface
     }
 
     /**
+     * Check cookie existance
+     *
      * @param $cookie
      * @return bool|mixed
      */
@@ -316,7 +296,7 @@ class Cookie extends StaticResolver implements CookieInterface
     }
 
     /**
-     * destroy the cookie
+     * Destroy the cookie
      *
      * @access   public
      * @param null $name
@@ -329,13 +309,7 @@ class Cookie extends StaticResolver implements CookieInterface
             $name = $this->name;
         }
 
-        return setcookie(
-            $name,
-            null,
-            (time()-1),
-            $this->path,
-            $this->domain
-        );
+        return setcookie($name, null, (time()-1), $this->path, $this->domain);
     }
 
     public function __destruct()
