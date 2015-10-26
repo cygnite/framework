@@ -11,15 +11,16 @@
 
 namespace Cygnite\Common\UrlManager;
 
-/*
- * Url Manager
- *
- * @author Sanjoy Dey <dey.sanjoy0@gmail.com>
- */
 use Cygnite\Base\Router\Router;
 use Cygnite\Foundation\Application as App;
 use InvalidArgumentException;
 
+/**
+ * Class Url
+ *
+ * @package Cygnite\Common\UrlManager
+ * @author Sanjoy Dey <dey.sanjoy0@gmail.com>
+ */
 class Url
 {
     public static $base;
@@ -32,9 +33,7 @@ class Url
     public function __construct(Router $route)
     {
         if (is_object($route)) {
-            if ($route instanceof Router) {
-                $this->setRoute($route);
-            }
+            $this->setRoute($route);
         }
     }
 
