@@ -31,7 +31,7 @@ if (! defined('CF_SYSTEM')) {
  *             ->setReadReceiptTo(SYS_EMAIL)
  *             ->setBody('Here is the message itself')
  *             ->setAttach()
- *             ->addPart('<q>Here is the message itself</q>', 'text/html')
+ *             ->addPart('<p>Here is the message itself</p>', 'text/html')
  *             ->getMessage();
  *
  *      $mailer->send($message);
@@ -258,14 +258,12 @@ class Mailer implements MailerInterface
     /**
      * Send email with message
      *
-     * @access public
-     * @param  $message your email contents
+     * @param your $message
+     * @return unknown
      * @throws \InvalidArgumentException
-     * @return boolean
      */
     public function send($message)
     {
-        //$mailer = Swift_Mailer::newInstance($this->transport);
         if (!$message instanceof MailMessage) {
             throw new \InvalidArgumentException(
                 sprintf("Mailer::%s expect instance of Swift_Message.", __FUNCTION__)

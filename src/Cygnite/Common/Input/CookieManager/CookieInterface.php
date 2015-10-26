@@ -22,7 +22,7 @@ interface CookieInterface
     /**
      * @return mixed
      */
-    public function save();
+    public function store();
 
     /**
      * @param $cookie

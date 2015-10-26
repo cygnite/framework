@@ -22,8 +22,9 @@ use Closure;
  * This package provides necessary in built validation for users data.
  *
  * <code>
- *  $instance = Security::create(function ($instance) {
- *               return $instance;
+ *  $instance = Security::create(function ($instance)
+ *  {
+ *      return $instance;
  *  });
  *  $instance->sanitize($string);
  * </code>
@@ -451,7 +452,7 @@ class Security
      * @param callable| Closure $callback
      * @return object Instance of Security
      */
-    public function create(Closure $callback = null)
+    public static function create(Closure $callback = null)
     {
         if (self::$instance === null) {
             self::$instance = new self();
