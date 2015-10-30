@@ -145,6 +145,7 @@ class Builder extends Joins implements QueryBuilderInterface
         $sql = $ar = null;
         $ar = self::cyrus();
         $this->triggerEvent('beforeCreate');
+
         $sql = $this->getInsertQuery(strtoupper(__FUNCTION__), $ar, $arguments);
         try {
             $statement = $this->getDatabaseConnection()->prepare($sql);
@@ -562,7 +563,7 @@ class Builder extends Joins implements QueryBuilderInterface
             static::$dataSource = false;
         }
 
-        switch ($fetchMode) {
+        switch (strtolower($fetchMode)) {
             case 'group':
                 $data = $statement->fetchAll(\PDO::FETCH_GROUP | \PDO::FETCH_ASSOC);
                 break;
@@ -582,7 +583,7 @@ class Builder extends Joins implements QueryBuilderInterface
                 $data = $statement->fetchAll(\PDO::FETCH_COLUMN);
                 break;
             case 'class':
-                $data = $statement->fetchAll(\PDO::FETCH_CLASS, "\\Cygnite\\Database\\DataSource");
+                $data = $statement->fetchAll(\PDO::FETCH_CLASS, "\\Cygnite\\Database\\ResultSet");
                 break;
             default:
                 $data = $statement->fetchAll(\PDO::FETCH_CLASS, '\\' . self::cyrus()->getModelClassNs());
