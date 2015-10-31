@@ -24,11 +24,16 @@ use Cygnite\Database\Query\Builder as QueryBuilder;
 
 abstract class ActiveRecord implements ActiveRecordInterface
 {
+    // Default foreign key suffix used by relationship methods
     const DEFAULT_FOREIGN_KEY_SUFFIX = '_id';
+
+    // Holds Activerecord instance
     public static $ar;
+
+    // Default primary key
     public static $defaultPrimaryKey = 'id';
 
-    //set closed property as true is set else false
+    // Valid Model events
     private static $events = [
         'beforeCreate',
         'afterCreate',
@@ -39,11 +44,10 @@ abstract class ActiveRecord implements ActiveRecordInterface
         'beforeDelete',
         'afterDelete'
     ];
-
-    // Default foreign key suffix used by relationship methods
+    // Holds primary key value
     private $index;
 
-    //Hold all your table fields in attributes
+    // Valid finders methods
     private static $validFinders = [
         'first',
         'last',
@@ -56,33 +60,44 @@ abstract class ActiveRecord implements ActiveRecordInterface
         'save'
     ];
 
-    //set user defined database name into it.
-    protected $primaryKeyValue;
-
     //set user defined table name into it.
     protected $modelClass;
 
-    //set user defined table primary key
-    //public $closed;
+    // Set Model attributes to store or update
     protected $attributes = [];
+
+    // Holds Pagination Uri number
     protected $paginationUri;
-    protected $paginator = [];
+    // Holds Pagination Offset
     protected $paginationOffset;
+
+    // Holds page numbers
     protected $pageNumber;
+
+    //Model class Name
     protected $modelClassNs;
+
+    //Holds Query Builder Instance
     protected $query;
+
+    //Holds database connection name into it.
     protected $database;
+
+    // Holds Table name
     protected $tableName;
+
+    //Holds primary key
     protected $primaryKey;
+    protected $primaryKeyValue;
+
+    // Holds model relations array
     protected $relations = [];
 
-    /*
-     * Restrict users to create active records object Directly
-     * Get the database configurations
+    /**
+     * Set Model Attributes and start booting Cyrus ActiveRecord ORM
      *
      */
-
-    protected function __construct()
+    public function __construct()
     {
         $model = null;
         static::$ar = $this;
@@ -93,12 +108,39 @@ abstract class ActiveRecord implements ActiveRecordInterface
     }
 
     /**
+     * Get the model class instance
+     *
+     * @return mixed
+     * @throws DatabaseException
+     */
+    public static function model()
+    {
+        $class = get_called_class();
+
+        if ($class == __CLASS__) {
+            throw new DatabaseException(sprintf("Abstract Class %s cannot be instantiated.", __CLASS__));
+        }
+
+        return (!class_exists($class)) ?: new $class();
+    }
+
+    /**
+     * Return empty model object
+     *
+     * @return mixed
+     */
+    public function returnEmptyObject()
+    {
+        return self::model();
+    }
+
+    /**
      * Configure and set all attributes into model class
      *
      * @param $model
      * @throws \InvalidArgumentException
      */
-    private function setModelAttributes($model)
+    protected function setModelAttributes($model)
     {
         $this->setModelClass(Inflector::getClassNameFromNamespace($model));
 
@@ -165,12 +207,111 @@ abstract class ActiveRecord implements ActiveRecordInterface
      * Set the primary key
      *
      */
-    private function setPrimaryKey()
+    protected function setPrimaryKey()
     {
         // making default primary key as id
-        $primaryKey = isset($this->primaryKey) && is_null($this->primaryKey) ? 'id' : $this->primaryKey;
+        $primaryKey = isset($this->primaryKey) && is_null($this->primaryKey) ?
+            static::$defaultPrimaryKey :
+            $this->primaryKey;
 
         $this->primaryKey = $primaryKey;
+    }
+
+    /**
+     * Get the primary key of table
+     *
+     * @return null|string
+     */
+    public function getKeyName()
+    {
+        return isset($this->primaryKey) ? $this->primaryKey : static::$defaultPrimaryKey;
+    }
+
+    /**
+     * Get primary Key Value
+     *
+     * @return mixed|null
+     */
+    public function getPrimaryKey()
+    {
+        return $this->primaryKeyValue;
+    }
+
+    /**
+     * Set the primary key id value
+     *
+     * @param $key
+     * @param $value
+     */
+    private function setId($key, $value)
+    {
+        $this->index[$key] = $value;
+    }
+
+    /**
+     * Get the Id stored into object
+     *
+     * @param null $key
+     * @return mixed
+     */
+    public function getId($key = null)
+    {
+        return (isset($this->index[$key]) && !is_null($key)) ?
+            $this->index[$key] :
+            $this->index[$this->getKeyName()];
+    }
+
+    /**
+     * Get Id column Alias method of getId()
+     *
+     * @param $class
+     * @return null|string
+     */
+    public function getIdColumn($class)
+    {
+        $column = $this->getTableNameFromClass($class, 'primaryKey');
+
+        return (is_null($column) ? $this->getKeyName() : $column);
+    }
+
+    /**
+     * Return Model Class with Namespace
+     *
+     * @return string
+     */
+    public function getModelClassNs()
+    {
+        return $this->modelClassNs;
+    }
+
+    /**
+     * Returns table name from Model class properties
+     *
+     * @param        $class
+     * @param string $property
+     * @param null   $default
+     * @return null
+     */
+    public function getTableNameFromClass($class, $property = 'tableName', $default = null)
+    {
+        if (!class_exists($class) || !property_exists($class, $property)) {
+            return $default;
+        }
+
+        $properties = get_class_vars($class);
+
+        return $properties[$property];
+    }
+
+    /**
+     * Get Foreign key of table
+     *
+     * @param $table
+     * @return string
+     */
+    protected static function getForeignKey($table)
+    {
+        return Inflector::singularize($table).self::DEFAULT_FOREIGN_KEY_SUFFIX;
     }
 
     /**
@@ -191,7 +332,7 @@ abstract class ActiveRecord implements ActiveRecordInterface
      */
     public static function first()
     {
-        return static::model()->fluentQuery()->first();
+        return static::model()->query()->first();
     }
 
     /**
@@ -202,7 +343,7 @@ abstract class ActiveRecord implements ActiveRecordInterface
      */
     public static function all($arguments = [])
     {
-        return static::model()->fluentQuery()->all($arguments);
+        return static::model()->query()->all($arguments);
     }
 
     /**
@@ -212,7 +353,7 @@ abstract class ActiveRecord implements ActiveRecordInterface
      */
     public static function last()
     {
-        return static::model()->fluentQuery()->last();
+        return static::model()->query()->last();
     }
 
     /**
@@ -222,97 +363,58 @@ abstract class ActiveRecord implements ActiveRecordInterface
      * @param string $query
      * @return object Collection
      */
-    public static function findBySql($query)
+    public static function sql($query)
     {
-        return static::$ar->fluentQuery()->findBySql($query);
+        return static::$ar->query()->findBySql($query);
     }
 
+    /**
+     * Join model with another model and return query instance
+     *
+     * $model->joinWith(['person', 'constraint', 'alias']);
+     *
+     * @param $arguments
+     * @return mixed
+     */
+    public function joinWith($arguments)
+    {
+        $class = static::model();
+
+        $tableWith = Inflector::tabilize($arguments[0]);
+
+        $params = [
+            $class->tableName . '.' . $class->primaryKey,
+            '=',
+            $tableWith . '.' . Inflector::singularize($class->tableName) . self::DEFAULT_FOREIGN_KEY_SUFFIX
+        ];
+
+        if (isset($arguments[1])) {
+            $params = $arguments[1];
+                }
+
+        return $this->query()->leftOuterJoin($tableWith, $params, $arguments[2]);
+        }
+
+    /**
+     * Return Last Executed query
+     *
+     * @return mixed
+     */
+    public static function lastQuery()
+    {
+        return static::model()->query()->lastQuery();
+        }
+
+    /**
+     * Create Pagination links and return
+     *
+     * @return $this|mixed
+     */
     public static function createLinks()
     {
         $pagination = Pagination::make(static::model());
 
         return $pagination->createLinks();
-    }
-
-    public static function lastQuery()
-    {
-        return static::model()->fluentQuery()->lastQuery();
-    }
-
-    /**
-     * The finder make use of __callStatic() to invoke
-     * undefined static methods dynamically. This magic method is mainly used
-     * for dynamic finders
-     *
-     * @param $method    String
-     * @param $arguments array
-     * @return object
-     *
-     */
-    public static function __callStatic($method, $arguments)
-    {
-        $params = [];
-        $class = self::model();
-
-        switch ($method) {
-            case (substr($method, 0, 6) == 'findBy') :
-
-                if (strpos($method, 'And') !== false) {
-                    return self::callFinderBy($method, $class, $arguments, 'And'); // findByAnd
-                }
-
-                if (strpos($method, 'Or') !== false) {
-                    return self::callFinderBy($method, $class, $arguments, 'Or'); // findByOr
-                }
-
-                $columnName = Inflector::tabilize(substr($method, 6));
-                $operator = (isset($arguments[1])) ? $arguments[1] : '=';
-                $params = [$columnName, $operator, $arguments[0]];
-
-                return self::model()->fluentQuery()->find('findBy', $params);
-                break;
-            case 'joinWith' :
-                return static::$ar->joinWith($class, $arguments);
-                break;
-        }
-
-        //Use the power of PDO methods directly via static functions
-        return static::callDynamicMethod(
-            [self::model()->fluentQuery()->getDatabaseConnection(), $method],
-            $arguments
-        );
-    }
-
-    /**
-     * Get the model class instance
-     *
-     * @return mixed
-     * @throws DatabaseException
-     */
-    public static function model()
-    {
-        $class = get_called_class();
-
-        if ($class == __CLASS__) {
-            throw new DatabaseException(sprintf("Abstract Class %s cannot be instantiated.", __CLASS__));
-        }
-
-        return (!class_exists($class)) ?: new $class();
-    }
-
-    public static function callDynamicMethod($callback, $arguments = [])
-    {
-        return call_user_func_array($callback, $arguments);
-    }
-
-    private static function callFinderBy($method, $class, $arguments, $type = 'And')
-    {
-        $params = [];
-
-        if (strpos($method, $type) !== false) {
-            $query = static::$ar->fluentQuery()->buildFindersWhereCondition($method, $arguments, $type);
-            return $query->findAll();
-        }
     }
 
     /*
@@ -329,16 +431,6 @@ abstract class ActiveRecord implements ActiveRecordInterface
     }
 
     /**
-     * get table name
-     *
-     * @return null
-     */
-    public function getTableName()
-    {
-        return isset($this->tableName) ? $this->tableName : null;
-    }
-
-    /**
      * Set the table name
      *
      * @param $value
@@ -347,7 +439,18 @@ abstract class ActiveRecord implements ActiveRecordInterface
     public function setTableName($value)
     {
         $this->tableName = $value;
+
         return $this;
+    }
+
+    /**
+     * get table name
+     *
+     * @return null
+     */
+    public function getTableName()
+    {
+        return isset($this->tableName) ? $this->tableName : null;
     }
 
     /**
@@ -379,6 +482,17 @@ abstract class ActiveRecord implements ActiveRecordInterface
     }
 
     /**
+     * Set attributes into model class
+     *
+     * @param $key
+     * @param $value
+     */
+    public function __set($key, $value)
+    {
+        $this->attributes[$key] = $value;
+    }
+
+    /**
      * Getter method
      *
      * @param $key
@@ -396,21 +510,32 @@ abstract class ActiveRecord implements ActiveRecordInterface
         }
 
         try {
-            return isset($this->attributes[$key]) ? $this->attributes[$key] : null;
+        return isset($this->attributes[$key]) ? $this->attributes[$key] : null;
         } catch (\Exception $ex) {
             throw new \Exception($ex->getMessage());
-        }
+    }
     }
 
     /**
-     * Setting method
+     * (PHP 5 &gt;= 5.0.0)<br/>
+     * Offset to set
      *
-     * @param $key
-     * @param $value
+     * @link http://php.net/manual/en/arrayaccess.offsetset.php
+     * @param  mixed $offset <p>
+     *                       The offset to assign the value to.
+     *                       </p>
+     * @param  mixed $value  <p>
+     *                       The value to set.
+     *                       </p>
+     * @return void
      */
-    public function __set($key, $value)
+    public function offsetSet($offset, $value)
     {
-        $this->attributes[$key] = $value;
+        if (is_null($offset)) {
+            $this->attributes[] = $value;
+        } else {
+            $this->attributes[$offset] = $value;
+        }
     }
 
     /**
@@ -448,25 +573,12 @@ abstract class ActiveRecord implements ActiveRecordInterface
     }
 
     /**
-     * (PHP 5 &gt;= 5.0.0)<br/>
-     * Offset to set
-     *
-     * @link http://php.net/manual/en/arrayaccess.offsetset.php
-     * @param  mixed $offset <p>
-     *                       The offset to assign the value to.
-     *                       </p>
-     * @param  mixed $value  <p>
-     *                       The value to set.
-     *                       </p>
-     * @return void
+     * @param $key
+     * @return bool
      */
-    public function offsetSet($offset, $value)
+    public function __isset($key)
     {
-        if (is_null($offset)) {
-            $this->attributes[] = $value;
-        } else {
-            $this->attributes[$offset] = $value;
-        }
+        return isset($this->attributes[$key]);
     }
 
     /**
@@ -486,90 +598,35 @@ abstract class ActiveRecord implements ActiveRecordInterface
         }
     }
 
-    public function callFinder($arguments)
-    {
-        $class = $this;
-        $method = $arguments['method'];
-        return Query::_callMethod(
-            function ($q) use ($method, $arguments) {
-                return $q->find($method, $arguments);
-            },
-            $class
-        );
-    }
-
-    public function findByAndOr()
-    {
-    }
-
     /**
-     * @param $key
-     * @return bool
-     */
-    public function __isset($key)
-    {
-        return isset($this->attributes[$key]);
-    }
-
-    /**
-     * Intermediate method to call query builder trash method
+     * Save model attributes into database
      *
-     * @param      $arguments
-     * @param bool $multiple
+     * @param array $attributes
      * @return mixed
      */
-    public function trash($arguments, $multiple = false)
+    public function save($attributes = [])
     {
-        return $this->fluentQuery()->{__FUNCTION__}($arguments, $multiple);
+        $attributes = (empty($attributes) || is_null($attributes)) ? $this->getAttributes() : $attributes;
+
+        return $this->_save($attributes);
     }
 
     /**
-     * Call framework defined method based on user input
-     * We will call PDO methods using Model object
+     * Interally called to identify user tries to insert or
+     * update the object
      *
-     * $name method name
-     * $arguments pass arguments to method dynamically
-     * return mixed
-     *
+     * @param $arguments
+     * @return mixed
      */
-    public function __call($method, $arguments = [])
-    {
-        // save attributes into table
-        if (in_array($method, self::$validFinders) && $method == 'save') {
-            return $this->_save($arguments);
-        }
-
-        // validate and call dynamic finders
-        if (in_array($method, self::$validFinders) && $method == 'find') {
-            return $this->findByPk($method, $arguments);
-        }
-
-        // try calling method against Query if exists
-        if (method_exists($this->fluentQuery(), $method)) {
-            return static::callDynamicMethod([$this->fluentQuery(), $method], $arguments);
-        }
-
-        if (!method_exists($this->fluentQuery()->getDatabaseConnection(), $method) ||
-            !method_exists($this->fluentQuery(), $method)
-        ) {
-            throw new \BadMethodCallException("$method method not exists");
-        }
-
-        //|-----------------------------------------------
-        //| If method not found we will check against the PDO.
-        //| call PDO method directly via model object and return result set
-        return call_user_func_array([$this->fluentQuery()->getDatabaseConnection(), $method], $arguments);
-    }
-
     private function _save($arguments)
     {
-        if (empty($arguments) && $this->isNew() == true) {
+        if ($this->isNew()) {
             // insert a new row
             return $this->setAttributesForInsertOrUpdate($arguments, 'insert');
-        } else {
-            //update the row using primary key
-            return $this->setAttributesForInsertOrUpdate($arguments, 'update');
         }
+
+        //update the row using primary key
+        return $this->setAttributesForInsertOrUpdate($arguments, 'update');
     }
 
     /** Check id is null or not.
@@ -589,26 +646,34 @@ abstract class ActiveRecord implements ActiveRecordInterface
      */
     private function setAttributesForInsertOrUpdate($arguments, $method)
     {
-        $query = $this->fluentQuery();
+        $query = $this->query();
 
         if ($method == 'insert') {
-            return $query->{$method}($this->getAttributes());
+            return $query->{$method}($arguments);
         }
 
         return $query->where($this->getKeyName(), '=', $this->index[$this->getKeyName()])
-                     ->{$method}($this->getAttributes());
+                     ->{$method}($arguments);
     }
 
     /**
-     * Get the primary key of table
+     * Intermediate method to call query builder trash method
      *
-     * @return null|string
+     * @param      $arguments
+     * @param bool $multiple
+     * @return mixed
      */
-    public function getKeyName()
+    public function trash($arguments, $multiple = false)
     {
-        return isset($this->primaryKey) ? $this->primaryKey : static::$defaultPrimaryKey;
+        return $this->query()->{__FUNCTION__}($arguments, $multiple);
     }
 
+    /**
+     * Find Record by Primary Key Id
+     *
+     * @param $arguments
+     * @return $this|mixed
+     */
     public function findByPK($arguments)
     {
         $arguments = (array) $arguments;
@@ -618,7 +683,7 @@ abstract class ActiveRecord implements ActiveRecordInterface
             'args' => $arguments
         ];
 
-        $fetch = $this->fluentQuery()->find('find', $args);
+        $fetch = $this->query()->find('find', $args);
 
         if ($fetch instanceof Collection && empty($fetch->asArray())) {
             return $this->returnEmptyObject();
@@ -637,27 +702,6 @@ abstract class ActiveRecord implements ActiveRecordInterface
     }
 
     /**
-     * Set the primary key id value
-     *
-     * @param $key
-     * @param $value
-     */
-    private function setId($key, $value)
-    {
-        $this->index[$key] = $value;
-    }
-
-    /**
-     * Return empty model object
-     *
-     * @return mixed
-     */
-    public function returnEmptyObject()
-    {
-        return self::model();
-    }
-
-    /**
      * We will assign values to model properties
      *
      * @param array $attributes
@@ -666,38 +710,13 @@ abstract class ActiveRecord implements ActiveRecordInterface
     {
         $model = null;
         $model = self::model();
+
         foreach ($attributes as $key => $value) {
             $model->{$key} = $value;
         }
     }
 
-    public function getPageNumber()
-    {
-        return (isset($this->pageNumber)) ? $this->pageNumber : null;
-        $this->pageNumber = intval($number);
-    }
-
-    public function setPageNumber($number)
-    {
-        $this->pageNumber = intval($number);
-    }
-
-    public function getPaginationOffset()
-    {
-        return (isset($this->paginationOffset)) ? $this->paginationOffset : null;
-    }
-
-    public function setPaginationOffset($offset)
-    {
-        $this->paginationOffset = intval($offset);
-    }
-
-    public function getId($key = null)
-    {
-        return (isset($this->index[$key]) && !is_null($key)) ?
-            $this->index[$key] :
-            $this->index[$this->getKeyName()];
-    }
+    /** ------------- Pagination functionalities ---------**/
 
     /**
      * Set the pagination limit
@@ -714,30 +733,52 @@ abstract class ActiveRecord implements ActiveRecordInterface
         $pagination->setPerPage($number);
     }
 
-    public function joinWith($arguments)
+    /**
+     * Set Page Number for Pagination
+     *
+     * @param $number
+     */
+    public function setPageNumber($number)
     {
-        $class = static::model();
+        $this->pageNumber = intval($number);
+    }
 
-        $tableWith = Inflector::tabilize($arguments[0]);
+    /**
+     * Get the page number
+     *
+     * @return null
+     */
+    public function getPageNumber()
+    {
+        return (isset($this->pageNumber)) ? $this->pageNumber : null;
+    }
 
-        $params = [
-            $class->tableName . '.' . $class->primaryKey,
-            '=',
-            $tableWith . '.' . Inflector::singularize($class->tableName) . self::DEFAULT_FOREIGN_KEY_SUFFIX
-        ];
+    /**
+     * Get Pagination Offset
+     *
+     * @return null
+     */
+    public function getPaginationOffset()
+    {
+        return (isset($this->paginationOffset)) ? $this->paginationOffset : null;
+    }
 
-        if (isset($arguments[1])) {
-            $params = $arguments[1];
-        }
-
-        return $this->fluentQuery()->leftOuterJoin($tableWith, $params, $arguments[2]);
+    /**
+     * Set Pagination Offset
+     *
+     * @param $offset
+     */
+    public function setPaginationOffset($offset)
+    {
+        $this->paginationOffset = intval($offset);
     }
 
     /**
      * We will get Fluent Query Object
+     *
      * @return Query
      */
-    public function fluentQuery()
+    public function query()
     {
         return new QueryBuilder($this);
     }
@@ -750,9 +791,24 @@ abstract class ActiveRecord implements ActiveRecordInterface
      */
     public static function db($database)
     {
+        static::$ar = new static();
+
         static::$ar->setDatabase($database);
 
-        return static::$ar->fluentQuery();
+        return static::$ar;
+    }
+
+    /**
+     * Query on Table
+     *
+     * @param $table
+     * @return QueryBuilder
+     */
+    public function table($table)
+    {
+        $this->setTableName($table);
+
+        return $this->query();
     }
 
     /**
@@ -763,35 +819,11 @@ abstract class ActiveRecord implements ActiveRecordInterface
      */
     public static function connection($database)
     {
+        static::$ar = new static();
+
         static::$ar->setDatabase($database);
-        return static::$ar->fluentQuery()->getDatabaseConnection();
-    }
 
-    public function getModelClassNs()
-    {
-        return $this->modelClassNs;
-    }
-
-    public function getPrimaryKey()
-    {
-        return $this->primaryKeyValue;
-    }
-
-    /**
-     * @param        $class
-     * @param string $property
-     * @param null   $default
-     * @return null
-     */
-    public function getTableNameFromClass($class, $property = 'tableName', $default = null)
-    {
-        if (!class_exists($class) || !property_exists($class, $property)) {
-            return $default;
-        }
-
-        $properties = get_class_vars($class);
-
-        return $properties[$property];
+        return static::$ar->query()->getDatabaseConnection();
     }
 
     /**
@@ -938,6 +970,8 @@ abstract class ActiveRecord implements ActiveRecordInterface
     }
 
     /**
+     * Get Join class name
+     *
      * @param $baseClass
      * @param $associatedClass
      * @return string
@@ -957,18 +991,9 @@ abstract class ActiveRecord implements ActiveRecordInterface
      */
     protected function buildForeignKeyName($foreignKey, $baseTable)
     {
-        return (is_null($foreignKey)) ? Inflector::singularize($baseTable). self::DEFAULT_FOREIGN_KEY_SUFFIX : $foreignKey;
-    }
-
-    /**
-     * @param $class
-     * @return null|string
-     */
-    public function getIdColumn($class)
-    {
-        $column = $this->getTableNameFromClass($class, 'primaryKey');
-
-        return (is_null($column) ? $this->getKeyName() : $column);
+        return (is_null($foreignKey)) ?
+            Inflector::singularize($baseTable). self::DEFAULT_FOREIGN_KEY_SUFFIX :
+            $foreignKey;
     }
 
     /**
@@ -1036,15 +1061,6 @@ abstract class ActiveRecord implements ActiveRecordInterface
     }
 
     /**
-     * @param $table
-     * @return string
-     */
-    protected static function getForeignKey($table)
-    {
-        return Inflector::singularize($table).self::DEFAULT_FOREIGN_KEY_SUFFIX;
-    }
-
-    /**
      * @param $data
      * @param $associatedModel
      * @param $associatedData
@@ -1075,5 +1091,95 @@ abstract class ActiveRecord implements ActiveRecordInterface
         }
 
         return $data;
+    }
+
+    /**
+     * The finder make use of __callStatic() to invoke
+     * undefined static methods dynamically. This magic method is mainly used
+     * for dynamic finders
+     *
+     * @param $method    String
+     * @param $arguments array
+     * @return object
+     *
+     */
+    public static function __callStatic($method, $arguments)
+    {
+        $params = [];
+        $class = self::model();
+
+        switch ($method) {
+            case (substr($method, 0, 6) == 'findBy') :
+
+                if (strpos($method, 'And') !== false) {
+                    return self::callFinderBy($method, $class, $arguments, 'And'); // findByAnd
+                }
+
+                if (strpos($method, 'Or') !== false) {
+                    return self::callFinderBy($method, $class, $arguments, 'Or'); // findByOr
+                }
+
+                $columnName = Inflector::tabilize(substr($method, 6));
+                $operator = (isset($arguments[1])) ? $arguments[1] : '=';
+                $params = [$columnName, $operator, $arguments[0]];
+
+                return self::model()->query()->find('findBy', $params);
+                break;
+            case 'joinWith' :
+                return static::$ar->joinWith($class, $arguments);
+                break;
+        }
+
+        //Use the power of PDO methods directly via static functions
+        return static::callDynamicMethod(
+            [self::model()->query()->getDatabaseConnection(), $method],
+            $arguments
+        );
+    }
+
+    public static function callDynamicMethod($callback, $arguments = [])
+    {
+        return call_user_func_array($callback, $arguments);
+    }
+
+    public static function callFinderBy($method, $class, $arguments, $type = 'And')
+    {
+        if (string_has($method, $type)) {
+            $query = static::$ar->query()->buildFindersWhereCondition($method, $arguments, $type);
+            return $query->findAll();
+        }
+    }
+
+    /**
+     * Call framework defined method based on user input
+     * We will call PDO methods using Model object
+     *
+     * $name method name
+     * $arguments pass arguments to method dynamically
+     * return mixed
+     *
+     */
+    public function __call($method, $arguments = [])
+    {
+        // Find record by Id
+        if ($method == 'find') {
+            return $this->findByPk($method, $arguments);
+        }
+
+        // try calling method against Query if exists
+        if (method_exists($this->query(), $method)) {
+            return static::callDynamicMethod([$this->query(), $method], $arguments);
+        }
+
+        if (!method_exists($this->query()->getDatabaseConnection(), $method) ||
+            !method_exists($this->query(), $method)
+        ) {
+            throw new \BadMethodCallException("$method method not exists");
+        }
+
+        //|-----------------------------------------------
+        //| If method not found we will check against the PDO.
+        //| call PDO method directly via model object and return result set
+        return call_user_func_array([$this->query()->getDatabaseConnection(), $method], $arguments);
     }
 }

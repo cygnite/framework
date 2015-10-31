@@ -33,9 +33,12 @@ class Schema
     public $tableName;
     public $schema = [];
     protected $_connection;
-    private $_pointer;
+    private $klass;
     private $_informationSchema = 'INFORMATION_SCHEMA';
     private $_tableSchema = 'TABLE_SCHEMA';
+
+    protected $checkSchemaExistence = false;
+
 
     /**
      * You cannot create an instance of Schema class
@@ -43,20 +46,20 @@ class Schema
      *
      * @param $model
      */
-    private function __construct($model)
+    protected function __construct($model)
     {
-        $this->_pointer = $model;
+        $this->klass = $model;
 
-        if (class_exists(get_class($this->_pointer))) {
-            $reflectionClass = new \ReflectionClass(get_class($this->_pointer));
+        if (class_exists(get_class($this->klass))) {
+            $reflectionClass = new \ReflectionClass(get_class($this->klass));
 
             /*
              | We will set the database connection name here
              */
-            if (property_exists($this->_pointer, 'database')) {
+            if (property_exists($this->klass, 'database')) {
                 $reflectionProperty = $reflectionClass->getProperty('database');
                 $reflectionProperty->setAccessible(true);
-                $this->database = $reflectionProperty->getValue($this->_pointer);
+                $this->database = $reflectionProperty->getValue($this->klass);
             } else {
                 $this->database = $this->getDefaultConnection();
             }
@@ -64,10 +67,10 @@ class Schema
             /*
             | We will set the primary key of the table schema
             */
-            if (property_exists($this->_pointer, 'primaryKey')) {
+            if (property_exists($this->klass, 'primaryKey')) {
                 $reflectionPropertyKey = $reflectionClass->getProperty('primaryKey');
                 $reflectionPropertyKey->setAccessible(true);
-                $this->primaryKey = $reflectionPropertyKey->getValue($this->_pointer);
+                $this->primaryKey = $reflectionPropertyKey->getValue($this->klass);
             }
 
             /*
@@ -75,9 +78,10 @@ class Schema
              */
             $this->setDatabaseConnection($this->database);
 
-            if (!property_exists($this->_pointer, 'tableName')) {
-                $this->tableName = Inflector::tabilize(get_class($this->_pointer));
+            if (!property_exists($this->klass, 'tableName')) {
+                $this->tableName = Inflector::tabilize(get_class($this->klass));
             }
+
         }
     }
 
@@ -119,7 +123,7 @@ class Schema
     /**
      * Get Schema instance to generate table schema
      * @access public
-     * @param $_pointer get the model pointer
+     * @param $klass get the model pointer
      * @param Closure instance to hold schema object
      *
      */
@@ -316,6 +320,7 @@ class Schema
             $table : $this->tableName;
 
         $this->schema = "SHOW TABLES LIKE '" . $tableName . "'";
+        $this->checkSchemaExistence = true;
 
         return $this;
     }
@@ -460,6 +465,8 @@ class Schema
         $this->schema = self::SELECT . " COUNT(COLUMN_NAME) FROM
                         " . $this->getSchemaQuery() . "
                         AND COLUMN_NAME = '" . $column . "' ";
+
+        $this->checkSchemaExistence = true;
 
         return $this;
     }
@@ -674,12 +681,19 @@ class Schema
     public function run()
     {
         if (is_object($this->connection())) {
-            $stmt = $this->connection()->prepare($this->schema);
 
-            if ($return = $stmt->execute()) {
-                return $return;
-            } else {
-                return false;
+            try {
+                $stmt = $this->connection()->prepare($this->schema);
+
+                    if ($this->checkSchemaExistence) {
+                        return $stmt->rowCount();
+                    } else if ($return = $stmt->execute()) {
+                    return $return;
+                } else {
+                    return false;
+                }
+            } catch (\PDOException $e) {
+                throw new \Exception($e->getMessage());
             }
         }
     }
