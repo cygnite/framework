@@ -6,6 +6,7 @@ use Cygnite\AssetManager\Html;
 use Cygnite\Translation\Translator;
 use Cygnite\Foundation\Http\CsrfValidator;
 use Cygnite\Common\SessionManager\Session;
+use Cygnite\Foundation\Collection;
 
 if (! function_exists('clear_sanity')) {
     /*
@@ -275,5 +276,18 @@ if (!function_exists('time_bench')) {
     function time_bench($name = NULL)
     {
         Debugger::timer($name);
+    }
+}
+
+if ( ! function_exists('collecttion')) {
+    /**
+     * Create a collection of array.
+     *
+     * @param  mixed  $data
+     * @return \Cygnite\Foundation\Collection
+     */
+    function collecttion($data = null)
+    {
+        return new Collection($data);
     }
 }
