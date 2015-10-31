@@ -208,7 +208,7 @@ interface QueryBuilderInterface
      * 
      * @return mixed
      */
-    public function get();
+    public function getOne();
 
     /**
      * Get all rows of table as Collection
