@@ -18,8 +18,9 @@ use Cygnite\Helpers\Inflector;
 use Cygnite\Common\Pagination;
 use Cygnite\Database\Table\Schema;
 use Cygnite\Foundation\Collection;
-use Cygnite\Database\ConnectionManagerTrait;
 use Cygnite\Database\Cyrus\ActiveRecord;
+use Cygnite\Database\ConnectionManagerTrait;
+use Cygnite\Database\Exceptions\DatabaseExeception;
 
 /**
  * Class Builder
@@ -35,59 +36,89 @@ class Builder extends Joins implements QueryBuilderInterface
     //hold all your fields name which to select from table
     const LIMIT_STYLE_TOP_N = "top";
     const LIMIT_STYLE_LIMIT = "limit";
+
+    // Holds query builder instance
     public static $query;
-    private static $debugQuery = [];
-    private static $activeRecord;
-    private static $cacheData = [];
-    private static $dataSource = false;
+
+    public static $debugQuery = [];
+
+    // Holds ActiveRecord instance
+    protected static $activeRecord;
+
+    protected static $cacheData = [];
+
+    protected static $dataSource = false;
+
     public $data = [];
-    protected $_tableAlias;
+
+    // Table Alias String
+    protected $tableAlias;
+
+    // Holds PDO instance
     protected $pdo = [];
-    private $_statement;
+    protected $statement;
 
     // set query builder query into property
-    private $_selectColumns;
-    private $_limitValue;
-    private $_offsetValue;
-
-    //Hold your pdo connection object
-    private $_columnName;
-    private $_orderType;
+    protected $selectColumns;
 
     // Limit clause style
-    private $_groupBy;
-    private $distinct;
-    private $sqlQuery;
-    private $closed;
+    protected $limitValue;
+    protected $offsetValue;
 
-    private $fromTable;
+    //Hold your pdo connection object
+    protected $columnName;
+    protected $orderType;
+
+    // Set group by column
+    protected $groupBy;
+
+    // Distinct column clause
+    protected $distinct;
+
+    // Holds Sql Query
+    protected $sqlQuery;
+    protected $closed;
+
+    // Table name
+    protected $fromTable;
     /**
-     * @access private
+     * @access protected
      * @var Array $where
      */
-    private $where = [];
+    protected $where = [];
     /**
      * Bindings for where sql statement
      *
-     * @access private
+     * @access protected
      * @var Array $bindings
      */
-    private $bindings = [];
+    protected $bindings = [];
 
+    // Holds Queries executed
     public static $queries = [];
 
     /**
-     * You can not instantiate the Query object directly
+     * Constructor of Query Builder
      *
-     * @param ActiveRecord $instance
+     * @param ActiveRecord $ar
      */
-    public function __construct(ActiveRecord $instance)
+    public function __construct(ActiveRecord $ar)
     {
-        if ($instance instanceof ActiveRecord) {
-            $this->setActiveRecord($instance);
+        if ($ar instanceof ActiveRecord) {
+            $this->setActiveRecord($ar);
         }
 
         self::$query = $this;
+    }
+
+    /**
+     * Set ActiveRecord instance
+     *
+     * @param $instance
+     */
+    public function setActiveRecord($instance)
+    {
+        self::$activeRecord = $instance;
     }
 
     /**
@@ -98,16 +129,6 @@ class Builder extends Joins implements QueryBuilderInterface
     public static function cyrus()
     {
         return is_object(self::$activeRecord) ? self::$activeRecord : null;
-    }
-
-    public static function make(\Closure $callback, $activeRecord = null)
-    {
-        return $callback(new Builder($activeRecord));
-    }
-
-    public static function _callMethod(\Closure $callback, $instance = null)
-    {
-        return $callback(self::$query, $instance);
     }
 
     /**
@@ -126,7 +147,7 @@ class Builder extends Joins implements QueryBuilderInterface
      *
      * @return null|object
      */
-    public function getDatabaseConnection()
+    public function resolveConnection()
     {
         $connection = self::cyrus()->getDatabase();
 
@@ -136,26 +157,44 @@ class Builder extends Joins implements QueryBuilderInterface
     }
 
     /**
+     * Insert a record into database
+     *
      * @param array $arguments
      * @return mixed
      * @throws \RuntimeException
      */
     public function insert($arguments = [])
     {
-        $sql = $ar = null;
+        $ar = null;
         $ar = self::cyrus();
+        /*
+         | Trigger Before create events if
+         | defined by user into model class
+         |
+         */
         $this->triggerEvent('beforeCreate');
+
+        // Build Sql Query and prepare it
         $sql = $this->getInsertQuery(strtoupper(__FUNCTION__), $ar, $arguments);
+
         try {
-            $statement = $this->getDatabaseConnection()->prepare($sql);
+            $statement = $this->resolveConnection()->prepare($sql);
             static::$queries[] = $statement->queryString;
+
             // we will bind all parameters into the statement using execute method
-            if ($bool = $statement->execute($arguments)) {
-                $ar->{$ar->getKeyName()} = (int)$this->getDatabaseConnection()->lastInsertId();
+            if ($return = $statement->execute($arguments)) {
+
+                $ar->{$ar->getKeyName()} = (int)$this->resolveConnection()->lastInsertId();
+                /*
+                 | Trigger after create events if
+                 | defined by user into model class
+                 |
+                 */
                 $this->triggerEvent('afterCreate');
 
-                return $bool;
+                return $return;
             }
+
         } catch (PDOException  $exception) {
             throw new \RuntimeException($exception->getMessage());
         }
@@ -186,7 +225,7 @@ class Builder extends Joins implements QueryBuilderInterface
      * @param $where
      * @return array
      */
-    private function formatWhereToNamePlaceHolder($where)
+    protected function formatWhereToNamePlaceHolder($where)
     {
         $whereStr = '';
         $whereNew = [];
@@ -200,23 +239,34 @@ class Builder extends Joins implements QueryBuilderInterface
     }
 
     /**
+     * Build where condition for Update query
+     *
      * @return array
      */
     private function buildWhereForUpdate()
     {
         $whereArray = array_combine($this->where, $this->bindings);
         list($whereNew, $condition) = $this->formatWhereToNamePlaceHolder($whereArray);
+
         return [$whereNew, $this->buildWherePlaceholderName($whereNew)];
     }
 
     /**
+     * Update record with new values
+     *
      * @param $args
      * @return mixed
      * @throws \Exception
      */
     public function update($data, $where = [])
     {
+        /*
+         | Trigger Before Update events if
+         | defined by user into model class
+         |
+         */
         $this->triggerEvent('beforeUpdate');
+
         if (!empty($where)) {
             $whereStr = $this->buildWherePlaceholderName($where);
         } else {
@@ -226,21 +276,30 @@ class Builder extends Joins implements QueryBuilderInterface
         $sql = $this->getUpdateQuery($data, strtoupper(__FUNCTION__)).$whereStr;
 
         try {
-            $statement = $this->getDatabaseConnection()->prepare($sql);
+
+            $stmt = $this->resolveConnection()->prepare($sql);
+
             //Bind all values to query statement
             foreach ($data as $key => $val) {
-                $statement->bindValue(":$key", $val);
+                $stmt->bindValue(":$key", $val);
             }
 
             foreach($where as $key => $value){
-                $statement->bindValue(":$key", $value);
+                $stmt->bindValue(":$key", $value);
             }
-            static::$queries[] = $statement->queryString;
 
-            $affectedRow = $statement->execute();
+            static::$queries[] = $stmt->queryString;
+            $affectedRow = $stmt->execute();
+
+            /*
+             | Trigger after update events if defined
+             | into model class
+             |
+             */
             $this->triggerEvent('afterUpdate');
 
             return $affectedRow;
+
         } catch (\PDOException  $exception) {
 
             throw new \Exception($exception->getMessage());
@@ -250,7 +309,16 @@ class Builder extends Joins implements QueryBuilderInterface
     /**
      * Trash method
      *
-     * Delete rows from the table and runs the query
+     * Delete a row from the table
+     *
+     * <code>
+     * $user = new User();
+     * $user->trash(1);
+     * $user->trash([1,4,6,33,54], true)
+     * $user->trash(['id' => 23])
+     * $user->where('name', '=', 'application')->trash();
+     *
+     * </code>
      *
      * @access    public
      * @param  array $where
@@ -263,8 +331,12 @@ class Builder extends Joins implements QueryBuilderInterface
     public function trash($where = null, $multiple = false)
     {
         $whr = [];
-        $statement = $affectedRows = null;
         $ar = self::cyrus();
+        /*
+         | Trigger Before Delete events if
+         | defined by user into model class
+         |
+         */
         $this->triggerEvent('beforeDelete');
 
         // Bind where conditions
@@ -275,24 +347,35 @@ class Builder extends Joins implements QueryBuilderInterface
             . $this->getWhere();
 
         try {
-            $stmt = $this->getDatabaseConnection()->prepare($sql);
+            /*
+             | Get the Connection, prepare and execute sql query
+             | return affected rows
+             */
+            $stmt = $this->resolveConnection()->prepare($sql);
             $this->bindParam($stmt); //bind parameters
             static::$queries[] = $stmt->queryString;
             $affectedRow = $stmt->execute();
+
+            /*
+             | Trigger after delete model events if defined
+             */
             $this->triggerEvent('afterDelete');
 
             return $affectedRow;
+
         } catch (\PDOException  $ex) {
-            throw new \Exception($ex->getMessage());
+            throw new DatabaseException($ex->getMessage());
         }
     }
 
     /**
      * <code>
+     * $user = new User();
      * $user->trash(1);
      * $user->trash([1,4,6,33,54], true)
      * $user->trash(['id' => 23])
      * $user->where('name', '=', 'application')->trash();
+     *
      * </code>
      * @param $where
      * @param $multiple
@@ -319,6 +402,61 @@ class Builder extends Joins implements QueryBuilderInterface
         }
     }
 
+    /**
+     * Find Function to selecting Table columns
+     *
+     * Generates the SELECT portion of the query
+     *
+     * @access    public
+     * @param     $column
+     * @throws    \Exception
+     * @return     object
+     */
+    public function select($column)
+    {
+        //select columns
+        if (is_string($column) && !is_null($column)) {
+            return $this->_select($column);
+        }
+    }
+
+    /**
+     * Internally build select Columns
+     *
+     * @param $column
+     * @return $this
+     */
+    private function _select($column)
+    {
+        if ($column === 'all' || $column == '*') {
+            $this->selectColumns = $this->quoteIdentifier(
+                    self::cyrus()->getTableName()
+                ) . '.*';
+        } else {
+            if (string_has($column, 'as') || string_has($column, 'AS')) {
+                return $this->selectExpr($column);
+            }
+
+            $this->selectColumns = (string)str_replace(' ', '', $this->quoteIdentifier(explode(',', $column)));
+        }
+
+        return $this;
+    }
+
+    /**
+     * Add an unquoted expression to the list of columns returned
+     * by the SELECT query. The second optional argument is
+     * the alias to return the column as.
+     *
+     * @param $expr
+     * @return $this
+     */
+    public function selectExpr($expr)
+    {
+        $this->selectColumns = (string)$expr;
+
+        return $this;
+    }
 
     /**
      * Adding an element in the where array with the value
@@ -346,11 +484,9 @@ class Builder extends Joins implements QueryBuilderInterface
      * Adding an element in the where array with the value
      * to the bindings
      *
-     * @access public
-     * @param String $key
-     * @param String $operator
-     * @param String $value
-     * @return void
+     * @param $key
+     * @param $value
+     * @return $this|mixed
      */
     public function whereIn($key, $value)
     {
@@ -383,6 +519,8 @@ class Builder extends Joins implements QueryBuilderInterface
     }
 
     /**
+     * Where conditions with "or"
+     *
      * @param        $key
      * @param        $value
      * @param string $operator
@@ -415,6 +553,14 @@ class Builder extends Joins implements QueryBuilderInterface
         return $this;
     }
 
+    /**
+     * Limit the record and fetch from database
+     *
+     * @param type   $limit
+     * @param string $offset
+     * @return $this
+     * @throws \Exception
+     */
     public function limit($limit, $offset = "")
     {
         if (is_null($limit)) {
@@ -422,18 +568,18 @@ class Builder extends Joins implements QueryBuilderInterface
         }
 
         if (empty($offset) && !empty($limit)) {
-            $this->_limitValue = 0;
-            $this->_offsetValue = intval($limit);
+            $this->limitValue = 0;
+            $this->offsetValue = intval($limit);
         } else {
-            $this->_limitValue = intval($limit);
-            $this->_offsetValue = intval($offset);
+            $this->limitValue = intval($limit);
+            $this->offsetValue = intval($offset);
         }
 
         return $this;
     }
 
     /**
-     * orderBy function to make order for selected query
+     * This function to make order for selected query
      *
      * @param        $column
      * @param string $orderType
@@ -445,15 +591,15 @@ class Builder extends Joins implements QueryBuilderInterface
         if (empty($column) || is_null($column)) {
             throw new \Exception('Empty parameter given to order by clause');
         }
-        $this->_orderType = $orderType;
+        $this->orderType = $orderType;
 
         if (is_array($column)) {
-            $this->_columnName = $this->extractArrayAttributes($column);
+            $this->columnName = $this->extractArrayAttributes($column);
             return $this;
         }
 
-        if (is_null($this->_columnName)) {
-            $this->_columnName = $column;
+        if (is_null($this->columnName)) {
+            $this->columnName = $column;
         }
 
         return $this;
@@ -473,20 +619,23 @@ class Builder extends Joins implements QueryBuilderInterface
         }
 
         if (is_array($column)) {
-            $this->_groupBy = $this->extractArrayAttributes($column);
+            $this->groupBy = $this->extractArrayAttributes($column);
             return $this;
         }
 
-        $this->_groupBy = $this->quoteIdentifier($column);
+        $this->groupBy = $this->quoteIdentifier($column);
         return $this;
     }
 
     /**
      * Add an alias for the main table to be used in SELECT queries
+     *
+     * @param $alias
+     * @return $this
      */
     public function tableAlias($alias)
     {
-        $this->_tableAlias = $alias;
+        $this->tableAlias = $alias;
 
         return $this;
     }
@@ -498,32 +647,42 @@ class Builder extends Joins implements QueryBuilderInterface
      * format output.
      *
      * @access   public
-     * @param  string $fetchMode
+     * @param  string $type
      * @throws \Exception
-     * @internal param string $fetchMode
+     * @internal param string $type
      * @return array      or object
      */
-    public function findAll($fetchMode = "")
+    public function findAll($type = "")
     {
         $data = [];
         $ar = self::cyrus();
+        /*
+         | Trigger before select events defined into
+         | model class
+         */
         $this->triggerEvent('beforeSelect');
 
-        $this->buildQuery();
+        $this->buildQuery(); // Build Sql Query
+
         try {
-            $statement = $this->getDatabaseConnection()->prepare($this->sqlQuery);
+            $stmt = $this->resolveConnection()->prepare($this->sqlQuery);
+
             $this->sqlQuery = null;
-            $this->setDbStatement($ar->getTableName(), $statement);
-            $this->bindParam($statement);
-            $statement->execute();
-            $data = $this->fetchAs($statement, $fetchMode);
+            $this->setDbStatement($ar->getTableName(), $stmt);
+            $this->bindParam($stmt);
+            $stmt->execute();
+            $data = $this->fetchAs($stmt, $type);
+            /*
+             | Trigger after select events defined into model class
+             */
             $this->triggerEvent('afterSelect');
 
-            if ($statement->rowCount() > 0) {
+            if ($stmt->rowCount() > 0) {
                 return new Collection($data);
             } else {
                 return new Collection([]);
             }
+
         } catch (PDOException $ex) {
             throw new \Exception("Database exceptions: Invalid query x" . $ex->getMessage());
         }
@@ -532,12 +691,12 @@ class Builder extends Joins implements QueryBuilderInterface
     /**
      * This is alias method of findAll()
      *
-     * @param string $fetchMode
+     * @param string $type
      * @return mixed
      */
-    public function findMany($fetchMode = "")
+    public function findMany($type = "")
     {
-        return $this->findAll($fetchMode);
+        return $this->findAll($type);
     }
 
     /**
@@ -546,46 +705,53 @@ class Builder extends Joins implements QueryBuilderInterface
      *
      * @return object|null
      */
-    public function findOne($fetchMode = "")
+    public function findOne($type = "")
     {
-        $rows = $this->findAll($fetchMode)->asArray();
+        $rows = $this->findAll($type)->asArray();
 
         return isset($rows[0]) ? $rows[0] : null;
     }
 
-    public function fetchAs($statement, $fetchMode = null)
+    /**
+     * Allows to fetch records as type specified
+     *
+     * @param      $stmt
+     * @param null $type
+     * @return string
+     */
+    public function fetchAs($stmt, $type = null)
     {
         $data = [];
 
         if (static::$dataSource) {
-            $fetchMode = 'class';
+            $type = 'class';
             static::$dataSource = false;
         }
 
-        switch ($fetchMode) {
+        switch (strtolower($type)) {
             case 'group':
-                $data = $statement->fetchAll(\PDO::FETCH_GROUP | \PDO::FETCH_ASSOC);
+                $data = $stmt->fetchAll(\PDO::FETCH_GROUP | \PDO::FETCH_ASSOC);
                 break;
             case 'both':
-                $data = $statement->fetchAll(\PDO::FETCH_BOTH);
+                $data = $stmt->fetchAll(\PDO::FETCH_BOTH);
                 break;
             case 'json':
-                $data = json_encode($statement->fetchAll(\PDO::FETCH_ASSOC));
+                $data = json_encode($stmt->fetchAll(\PDO::FETCH_ASSOC));
                 break;
             case 'object':
-                $data = $statement->fetchAll(\PDO::FETCH_OBJ);
+                $data = $stmt->fetchAll(\PDO::FETCH_OBJ);
                 break;
             case 'assoc':
-                $data = $statement->fetchAll(\PDO::FETCH_ASSOC);
+                $data = $stmt->fetchAll(\PDO::FETCH_ASSOC);
                 break;
             case 'column':
-                $data = $statement->fetchAll(\PDO::FETCH_COLUMN);
+                $data = $stmt->fetchAll(\PDO::FETCH_COLUMN);
                 break;
             case 'class':
-                $data = $statement->fetchAll(\PDO::FETCH_CLASS, "\\Cygnite\\Database\\DataSource");
+                $data = $stmt->fetchAll(\PDO::FETCH_CLASS, "\\Cygnite\\Database\\ResultSet");
                 break;
             default:
-                $data = $statement->fetchAll(\PDO::FETCH_CLASS, '\\' . self::cyrus()->getModelClassNs());
+                $data = $stmt->fetchAll(\PDO::FETCH_CLASS, '\\' . self::cyrus()->getModelClassNs());
                 break;
         }
 
@@ -594,20 +760,20 @@ class Builder extends Joins implements QueryBuilderInterface
 
     public function getGroupBy()
     {
-        return (isset($this->_groupBy) && !is_null($this->_groupBy)) ?
-            'GROUP BY ' . $this->_groupBy : '';
+        return (isset($this->groupBy) && !is_null($this->groupBy)) ?
+            'GROUP BY ' . $this->groupBy : '';
     }
 
     public function getOrderBy()
     {
-        return (isset($this->_columnName) && isset($this->_orderType)) ?
-            " ORDER BY " . $this->_columnName . "  " . $this->_orderType : '';
+        return (isset($this->columnName) && isset($this->orderType)) ?
+            " ORDER BY " . $this->columnName . "  " . $this->orderType : '';
     }
 
     public function getLimit()
     {
-        return (isset($this->_limitValue) && isset($this->_offsetValue)) ?
-            " LIMIT " . $this->_limitValue . "," . $this->_offsetValue . " " : '';
+        return (isset($this->limitValue) && isset($this->offsetValue)) ?
+            " LIMIT " . $this->limitValue . "," . $this->offsetValue . " " : '';
     }
 
     /**
@@ -617,9 +783,9 @@ class Builder extends Joins implements QueryBuilderInterface
      */
     public function rowCount()
     {
-        $statement = $this->getDbStatement(self::cyrus()->getDatabase());
+        $stmt = $this->getDbStatement(self::cyrus()->getDatabase());
 
-        return $statement->rowCount();
+        return $stmt->rowCount();
     }
 
     /**
@@ -643,13 +809,14 @@ class Builder extends Joins implements QueryBuilderInterface
     public function query($sql, $attributes = [])
     {
         try {
-            $this->_statement = $this->getDatabaseConnection()->prepare($sql);
+            $this->statement = $this->resolveConnection()->prepare($sql);
 
             if (!empty($attributes)) {
-                $this->_statement->execute($attributes);
+                $this->statement->execute($attributes);
             } else {
-                $this->_statement->execute();
+                $this->statement->execute();
             }
+
         } catch (\PDOException $e) {
             throw new Exception($e->getMessage());
         }
@@ -658,17 +825,19 @@ class Builder extends Joins implements QueryBuilderInterface
     }
 
     /**
+     * Execute Prepared Query
+     *
      * @return mixed
      */
     public function execute()
     {
-        return $this->_statement->execute();
+        return $this->statement->execute();
     }
 
     /**
      * @return mixed
      */
-    public function get()
+    public function getOne()
     {
         return $this->first();
     }
@@ -676,13 +845,11 @@ class Builder extends Joins implements QueryBuilderInterface
     /**
      * Get all rows of table as Collection
      *
-     * @access   public
-     * @internal param \Cygnite\Database\fetch $fetchModel type
-     * @return array results
+     * @return array|Collection
      */
     public function getAll()
     {
-        return new Collection($this->fetchAs($this->_statement));
+        return new Collection($this->fetchAs($this->statement));
     }
 
     /**
@@ -756,38 +923,6 @@ class Builder extends Joins implements QueryBuilderInterface
     }
 
     /**
-     * Find Function to selecting Table columns
-     *
-     * Generates the SELECT portion of the query
-     *
-     * @access    public
-     * @param     $column
-     * @throws    \Exception
-     * @return     object
-     */
-    public function select($column)
-    {
-        //select columns
-        if (is_string($column) && !is_null($column)) {
-            return $this->_select($column);
-        }
-
-        throw new Exception("Accepted parameters should be string.");
-    }
-
-    /**
-     * Add an unquoted expression to the list of columns returned
-     * by the SELECT query. The second optional argument is
-     * the alias to return the column as.
-     */
-    public function selectExpr($expr)
-    {
-        $this->_selectColumns = (string)$expr;
-
-        return $this;
-    }
-
-    /**
      * Find result using raw sql query
      *
      * @param $arguments
@@ -796,16 +931,23 @@ class Builder extends Joins implements QueryBuilderInterface
     public function findBySql($arguments)
     {
         $results = [];
-        $statement = $this->getDatabaseConnection()->prepare(trim($arguments[0]));
-        $statement->execute();
-        $results = $this->fetchAs($statement);
+        $stmt = $this->resolveConnection()->prepare(trim($arguments[0]));
+        $stmt->execute();
+        $results = $this->fetchAs($stmt);
 
         return new Collection($results);
     }
 
+    /**
+     * Select from table. Alias method of table
+     *
+     * @param $table
+     * @return $this
+     */
     public function from($table)
     {
         $this->fromTable = (is_null($table)) ? get_class($this) : $table;
+
         return $this;
     }
 
@@ -828,19 +970,13 @@ class Builder extends Joins implements QueryBuilderInterface
         $ar = static::cyrus();
         $ar->setTableName($table);
         static::$dataSource = true;
+
         return $this;
     }
 
-    /*
-     * fetch data as user defined format
-     *
-     * @access private
-     * @param  object $statement
-     * @param  string $fetchMode null
-     * @return mixed.
-     */
-
     /**
+     * Internally call finder methods
+     *
      * @param       $method
      * @param array $params
      * @return mixed
@@ -849,6 +985,7 @@ class Builder extends Joins implements QueryBuilderInterface
     {
         return $this->find($method, $params);
     }
+
     /**
      * Find a single row
      *
@@ -859,6 +996,7 @@ class Builder extends Joins implements QueryBuilderInterface
     public function find($method, $options = [])
     {
         if (isset($options['primaryKey']) && $method == __FUNCTION__) {
+
             return $this->select('all')
                 ->where(self::cyrus()->getKeyName(), '=', array_shift($options['args']))
                 ->orderBy(self::cyrus()->getKeyName(), 'DESC')
@@ -878,6 +1016,9 @@ class Builder extends Joins implements QueryBuilderInterface
         return end(static::$queries);
     }
 
+    /**
+     *  Flush Connection object
+     */
     public function flush()
     {
         if ($this->isClosed() == false) {
@@ -888,42 +1029,26 @@ class Builder extends Joins implements QueryBuilderInterface
 
     /**
      * Closes the reader.
+     *
      * This frees up the resources allocated for executing this SQL statement.
      * Read attempts after this method call are unpredictable.
      */
     public function close()
     {
-        $statement = null;
-        $statement = $this->getDbStatement(self::cyrus()->getDatabase());
+        $stmt = null;
+        $stmt = $this->getDbStatement(self::cyrus()->getDatabase());
 
-        $statement->closeCursor();
+        $stmt->closeCursor();
         $this->pdo = null;
         $this->closed = true;
     }
-
-    /**
-     * Set ActiveRecord instance
-     *
-     * @param $instance
-     */
-    private function setActiveRecord($instance)
-    {
-        self::$activeRecord = $instance;
-    }
-
-    /*
-    * Execute user raw queries
-    *
-    * @access public
-    * @return array results
-    */
 
     /**
      * We will trigger event
      *
      * @param $event
      */
-    private function triggerEvent($event)
+    protected function triggerEvent($event)
     {
         $instance = static::cyrus();
 
@@ -992,12 +1117,17 @@ class Builder extends Joins implements QueryBuilderInterface
         }
     }
 
+    /**
+     * @param $sql
+     */
     private function setDebug($sql)
     {
         static::$debugQuery[] = $sql;
     }
 
     /**
+     * Create placeholders for arguments
+     *
      * @param $arguments
      * @return string
      */
@@ -1006,10 +1136,12 @@ class Builder extends Joins implements QueryBuilderInterface
         foreach (array_keys($arguments) as $key) {
             $placeholder[] = substr(str_repeat('?,', count($key)), 0, -1);
         }
+
         return implode(',', $placeholder);
     }
 
     /**
+     *
      * @param $columns
      * @return string
      */
@@ -1049,28 +1181,30 @@ class Builder extends Joins implements QueryBuilderInterface
     private function prepareExceptColumns()
     {
         $ar = self::cyrus();
+
         // we will get the table schema
-        $select = Schema::make(
-            $this,
-            function ($table) use ($ar) {
+        $select = Schema::make($this, function ($table) use ($ar)
+        {
                 $table->database = $ar->getDatabase();
                 $table->tableName = $ar->getTableName();
 
                 return $table->getColumns();
-            }
-        );
+        });
 
         $columns = $this->query($select->schema)->getAll();
 
         // Get all column name which need to remove from the result set
         $exceptColumns = $ar->skip();
         $columnArray = [];
+
         foreach ($columns as $key => $value) {
+
             if (!in_array($value->COLUMN_NAME, $exceptColumns)) {
                 $columnArray[] = $value->COLUMN_NAME;
             }
         }
-        $this->_selectColumns = (string)implode(',', $columnArray);
+
+        $this->selectColumns = (string)implode(',', $columnArray);
     }
 
     /**
@@ -1081,7 +1215,7 @@ class Builder extends Joins implements QueryBuilderInterface
         $this->sqlQuery =
             'SELECT ' . $this->buildSelectedColumns() . ' FROM ' . $this->quoteIdentifier(
                 self::cyrus()->getTableName()
-            ) . ' ' . $this->_tableAlias . $this->getJoinSource() . $this->getWhere() .
+            ) . ' ' . $this->tableAlias . $this->getJoinSource() . $this->getWhere() .
             ' ' . $this->getGroupBy() . ' ' . $this->getOrderBy() . ' ' . $this->getLimit();
 
         static::$queries[] = $this->sqlQuery;
@@ -1109,14 +1243,14 @@ class Builder extends Joins implements QueryBuilderInterface
      */
     private function buildSelectedColumns()
     {
-        if (is_null($this->_selectColumns)) {
-            $this->_selectColumns = '*';
+        if (is_null($this->selectColumns)) {
+            $this->selectColumns = '*';
         }
 
-        return ($this->_selectColumns == '*') ?
+        return ($this->selectColumns == '*') ?
             $this->quoteIdentifier(
                 self::cyrus()->getTableName()
-            ) . ' .' . $this->_selectColumns : $this->_selectColumns;
+            ) . ' .' . $this->selectColumns : $this->selectColumns;
     }
 
     /**
@@ -1151,26 +1285,13 @@ class Builder extends Joins implements QueryBuilderInterface
         return ' WHERE ' . ltrim(implode(" ", $this->where), "ANDOR");
     }
 
+    /**
+     * @param $key
+     * @param $value
+     */
     private function setDbStatement($key, $value)
     {
         $this->data[$key] = $value;
-    }
-
-    private function _select($column)
-    {
-        if ($column === 'all' || $column == '*') {
-            $this->_selectColumns = $this->quoteIdentifier(
-                    self::cyrus()->getTableName()
-                ) . '.*';
-        } else {
-            if (string_has($column, 'as') || string_has($column, 'AS')) {
-                return $this->selectExpr($column);
-            }
-
-            $this->_selectColumns = (string)str_replace(' ', '', $this->quoteIdentifier(explode(',', $column)));
-        }
-
-        return $this;
     }
 
     /**
@@ -1237,6 +1358,12 @@ class Builder extends Joins implements QueryBuilderInterface
         return $this->findFirstOrLast();
     }
 
+    /**
+     * Method to find first oof last row of the table
+     *
+     * @param null $order
+     * @return mixed
+     */
     private function findFirstOrLast($order = null)
     {
         $orderBy = (!is_null($order)) ? $order : 'ASC';
@@ -1253,12 +1380,6 @@ class Builder extends Joins implements QueryBuilderInterface
         return $fetchObject;
     }
 
-    /*
-    * Flush results after data retrieving process
-    * It will unset all existing properties and close reader in order to make new selection process
-    *
-    */
-
     /**
      * Get last row of table
      *
@@ -1269,15 +1390,19 @@ class Builder extends Joins implements QueryBuilderInterface
         return $this->findFirstOrLast('DESC');
     }
 
+    /**
+     * @param $arguments
+     * @return mixed
+     */
     private function findBy($arguments)
     {
-        $fetch = $this->select('*')->where($arguments[0], $arguments[1], $arguments[2])->findAll();
+        $results = $this->select('*')->where($arguments[0], $arguments[1], $arguments[2])->findAll();
 
-        if ($fetch == null) {
+        if (is_null($results)) {
             return self::cyrus()->returnEmptyObject();
         }
 
-        return $fetch;
+        return $results;
     }
 
     /**
@@ -1288,5 +1413,15 @@ class Builder extends Joins implements QueryBuilderInterface
     private function isClosed()
     {
         return $this->closed;
+    }
+
+    public static function make(\Closure $callback, $activeRecord = null)
+    {
+        return $callback(new Builder($activeRecord));
+}
+
+    public static function _callMethod(\Closure $callback, $instance = null)
+    {
+        return $callback(self::$query, $instance);
     }
 }

@@ -2,6 +2,7 @@
 namespace Cygnite\Proxy;
 
 use Cygnite\Helpers\Inflector;
+use Cygnite\Foundation\Application;
 
 if (!defined('CF_SYSTEM')) {
     exit('External script access not allowed');
@@ -30,7 +31,7 @@ abstract class StaticResolver
      *
      * @return Container
      */
-    protected static function getContainer()
+    public static function app()
     {
         return Application::instance();
     }
@@ -46,16 +47,6 @@ abstract class StaticResolver
         if (isset(self::$cached[$class]) && is_object(self::$cached[$class])) {
             return self::$cached[$class];
         }
-
-        /*-------------------------------------------
-         |  If instance method called statically we will return
-         |  the child class object
-         */
-        if ($method == 'instance') {
-            return self::$cached[$class] = new $class();
-        }
-
-
 
         /**
          * Access all your protected method directly using facade

@@ -6,7 +6,7 @@ namespace Cygnite\Helpers;
  *
  * @package Cygnite\Helpers
  */
-class String
+class Str
 {
     public static $alpha = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ';
 

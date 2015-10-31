@@ -44,7 +44,7 @@ interface ActiveRecordInterface extends \ArrayAccess
      * @param $query
      * @return mixed
      */
-    public static function findBySql($query);
+    public static function sql($query);
 
     /**
      * @return mixed
@@ -85,6 +85,14 @@ interface ActiveRecordInterface extends \ArrayAccess
      * @return array|null
      */
     public function getAttributes();
+
+    /**
+     * Save model attributes into database
+     *
+     * @param array $attributes
+     * @return mixed
+     */
+    public function save($attributes = []);
 
     /**
      * @param      $arguments
@@ -136,7 +144,7 @@ interface ActiveRecordInterface extends \ArrayAccess
      * We will get Fluent Query Object
      * @return Query
      */
-    public function fluentQuery();
+    public function query();
 
     /**
      * Use Connection to build fluent queries against any table

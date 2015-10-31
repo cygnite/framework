@@ -2,7 +2,9 @@
 -----------------------------------
 [![Build Status](https://travis-ci.org/cygnite/framework.svg)](https://travis-ci.org/cygnite/framework)
 [![Gitter](https://badges.gitter.im/Join%20Chat.svg)](https://gitter.im/cygnite/framework?utm_source=badge&utm_medium=badge&utm_campaign=pr-badge&utm_content=badge)
+[![HHVM Status](http://hhvm.h4cc.de/badge/cygnite/framework.svg)](http://hhvm.h4cc.de/package/cygnite/framework)
 [![Latest Stable Version](https://poser.pugx.org/cygnite/framework/v/stable.svg)](https://packagist.org/packages/cygnite/framework) [![Total Downloads](https://poser.pugx.org/cygnite/framework/downloads.svg)](https://packagist.org/packages/cygnite/framework) [![Latest Unstable Version](https://poser.pugx.org/cygnite/framework/v/unstable.svg)](https://packagist.org/packages/cygnite/framework) [![License](https://poser.pugx.org/cygnite/framework/license.svg)](https://packagist.org/packages/cygnite/framework)
+
 
 Cygnite Framework it's just a small footprint to give you the creative experience of developing a web application.
 
