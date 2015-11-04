@@ -194,7 +194,7 @@ class Router implements RouterInterface
         $method = strtoupper(__FUNCTION__);
 
         if (!$func instanceof \Closure) {
-            return $this->override($pattern, $func, 'POST', $method);
+            return $this->override($pattern, $func, false, $method);
         }
 
         return $this->match($method, $pattern, $func);
@@ -207,7 +207,7 @@ class Router implements RouterInterface
      * @param string $overrideWith
      * @return bool
      */
-    protected function override($pattern, $func, $method, $overrideWith = 'GET')
+    public function override($pattern, $func, $method, $overrideWith = 'GET')
     {
         /**
          * We will bind static routes to callable
