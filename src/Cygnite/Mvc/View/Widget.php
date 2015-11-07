@@ -89,7 +89,7 @@ class Widget implements \ArrayAccess
             $exp = explode(':', $this->getWidgetName());
             $moduleName = $exp[0];
             $view = $exp[1];
-            $path = $this->getWidgetPath($view, true);
+            $path = $this->getWidgetPath($view, $moduleName, true);
             $this->setWidgetName(null);
             $this->setModule(false);
 
@@ -111,13 +111,12 @@ class Widget implements \ArrayAccess
         if (string_has($this->getWidgetName(), ':')) {
             $widget = null;
             $widget = str_replace(':', DS, $this->getWidgetName());
-            return $this->getWidgetPath($widget);
+            return $this->getWidgetPath($widget, '', false);
         }
     }
 
-    private function getWidgetPath($widget, $isModule = false)
+    private function getWidgetPath($widget, $moduleName = '',  $isModule = false)
     {
-        $moduleName = '';
         $modulePath = 'Views';
         if ($isModule) {
             $modulePath = $this->moduleDir.DS.$moduleName.DS.'Views';

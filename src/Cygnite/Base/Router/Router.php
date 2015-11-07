@@ -163,10 +163,11 @@ class Router implements RouterInterface
     }
 
     /**
-     * Store a route and a handling function to be executed when accessed using one of the specified methods
+     * Store a route and a handling function to be executed.
+     * Routes will execute when accessed using specific pattern and methods
      *
      * @param string $methods Allowed methods, | delimited
-     * @param string $pattern A route pattern such as /about/system
+     * @param string $pattern A route pattern such as /service/contact-us
      * @param object $func    The handling function to be executed
      * @return bool
      */
@@ -190,25 +191,41 @@ class Router implements RouterInterface
      */
     public function get($pattern, $func)
     {
+        $method = strtoupper(__FUNCTION__);
+
         if (!$func instanceof \Closure) {
-
-            /**
-             * We will bind static routes to callable
-             * closure object
-             * @return object
-             */
-            $callable = function () use ($func) {
-                return $this->callStaticRoute($func);
-            };
-
-            if ($_SERVER['REQUEST_METHOD'] == 'POST') {
-                $_SERVER['REQUEST_METHOD'] = 'GET';
-            }
-
-            return $this->match(strtoupper(__FUNCTION__), $pattern, $callable);
+            return $this->override($pattern, $func, false, $method);
         }
 
-        return $this->match(strtoupper(__FUNCTION__), $pattern, $func);
+        return $this->match($method, $pattern, $func);
+    }
+
+    /**
+     * @param        $pattern
+     * @param        $func
+     * @param        $method
+     * @param string $overrideWith
+     * @return bool
+     */
+    public function override($pattern, $func, $method, $overrideWith = 'GET')
+    {
+        /**
+         * We will bind static routes to callable
+         *
+         * closure object
+         * @return object
+         */
+        $callable = function () use ($func) {
+            return $this->callStaticRoute($func);
+        };
+
+        if ($method !== false) {
+            if ($_SERVER['REQUEST_METHOD'] == $method) {
+                $_SERVER['REQUEST_METHOD'] = $overrideWith;
+            }
+        }
+
+        return $this->match($overrideWith, $pattern, $callable);
     }
 
     /**
@@ -231,7 +248,13 @@ class Router implements RouterInterface
      */
     public function post($pattern, $func)
     {
-        return $this->match(strtoupper(__FUNCTION__), $pattern, $func);
+        $method = strtoupper(__FUNCTION__);
+
+        if (!$func instanceof \Closure) {
+            return $this->override($pattern, $func, false, $method);
+        }
+
+        return $this->match($method, $pattern, $func);
     }
 
     /**
@@ -243,7 +266,9 @@ class Router implements RouterInterface
      */
     public function delete($pattern, $func)
     {
-        return $this->match(strtoupper(__FUNCTION__), $pattern, $func);
+        $method = strtoupper(__FUNCTION__);
+
+        return $this->match($method, $pattern, $func);
     }
 
     /**
@@ -255,7 +280,9 @@ class Router implements RouterInterface
      */
     public function put($pattern, $func)
     {
-        return $this->match(strtoupper(__FUNCTION__), $pattern, $func);
+        $method = strtoupper(__FUNCTION__);
+
+        return $this->match($method, $pattern, $func);
     }
 
     /**
@@ -266,7 +293,9 @@ class Router implements RouterInterface
      */
     public function patch($pattern, $func)
     {
-        return $this->match(strtoupper(__FUNCTION__), $pattern, $func);
+        $method = strtoupper(__FUNCTION__);
+
+        return $this->match($method, $pattern, $func);
     }
 
     /**
@@ -308,7 +337,7 @@ class Router implements RouterInterface
      * @param $pattern
      * @return $this
      */
-    private function pattern($key, $pattern)
+    public function pattern($key, $pattern)
     {
         $this->patterns[$key] = $pattern;
 
