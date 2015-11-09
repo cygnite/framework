@@ -31,7 +31,7 @@ interface QueryBuilderInterface
      *
      * @return null|object
      */
-    public function getDatabaseConnection();
+    public function resolveConnection();
 
     /**
      * Insert a new row into table
