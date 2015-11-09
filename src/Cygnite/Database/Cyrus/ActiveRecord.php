@@ -823,7 +823,7 @@ abstract class ActiveRecord implements ActiveRecordInterface
 
         static::$ar->setDatabase($database);
 
-        return static::$ar->query()->getDatabaseConnection();
+        return static::$ar->query()->resolveConnection();
     }
 
     /**
@@ -1132,7 +1132,7 @@ abstract class ActiveRecord implements ActiveRecordInterface
 
         //Use the power of PDO methods directly via static functions
         return static::callDynamicMethod(
-            [self::model()->query()->getDatabaseConnection(), $method],
+            [self::model()->query()->resolveConnection(), $method],
             $arguments
         );
     }
@@ -1171,7 +1171,7 @@ abstract class ActiveRecord implements ActiveRecordInterface
             return static::callDynamicMethod([$this->query(), $method], $arguments);
         }
 
-        if (!method_exists($this->query()->getDatabaseConnection(), $method) ||
+        if (!method_exists($this->query()->resolveConnection(), $method) ||
             !method_exists($this->query(), $method)
         ) {
             throw new \BadMethodCallException("$method method not exists");
@@ -1180,6 +1180,6 @@ abstract class ActiveRecord implements ActiveRecordInterface
         //|-----------------------------------------------
         //| If method not found we will check against the PDO.
         //| call PDO method directly via model object and return result set
-        return call_user_func_array([$this->query()->getDatabaseConnection(), $method], $arguments);
+        return call_user_func_array([$this->query()->resolveConnection(), $method], $arguments);
     }
 }
