@@ -23,6 +23,12 @@ class Reflection
 
     public $reflectionProperty;
 
+    protected $methodScopes = [
+        'public' => [],
+        'protected' => [],
+        'private' => []
+    ];
+
     /**
      * Get instance of your class using Reflection api
      *
@@ -101,5 +107,78 @@ class Reflection
     public function getReflectionProperty()
     {
         return (isset($this->reflectionProperty) ? $this->reflectionProperty : null);
+    }
+
+    /**
+     * Get All methods of the reflection class, you
+     * are allowed to filter out methods you required.
+     *
+     * @link http://stackoverflow.com/questions/12825187/get-all-public-methods-declared-in-the-class-not-inherited
+     * @param        $class
+     * @param bool   $inherit
+     * @param null   $static
+     * @param string $scope
+     * @return array
+     */
+    public function getMethods($scope = null, $inherit = false, $static = null)
+    {
+        $return = $this->methodScopes;
+
+        foreach (array_keys($return) as $key) {
+
+            $validScope = false;
+            $validScope = $this->getScopeType($key);
+
+            if ($validScope) {
+                $methods = $this->reflectionClass->getMethods($validScope);
+
+                $return = $this->getClassMethods($methods, $inherit, $key, $static, $return);
+            }
+        }
+
+        return (is_null($scope)) ? $return : $return[$scope];
+    }
+
+    /**
+     * @param string $scope
+     * @return mixed
+     */
+    public function getScopeType($scope = 'public')
+    {
+        switch ($scope) {
+            case 'public':
+                $type = \ReflectionMethod::IS_PUBLIC;
+                break;
+            case 'protected':
+                $type = \ReflectionMethod::IS_PROTECTED;
+                break;
+            case 'private':
+                $type = \ReflectionMethod::IS_PRIVATE;
+                break;
+        }
+
+        return $type;
+    }
+
+    public function getClassMethods(&$methods, &$inherit, &$key, &$static, &$return)
+    {
+        foreach ($methods as $method) {
+
+            $isStatic = $method->isStatic();
+
+            if (!is_null($static) && $static && !$isStatic) {
+                continue;
+            } elseif (!is_null($static) && !$static && $isStatic) {
+                continue;
+            }
+
+            if (!$inherit && $method->class === $this->reflectionClass->getName()) {
+                $return[$key][] = $method->name;
+            } elseif ($inherit) {
+                $return[$key][] = $method->name;
+            }
+        }
+
+        return $return;
     }
 }

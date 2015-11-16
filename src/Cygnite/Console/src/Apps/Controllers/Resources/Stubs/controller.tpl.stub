@@ -11,7 +11,7 @@ use Cygnite\Mvc\Controller\AbstractBaseController;
 * You may alter code to fit your needs
 */
 
-class {%ControllerName%} extends AbstractBaseController
+class {%ControllerClassName%}Controller extends AbstractBaseController
 {
     protected $layout = 'layouts.base';
 
