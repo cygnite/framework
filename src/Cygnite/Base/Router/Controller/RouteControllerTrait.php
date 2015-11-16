@@ -139,7 +139,7 @@ trait RouteControllerTrait
             return false;
         }
 
-        Config::setConfigurationItems(strtolower($module).'.config', include $file);
+        Config::set(strtolower($module).'.config', include $file);
         return (new $class)->register($this->getApplication(), $file);
     }
 
@@ -172,7 +172,7 @@ trait RouteControllerTrait
      *
      * @return App
      */
-    private function getApplication()
+    public function getApplication()
     {
         return App::instance();
     }
