@@ -9,10 +9,10 @@
  */
 namespace Cygnite\Base\Request;
 
-use Cygnite\Foundation\Application;
+use Exception;
 use Cygnite\Helpers\Config;
 use Cygnite\Helpers\Inflector;
-use Exception;
+use Cygnite\Foundation\ApplicationInterface;
 
 /**
  * Cygnite Dispatcher
@@ -28,23 +28,21 @@ class Dispatcher
      *
      * @var string
      */
-    private static $indexPage = 'index.php';
-    /**
-     * Define the router variable. default value set as false
-     *
-     * @var bool
-     */
-    private static $router_enabled = false;
+    public static $indexPage = 'index.php';
+
     public $default = [];
-    private $router;
-    private $routes = [];
+    public $router;
+    protected $routes = [];
+
+    protected $app;
 
     /**
      * @param \Cygnite\Foundation\Application $app
      * @internal param $route
      */
-    public function __construct(Application $app)
+    public function __construct(ApplicationInterface $app)
     {
+        $this->app = $app;
         $this->router = $app['router'];
 
         $this->default['controller'] = lcfirst(
@@ -79,9 +77,10 @@ class Dispatcher
             }
         }
 
-        $routes = $this->getRoutes();
+        $routeRequests = $this->getRoutes();
+
         try {
-            return $routes();
+            return $this->router->getResponse();
         } catch (\Exception $e) {
             throw $e;
         }
@@ -92,8 +91,12 @@ class Dispatcher
      */
     public function getRoutes()
     {
-        return function () {
+        $routes = function ()
+        {
+            $app = $this->app;
             require APPPATH.DS.'Routing'.DS.'Routes'.EXT;
         };
+
+        return $routes();
     }
 }
