@@ -15,6 +15,7 @@ use ErrorException;
 use Cygnite\Helpers\Inflector;
 use Cygnite\Helpers\Helper;
 use Cygnite\Foundation\Application as App;
+use Cygnite\Foundation\Http\ResponseInterface;
 use Cygnite\Base\Router\Controller\Controller;
 use Cygnite\Base\Router\Controller\RouteControllerTrait;
 use Cygnite\Base\Router\Controller\ResourceControllerTrait;
@@ -87,16 +88,28 @@ class Router implements RouterInterface
 
     public static $moduleDir;
 
-    /**
-     * @param $method
-     * @param $arguments
-     * @return mixed
-     */
-    public static function __callStatic($method, $arguments)
+    public $response;
+
+    public static function call($pattern, array $arguments = [])
     {
-        if ($method == 'call') {
-            return call_user_func_array([new self(), $method], $arguments);
+        return (new static())->callController([$pattern, $arguments]);
+    }
+
+    /**
+     * Set RouteCollection
+     *
+     * @param $namespace
+     * @return mixed
+     * @throws InvalidRouterCollectionException
+     */
+    public function collection($namespace)
+    {
+        if (!class_exists($namespace)) {
+            throw new InvalidRouterCollectionException('');
         }
+
+        $routeCollection = $this->getApplication()->make($namespace);
+        return $routeCollection->setRouter($this);
     }
 
     /**
@@ -148,18 +161,6 @@ class Router implements RouterInterface
     public function setModuleDirectory($name)
     {
         static::$moduleDir = $name;
-    }
-
-    /**
-     * @param       $method
-     * @param array $arguments
-     * @return $this
-     */
-    public function __call($method, $arguments = [])
-    {
-        if ($method == 'call') {
-            return $this->{$method . 'Controller'}($arguments);
-        }
     }
 
     /**
@@ -348,9 +349,9 @@ class Router implements RouterInterface
      * @param $key
      * @return string
      */
-    public function getPattern($key)
+    public function getPattern($key = null)
     {
-        return isset($this->patterns[$key]) ? $this->patterns[$key] : '';
+        return isset($this->patterns[$key]) ? $this->patterns[$key] : $this->patterns;
     }
 
     public function getRoutes()
@@ -410,6 +411,15 @@ class Router implements RouterInterface
         return (new Controller)->{__FUNCTION__}($controllerName);
     }
 
+    /**
+     * Route to controller implicitly based on HTTP verbs prefixed
+     *
+     * @param $controller
+     */
+    public function controller($controller)
+    {
+        return (new Controller)->implicitController($controller);
+    }
 
     /**
      * @return unknown
@@ -502,6 +512,11 @@ class Router implements RouterInterface
 
                 // call the handling function with the URL
                 $this->handledRoute = call_user_func_array($route['fn'], $params);
+
+                if ($this->handledRoute instanceof ResponseInterface) {
+                    $app = $this->getApplication();
+                    $app['response'] = $this->handledRoute;
+                }
 
                 $handledRequest++;
 
@@ -603,13 +618,19 @@ class Router implements RouterInterface
      * @param $string
      * @return mixed
      */
-    private function replace($string)
+    protected function replace($string)
     {
         foreach ($this->patterns as $key => $value) {
             $string = str_replace($key, $value, $string);
         }
 
         return $string;
+    }
+
+    public function getResponse()
+    {
+        $app = $this->getApplication();
+        return $app['response'];
     }
 
     /**
@@ -621,5 +642,7 @@ class Router implements RouterInterface
     public function set404Page($func)
     {
         $this->notFound = $func;
+
+        return $this;
     }
 }

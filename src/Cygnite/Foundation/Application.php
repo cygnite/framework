@@ -20,6 +20,7 @@ use Cygnite\Container\Container;
 use Cygnite\Common\UrlManager\Url;
 use Cygnite\Translation\Translator;
 use Cygnite\Base\Request\Dispatcher;
+use Cygnite\Foundation\Http\ResponseInterface;
 use Cygnite\Exception\Handler as ExceptionHandler;
 
 
@@ -490,7 +491,14 @@ class Application extends Container implements ApplicationInterface
         }
 
         try {
-            return $this->handle();
+            $response = $this->handle();
+
+            if ($response instanceof ResponseInterface) {
+                return $response->send();
+            }
+
+            return $response;
+
         } catch (\Exception $e) {
             if (ENV == 'development') {
                 throw $e;
