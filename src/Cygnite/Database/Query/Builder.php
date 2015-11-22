@@ -47,7 +47,7 @@ class Builder extends Joins implements QueryBuilderInterface
 
     protected static $cacheData = [];
 
-    protected static $dataSource = false;
+    public static $dataSource = false;
 
     public $data = [];
 
@@ -98,11 +98,20 @@ class Builder extends Joins implements QueryBuilderInterface
     public static $queries = [];
 
     /**
+     * The current query HAVING value bindings.
+     *
+     * @var array
+     */
+    protected $havingConditions = [];
+
+    protected $havingType;
+
+    /**
      * Constructor of Query Builder
      *
      * @param ActiveRecord $ar
      */
-    public function __construct(ActiveRecord $ar)
+    public function __construct($ar = null)
     {
         if ($ar instanceof ActiveRecord) {
             $this->setActiveRecord($ar);
@@ -119,6 +128,8 @@ class Builder extends Joins implements QueryBuilderInterface
     public function setActiveRecord($instance)
     {
         self::$activeRecord = $instance;
+
+        return $this;
     }
 
     /**
@@ -208,7 +219,7 @@ class Builder extends Joins implements QueryBuilderInterface
     {
         $whereStr = '';
         $i = 0;
-        foreach($where as $key => $value){
+        foreach ($where as $key => $value) {
             if ($i == 0) {
                 $whereStr .= "$key = :$key";
             } else {
@@ -402,6 +413,11 @@ class Builder extends Joins implements QueryBuilderInterface
         }
     }
 
+    public function truncate()
+    {
+        
+    }
+
     /**
      * Find Function to selecting Table columns
      *
@@ -536,6 +552,142 @@ class Builder extends Joins implements QueryBuilderInterface
         }
 
         return $this;
+    }
+
+    /**
+     * Add having clause to the query
+     *
+     * @param        $column
+     * @param string $operator
+     * @param null   $value
+     * @return $this
+     */
+    public function having($column, $operator = '=', $value = null)
+    {
+        $this->havingType = 'AND';
+
+        return $this->addCondition('having', $column, $operator, $value);
+    }
+
+    /**
+     * Add having clause to the query prefixing OR keyword
+     * 
+     * @param        $column
+     * @param string $operator
+     * @param null   $value
+     * @return $this|Builder
+     */
+    public function orHaving($column, $operator = '=', $value = null)
+    {
+        $this->havingType = 'OR';
+
+        return $this->addCondition('having', $column, $operator, $value);
+    }
+
+    /**
+     * Method to compile a simple column separated value for HAVING clause.
+     * If column passed as array, we will add condition for each column
+     *
+     * @param $type
+     * @param $column
+     * @param $separator
+     * @param $value
+     * @return $this
+     */
+    protected function addCondition($type, $column, $separator, $value)
+    {
+        $multiple = is_array($column) ? $column : [$column => $value];
+
+        foreach($multiple as $key => $val) {
+
+            // Add the table name in case of ambiguous columns
+            if (count($this->joinSources) > 0 && string_has($key, '.')) {
+                $table = (!is_null($this->tableAlias)) ? $this->tableAlias : $this->formTable;
+
+                $key = "{$table}.{$key}";
+            }
+
+            $key = $this->quoteIdentifier($key);
+            $this->bindCondition($type, "{$key} {$separator} ?", $val);
+        }
+
+        return $this;
+    }
+
+    /**
+     * Add a raw HAVING clause to the query. You can also bing values by passing
+     * second parameter as array. Make sure you clause should contain question mark
+     * placeholder
+     *
+     * @param       $clause
+     * @param array $values
+     * @return $this
+     */
+    public function havingRaw($clause, $values = [])
+    {
+        return $this->bindCondition('having', $clause, $values);
+    }
+
+    /**
+     * Build Having Conditions for the query
+     *
+     * @param       $type
+     * @param       $key
+     * @param array $values
+     * @return $this
+     */
+    protected function bindCondition($type, $key, $values= [])
+    {
+        $conditionHolder = "{$type}Conditions";
+        if (!is_array($values)) {
+            $values = [$values];
+        }
+
+        array_push($this->$conditionHolder, [$key, $values]);
+
+        return $this;
+    }
+
+    /**
+     * Build the HAVING clause(s)
+     *
+     * @return string
+     */
+    protected function buildHavingConditions()
+    {
+        $join = ($this->havingType == 'AND') ? 'AND' : 'OR';
+        $this->havingType = null;
+
+        return $this->makeConditions('having', $join);
+    }
+
+    /**
+     * Build a HAVING clause conditions
+     *
+     * @param string $type
+     * @param string $join
+     * @return string
+     */
+    protected function makeConditions($type, $join = 'AND')
+    {
+        $conditionHolder = "{$type}Conditions";
+
+        // If there are no clauses, return empty string
+        if (count($this->$conditionHolder) === 0) {
+            return '';
+        }
+
+        $conditions = [];
+
+        /*
+         * Bind all values to property to execute query
+         */
+        foreach ($this->$conditionHolder as $condition) {
+            $conditions[] = $condition[0];
+            $this->bindings = array_merge($this->bindings, $condition[1]);
+        }
+
+        return strtoupper($type) . " " . join(" $join ", $conditions);
     }
 
     /**
@@ -723,7 +875,7 @@ class Builder extends Joins implements QueryBuilderInterface
     {
         $data = [];
 
-        if (static::$dataSource) {
+        if ((is_null($type) || $type == '') && static::$dataSource) {
             $type = 'class';
             static::$dataSource = false;
         }
@@ -734,9 +886,6 @@ class Builder extends Joins implements QueryBuilderInterface
                 break;
             case 'both':
                 $data = $stmt->fetchAll(\PDO::FETCH_BOTH);
-                break;
-            case 'json':
-                $data = json_encode($stmt->fetchAll(\PDO::FETCH_ASSOC));
                 break;
             case 'object':
                 $data = $stmt->fetchAll(\PDO::FETCH_OBJ);
@@ -1182,6 +1331,10 @@ class Builder extends Joins implements QueryBuilderInterface
     {
         $ar = self::cyrus();
 
+        if (!method_exists($ar, 'skip')) {
+            return ;
+        }
+
         // we will get the table schema
         $select = Schema::make($this, function ($table) use ($ar)
         {
@@ -1210,13 +1363,13 @@ class Builder extends Joins implements QueryBuilderInterface
     /**
      * @return $this
      */
-    private function buildSqlQuery()
+    protected function buildSqlQuery()
     {
         $this->sqlQuery =
             'SELECT ' . $this->buildSelectedColumns() . ' FROM ' . $this->quoteIdentifier(
                 self::cyrus()->getTableName()
             ) . ' ' . $this->tableAlias . $this->getJoinSource() . $this->getWhere() .
-            ' ' . $this->getGroupBy() . ' ' . $this->getOrderBy() . ' ' . $this->getLimit();
+            ' ' . $this->getGroupBy() . ' ' .$this->buildHavingConditions(). ' '. $this->getOrderBy() . ' ' . $this->getLimit();
 
         static::$queries[] = $this->sqlQuery;
 
@@ -1235,7 +1388,7 @@ class Builder extends Joins implements QueryBuilderInterface
             'SELECT ' . $this->buildSelectedColumns() . ' FROM ' . $this->quoteIdentifier(
                 self::cyrus()->getTableName()
             ) . ' ' . $this->getWhere() .
-            ' ' . $this->getGroupBy() . ' ' . $this->getOrderBy() . ' ' . $this->getLimit();
+            ' ' . $this->getGroupBy() . ' ' .$this->buildHavingConditions(). ' '. $this->getOrderBy() . ' ' . $this->getLimit();
     }
 
     /**
@@ -1417,8 +1570,8 @@ class Builder extends Joins implements QueryBuilderInterface
 
     public static function make(\Closure $callback, $activeRecord = null)
     {
-        return $callback(new Builder($activeRecord));
-}
+        return $callback(new static($activeRecord));
+    }
 
     public static function _callMethod(\Closure $callback, $instance = null)
     {
