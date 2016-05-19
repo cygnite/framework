@@ -413,6 +413,7 @@ abstract class ActiveRecord implements ActiveRecordInterface
     public static function createLinks()
     {
         $pagination = Pagination::make(static::model());
+        $pagination->setPerPage();
 
         return $pagination->createLinks();
     }
