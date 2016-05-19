@@ -118,9 +118,7 @@ class Pagination
             $modelClass = Inflector::getClassNameFromNamespace(get_class($this->model));
             $table = Inflector::tabilize($modelClass);
 
-            $numRecords = $this->model
-                              ->query("SELECT ".$this->count()." as ".$this->numCount." FROM `".$table."`")
-                              ->getAll();
+            $numRecords = $this->model->select($this->count()." AS ".$this->numCount)->findMany();
 
             $this->totalNumOfPage = $numRecords[0]->{$this->numCount};
 
