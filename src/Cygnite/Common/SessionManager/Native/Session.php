@@ -151,7 +151,7 @@ class Session extends Manager implements SessionInterface
         if (!empty($_SERVER['HTTP_REFERER'])) {
             $url = parse_url($_SERVER['HTTP_REFERER']);
 
-            if ($url['host'] != $_SERVER['HTTP_HOST']) {
+            if ($url['host'].':'.$url['port'] != $_SERVER['HTTP_HOST']) {
                 session_destroy(); // destroy fake session
             }
         }
@@ -271,6 +271,6 @@ class Session extends Manager implements SessionInterface
      */
     public function __call($method, $args)
     {
-        return call_user_func_array([new Manager(), $method], [$args]);
+        return call_user_func_array([$this, $method], [$args]);
     }
 }
