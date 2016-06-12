@@ -29,7 +29,7 @@ class {%ControllerClassName%}Controller extends AbstractBaseController
     |
     |     public function indexAction()
     |     {
-    |         return Response::make("Cygnite : Hello World!!")->send();
+    |         return Response::make("Cygnite : Hello World!!");
     |     }
     |
     */
@@ -65,7 +65,7 @@ class {%ControllerClassName%}Controller extends AbstractBaseController
                     'links' => '', //%StaticModelName%::createLinks(),
                     'title' => 'Cygnite Framework - Crud Application'
         ]);
-        return Response::make($content)->send();
+        return Response::make($content);
     }
 
     /**
@@ -113,7 +113,7 @@ class {%ControllerClassName%}Controller extends AbstractBaseController
                     'title' => 'Add a new %ControllerName%'
         ]);
 
-        return Response::make($content)->send();
+        return Response::make($content);
     }
 
     /**
@@ -162,7 +162,7 @@ class {%ControllerClassName%}Controller extends AbstractBaseController
                     'title' => 'Update the %ControllerName%'
         ]);
 
-        return Response::make($content)->send();
+        return Response::make($content);
 
     }
 
@@ -179,7 +179,7 @@ class {%ControllerClassName%}Controller extends AbstractBaseController
                         'title' => 'Show the %ControllerName%'
         ]);
 
-        return Response::make($content)->send();
+        return Response::make($content);
     }
 
     /**

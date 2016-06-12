@@ -175,8 +175,8 @@ class GeneratorCommand extends Command
 
         $controller = str_replace('Controller', '', $this->controller);
 
-        $this->comment("\n".'You need to route the controller to access via browser, add
-        $this->getStaticRouteInstance()->controller("'.$controller.'"); into '."\n".'
+        $this->comment("\n".'You need to route the controller to access methods from browser, add
+        $this->routesController->controller("'.$controller.'"); inside the method '."\n".'
         \Apps\Routing\RouteCollection::executeStaticRoutes();'."\n");
 
         $this->info("Crud Generated Successfully By Cygnite Cli.");
