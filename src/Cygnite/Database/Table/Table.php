@@ -154,7 +154,7 @@ class Table
                         array('column'=> 'id', 'type' => 'int', 'length' => 11,
                             'increment' => true, 'key' => 'primary'),
                         array('column'=> 'migration', 'type' => 'string', 'length' =>255),
-                        array('column'=> 'version', 'type' => 'int'),
+                        array('column'=> 'version', 'type' => 'int', 'null'=> true),
                         array('column'=> 'created_at',  'type' => 'datetime')
                     ),
                     'InnoDB',

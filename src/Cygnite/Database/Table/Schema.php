@@ -211,7 +211,7 @@ class Schema
                     $type = 'date';
                     break;
                 case 'datetime':
-                    $len = (isset($value['length'])) ? $value['length'] : "DEFAULT '0000-00-00 00:00:00'";
+                    $len = (isset($value['length'])) ? $value['length'] : "NOT NULL DEFAULT NOW()";
                     $type = strtoupper($value['type']) . ' ' . $len;
                     break;
                 case 'time':
