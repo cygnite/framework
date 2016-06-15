@@ -27,10 +27,11 @@ trait EventRegistrarTrait
      */
     public function getAppEvents()
     {
-        $class = APP_NS.'\Middlewares\Events\Event';
-
+        $class = APP_NS.'\Middleware\Events\Event';
+        
         if (property_exists($class, 'appEvents') && $class::$activateAppEvent == true) {
-            return \Apps\Middlewares\Events\Event::$appEvents;
+            
+            return $class::$appEvents;
         }
 
         return false;
