@@ -30,6 +30,8 @@ class Controller implements RouteControllerInterface
         'any', 'get', 'post', 'put', 'patch',
         'delete', 'head', 'options'
     ];
+    
+    private $routes = [];
 
     /**
      * Set the controller as Route Controller
@@ -49,6 +51,8 @@ class Controller implements RouteControllerInterface
                 $this->{'set'.$method.'Route'}(Inflector::deCamelize($controller), $action);
             }
         }
+        
+        $this->mapRoute();
 
         return $this;
     }
@@ -60,6 +64,8 @@ class Controller implements RouteControllerInterface
     public function setActions($actions)
     {
         $this->controllerRoutes = array_merge($this->controllerRoutes, $actions);
+        
+        return $this;
     }
 
     /**
@@ -76,10 +82,14 @@ class Controller implements RouteControllerInterface
      * @return mixed
      */
     protected function setIndexRoute($controller, $action)
-    {
-        $this->mapRoute("/$controller/", Inflector::classify($controller).'@'.$action);
-        $this->mapRoute("/$controller/$action/{:id}", Inflector::classify($controller).'@'.$action);
-        return $this->mapRoute("/$controller/$action/", Inflector::classify($controller).'@'.$action);
+    {   
+        $this->routes['get'] = [
+            "/$controller/" => Inflector::classify($controller).'@'.$action,
+            "/$controller/$action/{:id}" => Inflector::classify($controller).'@'.$action,
+            "/$controller/$action/" => Inflector::classify($controller).'@'.$action
+        ];
+        
+        return $this;
     }
 
     /**
@@ -90,9 +100,16 @@ class Controller implements RouteControllerInterface
     protected function setAddRoute($controller, $action)
     {
         $callTo = Inflector::classify($controller).'@'.$action;
-        $this->mapRoute("/$controller/$action/", $callTo, 'post');
+        
+        $this->routes['get'] = array_merge($this->routes['get'], [
+            "/$controller/$action/" => $callTo
+        ]);
+        
+        $this->routes['post'] = [
+            "/$controller/$action/" => $callTo
+        ];
 
-        return $this->mapRoute("/$controller/$action/", $callTo);
+        return $this;
     }
 
     /**
@@ -103,9 +120,16 @@ class Controller implements RouteControllerInterface
     protected function setEditRoute($controller, $action)
     {
         $callTo = Inflector::classify($controller).'@'.$action;
-        $this->mapRoute("/$controller/$action/", $callTo, 'post');
+        
+        $this->routes['get'] = array_merge($this->routes['get'], [
+            "/$controller/$action/{:id}/" => $callTo
+        ]);
+        
+        $this->routes['post'] = array_merge($this->routes['post'], [
+            "/$controller/$action/" => $callTo
+        ]);        
 
-        return $this->mapRoute("/$controller/$action/{:id}/", $callTo);
+        return $this;
     }
 
     /**
@@ -115,7 +139,11 @@ class Controller implements RouteControllerInterface
      */
     protected function setShowRoute($controller, $action)
     {
-        return $this->mapRoute("/$controller/$action/{:id}/", Inflector::classify($controller).'@'.$action);
+        $this->routes['get'] = array_merge($this->routes['get'], [
+            "/$controller/$action/{:id}/" => Inflector::classify($controller).'@'.$action
+        ]);
+        
+        return $this;
     }
 
     /**
@@ -125,7 +153,11 @@ class Controller implements RouteControllerInterface
      */
     protected function setDeleteRoute($controller, $action)
     {
-        return $this->mapRoute("/$controller/$action/{:id}/", Inflector::classify($controller).'@'.$action);
+        $this->routes['get'] = array_merge($this->routes['get'], [
+            "/$controller/$action/{:id}/" => Inflector::classify($controller).'@'.$action
+        ]);
+        
+        return $this;
     }
 
     /**
@@ -134,30 +166,35 @@ class Controller implements RouteControllerInterface
      * @return mixed
      * @throws \Exception
      */
-    protected function mapRoute($pattern, $func, $method = 'get')
-    {
+    protected function mapRoute()
+    {        
+        foreach ($this->routes['get'] as $pattern => $func) {
+            $this->mapStaticRoutes($pattern, $func);
+        }
+        
+        foreach ($this->routes['post'] as $pattern => $func) {
+             $this->mapStaticRoutes($pattern, $func, 'post');
+        }
+        
+        return $this;
+    }
+    
+    /**
+     * 
+     * @param type $pattern
+     * @param type $func
+     * @param type $method
+     * @return \Cygnite\Base\Router\Controller\Controller
+     */
+    private function mapStaticRoutes($pattern, $func, $method = 'get')
+    {                        
         if (!is_string($func)) {
             throw new \Exception("$func must be string!");
         }
-
-        return $this->mapStaticRoutes($pattern, $func, $method);
-    }
-
-    /**
-     * @param $func
-     * @param $pattern
-     * @throws \Exception
-     * @return mixed
-     */
-    protected function mapStaticRoutes($pattern, $func, $method = 'get')
-    {
-        $app = Application::instance();
-
-        if (!is_null($method)) {
-            $app['router']->{$method}($pattern, $func);
-        }
-
-        return $app['router']->{$method}($pattern, $func);
+        
+        $this->app()->router->{$method}($pattern, $func);
+        
+        return $this;
     }
 
     /**

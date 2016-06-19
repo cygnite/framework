@@ -75,6 +75,7 @@ class Url
                 header("Location: " . $uri, true, $httpResponseCode);
                 break;
         }
+        exit;
     }
 
     /**
