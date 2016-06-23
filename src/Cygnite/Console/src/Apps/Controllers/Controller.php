@@ -5,6 +5,7 @@ use Cygnite\Common\Input\Input;
 use Cygnite\Validation\Validator;
 use Cygnite\Common\UrlManager\Url;
 use Cygnite\Foundation\Application;
+use Cygnite\Foundation\Http\Response;
 use {%Apps%}\Form\%ControllerName%Form;
 use {%Apps%}\Models\%StaticModelName%;
 use Cygnite\Mvc\Controller\AbstractBaseController;
@@ -60,14 +61,14 @@ class {%ControllerClassName%}Controller extends AbstractBaseController
             $flash = $this->getFlash('error');
         }
 
-        $this->render('%controllerName%.index')->with(
-            [
+        $view = $this->render('%controllerName%.index', [
                 'records' => $%controllerName%,
                 'flashMessage' => $flash,
                 'links' => '', //%StaticModelName%::createLinks()
                 'title' => 'Cygnite Framework - Crud Application'
-            ]
-        );
+        ], true);
+        
+        return Response::make($view);
     }
 
     /**
@@ -108,11 +109,13 @@ class {%ControllerClassName%}Controller extends AbstractBaseController
         }
 
         // render view page
-        $this->render('%controllerName%.create')->with([
+        $view = $this->render('%controllerName%.create', [
                 'form' => $form->render(),
                 'validation_errors' => $form->errors,
                 'title' => 'Add a new %ControllerName%'
-        ]);
+        ], true);
+        
+        return Response::make($view);
     }
 
     /**
@@ -155,11 +158,13 @@ class {%ControllerClassName%}Controller extends AbstractBaseController
         }
 
          // render view page
-        $this->render('%controllerName%.update')->with([
+        $view = $this->render('%controllerName%.update', [
                 'form' => $form->render(),
                 'validation_errors' => $form->errors,
                 'title' => 'Update %ControllerName%'
-        ]);
+        ], true);
+        
+        return Response::make($view);
     }
 
     /**
@@ -171,10 +176,12 @@ class {%ControllerClassName%}Controller extends AbstractBaseController
         $%modelName% = %StaticModelName%::find($id);
 
         // render view page
-        $this->render('%controllerName%.show')->with([
+        $view = $this->render('%controllerName%.show', [
                 'record' => $%modelName%,
                 'title' => 'Show a %ControllerName%'
-        ]);
+        ], true);
+        
+        return Response::make($view);
     }
 
     /**

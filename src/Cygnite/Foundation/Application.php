@@ -370,7 +370,7 @@ class Application extends Container implements ApplicationInterface
 
         if ($eventMiddleware) {
             $class = "\\".APP_NS."\\Middleware\\Events\\Event";
-            return (new $class)->register();
+            return (new $class)->register($this);
         }
     }
 
