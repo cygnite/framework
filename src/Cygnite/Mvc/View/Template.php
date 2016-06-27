@@ -3,7 +3,6 @@ namespace Cygnite\Mvc\View;
 
 use Cygnite\AssetManager\Asset;
 use Cygnite\Common\UrlManager\Url;
-use Cygnite\Reflection;
 
 if (!defined('CF_SYSTEM')) {
     exit('External script access not allowed');
@@ -31,7 +30,7 @@ class Template
         'getLayout'
     ];
 
-    public $twig;
+    public $twigEnvironment;
     /**
      * @param            $view
      */
@@ -39,7 +38,6 @@ class Template
     {
         \Twig_Autoloader::register();
         $this->view = $view;
-
         /*
          | We will get all the necessary user configuration set
          | in controller by the user and set into template method array.
@@ -53,7 +51,8 @@ class Template
     }
 
     /**
-     * @param $property
+     * @param $method
+     * @internal param $property
      */
     public function setValue($method)
     {
@@ -66,33 +65,39 @@ class Template
     public function setEnvironment()
     {
         $this->methods['twigLoader'] = new \Twig_Loader_Filesystem($this->view->getTemplateLocation());
-        $this->twig = new \Twig_Environment($this->methods['twigLoader'], array(
+
+        $this->twigEnvironment = new \Twig_Environment($this->methods['twigLoader'], [
             'cache' => CYGNITE_BASE.DS. 'public'.DS.'storage' . DS . 'temp' . DS . 'twig' . DS . 'tmp' . DS . 'cache',
             'auto_reload' => $this->methods['getAutoReload'],
             'debug' => $this->methods['isDebugModeOn'],
-        ));
-
+        ]);
         $this->setDefaultFunctions();
 
-        return $this->twig;
+        return $this->twigEnvironment;
     }
 
+    /**
+     * Set default functions for the framework
+     */
     public function setDefaultFunctions()
     {
         $this->setLink() //set link() function
              ->setTwigBaseUrl(); //set baseUrl() function
 
         foreach ($this->functions as $key => $func) {
-            $this->twig->addFunction($func);
+            $this->twigEnvironment->addFunction($func);
         }
     }
 
+    /**
+     * register baseUrl function in twig
+     * @return $this
+     */
     private function setTwigBaseUrl()
     {
         // We will set baseUrl as default function to twig engine
         $this->functions[] = $this->getTwigSimpleFunctionInstance(
-            'baseUrl',
-            function () {
+            'baseUrl', function () {
                 return Url::getBase();
             }
         );
@@ -127,28 +132,81 @@ class Template
     }
 
     /**
+     * @return mixed
+     */
+    public function getTwigEnvironment()
+    {
+        return $this->twigEnvironment;
+    }
+
+    /**
+     * @return \Twig_Extension_Debug
+     */
+    public function twigDebug()
+    {
+        return new \Twig_Extension_Debug();
+    }
+
+    /**
      * @param null $extension
      * @return void
      */
     public function addExtension($extension = null)
     {
         if ($extension == null) {
-            $this->view->tpl->{__FUNCTION__}(new \Twig_Extension_Debug());
-        } else {
-            $this->view->tpl->{__FUNCTION__}($extension);
+            return $this->twigEnvironment->addExtension($this->twigDebug());
         }
+
+        return $this->twigEnvironment->addExtension($extension);
     }
 
     /**
-     * @param null     $funcName
+     * @param null $funcName
+     * @param callable $callback
      * @param callable $callback
      */
     public function addFunction($funcName = null, \Closure $callback = null)
     {
         if ($callback !== null && $callback instanceof \Closure) {
-            $this->view->tpl->{__FUNCTION__}(new \Twig_SimpleFunction($funcName, $callback));
-        } else {
-            $this->view->tpl->{__FUNCTION__}($funcName, $callback);
+            return $this->twigEnvironment->addFunction($this->getTwigSimpleFunctionInstance($funcName, $callback));
         }
+
+        return $this->twigEnvironment->addFunction($this->getTwigSimpleFunctionInstance($funcName, $callback));
+    }
+
+    /**
+     * @param $function
+     * @param $callback
+     * @param array $options
+     * @return Twig_SimpleFilter
+     */
+    public function filter($function, $callback, $options = array())
+    {
+        return new \Twig_SimpleFilter($function, $callback, $options);
+}
+
+    /**
+     * @param $function
+     * @param callable $callback
+     * @param array $options
+     * @return mixed
+     */
+    public function addFilter($function, $callback = null, $options = array())
+    {
+        $filter = $this->filter($function, $callback, $options);
+
+        return $this->twigEnvironment->addFilter($filter);
+    }
+
+    /**
+     * Add global variable available in all templates and macros
+     *
+     * @param $name
+     * @param $func
+     * @return mixed
+     */
+    public function addGlobal($name, $func)
+    {
+        return $this->twigEnvironment->addGlobal($name, $func);
     }
 }
