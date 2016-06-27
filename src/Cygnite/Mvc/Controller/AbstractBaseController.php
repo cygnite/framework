@@ -152,6 +152,7 @@ abstract class AbstractBaseController
     /**
      * @param       $view
      * @param array $params
+     * @param bool $return
      * @return mixed
      */
     public function render($view, $params = [], $return = false)
@@ -160,8 +161,9 @@ abstract class AbstractBaseController
     }
 
     /**
-     * @param       $view
+     * @param $view
      * @param array $params
+     * @param bool $return
      * @return mixed
      */
     public function template($view, $params = [], $return = false)
@@ -175,5 +177,21 @@ abstract class AbstractBaseController
     public function view()
     {
         return ViewFactory::make();
+    }
+
+    /**
+     * Return the Template instance
+     *
+     * @return bool
+     */
+    public function getTemplate()
+    {
+        if ($this->templateEngine == false) {
+            return false;
+        }
+        $view = $this->view();
+        $view->setTwigEnvironment();
+
+        return $view->getTemplate();
     }
 }

@@ -21,7 +21,7 @@ trait Output
     {
         $obLevel = ob_get_level();
         ob_start();
-            extract($data);
+        extract($data);
 
         /*
          | We will try to include view file and check content into try catch block
