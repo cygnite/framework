@@ -22,10 +22,9 @@ if (!defined('CF_SYSTEM')) {
  * View Class.
  *
  * Render your view page or template
- *
+ * 
  * @author Sanjoy Dey <dey.sanjoy0@gmail.com>
  */
-
 class View implements ViewInterface,\ArrayAccess
 {
     use ControllerViewBridgeTrait, Output;
@@ -34,9 +33,7 @@ class View implements ViewInterface,\ArrayAccess
 
     public $data = [];
 
-    public $tpl;
-
-    public $twig;
+    public static $twigEnvironment;
 
     private $class;
 
@@ -87,28 +84,28 @@ class View implements ViewInterface,\ArrayAccess
      *
      * @internal param $template
      */
-    private function setTwigEnvironment()
+    public function setTwigEnvironment()
     {
-        if ($this->template instanceof Template) {
-
-            $this->template->configure($this);
-            $this->setTemplate($this->template);
-            $controller = $this->getControllerName();
-            $this->layout = Inflector::toDirectorySeparator($this->layout);
-
-            if ($this->layout == '') {
-                $this->layout = strtolower($controller);
-            }
-
-            $this->setViewPath();
-            $this->tpl = $this->template->setEnvironment();
-
-            if ($this->isDebugModeOn()) {
-                $this->template->addExtension();
-            }
+        if (!$this->template instanceof Template) {
+            return $this;
         }
 
-        return $this;
+        $this->template->configure($this);
+        $controller = $this->getControllerName();
+        $this->layout = Inflector::toDirectorySeparator($this->layout);
+
+        if ($this->layout == '') {
+            $this->layout = strtolower($controller);
+        }
+
+        $this->setViewPath();
+        if (!is_object(static::$twigEnvironment)) {
+            static::$twigEnvironment = $this->template->setEnvironment();
+        }
+
+        if ($this->isDebugModeOn()) {
+            $this->template->addExtension();
+        }
     }
 
     public function getControllerName()
@@ -203,7 +200,7 @@ class View implements ViewInterface,\ArrayAccess
      * $this->render('Apps.Views.home:welcome', []);
      *
      * $content = $this->render('Apps.Views.home:welcome', [], true)->content();
-     * return Response::make($content)->send();
+     * return Response::make($content);
      *
      * Render Twig template:
      * ---------------------
@@ -211,7 +208,7 @@ class View implements ViewInterface,\ArrayAccess
      * $this->render('home.index', $data);
      * 
      * $content = $this->render('home.index', $data, true);
-     * return Response::make($content)->send();
+     * return Response::make($content);
      * @param       $view
      * @param array $params
      * @param bool  $return
@@ -272,7 +269,7 @@ class View implements ViewInterface,\ArrayAccess
          | twig, then we will set twig template
          | environment
          */
-        if (is_object($this->tpl) && is_file($path)) {
+        if (is_object(static::$twigEnvironment) && is_file($path)) {
             $this->setTwigTemplateInstance($view);
         }
 
@@ -280,7 +277,7 @@ class View implements ViewInterface,\ArrayAccess
         | We will check is twig template instance exists
         | then we will render twig template with parameters
         */
-        if (is_object($this->tpl) && is_object($this['twig_template'])) {
+        if (is_object(static::$twigEnvironment) && is_object($this['twig_template'])) {
             return ($return) ?
                 $this['twig_template']->render($param) :
                 $this['twig_template']->display($param);
@@ -317,7 +314,7 @@ class View implements ViewInterface,\ArrayAccess
     private function setTwigTemplateInstance($view)
     {
         if (is_null($this['twig_template'])) {
-            $this['twig_template'] = $this->tpl->loadTemplate(
+            $this['twig_template'] = static::$twigEnvironment->loadTemplate(
                 str_replace('.', DS, $view).$this->getTemplateExtension()
             );
         }
@@ -453,9 +450,9 @@ class View implements ViewInterface,\ArrayAccess
      * @param $template
      * @return $this
      */
-    private function setTemplate($template)
+    public function setTemplate($template)
     {
-        $this->twig = $template;
+        $this->template = $template;
 
         return $this;
     }
@@ -467,7 +464,7 @@ class View implements ViewInterface,\ArrayAccess
      */
     public function getTemplate()
     {
-        return isset($this->twig) ? $this->twig : null;
+        return isset($this->template) ? $this->template : null;
     }
 
     /**
@@ -517,6 +514,14 @@ class View implements ViewInterface,\ArrayAccess
         $this->templateExtension = $templateExtension;
 
         return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTwigEnvironment()
+    {
+        return static::$twigEnvironment;
     }
 
     /**
