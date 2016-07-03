@@ -1,6 +1,7 @@
 <?php
 namespace Cygnite\Translation;
 
+use Cygnite\Common\ArrayManipulator\ArrayAccessor;
 /**
  * Class Translator
  *
@@ -20,7 +21,7 @@ class Translator implements TranslatorInterface
 
     public static $fallback = 'en';
 
-    protected $rootDir;
+    protected static $rootDir;
 
     protected $langDir = 'Languages';
 
@@ -113,12 +114,19 @@ class Translator implements TranslatorInterface
             $locale = $this->locale();
         }
 
-        if (string_has($key, '.')) {
-            $exp = string_split($key);
+        if (string_has($key, ':')) {
+            $exp = string_split($key, ':');
             // Load the translation table for this language
             $translator = $this->load($locale.'-'.$exp[0]);
+            unset($exp[0]);
+
+            $string = ArrayAccessor::make($translator, function ($a) use($exp)
+            {
+                return $a->toString(implode('.', $exp));
+            });
+
             // Return the translated string if it exists
-            return isset($translator[$exp[1]]) ? $translator[$exp[1]] : $key;
+            return !is_null($string) ? $string : $key;
         }
 
         // Load the Translator array for this language
@@ -147,8 +155,8 @@ class Translator implements TranslatorInterface
      */
     public function setRootDirectory($dir)
     {
-        $this->rootDir = $dir;
-
+        static::$rootDir = $dir;
+        
         return $this;
     }
 
@@ -160,7 +168,7 @@ class Translator implements TranslatorInterface
      */
     public function getRootDirectory()
     {
-        return isset($this->rootDir) ? $this->rootDir : APPPATH . DS;
+        return isset(static::$rootDir) ? static::$rootDir : APPPATH . DS;
     }
 
     /**

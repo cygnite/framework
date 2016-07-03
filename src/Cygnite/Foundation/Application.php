@@ -197,7 +197,9 @@ class Application extends Container implements ApplicationInterface
 
         return Translator::make(function ($trans) use ($locale, $fallbackLocale)
         {
-            return $trans->setFallback($fallbackLocale)->locale($locale);
+            return $trans->setRootDirectory(APPPATH . DS.'Resources'.DS)
+                         ->setFallback($fallbackLocale)
+                         ->locale($locale);
         });
     }
 
