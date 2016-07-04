@@ -158,15 +158,16 @@ if (!function_exists('trans')) {
      */
     function trans($key, array $replace = null, $locale = 'en-us')
     {
-        return Translator::make(function ($trans) use ($key, $replace, $locale) {
-            if ($locale !== $trans->locale()) {
+        $trans = app()->getTranslator();
+        $local = $trans->locale();
+
+        if ($locale !== $local) {
                 // The message and target languages are different
                 // Get the translation for this message
                 $key = $trans->get($key);
             }
 
-            return empty($replace) ? $key : strtr($key, $replace);
-        });
+        return empty($replace) ? $trans->get($key) : strtr($key, $replace);
     }
 }
 
