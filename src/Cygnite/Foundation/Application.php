@@ -186,21 +186,32 @@ class Application extends Container implements ApplicationInterface
     }
 
     /**
+     * @return static
+     */
+    public function getTranslator()
+    {
+        return Translator::make();
+    }
+
+    /**
      * Set language to the translator
      *
+     * @param null $localization
      * @return locale
      */
-    public function setLocale()
+    public function setLocale($localization = null)
     {
         $locale = Config::get('global.config', 'locale');
+        if (!is_null($localization)) {
+            $locale = $localization;
+        }
+
         $fallbackLocale = Config::get('global.config', 'fallback.locale');
 
-        return Translator::make(function ($trans) use ($locale, $fallbackLocale)
-        {
-            return $trans->setRootDirectory(APPPATH . DS.'Resources'.DS)
-                         ->setFallback($fallbackLocale)
-                         ->locale($locale);
-        });
+        $trans = $this->getTranslator();
+        return $trans->setRootDirectory(APPPATH . DS.'Resources'.DS)
+              ->setFallback($fallbackLocale)
+              ->locale($locale);
     }
 
     /**

@@ -32,6 +32,8 @@ class Translator implements TranslatorInterface
      */
     protected $cache = [];
 
+    protected static $instance;
+
     /**
      * Create Translator instance and return
      *
@@ -44,11 +46,15 @@ class Translator implements TranslatorInterface
      */
     public static function make(\Closure $callback = null)
     {
-        if ($callback instanceof \Closure) {
-            return $callback(new static());
+        if (is_null(static::$instance)) {
+            static::$instance = new static();
         }
 
-        return new static();
+        if ($callback instanceof \Closure) {
+            return $callback(static::$instance);
+        }
+
+        return static::$instance;
     }
 
     /**
