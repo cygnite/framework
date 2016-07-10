@@ -55,6 +55,42 @@ class Collection implements Countable, IteratorAggregate, ArrayAccess, Serializa
     }
 
     /**
+     * Add additional arguments in the given collection
+     *
+     * @param $name
+     * @param $value
+     * @return $this
+     */
+    public function add($name, $value)
+    {
+        if (is_array($name)) {
+            foreach ($name as $key => $value) {
+                $this->data[$key] = $value;
+            }
+
+            return $this;
+        }
+
+        $this->data[$name] = $value;
+
+        return $this;
+    }
+
+    /**
+     * Exchanges the current values with the input
+     *
+     * @param mixed $array The values to exchange with
+     * @return array The old array
+     */
+    public function exchangeArray($array)
+    {
+        $oldValues = $this->data;
+        $this->data = $array;
+
+        return $oldValues;
+    }
+
+    /**
      * Alias method of getData
      *
      * @return array
