@@ -48,6 +48,7 @@ interface ApplicationInterface extends ContainerAwareInterface
     /**
      * Set language to the translator
      *
+     * @param null $localization
      * @return locale
      */
     public function setLocale($localization = null);
