@@ -197,7 +197,7 @@ class Application extends Container implements ApplicationInterface
      * Set language to the translator
      *
      * @param null $localization
-     * @return locale
+     * @return $localization
      */
     public function setLocale($localization = null)
     {
