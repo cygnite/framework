@@ -15,7 +15,7 @@ use ErrorException;
 use Cygnite\Helpers\Inflector;
 use Cygnite\Helpers\Helper;
 use Cygnite\Foundation\Application as App;
-use Cygnite\Foundation\Http\ResponseInterface;
+use Cygnite\Http\Responses\ResponseInterface;
 use Cygnite\Base\Router\Controller\Controller;
 use Cygnite\Base\Router\Controller\RouteControllerTrait;
 use Cygnite\Base\Router\Controller\ResourceControllerTrait;

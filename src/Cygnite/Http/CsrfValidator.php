@@ -1,16 +1,18 @@
 <?php
-namespace Cygnite\Foundation\Http;
+namespace Cygnite\Http;
+
+use Cygnite\Http\Requests\RequestMethods;
 
 /**
  * Class CsrfValidator
  *
- * @package Cygnite\Foundation\Http
+ * @package Cygnite\Http
  */
 class CsrfValidator
 {
     protected $token;
 
-    protected $spoofedMethods = ['DELETE', 'PATCH', 'PUT'];
+    protected $spoofedMethods = [RequestMethods::DELETE, RequestMethods::PATCH, RequestMethods::PUT];
 
     protected $session;
 
@@ -36,6 +38,8 @@ class CsrfValidator
 
 
     /**
+     * @param $session
+     * @param null $random
      * @param callable $callback
      * @return static
      */
