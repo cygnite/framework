@@ -20,7 +20,7 @@ use Cygnite\Container\Container;
 use Cygnite\Common\UrlManager\Url;
 use Cygnite\Translation\Translator;
 use Cygnite\Base\Request\Dispatcher;
-use Cygnite\Foundation\Http\ResponseInterface;
+use Cygnite\Http\Responses\ResponseInterface;
 use Cygnite\Exception\Handler as ExceptionHandler;
 
 
