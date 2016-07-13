@@ -2,7 +2,7 @@
 use Mockery as m;
 use Cygnite\Mvc\View\View;
 use Cygnite\Mvc\View\Template;
-use Cygnite\Foundation\Http\Response;
+use Cygnite\Http\Responses\Response;
 
 class ViewTest extends PHPUnit_Framework_TestCase
 {

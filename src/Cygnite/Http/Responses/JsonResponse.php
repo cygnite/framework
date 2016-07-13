@@ -1,14 +1,14 @@
 <?php
-namespace Cygnite\Foundation\Http;
+namespace Cygnite\Http\Responses;
 
-use Cygnite\Foundation\Http\Response;
+use Cygnite\Http\Responses\Response;
+use Cygnite\Http\Responses\ResponseHeader;
 
 /**
  * Class JsonResponse
  *
- * @package Cygnite\Foundation\Http
+ * @package Cygnite\Http\Responses
  */
-
 class JsonResponse extends Response
 {
     // 15 === JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT
@@ -28,8 +28,8 @@ class JsonResponse extends Response
             $content = $this->jsonEncode($content, $prettyPrint);
         }
 
-        parent::__construct($content, 200, $headers);
-        $this->setContentType('application/json');
+        parent::__construct($content, ResponseHeader::HTTP_OK, $headers);
+        $this->setContentType(ResponseHeader::CONTENT_TYPE_JSON);
     }
 
     /**
