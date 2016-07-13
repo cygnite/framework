@@ -2,7 +2,7 @@
 namespace {%Apps%}\Controllers;
 
 use Cygnite\Mvc\View\View;
-use Cygnite\Foundation\Http\Response;
+use Cygnite\Http\Responses\Response;
 use Cygnite\Foundation\Application;
 use Cygnite\Mvc\Controller\AbstractBaseController;
 

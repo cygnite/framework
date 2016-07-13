@@ -6,7 +6,7 @@ use Cygnite\Common\Input\Input;
 use Cygnite\Validation\Validator;
 use Cygnite\Common\UrlManager\Url;
 use Cygnite\Foundation\Application;
-use Cygnite\Foundation\Http\Response;
+use Cygnite\Http\Responses\Response;
 use {%Apps%}\Form\%ControllerName%Form;
 use {%Apps%}\Models\%StaticModelName%;
 use Cygnite\Mvc\Controller\AbstractBaseController;
