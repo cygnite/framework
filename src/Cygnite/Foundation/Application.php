@@ -20,7 +20,7 @@ use Cygnite\Container\Container;
 use Cygnite\Common\UrlManager\Url;
 use Cygnite\Translation\Translator;
 use Cygnite\Base\Request\Dispatcher;
-use Cygnite\Foundation\Http\ResponseInterface;
+use Cygnite\Http\Responses\ResponseInterface;
 use Cygnite\Exception\Handler as ExceptionHandler;
 
 
@@ -197,7 +197,7 @@ class Application extends Container implements ApplicationInterface
      * Set language to the translator
      *
      * @param null $localization
-     * @return locale
+     * @return $localization
      */
     public function setLocale($localization = null)
     {

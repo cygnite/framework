@@ -7,8 +7,9 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-namespace Cygnite\Foundation\Http;
+namespace Cygnite\Http\Responses;
 
+use Cygnite\Http\Responses\ResponseHeader;
 use Cygnite\Exception\Http\ResponseException;
 
 /**
@@ -23,74 +24,9 @@ class Response implements ResponseInterface
 
     const CHARSET = 'UTF-8';
 
-    const CONTENT_TYPE = 'text/html';
+    const CONTENT_TYPE = ResponseHeader::CONTENT_TYPE_HTML;
 
-    /**
-     * @var array
-     */
-    public static $httpStatus = array(
-        100 => 'Continue',
-        101 => 'Switching Protocols',
-        102 => 'Processing',
-        200 => 'OK',
-        201 => 'Created',
-        202 => 'Accepted',
-        203 => 'Non-Authoritative Information',
-        204 => 'No Content',
-        205 => 'Reset Content',
-        206 => 'Partial Content',
-        207 => 'Multi-Status',
-        208 => 'Already Reported',
-        226 => 'IM Used',
-        300 => 'Multiple Choices',
-        301 => 'Moved Permanently',
-        302 => 'Found',
-        303 => 'See Other',
-        304 => 'Not Modified',
-        305 => 'Use Proxy',
-        307 => 'Temporary Redirect',
-        308 => 'Permanent Redirect',
-        400 => 'Bad Request',
-        401 => 'Unauthorized',
-        402 => 'Payment Required',
-        403 => 'Forbidden',
-        404 => 'Not Found',
-        405 => 'Method Not Allowed',
-        406 => 'Not Acceptable',
-        407 => 'Proxy Authentication Required',
-        408 => 'Request Timeout',
-        409 => 'Conflict',
-        410 => 'Gone',
-        411 => 'Length Required',
-        412 => 'Precondition Failed',
-        413 => 'Request Entity Too Large',
-        414 => 'Request-URI Too Long',
-        415 => 'Unsupported Media Type',
-        416 => 'Requested Range Not Satisfiable',
-        417 => 'Expectation Failed',
-        418 => 'I\'m a Teapot',
-        422 => 'Unprocessable Entity',
-        423 => 'Locked',
-        424 => 'Failed Dependency',
-        426 => 'Upgrade Required',
-        428 => 'Precondition Required',
-        428 => 'Too Many Requests',
-        431 => 'Request Header Fields Too Large',
-        500 => 'Internal Server Error',
-        501 => 'Not Implemented',
-        502 => 'Bad Gateway',
-        503 => 'Service Unavailable',
-        504 => 'Gateway Timeout',
-        505 => 'HTTP Version Not Supported',
-        506 => 'Variant Also Negotiates',
-        507 => 'Insufficient Storage',
-        508 => 'Loop Detected',
-        509 => 'Bandwidth Limit Exceeded',
-        510 => 'Not Extended',
-        511 => 'Network Authentication Required',
-    );
-
-    public $statusCode = 200;
+    public $statusCode = ResponseHeader::HTTP_OK;
 
     protected $statusMessage;
 
@@ -108,7 +44,7 @@ class Response implements ResponseInterface
      */
     protected $content;
 
-    protected $contentType = 'text/html';
+    protected $contentType = self::CONTENT_TYPE;
 
     protected $charset;
 
@@ -117,29 +53,32 @@ class Response implements ResponseInterface
      * @param int    $statusCode
      * @param array  $headers
      */
-    public function __construct($content = '', $statusCode = 200, $headers = [])
+    public function __construct($content = '', $statusCode = ResponseHeader::HTTP_OK, $headers = [])
     {
         $this->setContent($content);
         $this->setStatusCode($statusCode);
 
-        /*
-         | set all headers
-         */
-        foreach ($headers as $key => $value) {
-            $this->setHeader($key, $value);
-        }
+        if (!empty($headers)) {
+            /*
+             | set all headers
+             */
+            foreach ($headers as $key => $value) {
+                $this->setHeader($key, $value);
+            }
+       }
+
     }
 
     /**
-     * <code>
+     * Returns Response object
      *
-     *  Response::make($content, 200)->send();
+     * <code>
+     *  Response::make($content, ResponseHeader::HTTP_OK)->send();
      *
      *  Response::make($content, function ($response)
      *  {
      *      return $response->setHeader($key, $value)->send();
      *  });
-     *
      * </code>
      *
      * @param string       $content
@@ -147,11 +86,11 @@ class Response implements ResponseInterface
      * @param array        $headers
      * @return static
      */
-    public static function make($content = '', $statusCode = 200, $headers = [])
+    public static function make($content = '', $statusCode = ResponseHeader::HTTP_OK, $headers = [])
     {
         // We will check if statusCode given as Closure object
         if ($statusCode instanceof \Closure) {
-            return $statusCode(new static($content, 200, $headers));
+            return $statusCode(new static($content, ResponseHeader::HTTP_OK, $headers));
         }
 
         return new static($content, $statusCode, $headers);
@@ -209,7 +148,7 @@ class Response implements ResponseInterface
     {
         $statusCode = $this->getStatusCode();
 
-        if (!isset(static::$httpStatus)) {
+        if (!isset(ResponseHeader::$httpStatus[$statusCode])) {
             throw new ResponseException(sprintf('Invalid status code provided %s', $statusCode));
         }
 
@@ -219,7 +158,7 @@ class Response implements ResponseInterface
             return $this;
         }
 
-        $this->statusMessage = self::$httpStatus[$statusCode];
+        $this->statusMessage = ResponseHeader::$httpStatus[$statusCode];
 
         return $this;
     }
@@ -359,8 +298,8 @@ class Response implements ResponseInterface
     {
         $message = 'Unknown Status';
 
-        if (isset(static::$httpStatus[$this->getStatusCode()])) {
-            $message = static::$httpStatus[$this->getStatusCode()];
+        if (isset(ResponseHeader::$httpStatus[$this->getStatusCode()])) {
+            $message = ResponseHeader::$httpStatus[$this->getStatusCode()];
         }
 
         header('Status: '.$this->getStatusCode().' '.$message);
@@ -371,7 +310,7 @@ class Response implements ResponseInterface
      */
     protected function setHeaderForServer()
     {
-        header($this->protocol().' '.$this->getStatusCode().' '.static::$httpStatus[$this->getStatusCode()]);
+        header($this->protocol().' '.$this->getStatusCode().' '.ResponseHeader::$httpStatus[$this->getStatusCode()]);
     }
 
     /**

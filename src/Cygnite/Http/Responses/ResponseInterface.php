@@ -1,17 +1,17 @@
 <?php
-namespace Cygnite\Foundation\Http;
+namespace Cygnite\Http\Responses;
 
 /**
  * Class ResponseInterface
  *
- * @package Cygnite\Foundation\Http
+ * @package Cygnite\Http\Responses
  */
 interface ResponseInterface
 {
     /**
      * <code>
      *
-     *  Response::make($content, 200)->send();
+     *  Response::make($content, ResponseHeader::HTTP_OK)->send();
      *
      *  Response::make($content, function ($response)
      *  {
@@ -25,7 +25,7 @@ interface ResponseInterface
      * @param array        $headers
      * @return static
      */
-    public static function make($content = '', $statusCode = 200, $headers = []);
+    public static function make($content = '', $statusCode = ResponseHeader::HTTP_OK, $headers = []);
 
     /**
      * @param null $content
@@ -42,7 +42,7 @@ interface ResponseInterface
      * @param int $statusCode
      * @return mixed
      */
-    public function setStatusCode($statusCode = 200);
+    public function setStatusCode($statusCode = ResponseHeader::HTTP_OK);
 
     /**
      * @return mixed
