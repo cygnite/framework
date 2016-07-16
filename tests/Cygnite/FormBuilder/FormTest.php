@@ -10,6 +10,8 @@ use Mockery as m;
 
 class FormTest extends PHPUnit_Framework_TestCase
 {
+    private $app;
+
     public function testCreateFormInstance()
     {
         $form = Form::make();
@@ -30,11 +32,15 @@ class FormTest extends PHPUnit_Framework_TestCase
 
     private function setUpAssetConfig()
     {
-        $app = Application::instance();
-        $app['router'] = new \Cygnite\Base\Router\Router();
+        $this->app = Application::instance();
+        $this->app['url'] = new \Cygnite\Common\UrlManager\Url();
+        $this->app['request'] = \Cygnite\Http\Requests\Request::createFromGlobals();
+        $this->app['router'] = new \Cygnite\Base\Router\Router($this->app['request']);
+        $this->app['router']->setApplication($this->app);
+        $this->app['url']->setApplication($this->app);
 
-        $_SERVER['REQUEST_URI'] = '/hello/user/';
-        $_SERVER['HTTP_HOST'] = 'localhost';
+        $this->app['request']->server->add('REQUEST_URI', '/hello/user/');
+        $this->app['request']->server->add('HTTP_HOST', 'localhost');
         $configuration = [
             'global.config' => [
                 'encoding' => 'utf-8'

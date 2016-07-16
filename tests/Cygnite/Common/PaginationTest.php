@@ -6,13 +6,22 @@ use Cygnite\Foundation\Application;
 
 class PaginationTest extends PHPUnit_Framework_TestCase
 {
+    private $app;
+
     public function setUp()
     {
-        $_SERVER['HTTP_HOST'] = 'localhost';
-        $_SERVER['REQUEST_URI'] = '/';
+        $this->app = Application::instance();
+        $this->app['url'] = new \Cygnite\Common\UrlManager\Url();
+        $this->app['request'] = \Cygnite\Http\Requests\Request::createFromGlobals();
+        $this->app['router'] = new \Cygnite\Base\Router\Router($this->app['request']);
+        $this->app['router']->setApplication($this->app);
+        $this->app['url']->setApplication($this->app);
 
+        $this->app['request']->server->add('HTTP_HOST', 'localhost');
+        $this->app['request']->server->add('REQUEST_URI', '/');
+/*
         $app = Application::instance();
-        $app['router'] = new Router;
+        $app['router'] = new Router;*/
         Url::setBase("/cygnite/index.php/user");
     }
 
