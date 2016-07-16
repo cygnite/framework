@@ -1,6 +1,7 @@
 <?php
 use Mockery as m;
 use Cygnite\Mvc\View\View;
+use Cygnite\Mvc\View\ViewFactory;
 use Cygnite\Mvc\View\Template;
 use Cygnite\Http\Responses\Response;
 
@@ -12,21 +13,24 @@ class ViewTest extends PHPUnit_Framework_TestCase
     }
 
     public function testSetDataOnView()
-    {   
+    {
         define('CYGNITE_BASE', __DIR__);
         define('APP', '');
         define('APP_NS', 'APP_NS');
 
         $view = $this->view();
-        $data = ['foo' => 'Foo'];        
+        $data = ['foo' => 'Foo'];
 
-        $content = $view->render('fixtures.hello', $data, true)->content();        
+        $content = $view->render('fixtures.hello', $data, true)->content();
         $this->assertEquals('Hello Foo', $content);
     }
 
 
     public function testViewCreateMethod()
     {
+        $app = new \Cygnite\Foundation\Application();
+        ViewFactory::setApplication($app);
+
         $data = ['foo' => 'Cygnite!'];
         $content = View::create("fixtures.hello", $data);        
         $this->assertEquals('Hello Cygnite!', Response::make($content)->getContent());
