@@ -555,7 +555,7 @@ class Request
         $host = strtolower(preg_replace('/:\d+$/', '', trim($host)));
 
         // Check for forbidden characters
-        if (!empty($host) && !empty(preg_replace("/(?:^\[)?[a-zA-Z0-9-:\]_]+\.?/", "", $host))) {
+        if (!empty($host) && '' !== preg_replace('/(?:^\[)?[a-zA-Z0-9-:\]_]+\.?/', '', $host)) {
             throw new \UnexpectedValueException("Invalid host $host");
         }
 
