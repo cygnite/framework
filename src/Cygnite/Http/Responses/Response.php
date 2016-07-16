@@ -65,8 +65,7 @@ class Response implements ResponseInterface
             foreach ($headers as $key => $value) {
                 $this->setHeader($key, $value);
             }
-       }
-
+        }
     }
 
     /**

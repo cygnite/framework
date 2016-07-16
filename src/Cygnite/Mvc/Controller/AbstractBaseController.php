@@ -11,6 +11,7 @@
 
 namespace Cygnite\Mvc\Controller;
 
+use Cygnite\Foundation\Application;
 use Exception;
 use Cygnite\Common\Encrypt;
 use Cygnite\Helpers\Inflector;
@@ -35,6 +36,8 @@ abstract class AbstractBaseController
     protected $validProperties = ['layout', 'templateEngine', 'templateExtension', 'autoReload', 'twigDebug'];
 
     private $class;
+
+    protected $app;
 
     /**
      * Constructor function
@@ -105,9 +108,27 @@ abstract class AbstractBaseController
         return $this->_call(new $class, $method, $arguments);
     }
 
-    public function getContainer()
+    /**
+     * Set Application instance
+     *
+     * @param $app
+     * @return $this
+     */
+    public function setApplication($app)
     {
-        return App::instance();
+        $this->app = $app;
+
+        return $this;
+    }
+
+    /**
+     * Get application instance
+     *
+     * @return mixed
+     */
+    public function app()
+    {
+        return $this->app;
     }
 
     /**
@@ -176,6 +197,8 @@ abstract class AbstractBaseController
      */
     public function view()
     {
+        ViewFactory::setApplication(Application::instance());
+
         return ViewFactory::make();
     }
 

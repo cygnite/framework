@@ -58,7 +58,7 @@ interface ApplicationInterface extends ContainerAwareInterface
      *
      * @return $this
      */
-    public function bootApplication();
+    public function bootApplication($request);
 
     /**
      * We will trigger after booting application event if it is

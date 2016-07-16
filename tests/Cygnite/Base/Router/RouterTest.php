@@ -1,19 +1,22 @@
 <?php
 use Cygnite\Base\Router\Router;
+use Cygnite\Foundation\Application;
 use Mockery as m;
 
 class RouterTest extends PHPUnit_Framework_TestCase
 {
     private $router;
 
+    private $app;
+
     private function requestUri($uri)
     {
-        $_SERVER['REQUEST_URI'] = $uri;
+        $this->app['request']->server->add('REQUEST_URI', $uri);
     }
 
     private function requestMethod($method)
     {
-        $_SERVER['REQUEST_METHOD'] = $method;
+        $this->app['request']->server->add('REQUEST_METHOD', $method);
     }
 
     private function obStart()
@@ -31,18 +34,20 @@ class RouterTest extends PHPUnit_Framework_TestCase
 
     public function setUp()
     {
-        $_SERVER['SCRIPT_NAME'] = '/index.php';
-        // Default request method to GET
-        $_SERVER['REQUEST_METHOD'] = 'GET';
-        // Default SERVER_PROTOCOL method to HTTP/1.1
-        $_SERVER['SERVER_PROTOCOL'] = 'HTTP/1.1';
+        $this->app = Application::instance();
+        $this->app['request'] = \Cygnite\Http\Requests\Request::createFromGlobals();
+        $this->app['router'] = new \Cygnite\Base\Router\Router($this->app['request']);
+        $this->app['router']->setApplication($this->app);
 
-        $this->router = new Router();
+        $this->app['request']->server->add('SCRIPT_NAME', '/index.php');
+        $this->app['request']->server->add('REQUEST_METHOD', 'GET');
+        $this->app['request']->server->add('SERVER_PROTOCOL', 'HTTP/1.1');
+        $this->router = $this->app['router'];
     }
 
     public function testRouterInstance()
     {
-        $this->assertInstanceOf('\Cygnite\Base\Router\Router', new \Cygnite\Base\Router\Router());
+        $this->assertInstanceOf('\Cygnite\Base\Router\Router', $this->router);
     }
 
     public function testAllRequest()

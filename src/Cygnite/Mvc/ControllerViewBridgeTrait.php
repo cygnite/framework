@@ -10,8 +10,6 @@
 
 namespace Cygnite\Mvc;
 
-use Cygnite\Foundation\Application;
-
 /**
  * trait ControllerViewBridgeTrait
  *
@@ -44,8 +42,10 @@ trait ControllerViewBridgeTrait
      */
     public function get($class)
     {
-        $container = Application::instance();
-        return $container->resolve($class);
+
+        $app = $this->app();
+
+        return $app->resolve($class);
     }
 
     /**

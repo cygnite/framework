@@ -1,10 +1,13 @@
 <?php
 use Cygnite\Container\Container;
+use Cygnite\Foundation\Application;
 use Mockery as m;
 
 class ContainerTest extends PHPUnit_Framework_TestCase
 {
     private $container;
+
+    protected $app;
 
     public function setUp()
     {
@@ -14,12 +17,17 @@ class ContainerTest extends PHPUnit_Framework_TestCase
     // need to create a test class
     public function testMakeClass()
     {
-        $router = new \Cygnite\Base\Router\Router();
-        $url = new \Cygnite\Common\UrlManager\Url($router);
+        $this->app = Application::instance();
+        $this->app['url'] = new \Cygnite\Common\UrlManager\Url();
+        $this->app['request'] = \Cygnite\Http\Requests\Request::createFromGlobals();
+        $this->app['router'] = new \Cygnite\Base\Router\Router($this->app['request']);
+        $this->app['router']->setApplication($this->app);
+        $this->app['url']->setApplication($this->app);
 
         $madeUrl = $this->container->make('\Cygnite\Common\UrlManager\Url');
+        $madeUrl->setApplication($this->app);
 
-        $this->assertEquals($url, $madeUrl);
+        $this->assertEquals($this->app['url'], $madeUrl);
     }
 
     public function testClouserResolutionAsObject()

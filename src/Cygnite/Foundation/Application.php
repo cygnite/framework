@@ -58,6 +58,12 @@ class Application extends Container implements ApplicationInterface
      */
     public $namespace = '\\Controllers\\';
 
+    public $bootStrappers = [
+        'debugger'   => 'Cygnite\Exception\ExceptionHandler',
+        'event'      => 'Cygnite\Base\EventHandler\Event',
+        'url' => 'Cygnite\Common\UrlManager\Url'
+    ];
+
     /**
      * ---------------------------------------------------
      * Cygnite Constructor
@@ -70,8 +76,9 @@ class Application extends Container implements ApplicationInterface
      * @return \Cygnite\Foundation\Application
      */
 
-    protected function __construct($argument = [])
+    public function __construct($argument = [])
     {
+
     }
 
     /**
@@ -197,7 +204,7 @@ class Application extends Container implements ApplicationInterface
      * Set language to the translator
      *
      * @param null $localization
-     * @return $localization
+     * @return locale
      */
     public function setLocale($localization = null)
     {
@@ -309,6 +316,17 @@ class Application extends Container implements ApplicationInterface
     }
 
     /**
+     * Create a Kernel and return it
+     *
+     * @param $kernel
+     * @return mixed
+     */
+    public function createKernel($kernel)
+    {
+        return new $kernel($this);
+    }
+
+    /**
      * @param $path
      * @return $this
      */
@@ -324,7 +342,7 @@ class Application extends Container implements ApplicationInterface
      *
      * @return $this
      */
-    public function bootApplication()
+    public function bootApplication($request)
     {
         /*
         | -------------------------------------------------------------------
@@ -352,7 +370,7 @@ class Application extends Container implements ApplicationInterface
     {
         if ($this->booted) return;
 
-        $this->registerCoreAlias();
+        $this->registerCoreBootstrappers();
         $this->setEnvironment();
         $this->beforeBootingApplication();
         $this['debugger']->handleException();
@@ -440,35 +458,39 @@ class Application extends Container implements ApplicationInterface
     /**
      * @return array
      */
-    public function getCoreAlias()
+    public function getBootStrappers()
     {
-        return [
-            'router'     => 'Cygnite\Base\Router\Router',
-            'debugger'   => 'Cygnite\Exception\ExceptionHandler',
-            'event'      => 'Cygnite\Base\EventHandler\Event',
-        ];
+        return $this->bootStrappers;
     }
 
     /**
      * Create an instance of the class and return it
      *
      * @param $class
+     * @param array $arguments
      * @return mixed
      */
     public function compose($class, $arguments = [])
     {
-        return $this->makeInstance($class, $arguments);
+        return parent::makeInstance($class, $arguments);
+    }
+
+    public function resolve($class, $arguments = [])
+    {
+        return parent::resolve($class, $arguments = []);
     }
 
     /**
      * We will register all core class into container
      * @return $this
      */
-    public function registerCoreAlias()
+    public function registerCoreBootstrappers()
     {
-        foreach ($this->getCoreAlias() as $key => $class) {
+        foreach ($this->getBootStrappers() as $key => $class) {
             $this->set($key, $this->compose("\\".$class));
         }
+
+        $this->get('url')->setApplication($this);
 
         $this->registerClassDefinition()
             ->setPropertyDefinition($this['definition.config']['property.definition']);
@@ -483,66 +505,6 @@ class Application extends Container implements ApplicationInterface
     {
         $app = $this;
         return include __DIR__ . '/../'.'BootStrap'.EXT;
-    }
-
-    /**
-     * Application booting completed!
-     * Lets run our awesome Application
-     *
-     * @return mixed
-     * @throws \Exception
-     */
-    public function run()
-    {
-        /*
-        | We will check if script running via console
-        | then we will return out from here, else application
-        | fall back down
-         */
-        if (isCli()) {
-            return $this;
-        }
-
-        try {
-            $response = $this->handle();
-
-            if ($response instanceof ResponseInterface) {
-                return $response->send();
-            }
-
-            return $response;
-
-        } catch (\Exception $e) {
-            if (ENV == 'development') {
-                throw $e;
-            }
-
-            if (ENV == 'production') {
-
-                /**
-                 * We will log exception if logger enabled
-                 */
-                if ($this['debugger']->isLoggerEnabled()) {
-                    $this['debugger']->log($e);
-                }
-
-                $this['debugger']->renderErrorPage($e);
-            }
-        }
-    }
-
-    /**
-     * @return mixed
-     */
-    public function handle()
-    {
-        $this->activateEventMiddleWare();
-        /**-------------------------------------------------------
-         * Booting completed. Lets handle user request!!
-         * Lets Go !!
-         * -------------------------------------------------------
-         */
-        return (new Dispatcher($this))->run();
     }
 
     /**

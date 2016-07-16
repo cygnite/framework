@@ -11,10 +11,9 @@ namespace Cygnite\Base\Router\Controller;
 
 use Exception;
 use Reflection;
-use Cygnite\Foundation\Application as App;
-use Cygnite\Base\Router\Router;
-use Cygnite\Helpers\Inflector;
 use Cygnite\Helpers\Config;
+use Cygnite\Helpers\Inflector;
+use Cygnite\Base\Router\Router;
 use Cygnite\Exception\Http\HttpNotFoundException;
 
 if (!defined('CF_SYSTEM')) {
@@ -46,7 +45,7 @@ trait RouteControllerTrait
      */
     public function getUrlSegments()
     {
-        $newUrl = str_replace('/index.php', '', rtrim($this->getCurrentUri()));
+        $newUrl = str_replace('/'.Router::$indexPage, '', rtrim($this->getCurrentUri()));
         return array_filter(explode('/', $newUrl));
     }
 
@@ -168,16 +167,6 @@ trait RouteControllerTrait
     }
 
     /**
-     * Get Application instance
-     *
-     * @return App
-     */
-    public function getApplication()
-    {
-        return App::instance();
-    }
-
-    /**
      * Set router instance
      *
      * @param $router
@@ -252,16 +241,16 @@ trait RouteControllerTrait
     {
         // make and return instance of controller
         $instance = $this->getApplication()->make($controller);
+        $instance->setApplication($this->getApplication());
 
         if (!method_exists($instance, $action)) {
-            throw new HttpNotFoundException("Action Not Found In Controller $controller::$action()");
+            throw new HttpNotFoundException("Action $action Not Found In Controller $controller");
         }
 
         // inject all properties of controller defined in definition
         $this->getApplication()->propertyInjection($instance, $controller);
         // Trigger Before Action Events
         $this->triggerActionEvent($instance, $action);
-
         $response = call_user_func_array([$instance, $action], $params);
         // Trigger After Action Events
         $this->triggerActionEvent($instance, $action, 'after');
