@@ -78,6 +78,13 @@ class Request
 
     private $content;
 
+    /**
+     * @var base url
+     */
+    public $currentUrl;
+
+    public $base;
+
     protected static $httpMethodParameterOverride = false;
 
     /**
@@ -784,25 +791,6 @@ class Request
     }
 
     /**
-     * The referrer URL, if set otherwise return the referrer header
-     *
-     * @param bool $fallBackToReferer
-     * @return string
-     */
-    public function getReferrerUrl($fallBackToReferer = true)
-    {
-        if (!empty($this->refererUrl)) {
-            return $this->refererUrl;
-        }
-
-        if ($fallBackToReferer) {
-            return $this->header->get("REFERER", "");
-        }
-
-        return "";
-    }
-
-    /**
      * @return null|string
      */
     public function getMethod()
@@ -888,6 +876,65 @@ class Request
         } else {
             return ($this->path == $path);
         }
+    }
+
+    /**
+     * The referrer URL, if set otherwise return the referrer header
+     *
+     * @param bool $fallBackToReferer
+     * @return string
+     */
+    public function getReferrerUrl($fallBackToReferer = true)
+    {
+        if (!empty($this->refererUrl)) {
+            return $this->refererUrl;
+        }
+
+        if ($fallBackToReferer) {
+            return $this->header->get("REFERER", "");
+        }
+
+        return "";
+    }
+
+    /**
+     * Get the base url
+     *
+     * @return string
+     */
+    public function getBaseUrl()
+    {
+        // Current Request URI
+        $this->currentUrl = $this->server->get('REQUEST_URI');
+
+        // Remove rewrite base path (= allows one to run the router in a sub folder)
+        $basePath = implode('/', array_slice(explode('/', $this->server->get('SCRIPT_NAME')), 0, -1)) . '/';
+
+        return $basePath;
+    }
+
+    /**
+     * Define the current relative URI
+     *
+     * @return string
+     */
+    public function getCurrentUri()
+    {
+        $basePath = $this->getBaseUrl();
+        $uri = $this->currentUrl;
+
+        $this->base = $basePath;
+        $uri = substr($uri, strlen($basePath));
+
+        // Don't take query params into account on the URL
+        if (strstr($uri, '?')) {
+            $uri = substr($uri, 0, strpos($uri, '?'));
+        }
+
+        // Remove trailing slash + enforce a slash at the start
+        $uri = '/' . trim($uri, '/');
+
+        return $uri;
     }
 
     /**

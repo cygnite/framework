@@ -12,8 +12,6 @@
 namespace Cygnite\Common\UrlManager;
 
 use Cygnite\Base\Router\Router;
-use Cygnite\Foundation\Application as App;
-use InvalidArgumentException;
 
 /**
  * Class Url
@@ -24,40 +22,54 @@ use InvalidArgumentException;
 class Url
 {
     public static $base;
-    private static $instance = 'make';
+
     private static $router;
 
-    /**
-     * @param Router $route
-     */
-    public function __construct(Router $route)
-    {
-        if (is_object($route)) {
-            $this->setRoute($route);
-        }
-    }
+    private static $request;
+
+    private $app;
 
     /**
+     * Set application instance
+     * Set router and request
+     *
+     * @param $app
+     * @return $this
+     */
+    public function setApplication($app)
+    {
+        $this->app = $app;
+        $this->setRouter($app['router']);
+        $this->setRequest($app['request']);
+
+        return $this;
+    }
+
+   /**
      * @param $route
      */
-    private function setRoute($route)
+    public function setRouter($route)
     {
         static::$router = $route;
     }
 
     /**
+     * @param $request
+     * @return $this
+     */
+    public function setRequest($request)
+    {
+        static::$request = $request;
+
+        return $this;
+    }
+
+    /**
      * Header Redirect
      *
-     * @access    public
-     * @param     string $uri
-     * @param    string  $type
-     * @param     int    $httpResponseCode
-     * @internal  false \Cygnite\Helpers\the $string URL
-     * @internal  false \Cygnite\Helpers\the $string method: location or redirect
-     * @param string     $uri
-     * @param string     $type
-     * @param int        $httpResponseCode
-     * @return    string
+     * @param string $uri
+     * @param string $type
+     * @param int $httpResponseCode
      */
     public static function redirectTo($uri = '', $type = 'location', $httpResponseCode = 302)
     {
@@ -88,22 +100,22 @@ class Url
      */
     public static function sitePath($uri)
     {
-        $expression = array_filter(explode('/', $_SERVER['REQUEST_URI']));
-        $index = (false !== array_search('index.php', $expression)) ? 'index.php/' : '';
+        $expression = array_filter(explode('/', static::$request->server['REQUEST_URI']));
+        $index = (false !== array_search(Router::$indexPage, $expression)) ? Router::$indexPage.'/' : '';
 
         return Url::getBase() . $index . $uri;
     }
 
     /**
      * @param $method
-     * @param $args
-     * @return mixed|string
-     * @throws \InvalidArgumentException
+     * @param array $args
+     * @return mixed
      */
     public static function __callStatic($method, $args = [])
     {
-        $arguments = ['method' => $method, 'args' => $args, 'instance' => Url::make()];
-        return call_user_func_array([Url::make(), 'call'], [$arguments]);
+        $instance = Url::make();
+        $arguments = ['method' => $method, 'args' => $args, 'instance' => $instance];
+        return call_user_func_array([$instance, 'call'], [$arguments]);
     }
 
     /** Return Url Instance
@@ -112,8 +124,7 @@ class Url
      */
     public static function make()
     {
-        $app = App::instance();
-        return new static($app['router']);
+        return new static();
     }
 
     /**
@@ -124,7 +135,7 @@ class Url
      */
     public function referredFrom()
     {
-        return isset($_SERVER["HTTP_REFERER"]) ? $_SERVER["HTTP_REFERER"] : null;
+        return isset(static::$request->server["HTTP_REFERER"]) ? static::$request->server["HTTP_REFERER"] : null;
     }
 
     /**
@@ -138,24 +149,24 @@ class Url
     public function getSegment($segment = [])
     {
         $segment = (!is_null($segment[0])) ? $segment[0] : 1;
-        $uri = $this->getRoute()->getCurrentUri();
+        $uri = $this->getRouter()->getCurrentUri();
         $urlArray = array_filter(explode('/', $uri));
-        $indexCount = array_search('index.php', $urlArray);
+        $indexCount = array_search(Router::$indexPage, $urlArray);
 
         if ($indexCount == true) {
             $num = $indexCount + $segment;
             return (isset($urlArray[$num]) ? $urlArray[$num] : null);
-        } else {
-            return (isset($urlArray[$segment]) ? $urlArray[$segment] : null);
         }
+
+        return (isset($urlArray[$segment]) ? $urlArray[$segment] : null);
     }
 
     /**
      * @return instance / null
      */
-    public function getRoute()
+    public function getRouter()
     {
-        return isset(static::$router) && is_object(static::$router) ? static::$router : null;
+        return isset(static::$router) ? static::$router : null;
     }
 
     /**
@@ -203,13 +214,13 @@ class Url
 
             switch ($match[1]) {
                 case 'get':
-                    return $protocol . $_SERVER['HTTP_HOST'] . '/' . ltrim($property->getValue(), "/");
+                    return $protocol . static::$request->server->get('HTTP_HOST') . '/' . ltrim($property->getValue(), "/");
                 case 'set':
-                    return $protocol . $_SERVER['HTTP_HOST'] . $property->setValue($args[0]);
+                    return $protocol . static::$request->server->get('HTTP_HOST') . $property->setValue($args[0]);
             }
-        } else {
-            throw new \InvalidArgumentException("Url::{$property} doesn't exist");
         }
+
+        throw new \InvalidArgumentException("Url::{$property} doesn't exist");
     }
 
     /**
@@ -217,36 +228,8 @@ class Url
      */
     public function protocol()
     {
-        $protocol = 'http://';
-
-        if ($this->isSecure()) {
-            // SSL connection
-            $protocol = 'https://';
-        }
-
-        return $protocol;
-    }
-
-    /**
-     * We will check if application is running into secure https url
-     *
-     * @return boolean
-     */
-    public function isSecure()
-    {
-        $scheme = $protocol = "";
-        $scheme = (!isset($_SERVER['REQUEST_SCHEME'])) ?: $_SERVER['REQUEST_SCHEME'];
-        $protocol = (!isset($_SERVER['SERVER_PROTOCOL'])) ?: $_SERVER['SERVER_PROTOCOL'];
-
-        if (
-            (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on') ||
-            stripos($scheme, 'https') || stripos($protocol, 'https')
-        ) {
-            // SSL connection
-            return true;
-        }
-
-        return false;
+        // Check if application is running into secure https url
+        return (static::$request->isSecure()) ? 'https://' : 'http://';
     }
 
     /**

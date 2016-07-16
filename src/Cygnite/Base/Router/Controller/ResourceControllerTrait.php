@@ -86,7 +86,7 @@ trait ResourceControllerTrait
      */
     protected function setResourceIndex($name, $controller, $action, $options = [])
     {
-        return $this->router()->match(
+        return $this->router->match(
             strtoupper('get'),
             $name,
             function () use ($controller, $action) {
@@ -178,7 +178,7 @@ trait ResourceControllerTrait
      */
     private function mapResource($method, $pattern, $controller, $action, $type = false)
     {
-        return $this->router()->match(
+        return $this->router->match(
             strtoupper($method),
             $pattern,
             function ($router, $id) use ($controller, $action, $type) {

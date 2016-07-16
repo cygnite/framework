@@ -12,6 +12,7 @@ namespace Cygnite\Base\Router\Controller;
 use Cygnite\Helpers\Inflector;
 use Cygnite\Base\Router\Router;
 use Cygnite\Foundation\Application;
+use Cygnite\Http\Requests\RequestMethods;
 
 if (!defined('CF_SYSTEM')) {
     exit('No External script access allowed');
@@ -32,6 +33,18 @@ class Controller implements RouteControllerInterface
     ];
     
     private $routes = [];
+
+    private $router;
+
+    /**
+     * @param $router
+     */
+    public function setRouter($router)
+    {
+        $this->router = $router;
+
+        return $this;
+    }
 
     /**
      * Set the controller as Route Controller
@@ -192,7 +205,7 @@ class Controller implements RouteControllerInterface
             throw new \Exception("$func must be string!");
         }
         
-        $this->app()->router->{$method}($pattern, $func);
+        $this->router->{$method}($pattern, $func);
         
         return $this;
     }
@@ -207,7 +220,7 @@ class Controller implements RouteControllerInterface
     {
         $reflection = (new \Cygnite\Reflection())->setClass($controller);
         $methods = $reflection->getMethods('public', false, null);
-        $app = $this->app();
+        $app = $this->getApplication();
 
         foreach ($methods as $key => $method) {
 
@@ -271,14 +284,9 @@ class Controller implements RouteControllerInterface
         return [$uri, $verb, $method, $plain];
     }
 
-    /**
-     * Get Application instance
-     *
-     * @return Application
-     */
-    public function app()
+    public function getApplication()
     {
-        return Application::instance();
+        return $this->router->getApplication();
     }
 
     /**
@@ -289,7 +297,7 @@ class Controller implements RouteControllerInterface
      */
     public function getUriArguments($url)
     {
-        $uriParam = str_replace($url, '', $this->app()->router->getCurrentUri());
+        $uriParam = str_replace($url, '', $this->router->getCurrentUri());
         return array_filter(explode('/', $uriParam));
     }
 
@@ -335,9 +343,8 @@ class Controller implements RouteControllerInterface
     {
         $refAction = $reflection->getReflectionClass()->getMethod($method);
 
-        $app = Application::instance();
         $parameter = '';
-        $patterns = $app->router->getPattern();
+        $patterns = $this->router->getPattern();
         $arguments = new \CachingIterator(new \ArrayIterator($refAction->getParameters()));
 
         foreach ($arguments as $key => $param) {

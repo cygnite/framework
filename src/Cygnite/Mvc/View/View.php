@@ -615,6 +615,11 @@ class View implements ViewInterface,\ArrayAccess
         return $this['container'];
     }
 
+    public function app()
+    {
+        return $this->getContainer();
+    }
+
     public function setTwigViewPath($path)
     {
         $this->viewsFilePath = $path;
