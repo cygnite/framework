@@ -55,7 +55,7 @@ interface ResponseInterface
      * @param bool $replace
      * @return mixed
      */
-    public function setHeader($name, $value, $replace = true);
+    public function setHeader($name, $value);
 
     /**
      * @param $contentType
