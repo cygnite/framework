@@ -23,13 +23,17 @@ class ApplicationTest extends PHPUnit_Framework_TestCase
 
     public function testDependencyInjection()
     {
-        $app = Application::instance();
+        $this->app = Application::instance();
+        $this->app['url'] = new \Cygnite\Common\UrlManager\Url();
+        $this->app['request'] = \Cygnite\Http\Requests\Request::createFromGlobals();
+        $this->app['router'] = new \Cygnite\Base\Router\Router($this->app['request']);
+        $this->app['router']->setApplication($this->app);
+        $this->app['url']->setApplication($this->app);
 
-        $router = new \Cygnite\Base\Router\Router();
-        $url = new \Cygnite\Common\UrlManager\Url($router);
-        $madeUrl = $app->make('\Cygnite\Common\UrlManager\Url');
+        $madeUrl = $this->app->make('\Cygnite\Common\UrlManager\Url');
+        $madeUrl->setApplication($this->app);
         
-        $this->assertEquals($url, $madeUrl);
+        $this->assertEquals($this->app['url'], $madeUrl);
     }
 
     public function testServiceCreation()
