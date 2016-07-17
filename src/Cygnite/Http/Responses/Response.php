@@ -48,6 +48,8 @@ class Response implements ResponseInterface
 
     protected $charset;
 
+    public $httpVersion;
+
     /**
      * @param string $content
      * @param int    $statusCode
@@ -57,15 +59,7 @@ class Response implements ResponseInterface
     {
         $this->setContent($content);
         $this->setStatusCode($statusCode);
-
-        if (!empty($headers)) {
-            /*
-             | set all headers
-             */
-            foreach ($headers as $key => $value) {
-                $this->setHeader($key, $value);
-            }
-        }
+        $this->headers = new ResponseHeader($headers);
     }
 
     /**
@@ -96,22 +90,39 @@ class Response implements ResponseInterface
     }
 
     /**
+     * Create Json response
+     * 
+     * @param type $content
+     * @param array $headers
+     * @param type $prettyPrint
+     * @return \Cygnite\Http\Responses\JsonResponse
+     */
+    public static function json($content = null, array $headers = [], $prettyPrint = false)
+    {
+        return new JsonResponse($content, $headers, $prettyPrint);
+    }
+
+    /**
+     * Set content for the http response object
+     *
      * @param $content
      * @return $this
      * @throws \Cygnite\Exception\Http\ResponseException
      */
     public function setContent($content = null)
     {
-        if (!is_string($content)) {
+        if (null !== $content && !is_string($content)) {
             throw new ResponseException('Response content must be a string.');
         }
 
-        $this->content = $content;
+        $this->content = (string) $content;
 
         return $this;
     }
 
     /**
+     * Get response body
+     *
      * @return string
      */
     public function getContent()
@@ -120,6 +131,8 @@ class Response implements ResponseInterface
     }
 
     /**
+     * Set Status code
+     *
      * @param int $statusCode
      * @return $this
      */
@@ -131,6 +144,8 @@ class Response implements ResponseInterface
     }
 
     /**
+     * Get Status Code
+     *
      * @return int
      */
     public function getStatusCode()
@@ -139,6 +154,8 @@ class Response implements ResponseInterface
     }
 
     /**
+     * Set Status Message
+     *
      * @param string $message
      * @return $this
      * @throws \Cygnite\Exception\Http\ResponseException
@@ -162,24 +179,56 @@ class Response implements ResponseInterface
         return $this;
     }
 
+    public function getStatusMessage()
+    {
+        return $this->statusMessage;
+    }
+
     /**
+     * Set HTTP headers here
+     *
      * @param      $name
      * @param      $value
-     * @param bool $replace
      * @return $this
      */
-    public function setHeader($name, $value, $replace = true)
+    public function setHeader($name, $value)
     {
-        if ($replace || !isset($this->headers[$name])) {
-            $this->headers[$name] = array($value);
-        } else {
-            array_push($this->headers[$name], $value);
-        }
+        $this->headers->set($name, $value);
 
         return $this;
     }
 
     /**
+     * Return all response headers
+     *
+     * @return ResponseHeader
+     */
+    public function getHeaders()
+    {
+        return $this->headers->all();
+    }
+
+    /**
+     * Set http version
+     *
+     * @param string $version
+     */
+    public function setHttpVersion($version)
+    {
+        $this->httpVersion = $version;
+    }
+
+    /**
+     * @return string
+     */
+    public function getHttpVersion()
+    {
+        return $this->httpVersion;
+    }
+
+    /**
+     * Set Content type of the page
+     *
      * @param $contentType
      * @return $this
      */
@@ -193,6 +242,8 @@ class Response implements ResponseInterface
     }
 
     /**
+     * Get content type of the page
+     *
      * @return string
      */
     public function getContentType()
@@ -201,6 +252,8 @@ class Response implements ResponseInterface
     }
 
     /**
+     * Set Charset
+     *
      * @param $charset
      * @return $this
      */
@@ -213,6 +266,8 @@ class Response implements ResponseInterface
     }
 
     /**
+     * Get charset
+     *
      * @return string
      */
     public function getCharset()
@@ -220,6 +275,21 @@ class Response implements ResponseInterface
         return (isset($this->charset) ? $this->charset : self::CHARSET);
     }
 
+    /**
+     * Sets the expiration time of the page
+     *
+     * @param DateTime $expiration The expiration time
+     */
+    public function setExpiration(\DateTime $expiration)
+    {
+        $this->headers->set("Expires", $expiration->format("r"));
+    }
+
+    /**
+     * Remove status, response body and all headers for 304 response.
+     *
+     * @return $this
+     */
     public function setAsNotModified()
     {
         $this->setStatusCode(304)->setContent(null);
@@ -235,7 +305,8 @@ class Response implements ResponseInterface
         ];
 
         foreach ($headersToRemove as $header) {
-            // @todo remove header key
+            //remove header key
+            $this->headers->remove($header);
         }
 
         return $this;
@@ -251,34 +322,43 @@ class Response implements ResponseInterface
     }
 
     /**
+     * Return boolean value if headers sent already
+     *
+     */
+    public function headersSent()
+    {
+        return headers_sent();
+    }
+
+    /**
+     * Send HTTP response headers
+     *
      * @return $this
      * @throws \Cygnite\Exception\Http\ResponseException
      */
     public function sendHeaders()
     {
         // Throw exception if header already sent
-        if (headers_sent()) {
+        if ($this->headersSent()) {
             throw new ResponseException('Cannot send headers, headers already sent.');
         }
 
         /*
          | If headers not set already we will set header here
          */
-        if (!isset($this->headers['Content-Type'])) {
+        if (!$this->headers->has('Content-Type')) {
             $this->setHeader('Content-Type', $this->getContentType().'; charset='.$this->getCharset());
         }
 
         // Check if script is running in FCGI server
         if ($this->server('FCGI_SERVER_VERSION')) {
-            /*
-             | We will set Header for Fast-CGI server
-             */
+            //We will set Header for Fast-CGI server
             $this->setFastCgiHeader();
         } else {
             $this->setHeaderForServer();
         }
 
-        foreach ($this->headers as $name => $values) {
+        foreach ($this->headers->all() as $name => $values) {
 
             foreach ($values as $value) {
                 // Create the header and send it
@@ -313,6 +393,8 @@ class Response implements ResponseInterface
     }
 
     /**
+     * Return server protocol
+     *
      * @return string
      */
     private function protocol()
@@ -321,6 +403,8 @@ class Response implements ResponseInterface
     }
 
     /**
+     * Send response content
+     *
      * @return $this
      */
     public function sendContent()
@@ -347,5 +431,13 @@ class Response implements ResponseInterface
         }
 
         return $this;
+    }
+
+    /**
+     * Clones the current Response instance.
+     */
+    public function __clone()
+    {
+        $this->headers = clone $this->headers;
     }
 }
