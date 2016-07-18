@@ -73,7 +73,7 @@ class StreamedResponse extends Response
      * @param type $content
      * @throws \LogicException
      */
-    public function setContent($content)
+    public function setContent($content = null)
     {
         //you are not alowed to set content for a stream response
         if ($content !== null && $content !== "") {

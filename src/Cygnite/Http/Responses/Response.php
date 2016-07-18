@@ -110,7 +110,7 @@ class Response implements ResponseInterface
      * @param type $headers
      * @return \Cygnite\Http\Responses\StreamedResponse
      */
-    public static function streamed(callable $callback = null, $status = ResponseHeaders::HTTP_OK, $headers = [])
+    public static function streamed(callable $callback = null, $status = ResponseHeader::HTTP_OK, $headers = [])
     {
         return new StreamedResponse($callback, $status, $headers);
     }
