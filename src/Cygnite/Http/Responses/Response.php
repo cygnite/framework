@@ -15,7 +15,7 @@ use Cygnite\Exception\Http\ResponseException;
 /**
  * Class Response
  *
- * @package Cygnite\Foundation\Http
+ * @package Cygnite\Http\Responses
  */
 
 class Response implements ResponseInterface
@@ -100,6 +100,19 @@ class Response implements ResponseInterface
     public static function json($content = null, array $headers = [], $prettyPrint = false)
     {
         return new JsonResponse($content, $headers, $prettyPrint);
+    }
+
+    /**
+     * Create a Streamed Response
+     * 
+     * @param \Cygnite\Http\Responses\callable $callback
+     * @param type $status
+     * @param type $headers
+     * @return \Cygnite\Http\Responses\StreamedResponse
+     */
+    public static function streamed(callable $callback = null, $status = ResponseHeader::HTTP_OK, $headers = [])
+    {
+        return new StreamedResponse($callback, $status, $headers);
     }
 
     /**
@@ -189,11 +202,21 @@ class Response implements ResponseInterface
      *
      * @param      $name
      * @param      $value
-     * @return $this
+     * @param      $replace
+     * @return     $this
      */
-    public function setHeader($name, $value)
+    public function setHeader($name, $value, $replace = false)
     {
-        $this->headers->set($name, $value);
+        // Add multiple headers for the reponse as array
+        if (is_array($name)) {
+            foreach ($name as $headerKey => $headerValue) {
+                $this->headers->set($headerKey, $headerValue, $replace);
+            }
+
+            return $this;
+        }
+
+        $this->headers->set($name, $value, $replace);
 
         return $this;
     }
@@ -205,7 +228,7 @@ class Response implements ResponseInterface
      */
     public function getHeaders()
     {
-        return $this->headers->all();
+        return $this->headers;
     }
 
     /**
