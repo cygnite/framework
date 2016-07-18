@@ -5,21 +5,35 @@ if (!defined('CF_SYSTEM')) {
     exit('External script access not allowed');
 }
 
-use Cygnite\Foundation\Application as App;
-
 abstract class ViewFactory
 {
     public static $view;
+
+    private static $app;
+
+    public static function setApplication($app)
+    {
+        static::$app = $app;
+    }
+
+    public static function app()
+    {
+        return static::$app;
+    }
 
     /**
      * @return mixed
      */
     public static function make()
     {
+        $app = self::app();
+        //var_dump(get_class($app));exit;
         if (is_null(static::$view)) {
-            $app = App::instance();
+            //static::$view = $app->resolve('cygnite.mvc.view.view');
             static::$view = $app->resolve('cygnite.mvc.view.view');
         }
+
+        static::$view->setContainer($app);
 
         return static::$view;
     }

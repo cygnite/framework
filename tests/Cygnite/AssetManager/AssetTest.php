@@ -19,10 +19,13 @@ class AssetTest extends PHPUnit_Framework_TestCase
     private function setUpAssetConfig()
     {
         $app = Application::instance();
-        $app['router'] = new \Cygnite\Base\Router\Router;
+        $app['url'] = new \Cygnite\Common\UrlManager\Url();
+        $app['request'] = \Cygnite\Http\Requests\Request::createFromGlobals();
+        $app['router'] = new \Cygnite\Base\Router\Router($app['request']);
+        $app['url']->setApplication($app);
 
-        $_SERVER['REQUEST_URI'] = '/hello/user';
-        $_SERVER['HTTP_HOST'] = 'localhost';
+        $app['request']->server->add('REQUEST_URI', '/hello/user');
+        $app['request']->server->add('HTTP_HOST', 'localhost');
         $configuration = [
             'global.config' => [
                 'encoding' => 'utf-8'
@@ -31,7 +34,7 @@ class AssetTest extends PHPUnit_Framework_TestCase
 
         Config::$config = $configuration;
 
-        Url::setBase('/cygnite/');//$app['router']->getBaseUrl()
+        Url::setBase('cygnite/');//$app['router']->getBaseUrl()
     }
 
     public function testStaticCallToJsScript()

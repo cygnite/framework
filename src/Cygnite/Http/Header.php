@@ -1,5 +1,5 @@
 <?php
-/**
+/*
  * This file is part of the Cygnite package.
  *
  * (c) Sanjoy Dey <dey.sanjoy0@gmail.com>

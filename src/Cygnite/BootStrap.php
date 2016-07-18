@@ -45,5 +45,5 @@ if (!is_null(Config::get('global.config', 'encryption.key')) ||
  * ------------------------------------------------------------------
  */
 if (is_null(Config::get('global.config', "default.controller"))) {
-    throw new \Exception("Set Default Controller in ".APPPATH."/configs/application.php");
+    throw new \Exception("Set Default Controller in ".APPPATH."/Configs/application.php");
 }
