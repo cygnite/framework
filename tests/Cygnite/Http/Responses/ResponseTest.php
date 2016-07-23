@@ -35,5 +35,21 @@ class ResponseTest extends PHPUnit_Framework_TestCase
         $response = new JsonResponse(['foo' => 'bar']);
         $this->assertEquals('{"foo":"bar"}', $response->getContent());
         $this->assertEquals('application/json', $response->getContentType());
+
+        $responseJson = Response::json(['foo' => 'bar']);
+        $this->assertEquals('{"foo":"bar"}', $responseJson->getContent());
+        $this->assertEquals('application/json', $responseJson->getContentType());
+    }
+
+    public function testSetAndReturnsHeadersCorrectly()
+    {
+        $r = Response::make("hello http")->setHeader('Content-Type', 'application/json');
+        $this->assertSame(true, $r->getHeaders()->has('Content-Type'));
+
+        $r = Response::make("hello http");
+        $r->setHeader('Content-Type', 'text/xml');
+
+        $this->assertSame(true, $r->getHeaders()->has('Content-Type'));
+        $this->assertEquals('text/xml', $r->getHeaders()->get('Content-Type'));
     }
 }

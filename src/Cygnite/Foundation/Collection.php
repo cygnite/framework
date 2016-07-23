@@ -75,6 +75,18 @@ class Collection implements Countable, IteratorAggregate, ArrayAccess, Serializa
 
         return $this;
     }
+    
+    /**
+     * This is the identical method as add()
+     *
+     * @param $name
+     * @param $value
+     * @return $this
+     */
+    public function set($name, $value)
+    {
+        return $this->add($name, $value);
+    }
 
     /**
      * Exchanges the current values with the input
