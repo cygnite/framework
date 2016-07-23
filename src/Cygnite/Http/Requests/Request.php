@@ -205,7 +205,7 @@ class Request
      */
     public static function create(
         $url,
-        $method,
+        $method = RequestMethods::GET,
         array $parameters = [],
         array $cookies = [],
         array $server = [],
@@ -275,9 +275,13 @@ class Request
             $query = array_replace($queryFromUrl, $query);
         }
 
+        if (!isset($urlParts['path'])) {
+            $urlParts['path'] = '/';
+        }
+
         $qs = http_build_query($query, "", "&");
         $server["QUERY_STRING"] = $qs;
-        $server["REQUEST_URI"] .= count($query) > 0 ? "?$qs" : "";
+        $server["REQUEST_URI"] = $urlParts['path'].(count($query) > 0 ? '?'.$qs : '');
 
         if (isset($urlParts["port"])) {
             $server = static::setServerData($urlParts, [
