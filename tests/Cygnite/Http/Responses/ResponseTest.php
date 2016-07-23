@@ -45,7 +45,10 @@ class ResponseTest extends PHPUnit_Framework_TestCase
     {
         $r = Response::make("hello http")->setHeader('Content-Type', 'application/json');
         $this->assertSame(true, $r->getHeaders()->has('Content-Type'));
+
+        $r = Response::make("hello http");
         $r->setHeader('Content-Type', 'text/xml');
+
         $this->assertSame(true, $r->getHeaders()->has('Content-Type'));
         $this->assertEquals('text/xml', $r->getHeaders()->get('Content-Type'));
     }
