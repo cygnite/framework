@@ -198,7 +198,7 @@ class Pipeline implements PipelineInterface
      * @return array
      * @link https://github.com/laravel/framework/blob/5.2/src/Illuminate/Pipeline/Pipeline.php#L160
      */
-    protected function parsePipeString($pipe)
+    public function parsePipeString($pipe)
     {
         list($name, $parameters) = array_pad(explode(':', $pipe, 2), 2, []);
 

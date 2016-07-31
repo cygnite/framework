@@ -25,6 +25,10 @@ class Kernel implements KernelInterface
 
     protected $router;
 
+    private $pipeline;
+
+    protected $exceptionHandler;
+
     /**
      * @param $app
      * @param null $router
@@ -32,6 +36,7 @@ class Kernel implements KernelInterface
     public function __construct($app, $router = null)
     {
         $this->app = $app;
+        $this->exceptionHandler = $app['debugger'];
         if (!is_null($router)) {
             $this->router = $router;
         }
@@ -49,6 +54,8 @@ class Kernel implements KernelInterface
     }
 
     /**
+     * Handle the request and dispatch to routes
+     *
      * @param $request
      * @return array|ResponseInterface|mixed|static
      * @throws Exception|\Exception
@@ -64,7 +71,7 @@ class Kernel implements KernelInterface
             $response = $this->sendRequestThroughRouter($request);
             /**
              * Check whether return value is a instance of Response,
-             * else we will try to fetch the response form container,
+             * otherwise we will try to fetch the response form container,
              * create a response and return to the browser.
              *
              */
@@ -72,44 +79,64 @@ class Kernel implements KernelInterface
                $r = $this->app->has('response') ? $this->app->get('response') : '';
                $response = Response::make($r);
             }
-        } catch (Exception $e) {
-            if (ENV == 'development') {
-                throw $e;
-            }
-
-            if (ENV == 'production') {
-
-                /**
-                 * We will log exception if logger enabled
-                 */
-                if ($this->app['debugger']->isLoggerEnabled()) {
-                    $this->app['debugger']->log($e);
-                }
-
-                $this->app['debugger']->renderErrorPage($e);
-            }
+        } catch (\Exception $e) {
+            $this->handleException($e);
         } catch (Throwable $e) {
+            $this->handleException($e);
         }
 
         return $response;
     }
 
-    protected function reportException(Exception $e)
+                /**
+     * Handle Exception & errors
+     *
+     * @param $e
+                 */
+    protected function handleException($e)
     {
-        $this->app['debugger']->report($e);
+        switch (ENV) {
+            case 'production':
+                $this->renderException($e);
+                break;
+            default:
+                $this->reportException($e);
+                break;
+
+            }
+        }
+
+    /**
+     * Report and throw exception
+     *
+     * @param $e
+     */
+    protected function reportException($e)
+    {
+        return $this->exceptionHandler->report($e);
     }
 
-
-    protected function renderException($request, Exception $e)
+    /**
+     * @param \Exception $e
+     * @return mixed
+     */
+    protected function renderException(\Exception $e)
     {
-        return $this->app['debugger']->render($request, $e);
+        return $this->exceptionHandler->render($e);
     }
 
+    /**
+     * Prepare pipeline requests and send through router
+     *
+     * @param $request
+     * @return mixed
+     */
     protected function sendRequestThroughRouter($request)
     {
         $this->app->bootApplication($request);
+        $this->pipeline = new Pipeline($this->app);
 
-        return (new Pipeline($this->app))
+        return $this->pipeline
             ->send($request)
             ->through($this->parseMiddlewareToPipelines($this->getMiddleware()), 'handle')
             ->then($this->dispatchToRouter())
@@ -137,6 +164,8 @@ class Kernel implements KernelInterface
         foreach ($middlewares as $middleware) {
             if (is_object($middleware)) {
                 $pipes[] = $middleware;
+            } elseif (string_has($middleware, ':')){
+                $pipes[] = $middleware;
             } else {
                 $pipes[] = $this->app->make($middleware);
             }
@@ -146,6 +175,8 @@ class Kernel implements KernelInterface
     }
 
     /**
+     * Application booted, let's dispatch the routes
+     *
      * @return callable
      */
     protected function dispatchToRouter()
@@ -156,6 +187,8 @@ class Kernel implements KernelInterface
     }
 
     /**
+     * Add middlewares to HTTP application
+     *
      * @param $middleware
      * @return $this
      */
@@ -170,8 +203,35 @@ class Kernel implements KernelInterface
         return $this;
     }
 
-    public function terminate($request, $response)
+    /**
+     * Get the application instance
+     *
+     * @return Application
+     */
+    public function getApplication()
     {
+        return $this->app;
+    }
 
+    /**
+     * Fire shutdown method of middleware class
+     *
+     * @param $request
+     * @param $response
+     */
+    public function shutdown($request, $response)
+    {
+        // @todo Merge application and routes middleware
+        //$middlewares =  ;
+
+        foreach ($this->middleware as $middleware) {
+            list($name, $parameters) = $this->pipeline->parsePipeString($middleware);
+
+            $instance = $this->app->make($name);
+
+            if (method_exists($instance, 'shutdown')) {
+                $instance->shutdown($request, $response);
+            }
+        }
     }
 }

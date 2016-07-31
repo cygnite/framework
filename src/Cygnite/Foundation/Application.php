@@ -368,12 +368,12 @@ class Application extends Container implements ApplicationInterface
      */
     private function bootInternals()
     {
-        if ($this->booted) return;
+        if ($this->isBooted()) return;
 
+        $this['debugger']->setEnv(ENV)->handleException();
         $this->registerCoreBootstrappers();
         $this->setEnvironment();
         $this->beforeBootingApplication();
-        $this['debugger']->handleException();
         $this['service.provider']();
         $this->afterBootingApplication();
 
@@ -452,7 +452,7 @@ class Application extends Container implements ApplicationInterface
             return true;
         }
 
-        return $this['event']->trigger(__FUNCTION__, $this);
+        return $this['event']->trigger('afterBootingApplication', $this);
     }
 
     /**
@@ -475,6 +475,11 @@ class Application extends Container implements ApplicationInterface
         return parent::makeInstance($class, $arguments);
     }
 
+    /**
+     * Resolve namespace via container
+     *
+     * return @object
+     */
     public function resolve($class, $arguments = [])
     {
         return parent::resolve($class, $arguments = []);
