@@ -31,7 +31,7 @@ class ExceptionHandler implements ExceptionInterface
     
     const CRITICAL = Debugger::CRITICAL;
     
-    public $name = 'Cygnite Framework';
+    protected $name = 'Cygnite Framework';
 
     private static $style = 'pretty';
 
@@ -39,9 +39,12 @@ class ExceptionHandler implements ExceptionInterface
 
     protected $enableMode;
 
-    public $enableLogger = false;
+    protected $enableLogger = false;
 
-    public $logPath;
+    protected $logPath;
+
+    protected $env;
+
     /**
      * @param $enableLogger
      * @param $loggerDir
@@ -54,7 +57,7 @@ class ExceptionHandler implements ExceptionInterface
         $debuggerMode = null;
         $debuggerMode = Debugger::DEVELOPMENT;
 
-        if (ENV == 'production') {
+        if ($this->env == 'production') {
             $debuggerMode = Debugger::PRODUCTION;
         }
 
@@ -74,6 +77,48 @@ class ExceptionHandler implements ExceptionInterface
         }
 
         return $this;
+    }
+
+    /**
+     * Set environment
+     *
+     * @param $env
+     * @return $this
+     */
+    public function setEnv($env)
+    {
+        $this->env = $env;
+
+        return $this;
+    }
+
+    /**
+     * @param $debugger
+     * @return $this
+     */
+    public function setDebugger($debugger)
+    {
+        $this->debugger = $debugger;
+
+        return $this;
+    }
+
+    /**
+     * @return null
+     */
+    public function getTracyDebugger()
+    {
+        return isset($this->debugger) ? $this->debugger : null;
+    }
+
+    /**
+     * Log errors
+     *
+     * @param $e
+     */
+    public function log($e)
+    {
+        Debugger::log($e);
     }
 
     /**
@@ -106,6 +151,8 @@ class ExceptionHandler implements ExceptionInterface
     }
 
     /**
+     * Set Title
+     *
      * @return $this
      */
     public function setTitle()
@@ -116,22 +163,19 @@ class ExceptionHandler implements ExceptionInterface
     }
 
     /**
+     * Set email address for sending error report
+     *
      * @param      $email
-     * @param bool $hasEmail
+     * @param bool $errorEmailing
      * @return $this
      */
-    public function setEmailAddress($email, $hasEmail = false)
+    public function setEmailAddress($email, $errorEmailing = false)
     {
-        if ($hasEmail) {
+        if ($errorEmailing) {
             Debugger::$email = $email;
         }
 
         return $this;
-    }
-
-
-    public function setCustomPage()
-    {
     }
 
     /**
@@ -142,25 +186,6 @@ class ExceptionHandler implements ExceptionInterface
         $this->debugger->collapsePaths[] = dirname(dirname(__DIR__));
 
         return $this;
-    }
-
-    /**
-     * @param $debugger
-     * @return $this
-     */
-    public function setDebugger($debugger)
-    {
-        $this->debugger = $debugger;
-
-        return $this;
-    }
-
-    /**
-     * @return null
-     */
-    public function getTracyDebugger()
-    {
-        return isset($this->debugger) ? $this->debugger : null;
     }
 
     /**
@@ -188,71 +213,73 @@ class ExceptionHandler implements ExceptionInterface
         $this->setCollapsePaths();
 
         //Add new panel to debug bar
-       $this->addPanel(
-            function ($e) use ($handler) {
+        $this->addPanel(function ($e) use ($handler) {
 
-                if (!is_null($path = $handler->assetsPath())) {
-                    $contents = $handler->includeAssets($path);
-                }
-
-                if (!is_null($e)) {
-                    if ($handler->isLoggerEnabled()) {
-                        $handler->log($e);
-                    }
-
-                    return [
-                        'tab' => $handler->name,
-                        'panel' => '<h1>
-                        <span class="heading-blue">
-                        <a href="http://www.cygniteframework.com">'.$handler->name.' </a>
-                        </span>
-                        </h1>
-                        <p> Version : '.Application::version().' </p>
-                        <style type="text/css" class="tracy-debug">'.$contents.'</style>'
-                    ];
-                }
+            if (!is_null($path = $handler->assetsPath())) {
+                $contents = $handler->includeAssets($path);
             }
-        );
-        $this->addPanel(
-            function ($e) {
 
-                if (!$e instanceof \PDOException) {
-                    return;
-                }
-                if (isset($e->queryString)) {
-                    $sql = $e->queryString;
+            if (!is_null($e)) {
+                if ($handler->isLoggerEnabled()) {
+                    $handler->log($e);
                 }
 
-                return isset($sql) ? ['tab' => 'SQL', 'panel' => $sql] : null;
-
+                return [
+                    'tab' => $handler->name,
+                    'panel' => '<h1>
+                <p class="heading-blue">
+                    <a href="http://www.cygniteframework.com">'.$handler->name.' </a>
+                </p>
+                    </h1>
+                    <p> Version : '.Application::version().' </p>
+                    <style type="text/css" class="tracy-debug">'.$contents.'</style>'
+                ];
             }
-        );
+        });
+
+        $this->addPanel(function ($e) {
+            if (!$e instanceof \PDOException) {
+                return;
+            }
+            if (isset($e->queryString)) {
+                $sql = $e->queryString;
+            }
+
+            return isset($sql) ? ['tab' => 'SQL', 'panel' => $sql] : null;
+        });
     }
 
-    public function getBlueScreenInstance()
-    {
-    }
-
+    /**
+     * Add panel to debugger
+     *
+     * @param $callback
+     * @return $this
+     */
     public function addPanel($callback)
     {
-        $this->getTracyDebugger()->{__FUNCTION__}($callback);
+        $this->getTracyDebugger()->addPanel($callback);
 
         return $this;
     }
 
+    /**
+     * Add Sql Panel to debugger
+     *
+     * @param $callback
+     */
     public function addSqlPanel($callback)
     {
-        $this->getTracyDebugger()->{__FUNCTION__}($callback);
+        $this->getTracyDebugger()->addSqlPanel($callback);
     }
 
+    /**
+     * Get Tracy Debugbar instance
+     *
+     * @return \Tracy\Bar
+     */
     public function getBar()
     {
         return Debugger::getBar();
-    }
-
-    public function log($e)
-    {
-        Debugger::log($e);
     }
 
     /**
@@ -262,28 +289,14 @@ class ExceptionHandler implements ExceptionInterface
      */
     public function includeAssets($path)
     {
-        //$this->overwriteBlueScreenStyle($path);
-
         return file_get_contents($path.self::$style.'.css');
     }
 
-    private function overwriteBlueScreenStyle($path)
-    {
-        $vendor = CYGNITE_BASE.DS.'vendor';
-        $stylePath = Config::get('global.config', 'bluescreen.style');
-        $screenPath = $vendor.DS.str_replace('.', DS, $stylePath).DS."bluescreen.css";
-
-        if (!file_exists($screenPath)) {
-            throw new Exception("Tracy debugger bluescreen.css not found inside vendor directory");
-        }
-        $blueScreen = file_get_contents($screenPath);
-        $pretty = file_get_contents($path.self::$style.'.css');
-        $blueScreen = (string) $blueScreen."\n".$pretty;
-        if (!string_has($blueScreen, '@Author:Cygnite')) {
-            file_put_contents($blueScreen);
-        }
-    }
-
+    /**
+     * Get the asset path
+     *
+     * @return string
+     */
     public function assetsPath()
     {
         if (is_dir($path = $this->getAssetsPath())) {

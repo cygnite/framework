@@ -17,7 +17,6 @@ namespace Cygnite\Database\Cyrus;
  */
 use Cygnite\Helpers\Inflector;
 use Cygnite\Common\Pagination;
-use Cygnite\Database\Connection;
 use Cygnite\Foundation\Collection;
 use Cygnite\Database\Table\Schema;
 use Cygnite\Database\Query\Builder as QueryBuilder;
@@ -149,7 +148,7 @@ abstract class ActiveRecord implements ActiveRecordInterface
         }
 
         if (!property_exists($model, 'database') || is_null($this->database)) {
-            $this->setDatabase(Connection::getDefaultConnection());
+            $this->setDatabase($this->query()->getDefaultConnection());
         } else {
             $this->setDatabase($this->database);
         }
