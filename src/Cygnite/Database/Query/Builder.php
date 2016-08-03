@@ -1074,13 +1074,13 @@ class Builder extends Joins implements QueryBuilderInterface
     /**
      * Find result using raw sql query
      *
-     * @param $arguments
+     * @param $sql
      * @return Collection
      */
-    public function findBySql($arguments)
+    public function findBySql($sql)
     {
         $results = [];
-        $stmt = $this->resolveConnection()->prepare(trim($arguments[0]));
+        $stmt = $this->resolveConnection()->prepare(trim($sql));
         $stmt->execute();
         $results = $this->fetchAs($stmt);
 
