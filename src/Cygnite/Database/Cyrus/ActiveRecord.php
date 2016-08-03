@@ -148,7 +148,7 @@ abstract class ActiveRecord implements ActiveRecordInterface
         }
 
         if (!property_exists($model, 'database') || is_null($this->database)) {
-            $this->setDatabase($this->query()->getDefaultConnection());
+            $this->setDatabase($this->queryBuilder()->getDefaultConnection());
         } else {
             $this->setDatabase($this->database);
         }
@@ -331,7 +331,7 @@ abstract class ActiveRecord implements ActiveRecordInterface
      */
     public static function first()
     {
-        return static::model()->query()->first();
+        return static::model()->queryBuilder()->first();
     }
 
     /**
@@ -342,7 +342,7 @@ abstract class ActiveRecord implements ActiveRecordInterface
      */
     public static function all($arguments = [])
     {
-        return static::model()->query()->all($arguments);
+        return static::model()->queryBuilder()->all($arguments);
     }
 
     /**
@@ -352,7 +352,7 @@ abstract class ActiveRecord implements ActiveRecordInterface
      */
     public static function last()
     {
-        return static::model()->query()->last();
+        return static::model()->queryBuilder()->last();
     }
 
     /**
@@ -364,7 +364,7 @@ abstract class ActiveRecord implements ActiveRecordInterface
      */
     public static function sql($query)
     {
-        return static::$ar->query()->findBySql($query);
+        return static::$ar->queryBuilder()->findBySql($query);
     }
 
     /**
@@ -391,7 +391,7 @@ abstract class ActiveRecord implements ActiveRecordInterface
             $params = $arguments[1];
                 }
 
-        return $this->query()->leftOuterJoin($tableWith, $params, $arguments[2]);
+        return $this->queryBuilder()->leftOuterJoin($tableWith, $params, $arguments[2]);
         }
 
     /**
@@ -401,7 +401,7 @@ abstract class ActiveRecord implements ActiveRecordInterface
      */
     public static function lastQuery()
     {
-        return static::model()->query()->lastQuery();
+        return static::model()->queryBuilder()->lastQuery();
         }
 
     /**
@@ -646,7 +646,7 @@ abstract class ActiveRecord implements ActiveRecordInterface
      */
     private function setAttributesForInsertOrUpdate($arguments, $method)
     {
-        $query = $this->query();
+        $query = $this->queryBuilder();
 
         if ($method == 'insert') {
             return $query->{$method}($arguments);
@@ -665,7 +665,7 @@ abstract class ActiveRecord implements ActiveRecordInterface
      */
     public function trash($arguments, $multiple = false)
     {
-        return $this->query()->{__FUNCTION__}($arguments, $multiple);
+        return $this->queryBuilder()->{__FUNCTION__}($arguments, $multiple);
     }
 
     /**
@@ -683,7 +683,7 @@ abstract class ActiveRecord implements ActiveRecordInterface
             'args' => $arguments
         ];
 
-        $fetch = $this->query()->find('find', $args);
+        $fetch = $this->queryBuilder()->find('find', $args);
 
         if ($fetch instanceof Collection && empty($fetch->asArray())) {
             return $this->returnEmptyObject();
@@ -778,7 +778,7 @@ abstract class ActiveRecord implements ActiveRecordInterface
      *
      * @return Query
      */
-    public function query()
+    public function queryBuilder()
     {
         return new QueryBuilder($this);
     }
@@ -808,7 +808,7 @@ abstract class ActiveRecord implements ActiveRecordInterface
     {
         $this->setTableName($table);
 
-        return $this->query();
+        return $this->queryBuilder();
     }
 
     /**
@@ -823,7 +823,7 @@ abstract class ActiveRecord implements ActiveRecordInterface
 
         static::$ar->setDatabase($database);
 
-        return static::$ar->query()->resolveConnection();
+        return static::$ar->queryBuilder()->resolveConnection();
     }
 
     /**
@@ -1123,7 +1123,7 @@ abstract class ActiveRecord implements ActiveRecordInterface
                 $operator = (isset($arguments[1])) ? $arguments[1] : '=';
                 $params = [$columnName, $operator, $arguments[0]];
 
-                return self::model()->query()->find('findBy', $params);
+                return self::model()->queryBuilder()->find('findBy', $params);
                 break;
             case 'joinWith' :
                 return static::$ar->joinWith($class, $arguments);
@@ -1132,7 +1132,7 @@ abstract class ActiveRecord implements ActiveRecordInterface
 
         //Use the power of PDO methods directly via static functions
         return static::callDynamicMethod(
-            [self::model()->query()->resolveConnection(), $method],
+            [self::model()->queryBuilder()->resolveConnection(), $method],
             $arguments
         );
     }
@@ -1145,7 +1145,7 @@ abstract class ActiveRecord implements ActiveRecordInterface
     public static function callFinderBy($method, $class, $arguments, $type = 'And')
     {
         if (string_has($method, $type)) {
-            $query = static::$ar->query()->buildFindersWhereCondition($method, $arguments, $type);
+            $query = static::$ar->queryBuilder()->buildFindersWhereCondition($method, $arguments, $type);
             return $query->findAll();
         }
     }
@@ -1167,12 +1167,12 @@ abstract class ActiveRecord implements ActiveRecordInterface
         }
 
         // try calling method against Query if exists
-        if (method_exists($this->query(), $method)) {
-            return static::callDynamicMethod([$this->query(), $method], $arguments);
+        if (method_exists($this->queryBuilder(), $method)) {
+            return static::callDynamicMethod([$this->queryBuilder(), $method], $arguments);
         }
 
-        if (!method_exists($this->query()->resolveConnection(), $method) ||
-            !method_exists($this->query(), $method)
+        if (!method_exists($this->queryBuilder()->resolveConnection(), $method) &&
+            !method_exists($this->queryBuilder(), $method)
         ) {
             throw new \BadMethodCallException("$method method not exists");
         }
@@ -1180,6 +1180,6 @@ abstract class ActiveRecord implements ActiveRecordInterface
         //|-----------------------------------------------
         //| If method not found we will check against the PDO.
         //| call PDO method directly via model object and return result set
-        return call_user_func_array([$this->query()->resolveConnection(), $method], $arguments);
+        return call_user_func_array([$this->queryBuilder()->resolveConnection(), $method], $arguments);
     }
 }

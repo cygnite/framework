@@ -195,7 +195,7 @@ interface QueryBuilderInterface
      * @throws \Exception|\PDOException
      * @return object                   pointer $this
      */
-    public function query($sql, $attributes = []);
+    public function sql($sql, $attributes = []);
 
     /**
      * @return mixed
