@@ -955,7 +955,7 @@ class Builder extends Joins implements QueryBuilderInterface
      * @throws \Exception|\PDOException
      * @return object                   pointer $this
      */
-    public function query($sql, $attributes = [])
+    public function sql($sql, $attributes = [])
     {
         try {
             $this->statement = $this->resolveConnection()->prepare($sql);
