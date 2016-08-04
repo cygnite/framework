@@ -12,8 +12,6 @@
 namespace Cygnite\Common;
 
 use Closure;
-use Cygnite\Proxy\StaticResolver;
-use Cygnite\Helpers\Inflector;
 use Cygnite\Common\UrlManager\Url;
 
 if (!defined('CF_SYSTEM')) {
@@ -25,9 +23,9 @@ if (!defined('CF_SYSTEM')) {
  *
  * <code>
  * $paginator = new \Cygnite\Common\Pagination;
- * $paginator->setTotalNumberOfPage();
+ * $paginator->setTotalNumberOfPage(15);
  * $paginator->setPerPage(5);
- * $paginator->createLinks();
+ * echo $paginator->createLinks();
  * </code>
  *
  * @package Cygnite\Common
@@ -75,17 +73,27 @@ class Pagination
     }
 
     /**
-     * @param array    $args
-     * @param callable $callback
-     * @return Pagination
+     * Set Model object
+     *
+     * @param $model
+     * @return $this
      */
-    public static function make($args = null, Closure $callback = null)
+    public function setModel($model)
     {
-        if ($callback instanceof Closure) {
-            return $callback(new static($args));
-        }
+        $this->model = $model;
 
-        return new static($args);
+        return $this;
+    }
+
+    /**
+     * Create Pagination instance
+     *
+     * @param callable $callback
+     * @return static
+     */
+    public static function make(Closure $callback)
+    {
+        return $callback(new static());
     }
 
     /**
