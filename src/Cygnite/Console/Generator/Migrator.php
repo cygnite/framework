@@ -53,11 +53,20 @@ class Migrator
         return new self($arguments);
     }
 
+    /**
+     * Set template directory
+     * @param type $path
+     */
     public function setTemplateDir($path)
     {
         $this->templatePath = $path;
     }
 
+    /**
+     * Get the template path
+     * 
+     * @return type
+     */
     public function getTemplatePath()
     {
         return (isset($this->templatePath)) ?
@@ -65,6 +74,12 @@ class Migrator
             null;
     }
 
+    /**
+     * Check has direectory
+     * 
+     * @param type $directory
+     * @return type
+     */
     private function hasDirectory($directory)
     {
         return is_dir($directory) || mkdir($directory);
@@ -221,11 +236,20 @@ class Migrator
         $this->migrationClass = $exp[1];
     }
 
+    /**
+     * Get the migration version
+     * @return type
+     */
     public function getVersion()
     {
         return $this->migrationVersion;
     }
 
+    /**
+     * Get the migration class name
+     * 
+     * @return type
+     */
     public function getMigrationClass()
     {
         return $this->migrationClass;
@@ -239,7 +263,6 @@ class Migrator
     public function updateMigration($type = 'up')
     {
         $file = $class = null;
-
         $file = $this->getAppMigrationDirPath().$this->getVersion().$this->getMigrationClass();
 
         if (is_readable($file.EXT)) {
@@ -251,13 +274,19 @@ class Migrator
             $type = 'up';
         }
 
+        //Create migrations table schema if not exists
+        $this->command->table()->makeMigration();
+
         call_user_func_array([new $class, $type], []);
 
         $this->updateMigrationTable();
 
-        $this->command->info("Migrated: $file OK!");
+        $this->command->info("Migrated: ".$file.EXT." OK!");
     }
     
+    /**
+     * Update the entry to migrations table
+     */
     public function updateMigrationTable()
     {
         $this->command->table()->updateMigrationVersion($this);
