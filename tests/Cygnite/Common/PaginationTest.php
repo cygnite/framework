@@ -27,7 +27,8 @@ class PaginationTest extends PHPUnit_Framework_TestCase
 
     public function testMakeMethod()
     {
-        $this->assertInstanceOf('Cygnite\Common\Pagination', Pagination::make());
+        $pagination = Pagination::make(function ($p) { return $p; });
+        $this->assertInstanceOf('Cygnite\Common\Pagination', $pagination);
     }
 
     public function testPagiationCreateLinks()
