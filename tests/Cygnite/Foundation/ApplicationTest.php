@@ -39,12 +39,8 @@ class ApplicationTest extends PHPUnit_Framework_TestCase
     public function testServiceCreation()
     {
         $app = Application::instance();
-        $app->service(function($app)
-        {
-            $app->registerServiceProvider(['FooBarServiceProvider']);
-
-            $app->setServiceController('bar.controller', 'BarController');
-        });
+        $app->registerServiceProvider(['FooBarServiceProvider']);
+        $app->setServiceController('bar.controller', 'BarController');
 
         $this->assertInstanceOf('\FooBar', $app['foo.bar']());
         $this->assertNotNull($app['foo.bar']()->greet());
