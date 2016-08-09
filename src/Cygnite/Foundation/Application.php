@@ -158,7 +158,7 @@ class Application extends Container implements ApplicationInterface
             throw new \Exception("Application::service() accept only valid closure callback");
         }
 
-        return $callback(static::$instance);
+        return $callback(new static());
     }
 
 
@@ -229,6 +229,7 @@ class Application extends Container implements ApplicationInterface
     {
         $this['service.provider'] = function () {
             $paths = Config::getPaths();
+            extract(['app' => $this]);
             return include $paths['app.path']. DS.$paths['app.config']['directory'] .'services' . EXT;
         };
 
