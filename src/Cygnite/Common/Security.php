@@ -22,11 +22,13 @@ use Closure;
  * This package provides necessary in built validation for users data.
  *
  * <code>
- *  $instance = Security::create(function ($instance)
+ *  $s = Security::create(function ($s)
  *  {
- *      return $instance;
+ *      return $s;
  *  });
- *  $instance->sanitize($string);
+ *
+ *  $s->sanitize($string);
+ *  $s->removeJavaScriptProtocols($string);
  * </code>
  * Inspired by TravianZ and Kohana security library http://kohanaphp.com/
  *
@@ -132,6 +134,8 @@ class Security
     }
 
     /**
+     * Clean $_POST array values
+     *
      * @return array
      */
     private function cleanPost()
@@ -156,7 +160,7 @@ class Security
      * @throws \Exception
      * @return string
      */
-    protected function cleanKeys($data)
+    public function cleanKeys($data)
     {
         $pregMatches = (bool)preg_match(self::PREG_PROPERTIES, '?');
         $chars = '';
@@ -171,7 +175,7 @@ class Security
     }
 
     /**
-     * Escapes data.
+     * Escapes/ Sanitize the given value.
      *
      * @param  mixed Data to clean
      * @return mixed
@@ -179,12 +183,12 @@ class Security
     public function sanitize($data)
     {
         if (is_array($data)) {
-            $new_array = [];
+            $newArray = [];
             foreach ($data as $key => $value) {
-                $new_array[$this->cleanKeys($key)] = $this->sanitize($value);
+                $newArray[$this->cleanKeys($key)] = $this->sanitize($value);
             }
 
-            return $new_array;
+            return $newArray;
         }
 
         if ($this->magicQuotesGpc === true) {
@@ -192,9 +196,7 @@ class Security
             $data = stripslashes($data);
         }
 
-        $data = $this->xssClean($data);
-
-        return $data;
+        return $this->xssClean($data);
     }
 
     /**
@@ -273,7 +275,13 @@ class Security
         return $data;
     }
 
-    private function removeJavaScriptProtocols($data)
+    /**
+     * Remove only javascript protocol from the given string
+     *
+     * @param $data
+     * @return mixed
+     */
+    public function removeJavaScriptProtocols($data)
     {
         return preg_replace(
             '#([a-z]*)[\x00-\x20]*=[\x00-\x20]*([`\'"]*)[\x00-\x20]*j[\x00-\x20]*a[\x00-\x20]*v[\x00-\x20]*a[\x00-\x20]*s[\x00-\x20]*c[\x00-\x20]*r[\x00-\x20]*i[\x00-\x20]*p[\x00-\x20]*t[\x00-\x20]*:#iu',
@@ -282,7 +290,13 @@ class Security
         );
     }
 
-    private function removeVbScriptProtocols($data)
+    /**
+     * Remove VB script protocols from the given string
+     *
+     * @param $data
+     * @return mixed
+     */
+    public function removeVbScriptProtocols($data)
     {
         return preg_replace(
             '#([a-z]*)[\x00-\x20]*=([\'"]*)[\x00-\x20]*v[\x00-\x20]*b[\x00-\x20]*s
@@ -292,6 +306,13 @@ class Security
         );
     }
 
+    /**
+     * Fix IE entity
+     * Only works in IE: <span style="width: expression(alert('Ping!'));"></span>
+     *
+     * @param $data
+     * @return mixed
+     */
     private function fixIe($data)
     {
         $data = preg_replace(
@@ -314,6 +335,12 @@ class Security
         return $data;
     }
 
+    /**
+     * Remove namespace elements from string
+     *
+     * @param $data
+     * @return mixed
+     */
     private function removeNameSpaceElements($data)
     {
         return preg_replace(
@@ -378,6 +405,12 @@ class Security
         return $matches[0];
     }
 
+    /**
+     * XSS clean
+     *
+     * @param $item
+     * @param $key
+     */
     public static function clean($item, $key)
     {
         self::_xssClean($item, $key);
@@ -430,6 +463,13 @@ class Security
         return $data;
     }
 
+    /**
+     * Validate the given input and value
+     *
+     * @param $key
+     * @param $value
+     * @return null
+     */
     public function validate($key, $value)
     {
         return $this->doValidation($key, $value);
