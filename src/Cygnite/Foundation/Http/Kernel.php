@@ -223,8 +223,10 @@ class Kernel implements KernelInterface
     {
         // @todo Merge application and routes middleware
         //$middlewares =  ;
+        $routeMiddlewares = $this->router->getRouteMiddlewares();
 
-        foreach ($this->middleware as $middleware) {
+        $middlewares =  array_merge(array_filter([$routeMiddlewares]), $this->middleware);
+        foreach ($this->middlewares as $middleware) {
             list($name, $parameters) = $this->pipeline->parsePipeString($middleware);
 
             $instance = $this->app->make($name);

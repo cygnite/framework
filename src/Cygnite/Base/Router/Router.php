@@ -15,6 +15,7 @@ use ErrorException;
 use Cygnite\Helpers\Inflector;
 use Cygnite\Helpers\Helper;
 use Cygnite\Helpers\Config;
+use Cygnite\Pipeline\Pipeline;
 use Cygnite\Foundation\Application as App;
 use Cygnite\Http\Requests\Request;
 use Cygnite\Http\Responses\ResponseInterface;
@@ -86,6 +87,8 @@ class Router implements RouterInterface
     private $afterRouter;
     private $routeBasePath = '';
     private $after = [];
+
+    protected $middleware;
 
     public function __construct($request)
     {
@@ -200,6 +203,22 @@ class Router implements RouterInterface
      */
     public function get($pattern, $func)
     {
+        if (is_array($func)) {
+            $uri = $this->removeIndexDotPhpAndTrillingSlash($this->getCurrentUri());
+            if (preg_match_all(
+                '#^' . $pattern . '$#',
+                $uri,
+                $matches,
+                PREG_SET_ORDER
+            )){
+                
+                $this->middleware = $func['middleware'];
+                
+            }
+
+            $func = end($func);
+        }
+
         $method = strtoupper(__FUNCTION__);
 
         if (!$func instanceof \Closure) {
@@ -208,6 +227,20 @@ class Router implements RouterInterface
 
         return $this->match($method, $pattern, $func);
     }
+
+    /*public function middleware($middleware)
+    {
+        $this->middleware = $middleware;
+
+        return $this;
+    }*/
+
+    public function getRouteMiddlewares()
+    {
+       
+        return $this->middleware;
+    }
+
 
     /**
      * @param        $pattern
@@ -537,7 +570,10 @@ class Router implements RouterInterface
                 PREG_SET_ORDER
             )
             ) {
-                //echo "1. <br> $pattern";
+                if($this->middleware){
+                    $this->handleMiddleware();
+                }
+                
 
                 // Extract the matched URL (and only the parameters)
                 $params = $this->extractParams($matches);
@@ -546,7 +582,9 @@ class Router implements RouterInterface
                 // call the handling function with the URL
                 $this->handledRoute = call_user_func_array($route['fn'], $params);
                 $app->set('response', $this->handledRoute);
-
+               /* if($this->_hasAfterMiddleware()){
+                    $this->handleMiddleware('after');
+                }*/
                 $handledRequest++;
 
                 // If we need to quit, then quit
@@ -557,7 +595,7 @@ class Router implements RouterInterface
             }
             $i++;
         }
-
+        //$this->middleware = null;
         // Return the number of routes handled
         return $handledRequest;
     }
@@ -736,6 +774,17 @@ class Router implements RouterInterface
 
         return $routes();
     }
+    /**
+     * @param $middleware
+     * @return $this
+     */
+    public function middleware($middleware)
+    {
+        $this->middleware = $middleware;
+
+        return $this;
+    }
+
 
     /**
      * Returns the response stored in container
@@ -746,5 +795,38 @@ class Router implements RouterInterface
     {
         $app = $this->getApplication();
         return $app['response'];
+    }
+    /**
+     * 
+     * @return mixed
+     */
+    public function getMiddlewares()
+    {
+        return $this->middleware;
+    }
+
+
+    /**
+     *
+     *
+     * @internal param null $pipe
+     * @internal param string $method
+     * @return null
+     */
+    public function handleMiddleware()
+    {
+        $this->runRouteWithinStack($this->request());
+    }
+
+    /* * @internal param $pipes
+     * @internal param $method
+     * @return mixed
+     */
+    public function runRouteWithinStack(Request $request)
+    {        
+        return (new Pipeline($this->application))
+            ->send($request)
+            ->through([$this->middleware])
+            ->run();
     }
 }
