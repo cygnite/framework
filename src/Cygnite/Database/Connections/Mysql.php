@@ -12,13 +12,19 @@ namespace Cygnite\Database\Connections;
 
 use PDO;
 
-class Mysql extends Connector
+class MySql extends Connector
 {
+    /**
+     * @param array $config
+     */
     public function __construct(array $config)
     {
         parent::__construct($config);
     }
 
+    /**
+     * @return PDO
+     */
     public function create()
     {
         $connection = parent::create();
@@ -33,6 +39,9 @@ class Mysql extends Connector
         return $connection;
     }
 
+    /**
+     * @param $connection
+     */
     private function setNamesAndCollation($connection)
     {
         $names = "set names '".$this->config['charset']."'".
