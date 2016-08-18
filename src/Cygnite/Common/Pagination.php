@@ -12,27 +12,24 @@
 namespace Cygnite\Common;
 
 use Closure;
-use Cygnite\Proxy\StaticResolver;
-use Cygnite\Helpers\Inflector;
 use Cygnite\Common\UrlManager\Url;
 
 if (!defined('CF_SYSTEM')) {
     exit('External script access not allowed');
 }
-/*
- * Pagination.
- *
- * @author Sanjoy Dey <dey.sanjoy0@gmail.com>
+
+/**
+ * Class Pagination
  *
  * <code>
  * $paginator = new \Cygnite\Common\Pagination;
- * $paginator->getItems();
- * $paginator->getTotalNumOfItems();
+ * $paginator->setTotalNumberOfPage(15);
  * $paginator->setPerPage(5);
- * $paginator->createLinks();
+ * echo $paginator->createLinks();
  * </code>
+ *
+ * @package Cygnite\Common
  */
-
 class Pagination
 {
     protected $perPage = '15';
@@ -62,33 +59,45 @@ class Pagination
     protected $totalNumOfPage;
 
     /**
+     * Pagination constructor
+     *
      * @param $model
      */
     public function __construct($model = null)
     {
         if (!is_null($model) && is_object($model)) {
-        $this->model = $model;
+            $this->model = $model;
         }
 
         $this->setCurrentPageUrl();
     }
 
     /**
-     * @param array    $args
-     * @param callable $callback
-     * @return Pagination
+     * Set Model object
+     *
+     * @param $model
+     * @return $this
      */
-    public static function make($args = null, Closure $callback = null)
+    public function setModel($model)
     {
-        if ($callback instanceof Closure) {
-            return $callback(new static($args));
-        }
+        $this->model = $model;
 
-        return new static($args);
+        return $this;
     }
 
     /**
-     * Set per page
+     * Create Pagination instance
+     *
+     * @param callable $callback
+     * @return static
+     */
+    public static function make(Closure $callback)
+    {
+        return $callback(new static());
+    }
+
+    /**
+     * Set per page record
      *
      * @param null $number
      * @return $this
@@ -98,28 +107,25 @@ class Pagination
         if (is_null($number)) {
             if (property_exists($this->model, 'perPage')) {
                 $this->perPage = $this->model->perPage;
-
                 return $this;
             }
         }
 
-            $this->perPage = $number;
+        $this->perPage = $number;
 
         return $this;
     }
 
     /**
+     * Set total number of pages
+     *
      * @param null $number
      * @return $this
      */
     public function setTotalNumberOfPage($number = null)
     {
         if (is_null($number)) {
-            $modelClass = Inflector::getClassNameFromNamespace(get_class($this->model));
-            $table = Inflector::tabilize($modelClass);
-
-            $numRecords = $this->model->select($this->count()." AS ".$this->numCount)->findMany();
-
+            $numRecords = $this->model->select($this->count()." AS ".$this->numCount)->findOne();
             $this->totalNumOfPage = $numRecords[0]->{$this->numCount};
 
             return $this;
@@ -139,6 +145,8 @@ class Pagination
     }
 
     /**
+     * Make the count row
+     *
      * @param string $count
      * @return string
      */
@@ -150,6 +158,8 @@ class Pagination
     }
 
     /**
+     * Render the pagination links
+     *
      * @return string
      */
     public function __toString()
@@ -157,6 +167,10 @@ class Pagination
         return (string) $this->render();
     }
 
+    /**
+     * Calculate the pagination links
+     *
+     */
     public function calculate()
     {
         $this->calculatePageLimitAndOffset();
@@ -177,6 +191,9 @@ class Pagination
         $this->create();
     }
 
+    /**
+     * Calculate page limit and offset
+     */
     private function calculatePageLimitAndOffset()
     {
         $pageUri = '';
@@ -194,6 +211,9 @@ class Pagination
         $this->setPaginationOffset($start);
     }
 
+    /**
+     * Set current page url
+     */
     private function setCurrentPageUrl()
     {
         $controller = Url::segment(1);
@@ -203,26 +223,51 @@ class Pagination
         $this->currentPageUrl = Url::getBase().$controller.'/'.$method;
     }
 
+    /**
+     * Set page number
+     *
+     * @param $number
+     */
     public function setPageNumber($number)
     {
         $this->pageNumber = intval($number);
     }
 
+    /**
+     * Get page number
+     *
+     * @return null
+     */
     public function getPageNumber()
     {
         return (isset($this->pageNumber)) ? $this->pageNumber : null;
     }
 
+    /**
+     * Set pagination offset
+     *
+     * @param $offset
+     */
     public function setPaginationOffset($offset)
     {
         $this->paginationOffset = intval($offset);
     }
 
+    /**
+     * Get Pagination offset
+     *
+     * @return null
+     */
     public function getPaginationOffset()
     {
         return (isset($this->paginationOffset)) ? $this->paginationOffset : null;
     }
 
+    /**
+     * Create pagination links
+     *
+     * @return $this
+     */
     public function createLinks()
     {
         $this->getTotalNumberOfPages();
@@ -380,7 +425,12 @@ class Pagination
         return $content;
     }
 
-    private function render()
+    /**
+     * Render pagination links
+     *
+     * @return mixed
+     */
+    protected function render()
     {
         return $this->paginationLinks;
     }

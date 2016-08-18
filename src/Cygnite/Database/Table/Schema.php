@@ -45,44 +45,36 @@ class Schema
      * directly
      *
      * @param $model
+     * @param null $database
+     * @throws \ErrorException
      */
-    protected function __construct($model)
+    protected function __construct($model = null, $database = null)
     {
+        if (!is_null($model) && is_object($model)) {
         $this->klass = $model;
 
-        if (class_exists(get_class($this->klass))) {
-            $reflectionClass = new \ReflectionClass(get_class($this->klass));
+            if (!class_exists(get_class($this->klass))) {
+                throw new \ErrorException(sprintf("Class %s doesn't exists", get_class($this->klass)));
+            }
 
+            $reflectionClass = new \ReflectionClass(get_class($this->klass));
             /*
              | We will set the database connection name here
              */
             if (property_exists($this->klass, 'database')) {
                 $reflectionProperty = $reflectionClass->getProperty('database');
                 $reflectionProperty->setAccessible(true);
-                $this->database = $reflectionProperty->getValue($this->klass);
-            } else {
-                $this->database = $this->getDefaultConnection();
+                $database = $reflectionProperty->getValue($this->klass);
             }
 
-            /*
-            | We will set the primary key of the table schema
-            */
-            if (property_exists($this->klass, 'primaryKey')) {
-                $reflectionPropertyKey = $reflectionClass->getProperty('primaryKey');
-                $reflectionPropertyKey->setAccessible(true);
-                $this->primaryKey = $reflectionPropertyKey->getValue($this->klass);
-            }
-
-            /*
-             | Set database connection name
-             */
-            $this->setDatabaseConnection($this->database);
-
+            // If table name not provided we will format and consider class name as table
             if (!property_exists($this->klass, 'tableName')) {
-                $this->tableName = Inflector::tabilize(get_class($this->klass));
+                $model = Inflector::tabilize(get_class($this->klass));
             }
-
         }
+
+        $this->setDatabase((!is_null($database)) ? $database : $this->getDefaultConnection());
+        $this->setTableName($model);
     }
 
     /**
@@ -103,35 +95,86 @@ class Schema
      */
     public static function __callStatic($method, $arguments = [])
     {
-        if ($method == 'make' && !empty($arguments)) {
-            $schema = new self($arguments[0]);
-
-            if (is_callable([$schema, 'init'])) {
-                if (isset($arguments[1]) && $arguments[1] instanceof Closure) {
-                    return $schema->init($arguments[1], $schema);
-                }
-
-                return $schema->init($schema);
-            }
-        }
-
-        throw new \Exception(
-            sprintf('Oops, Undefined method called %s', 'Schema::' . $method)
-        );
+        throw new \Exception(sprintf(
+            'Oops, Undefined method called %s', 'Schema::' . $method
+        ));
     }
 
     /**
-     * Get Schema instance to generate table schema
-     * @access public
-     * @param $klass get the model pointer
-     * @param Closure instance to hold schema object
+     * Set the connection object
      *
+     * @param $connection
+     * @return $this
      */
-    public function init(Closure $callback = null, $schema = null)
+    public function on($connection)
     {
-        if ($callback instanceof Closure) {
-            return $callback($schema);
+        $this->setDatabase($connection);
+        $this->_connection = null;
+
+        $this->setDatabaseConnection($this->getDatabase());
+
+        return $this;
+                }
+
+    /**
+     * Set the database connection name
+     *
+     * @param $database
+     * @return $this
+     */
+    private function setDatabase($database)
+    {
+        $this->database = $database;
+
+        return $this;
+            }
+
+    /**
+     * Get the table name
+     *
+     * @return mixed
+     */
+    public function getDatabase()
+    {
+        return $this->database;
         }
+
+    /**
+     * Set table name
+     *
+     * @param $table
+     * @return $this
+     */
+    public function setTableName($table)
+    {
+        $this->tableName =$table;
+
+        return $this;
+    }
+
+    /**
+     * Create database schema and return the schema instance
+     *
+     * @param $table
+     * @param callable $closure
+     * @return mixed
+     */
+    public static function make($table, Closure $closure)
+    {
+        if (is_array($table)){
+            $table = isset($table['table']) ? $table['table'] : $table;
+            $database = isset($table['database']) ? $table['database'] : null;
+            $schema = new static($table, $database);
+        } else {
+            $schema = new static($table);
+        }
+
+        $callback =  $closure($schema);
+        /*
+        | Set database connection name
+        */
+        $schema->on($schema->getDatabase());
+        $schema->run();
 
         return $callback;
     }
@@ -211,8 +254,9 @@ class Schema
                     $type = 'date';
                     break;
                 case 'datetime':
-                    $len = (isset($value['length'])) ? $value['length'] : "NOT NULL DEFAULT NOW()";
+                    $len = (isset($value['length'])) ? $value['length'] : "NOT NULL DEFAULT '0000:00:00 00:00:00'";
                     $type = strtoupper($value['type']) . ' ' . $len;
+                    $isNull = '';
                     break;
                 case 'time':
                     $type = 'time';
@@ -363,7 +407,9 @@ class Schema
             }
         }
 
-        throw new \BadMethodCallException("Invalid method $name called ");
+        throw new \BadMethodCallException(sprintf(
+            'Oops, Undefined method called %s', 'Schema::' . $name
+        ));
     }
 
     /**
@@ -675,7 +721,18 @@ class Schema
     }
 
     /**
+     * Get the schema prepared query
+     *
+     * @return array
+     */
+    public function getSchemaPreparedQuery()
+    {
+        return $this->schema;
+    }
+
+    /**
      * Build schema and return result set
+     * @throws \Exception
      * @return bool
      */
     public function run()

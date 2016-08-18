@@ -145,23 +145,20 @@ class Table
         );
 
         //Create migration table in order to save migrations information
-        Schema::make($this,
-            function ($table) use ($tableName) {
-                $table->tableName = $tableName;
-                $table->database = trim($this->getDefaultDatabaseConnection());
-                $table->create(
-                    array(
-                        array('column'=> 'id', 'type' => 'int', 'length' => 11,
-                            'increment' => true, 'key' => 'primary'),
-                        array('column'=> 'migration', 'type' => 'string', 'length' =>255),
-                        array('column'=> 'version', 'type' => 'int', 'null'=> true),
-                        array('column'=> 'created_at',  'type' => 'datetime')
-                    ),
-                    'InnoDB',
-                    'latin1'
-                )->run();
-            }
-        );
+        Schema::make($tableName, function ($table)
+        {
+            //$table->tableName = $tableName;
+            $table->on(trim($this->getDefaultDatabaseConnection()));
+            $table->create(
+                [
+                    ['column'=> 'id', 'type' => 'int', 'length' => 11,
+                        'increment' => true, 'key' => 'primary'],
+                    ['column'=> 'migration', 'type' => 'string', 'length' =>255],
+                    ['column'=> 'version', 'type' => 'int', 'null'=> true],
+                    ['column'=> 'created_at',  'type' => 'datetime']
+                ], 'InnoDB', 'latin1'
+            );
+        });
     }
 
     /**

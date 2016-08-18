@@ -144,7 +144,7 @@ interface ActiveRecordInterface extends \ArrayAccess
      * We will get Fluent Query Object
      * @return Query
      */
-    public function query();
+    public function queryBuilder();
 
     /**
      * Use Connection to build fluent queries against any table

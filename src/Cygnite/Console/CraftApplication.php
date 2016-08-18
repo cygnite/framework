@@ -9,17 +9,19 @@
  */
 namespace Cygnite\Console;
 
-use Cygnite\Foundation\Application as CygniteApplication;
+use Cygnite\Foundation\Application;
 use Cygnite\Console\Foundation\Application as ConsoleApplication;
 
 /**
- * Class CygniteConsoleApplication
+ * Class CraftApplication
  *
  * @package Cygnite\Console
  */
-class CygniteConsoleApplication
+class CraftApplication
 {
     private $version;
+
+    protected $commands = [];
 
     /**
      * @param $version
@@ -30,22 +32,32 @@ class CygniteConsoleApplication
     }
 
     /**
+     * Register your console commands here
+     *
+     * @param $commands
+     * @return $this
+     */
+    public function register($commands)
+    {
+        $this->commands = $commands;
+
+        return $this;
+    }
+
+    /**
      * We will run Cygnite Console Application
      */
     public function run()
     {
-        $app = CygniteApplication::instance();
-
-        $console = new ConsoleApplication($app, $this->version);
+        $console = new ConsoleApplication(new Application(), $this->version);
 
         /*
          | We will also register Application Console commands
          | User can register multiple commands apart from core
          | commands and run on the fly
          */
-        $appConsoleBootStrap = $app->make('\Apps\Console\BootStrapConsoleApplication');
-        $appConsoleCommands = $appConsoleBootStrap->register();
-
-        $console->setCommand($appConsoleCommands)->registerCommands()->run();
+        $console->setCommand($this->commands)
+            ->registerCommands()
+            ->run();
     }
 }

@@ -158,7 +158,7 @@ class Application extends Container implements ApplicationInterface
             throw new \Exception("Application::service() accept only valid closure callback");
         }
 
-        return $callback(static::$instance);
+        return $callback(new static());
     }
 
 
@@ -229,6 +229,7 @@ class Application extends Container implements ApplicationInterface
     {
         $this['service.provider'] = function () {
             $paths = Config::getPaths();
+            extract(['app' => $this]);
             return include $paths['app.path']. DS.$paths['app.config']['directory'] .'services' . EXT;
         };
 
@@ -368,12 +369,12 @@ class Application extends Container implements ApplicationInterface
      */
     private function bootInternals()
     {
-        if ($this->booted) return;
+        if ($this->isBooted()) return;
 
+        $this['debugger']->setEnv(ENV)->handleException();
         $this->registerCoreBootstrappers();
         $this->setEnvironment();
         $this->beforeBootingApplication();
-        $this['debugger']->handleException();
         $this['service.provider']();
         $this->afterBootingApplication();
 
@@ -452,7 +453,7 @@ class Application extends Container implements ApplicationInterface
             return true;
         }
 
-        return $this['event']->trigger(__FUNCTION__, $this);
+        return $this['event']->trigger('afterBootingApplication', $this);
     }
 
     /**
@@ -475,6 +476,11 @@ class Application extends Container implements ApplicationInterface
         return parent::makeInstance($class, $arguments);
     }
 
+    /**
+     * Resolve namespace via container
+     *
+     * return @object
+     */
     public function resolve($class, $arguments = [])
     {
         return parent::resolve($class, $arguments = []);
