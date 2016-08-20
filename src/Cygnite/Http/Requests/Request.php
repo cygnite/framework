@@ -416,12 +416,16 @@ class Request
      */
     private function setUnsupportedMethodsIfExists()
     {
+        if (!function_exists('mb_strpos')) {
+            throw new \Exception('You must have php-mbstring extension installed in the server.');
+        }
+    
         /**
          * If the content is not passed from FORM then we will simply return corresponding
          * GLOBAL variable raw data
          */
         if (
-            mb_strpos($this->header->get("CONTENT_TYPE"), "application/x-www-form-urlencoded") === 0 &&
+            \mb_strpos($this->header->get("CONTENT_TYPE"), "application/x-www-form-urlencoded") === 0 &&
             in_array($this->getMethod(), [RequestMethods::PUT, RequestMethods::PATCH, RequestMethods::DELETE])
         ) {
             parse_str($this->getRawBody(), $array);
