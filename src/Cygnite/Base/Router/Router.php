@@ -204,18 +204,10 @@ class Router implements RouterInterface
     public function get($pattern, $func)
     {
         if (is_array($func)) {
-            $uri = $this->removeIndexDotPhpAndTrillingSlash($this->getCurrentUri());
-            if (preg_match_all(
-                '#^' . $pattern . '$#',
-                $uri,
-                $matches,
-                PREG_SET_ORDER
-            )){
-                
+            
+            if($this->isPatternMatches($pattern)){
                 $this->middleware = $func['middleware'];
-                
             }
-
             $func = end($func);
         }
 
@@ -240,7 +232,6 @@ class Router implements RouterInterface
        
         return $this->middleware;
     }
-
 
     /**
      * @param        $pattern
@@ -313,7 +304,12 @@ class Router implements RouterInterface
     public function post($pattern, $func)
     {
         $method = strtoupper(__FUNCTION__);
-
+        if (is_array($func)) {
+            if($this->isPatternMatches($pattern)){
+                $this->middleware = $func['middleware'];
+            }
+            $func = end($func);
+        }
         if (!$func instanceof \Closure) {
             return $this->override($pattern, $func, false, $method);
         }
@@ -331,7 +327,12 @@ class Router implements RouterInterface
     public function delete($pattern, $func)
     {
         $method = strtoupper(__FUNCTION__);
-
+        if (is_array($func)) {
+            if($this->isPatternMatches($pattern)){
+                $this->middleware = $func['middleware'];
+            }
+            $func = end($func);
+        }
         return $this->match($method, $pattern, $func);
     }
 
@@ -345,7 +346,12 @@ class Router implements RouterInterface
     public function put($pattern, $func)
     {
         $method = strtoupper(__FUNCTION__);
-
+        if (is_array($func)) {
+            if($this->isPatternMatches($pattern)){
+                $this->middleware = $func['middleware'];
+            }
+            $func = end($func);
+        }
         return $this->match($method, $pattern, $func);
     }
 
@@ -360,6 +366,12 @@ class Router implements RouterInterface
     {
         $method = strtoupper(__FUNCTION__);
 
+        if (is_array($func)) {
+            if($this->isPatternMatches($pattern)){
+                $this->middleware = $func['middleware'];
+            }
+            $func = end($func);
+        }
         return $this->match($method, $pattern, $func);
     }
 
@@ -372,6 +384,12 @@ class Router implements RouterInterface
      */
     public function options($pattern, $func)
     {
+        if (is_array($func)) {
+            if($this->isPatternMatches($pattern)){
+                $this->middleware = $func['middleware'];
+            }
+            $func = end($func);
+        }
         return $this->match(strtoupper(__FUNCTION__), $pattern, $func);
     }
 
@@ -382,6 +400,12 @@ class Router implements RouterInterface
      */
     public function any($pattern, $func)
     {
+        if (is_array($func)) {
+            if($this->isPatternMatches($pattern)){
+                $this->middleware = $func['middleware'];
+            }
+            $func = end($func);
+        }
         return $this->match('GET|POST|PUT|PATCH|DELETE|OPTIONS', $pattern, $func);
     }
 
@@ -552,39 +576,26 @@ class Router implements RouterInterface
         // Counter to keep track of the number of routes we've handled
         $handledRequest = 0;
 
-        //remove index.php and extra slash from url if exists to match with routing
-        $uri = $this->removeIndexDotPhpAndTrillingSlash($this->getCurrentUri());
-        $app = $this->getApplication();
-
         $i = 0;
         // Loop all routes
         foreach ($routes as $route) {
             $routePattern = $this->hasNamedPattern($route['pattern']);
             $pattern = ($routePattern == false) ? $route['pattern'] : $routePattern;
 
-            // we have a match!
-            if (preg_match_all(
-                '#^' . $pattern . '$#',
-                $uri,
-                $matches,
-                PREG_SET_ORDER
-            )
-            ) {
+            if($matches=$this->isPatternMatches($pattern))
+             {
                 if($this->middleware){
                     $this->handleMiddleware();
                 }
                 
-
                 // Extract the matched URL (and only the parameters)
                 $params = $this->extractParams($matches);
                 array_unshift($params, $this);
 
                 // call the handling function with the URL
                 $this->handledRoute = call_user_func_array($route['fn'], $params);
-                $app->set('response', $this->handledRoute);
-               /* if($this->_hasAfterMiddleware()){
-                    $this->handleMiddleware('after');
-                }*/
+                $this->application->set('response', $this->handledRoute);
+               
                 $handledRequest++;
 
                 // If we need to quit, then quit
@@ -595,7 +606,7 @@ class Router implements RouterInterface
             }
             $i++;
         }
-        //$this->middleware = null;
+
         // Return the number of routes handled
         return $handledRequest;
     }
@@ -829,4 +840,18 @@ class Router implements RouterInterface
             ->through([$this->middleware])
             ->run();
     }
+
+    public function isPatternMatches($pattern)
+    {
+        $uri = $this->removeIndexDotPhpAndTrillingSlash($this->getCurrentUri());
+        if (preg_match_all(
+                '#^'.$pattern.'$#',
+                $uri,
+                $matches,
+                PREG_SET_ORDER
+            )) {
+            return $matches;
+        }
+    }
 }
+
