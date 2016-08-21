@@ -843,7 +843,7 @@ class Router implements RouterInterface
     {
         $uri = $this->removeIndexDotPhpAndTrillingSlash($this->getCurrentUri());
         $hasPattern = $this->hasNamedPattern($pattern);
-        $pattern = ($hasPattern = false)?$pattern : $hasPattern;
+        $pattern = ($hasPattern == false) ? $pattern : $hasPattern;
         if (preg_match_all(
                 '#^'.$pattern.'$#',
                 $uri,
