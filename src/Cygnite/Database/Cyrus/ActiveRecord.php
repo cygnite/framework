@@ -389,10 +389,10 @@ abstract class ActiveRecord implements ActiveRecordInterface
 
         if (isset($arguments[1])) {
             $params = $arguments[1];
-                }
+        }
 
         return $this->queryBuilder()->leftOuterJoin($tableWith, $params, $arguments[2]);
-        }
+    }
 
     /**
      * Return Last Executed query
@@ -402,7 +402,7 @@ abstract class ActiveRecord implements ActiveRecordInterface
     public static function lastQuery()
     {
         return static::model()->queryBuilder()->lastQuery();
-        }
+    }
 
     /**
      * Create Pagination links and return
@@ -510,10 +510,10 @@ abstract class ActiveRecord implements ActiveRecordInterface
         }
 
         try {
-        return isset($this->attributes[$key]) ? $this->attributes[$key] : null;
+            return isset($this->attributes[$key]) ? $this->attributes[$key] : null;
         } catch (\Exception $ex) {
             throw new \Exception($ex->getMessage());
-    }
+        }
     }
 
     /**
@@ -872,7 +872,7 @@ abstract class ActiveRecord implements ActiveRecordInterface
         $foreignKey = $this->buildForeignKeyName($foreignKey, $associatedTable);
         $associatedTableId = $this->$foreignKey;
 
-        if( is_null($mappingId) ) {
+        if (is_null($mappingId)) {
             return (new $associatedClass)->where($this->primaryKey, '=', $associatedTableId);
         }
 
@@ -895,7 +895,7 @@ abstract class ActiveRecord implements ActiveRecordInterface
         $whereValue = '';
         $whereValue = $this->{$this->primaryKey};
 
-        if(!is_null($mappingId)) {
+        if (!is_null($mappingId)) {
             $whereValue = $this->{$mappingId};
         }
 
@@ -927,8 +927,7 @@ abstract class ActiveRecord implements ActiveRecordInterface
         $associatedTableId = null,
         $firstKey = null,
         $secondKey = null
-    )
-    {
+    ) {
         $baseClass = get_class($this);
 
         if (is_null($joinModelClass)) {
@@ -1068,13 +1067,11 @@ abstract class ActiveRecord implements ActiveRecordInterface
      */
     protected static function buildRelations($data, $associatedModel, $associatedData)
     {
-        foreach($data as $parentKey => &$class) {
-
+        foreach ($data as $parentKey => &$class) {
             $associateId = static::getForeignKey($class->tableName);
             $tempArray = [];
             $i = 0;
             foreach ($associatedData as $key => $value) {
-
                 if ($value->{$associateId} == $class->{$class->primaryKey}) {
                     $tempArray[$i] = $value;
                     $i++;
@@ -1109,7 +1106,7 @@ abstract class ActiveRecord implements ActiveRecordInterface
         $class = self::model();
 
         switch ($method) {
-            case (substr($method, 0, 6) == 'findBy') :
+            case (substr($method, 0, 6) == 'findBy'):
 
                 if (strpos($method, 'And') !== false) {
                     return self::callFinderBy($method, $class, $arguments, 'And'); // findByAnd
@@ -1125,7 +1122,7 @@ abstract class ActiveRecord implements ActiveRecordInterface
 
                 return self::model()->queryBuilder()->find('findBy', $params);
                 break;
-            case 'joinWith' :
+            case 'joinWith':
                 return static::$ar->joinWith($class, $arguments);
                 break;
         }

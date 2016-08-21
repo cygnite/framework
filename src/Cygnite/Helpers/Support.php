@@ -162,10 +162,10 @@ if (!function_exists('trans')) {
         $local = $trans->locale();
 
         if ($locale !== $local) {
-                // The message and target languages are different
+            // The message and target languages are different
                 // Get the translation for this message
                 $key = $trans->get($key);
-            }
+        }
 
         return empty($replace) ? $trans->get($key) : strtr($key, $replace);
     }
@@ -240,7 +240,7 @@ if (! function_exists('d')) {
      * @param null  $title
      * @param array $options
      */
-    function d($data, $title = NULL, array $options = NULL)
+    function d($data, $title = null, array $options = null)
     {
         Debugger::barDump($data, $title, $options);
     }
@@ -274,13 +274,13 @@ if (!function_exists('time_bench')) {
     /**
      * @param null $name
      */
-    function time_bench($name = NULL)
+    function time_bench($name = null)
     {
         Debugger::timer($name);
     }
 }
 
-if ( ! function_exists('collecttion')) {
+if (! function_exists('collecttion')) {
     /**
      * Create a collection of array.
      *

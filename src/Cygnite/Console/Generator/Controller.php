@@ -171,9 +171,7 @@ class Controller
         $form = $this->buildFormOpen();
 
         foreach ($this->columns as $key=> $value) {
-
             if ($value['COLUMN_NAME'] !== 'id') {
-
                 if ($this->isFormGenerator == false) {
                     $codeDb .= $this->generateDbCode($value);
                 }

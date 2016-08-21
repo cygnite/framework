@@ -29,7 +29,7 @@ class Apc implements StorageInterface
     protected $apc;
 
     /*
-    * Constructor function to check availability of apc extension, 
+    * Constructor function to check availability of apc extension,
     * throws exception if not available
     *
     */

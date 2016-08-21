@@ -151,7 +151,6 @@ abstract class AbstractBaseController
     public function configure()
     {
         foreach ($this->validProperties as $key => $property) {
-
             $method = 'set'.ucfirst($property);
 
             if ($this->property($this, $property)) {

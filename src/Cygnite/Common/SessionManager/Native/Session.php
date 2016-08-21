@@ -150,7 +150,7 @@ class Session extends Manager implements SessionInterface
     {
         if (!empty($_SERVER['HTTP_REFERER'])) {
             $url = parse_url($_SERVER['HTTP_REFERER']);
-			
+            
             $hostUrl = (array_key_exists('port', $url)) ? $url['host'].':'.$url['port'] : $url['host'];
 
             if ($hostUrl != $_SERVER['HTTP_HOST']) {

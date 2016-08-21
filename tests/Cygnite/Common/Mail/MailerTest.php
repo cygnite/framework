@@ -34,8 +34,7 @@ class MailerTest extends PHPUnit_Framework_TestCase
 
     public function testMailerClosureInstance()
     {
-        list($mailer, $message) = Mailer::compose(function ($mailer, $message)
-        {
+        list($mailer, $message) = Mailer::compose(function ($mailer, $message) {
             return [$mailer, $message];
         });
 
