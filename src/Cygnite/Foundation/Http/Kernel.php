@@ -1,4 +1,5 @@
 <?php
+
 namespace Cygnite\Foundation\Http;
 
 use Throwable;
@@ -9,8 +10,7 @@ use Cygnite\Http\Responses\Response;
 use Cygnite\Http\Responses\ResponseInterface;
 
 /**
- * Class Kernel
- * @package Cygnite\Foundation\Http
+ * Class Kernel.
  */
 class Kernel implements KernelInterface
 {
@@ -54,10 +54,12 @@ class Kernel implements KernelInterface
     }
 
     /**
-     * Handle the request and dispatch to routes
+     * Handle the request and dispatch to routes.
      *
      * @param $request
+     *
      * @return array|ResponseInterface|mixed|static
+     *
      * @throws Exception|\Exception
      *
      * @note this function is incomplete, need to enhance
@@ -69,15 +71,15 @@ class Kernel implements KernelInterface
 
         try {
             $response = $this->sendRequestThroughRouter($request);
-            /**
+            /*
              * Check whether return value is a instance of Response,
              * otherwise we will try to fetch the response form container,
              * create a response and return to the browser.
              *
              */
             if (!$response instanceof ResponseInterface && !is_array($response)) {
-               $r = $this->app->has('response') ? $this->app->get('response') : '';
-               $response = Response::make($r);
+                $r = $this->app->has('response') ? $this->app->get('response') : '';
+                $response = Response::make($r);
             }
         } catch (\Exception $e) {
             $this->handleException($e);
@@ -88,11 +90,11 @@ class Kernel implements KernelInterface
         return $response;
     }
 
-                /**
-     * Handle Exception & errors
+    /**
+     * Handle Exception & errors.
      *
      * @param $e
-                 */
+     */
     protected function handleException($e)
     {
         switch (ENV) {
@@ -104,10 +106,10 @@ class Kernel implements KernelInterface
                 break;
 
             }
-        }
+    }
 
     /**
-     * Report and throw exception
+     * Report and throw exception.
      *
      * @param $e
      */
@@ -118,6 +120,7 @@ class Kernel implements KernelInterface
 
     /**
      * @param \Exception $e
+     *
      * @return mixed
      */
     protected function renderException(\Exception $e)
@@ -126,9 +129,10 @@ class Kernel implements KernelInterface
     }
 
     /**
-     * Prepare pipeline requests and send through router
+     * Prepare pipeline requests and send through router.
      *
      * @param $request
+     *
      * @return mixed
      */
     protected function sendRequestThroughRouter($request)
@@ -155,6 +159,7 @@ class Kernel implements KernelInterface
 
     /**
      * @param array $middlewares
+     *
      * @return array
      */
     protected function parseMiddlewareToPipelines(array $middlewares)
@@ -164,7 +169,7 @@ class Kernel implements KernelInterface
         foreach ($middlewares as $middleware) {
             if (is_object($middleware)) {
                 $pipes[] = $middleware;
-            } elseif (string_has($middleware, ':')){
+            } elseif (string_has($middleware, ':')) {
                 $pipes[] = $middleware;
             } else {
                 $pipes[] = $this->app->make($middleware);
@@ -175,7 +180,7 @@ class Kernel implements KernelInterface
     }
 
     /**
-     * Application booted, let's dispatch the routes
+     * Application booted, let's dispatch the routes.
      *
      * @return callable
      */
@@ -187,9 +192,10 @@ class Kernel implements KernelInterface
     }
 
     /**
-     * Add middlewares to HTTP application
+     * Add middlewares to HTTP application.
      *
      * @param $middleware
+     *
      * @return $this
      */
     public function addMiddleware($middleware)
@@ -204,7 +210,7 @@ class Kernel implements KernelInterface
     }
 
     /**
-     * Get the application instance
+     * Get the application instance.
      *
      * @return Application
      */
@@ -214,17 +220,18 @@ class Kernel implements KernelInterface
     }
 
     /**
-     * Fire shutdown method of middleware class
+     * Fire shutdown method of middleware class.
      *
      * @param $request
      * @param $response
      */
     public function shutdown($request, $response)
     {
-        // @todo Merge application and routes middleware
-        //$middlewares =  ;
+        $routeMiddlewares = $this->router->getRouteMiddlewares();
 
-        foreach ($this->middleware as $middleware) {
+        $middlewares = array_merge(array_filter([$routeMiddlewares]), $this->middleware);
+
+        foreach ($middlewares as $middleware) {
             list($name, $parameters) = $this->pipeline->parsePipeString($middleware);
 
             $instance = $this->app->make($name);

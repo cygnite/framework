@@ -1,13 +1,16 @@
 <?php
+
 namespace Cygnite\Foundation\Http;
 
 interface KernelInterface
 {
     /**
-     * Handle the request and dispatch to routes
+     * Handle the request and dispatch to routes.
      *
      * @param $request
+     *
      * @return array|ResponseInterface|mixed|static
+     *
      * @throws Exception|\Exception
      *
      * @note this function is incomplete, need to enhance
@@ -16,9 +19,10 @@ interface KernelInterface
     public function handle($request);
 
     /**
-     * Add middlewares to HTTP application
+     * Add middlewares to HTTP application.
      *
      * @param $middleware
+     *
      * @return $this
      */
     public function addMiddleware($middleware);
@@ -26,14 +30,14 @@ interface KernelInterface
     public function getMiddleware();
 
     /**
-     * Get the application instance
+     * Get the application instance.
      *
      * @return Application
      */
     public function getApplication();
 
     /**
-     * Fire shutdown method of middleware class
+     * Fire shutdown method of middleware class.
      *
      * @param $request
      * @param $response
