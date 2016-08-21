@@ -579,11 +579,9 @@ class Router implements RouterInterface
         $i = 0;
         // Loop all routes
         foreach ($routes as $route) {
-            $routePattern = $this->hasNamedPattern($route['pattern']);
-            $pattern = ($routePattern == false) ? $route['pattern'] : $routePattern;
 
-            if($matches=$this->isPatternMatches($pattern))
-             {
+            if($matches=$this->isPatternMatches($route['pattern'], true)) {
+            
                 if($this->middleware){
                     $this->handleMiddleware();
                 }
@@ -841,9 +839,11 @@ class Router implements RouterInterface
             ->run();
     }
 
-    public function isPatternMatches($pattern)
+    public function isPatternMatches($pattern, $routePattern = false)
     {
         $uri = $this->removeIndexDotPhpAndTrillingSlash($this->getCurrentUri());
+        $hasPattern = $this->hasNamedPattern($pattern);
+        $pattern = ($hasPattern = false)?$pattern : $hasPattern;
         if (preg_match_all(
                 '#^'.$pattern.'$#',
                 $uri,
