@@ -467,7 +467,6 @@ class Collection implements Countable, IteratorAggregate, ArrayAccess, Serializa
     public function __call($method, $params = [])
     {
         foreach ($this->data as $class) {
-
             if (!method_exists($class, $method)) {
                 throw new BadMethodCallException(
                     sprintf('Method %s() doesn\'t exists in class %s', $method, get_class($this))

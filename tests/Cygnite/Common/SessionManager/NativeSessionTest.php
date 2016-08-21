@@ -31,7 +31,6 @@ class NativeSessionTest extends PHPUnit_Framework_TestCase
      */
     public function testSetItemIntoSession()
     {
-
         $this->session->set('name', "John Doe");
 
         $this->assertEquals('John Doe', $this->session->get('name'));

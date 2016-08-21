@@ -95,7 +95,7 @@ class Controller implements RouteControllerInterface
      * @return mixed
      */
     protected function setIndexRoute($controller, $action)
-    {   
+    {
         $this->routes['get'] = [
             "/$controller/" => Inflector::classify($controller).'@'.$action,
             "/$controller/$action/{:id}" => Inflector::classify($controller).'@'.$action,
@@ -140,7 +140,7 @@ class Controller implements RouteControllerInterface
         
         $this->routes['post'] = array_merge($this->routes['post'], [
             "/$controller/$action/" => $callTo
-        ]);        
+        ]);
 
         return $this;
     }
@@ -180,27 +180,27 @@ class Controller implements RouteControllerInterface
      * @throws \Exception
      */
     protected function mapRoute()
-    {        
+    {
         foreach ($this->routes['get'] as $pattern => $func) {
             $this->mapStaticRoutes($pattern, $func);
         }
         
         foreach ($this->routes['post'] as $pattern => $func) {
-             $this->mapStaticRoutes($pattern, $func, 'post');
+            $this->mapStaticRoutes($pattern, $func, 'post');
         }
         
         return $this;
     }
     
     /**
-     * 
+     *
      * @param type $pattern
      * @param type $func
      * @param type $method
      * @return \Cygnite\Base\Router\Controller\Controller
      */
     private function mapStaticRoutes($pattern, $func, $method = 'get')
-    {                        
+    {
         if (!is_string($func)) {
             throw new \Exception("$func must be string!");
         }
@@ -223,14 +223,12 @@ class Controller implements RouteControllerInterface
         $app = $this->getApplication();
 
         foreach ($methods as $key => $method) {
-
             if ($method !== '__construct') {
-
                 list($uri, $verb, $method, $plain) = $this->getRoutesParameters($method, $controller, $reflection);
                 $args = $this->getUriArguments($plain);
 
                 if (!in_array($verb, $this->verbs)) {
-                  throw new \RuntimeException("Invalid HTTP verb ($verb) exception.");
+                    throw new \RuntimeException("Invalid HTTP verb ($verb) exception.");
                 }
 
                 $classParam = ['controller' =>$controller, 'method' => $method, 'args' => $args];
@@ -250,8 +248,7 @@ class Controller implements RouteControllerInterface
      */
     public function handleRoute($app, $classParam, $verb, $uri)
     {
-        $app->router->{$verb}($uri, function () use($app, $classParam)
-        {
+        $app->router->{$verb}($uri, function () use ($app,$classParam) {
             extract($classParam);
             $app['response'] = $app->router->handleControllerDependencies($controller, $method, $args);
             return $app['response'];
@@ -348,9 +345,7 @@ class Controller implements RouteControllerInterface
         $arguments = new \CachingIterator(new \ArrayIterator($refAction->getParameters()));
 
         foreach ($arguments as $key => $param) {
-
             if (!$param->isOptional()) {
-
                 if (array_key_exists('{:'.$param->getName().'}', $patterns)) {
                     $slash = ($arguments->hasNext()) ? '/' : '';
                     $parameter .= '{:'.$param->getName().'}'.$slash;

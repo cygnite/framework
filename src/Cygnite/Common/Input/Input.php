@@ -89,8 +89,7 @@ class Input
         }
 
         if (!is_null($key) && !string_has($key, '.') && is_null($value)) {
-
-        $postValue = '';
+            $postValue = '';
             $key = $this->security->sanitize($key);
             $postValue = $this->security->sanitize($this->request['post'][$key]);
             $this->request['post'][$key] = $postValue;
@@ -110,11 +109,10 @@ class Input
          | $input->post('user.name'); // output: foo
          */
         if (!is_null($key) && string_has($key, '.') && is_null($value)) {
-
             $arr = ArrayAccessor::make($this->request['post']);
 
             return $arr->toString($this->security->sanitize($key));
-            }
+        }
 
         $this->setPostValue($key, $value);
 

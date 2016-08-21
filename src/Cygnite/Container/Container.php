@@ -221,13 +221,11 @@ class Container extends DependencyBuilder implements ContainerAwareInterface, Ar
         $binding = $this->offsetExists($key) ? $this->stack[$key] : null;
 
         $extended = function () use ($callable, $binding) {
-
             if (!is_object($binding)) {
                 throw new ContainerException(sprintf('"%s" must be Closure object.', $binding));
             }
 
             return $callable($binding($this), $this);
-
         };
 
         return $this[$key] = $extended;
@@ -353,7 +351,6 @@ class Container extends DependencyBuilder implements ContainerAwareInterface, Ar
         $constructorArgs = [];
 
         foreach ($dependencies as $dependency) {
-
             if (!is_null($dependency->getClass())) {
                 $constructorArgs[] = $this->resolverClass($dependency, $arguments);
             } else {
@@ -363,7 +360,6 @@ class Container extends DependencyBuilder implements ContainerAwareInterface, Ar
                  | for next argument
                  */
                 if ($dependency->isDefaultValueAvailable()) {
-
                     $constructorArgs[] = $this->checkIfConstructorHasDefaultArgs($dependency, $arguments);
                     continue;
                 }
@@ -428,7 +424,7 @@ class Container extends DependencyBuilder implements ContainerAwareInterface, Ar
         }
         
         if ($this->offsetExists($class)) {
-        	return $this[$class];
+            return $this[$class];
         }
 
         return $this[$class] = new $class($arguments);

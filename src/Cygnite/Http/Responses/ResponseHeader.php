@@ -10,6 +10,7 @@
 namespace Cygnite\Http\Responses;
 
 use Cygnite\Http\Header;
+
 /**
  * Class Response
  *

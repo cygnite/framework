@@ -22,7 +22,7 @@ if (!defined('CF_SYSTEM')) {
  * View Class.
  *
  * Render your view page or template
- * 
+ *
  * @author Sanjoy Dey <dey.sanjoy0@gmail.com>
  */
 class View implements ViewInterface,\ArrayAccess
@@ -183,7 +183,6 @@ class View implements ViewInterface,\ArrayAccess
         $v = ViewFactory::make();
 
         if ($callback instanceof \Closure) {
-
             $content = $v->render($view, $data, true)->content();
 
             return $callback($v, $content);
@@ -206,7 +205,7 @@ class View implements ViewInterface,\ArrayAccess
      * ---------------------
      * //path : Views/home/index.html.twig
      * $this->render('home.index', $data);
-     * 
+     *
      * $content = $this->render('home.index', $data, true);
      * return Response::make($content);
      * @param       $view

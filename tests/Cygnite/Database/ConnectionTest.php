@@ -6,8 +6,7 @@ class ConnectionTest extends PHPUnit_Framework_TestCase
 {
     public function setUp()
     {
-        Configure::database(function ($config)
-        {
+        Configure::database(function ($config) {
             $config->default = 'db';
             $config->set([
                     'db' => [

@@ -43,7 +43,7 @@ class Elements
 
     /**
      *
-     * <code> 
+     * <code>
      * ->addElement('custom', 'dl', ['name' => '<span style="color:red;">Custom Tag</span>',)
      * </code>
      *
@@ -62,7 +62,7 @@ class Elements
 
     /**
      *
-     * <code> 
+     * <code>
      * ->addElement('openTag', 'div_1', ['style' => 'height:40px;'])
      * </code>
      *
@@ -84,7 +84,7 @@ class Elements
 
     /**
      *
-     * <code> 
+     * <code>
      * ->addElement('closeTag', 'div_1')
      * </code>
      *

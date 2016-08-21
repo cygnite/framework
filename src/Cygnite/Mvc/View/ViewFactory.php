@@ -57,6 +57,4 @@ abstract class ViewFactory
 
         return static::make()->render($view, $data);
     }
-
-
 }

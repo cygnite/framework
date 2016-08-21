@@ -42,7 +42,6 @@ trait ControllerViewBridgeTrait
      */
     public function get($class)
     {
-
         $app = $this->app();
 
         return $app->resolve($class);

@@ -204,8 +204,7 @@ class Router implements RouterInterface
     public function get($pattern, $func)
     {
         if (is_array($func)) {
-            
-            if($this->isPatternMatches($pattern)){
+            if ($this->isPatternMatches($pattern)) {
                 $this->middleware = $func['middleware'];
             }
             $func = end($func);
@@ -229,7 +228,6 @@ class Router implements RouterInterface
 
     public function getRouteMiddlewares()
     {
-       
         return $this->middleware;
     }
 
@@ -305,7 +303,7 @@ class Router implements RouterInterface
     {
         $method = strtoupper(__FUNCTION__);
         if (is_array($func)) {
-            if($this->isPatternMatches($pattern)){
+            if ($this->isPatternMatches($pattern)) {
                 $this->middleware = $func['middleware'];
             }
             $func = end($func);
@@ -328,7 +326,7 @@ class Router implements RouterInterface
     {
         $method = strtoupper(__FUNCTION__);
         if (is_array($func)) {
-            if($this->isPatternMatches($pattern)){
+            if ($this->isPatternMatches($pattern)) {
                 $this->middleware = $func['middleware'];
             }
             $func = end($func);
@@ -347,7 +345,7 @@ class Router implements RouterInterface
     {
         $method = strtoupper(__FUNCTION__);
         if (is_array($func)) {
-            if($this->isPatternMatches($pattern)){
+            if ($this->isPatternMatches($pattern)) {
                 $this->middleware = $func['middleware'];
             }
             $func = end($func);
@@ -367,7 +365,7 @@ class Router implements RouterInterface
         $method = strtoupper(__FUNCTION__);
 
         if (is_array($func)) {
-            if($this->isPatternMatches($pattern)){
+            if ($this->isPatternMatches($pattern)) {
                 $this->middleware = $func['middleware'];
             }
             $func = end($func);
@@ -385,7 +383,7 @@ class Router implements RouterInterface
     public function options($pattern, $func)
     {
         if (is_array($func)) {
-            if($this->isPatternMatches($pattern)){
+            if ($this->isPatternMatches($pattern)) {
                 $this->middleware = $func['middleware'];
             }
             $func = end($func);
@@ -401,7 +399,7 @@ class Router implements RouterInterface
     public function any($pattern, $func)
     {
         if (is_array($func)) {
-            if($this->isPatternMatches($pattern)){
+            if ($this->isPatternMatches($pattern)) {
                 $this->middleware = $func['middleware'];
             }
             $func = end($func);
@@ -579,10 +577,8 @@ class Router implements RouterInterface
         $i = 0;
         // Loop all routes
         foreach ($routes as $route) {
-
-            if($matches=$this->isPatternMatches($route['pattern'], true)) {
-            
-                if($this->middleware){
+            if ($matches=$this->isPatternMatches($route['pattern'], true)) {
+                if ($this->middleware) {
                     $this->handleMiddleware();
                 }
                 
@@ -806,7 +802,7 @@ class Router implements RouterInterface
         return $app['response'];
     }
     /**
-     * 
+     *
      * @return mixed
      */
     public function getMiddlewares()
@@ -832,7 +828,7 @@ class Router implements RouterInterface
      * @return mixed
      */
     public function runRouteWithinStack(Request $request)
-    {        
+    {
         return (new Pipeline($this->application))
             ->send($request)
             ->through([$this->middleware])
@@ -854,4 +850,3 @@ class Router implements RouterInterface
         }
     }
 }
-

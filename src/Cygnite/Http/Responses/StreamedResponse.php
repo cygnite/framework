@@ -22,7 +22,7 @@ class StreamedResponse extends Response
 
     /**
      * Constructor of StreamedResponse class
-     * 
+     *
      * @param \Cygnite\Http\Responses\callable $callback
      * @param type $status
      * @param type $headers
@@ -38,7 +38,7 @@ class StreamedResponse extends Response
 
     /**
      * Factory method to return StreamedResponse object to chain methods
-     * 
+     *
      * @param type $callback
      * @param type $status
      * @param type $headers
@@ -50,8 +50,8 @@ class StreamedResponse extends Response
     }
 
     /**
-     * Send streamed contents 
-     * 
+     * Send streamed contents
+     *
      * @throws \LogicException
      */
     public function sendContent()
@@ -67,9 +67,9 @@ class StreamedResponse extends Response
     }
 
     /**
-     * Throw exception if user tries to send content for 
+     * Throw exception if user tries to send content for
      * StreamedResponse.
-     * 
+     *
      * @param type $content
      * @throws \LogicException
      */
@@ -83,7 +83,7 @@ class StreamedResponse extends Response
 
     /**
      * Returns false
-     * 
+     *
      * @return boolean
      */
     public function getContent()
@@ -93,7 +93,7 @@ class StreamedResponse extends Response
 
     /**
      * Set the callback for streaming response
-     * 
+     *
      * @param \Cygnite\Http\Responses\callable $callback
      */
     public function setCallback(callable $callback)

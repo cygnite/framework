@@ -72,7 +72,7 @@ class FooBarServiceProvider
     public function register(Application $app)
     {
         $app['foo.bar'] = $app->share(function ($c) {
-             return new FooBar();
+            return new FooBar();
         });
     }
 }

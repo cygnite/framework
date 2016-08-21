@@ -51,7 +51,7 @@ class Schema
     protected function __construct($model = null, $database = null)
     {
         if (!is_null($model) && is_object($model)) {
-        $this->klass = $model;
+            $this->klass = $model;
 
             if (!class_exists(get_class($this->klass))) {
                 throw new \ErrorException(sprintf("Class %s doesn't exists", get_class($this->klass)));
@@ -114,7 +114,7 @@ class Schema
         $this->setDatabaseConnection($this->getDatabase());
 
         return $this;
-                }
+    }
 
     /**
      * Set the database connection name
@@ -127,7 +127,7 @@ class Schema
         $this->database = $database;
 
         return $this;
-            }
+    }
 
     /**
      * Get the table name
@@ -137,7 +137,7 @@ class Schema
     public function getDatabase()
     {
         return $this->database;
-        }
+    }
 
     /**
      * Set table name
@@ -161,7 +161,7 @@ class Schema
      */
     public static function make($table, Closure $closure)
     {
-        if (is_array($table)){
+        if (is_array($table)) {
             $table = isset($table['table']) ? $table['table'] : $table;
             $database = isset($table['database']) ? $table['database'] : null;
             $schema = new static($table, $database);
@@ -738,13 +738,12 @@ class Schema
     public function run()
     {
         if (is_object($this->connection())) {
-
             try {
                 $stmt = $this->connection()->prepare($this->schema);
 
-                    if ($this->checkSchemaExistence) {
-                        return $stmt->rowCount();
-                    } else if ($return = $stmt->execute()) {
+                if ($this->checkSchemaExistence) {
+                    return $stmt->rowCount();
+                } elseif ($return = $stmt->execute()) {
                     return $return;
                 } else {
                     return false;

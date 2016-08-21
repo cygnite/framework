@@ -44,9 +44,7 @@ class JsonResponse extends Response
     {
         try {
             $data = json_encode($data, (($prettyPrint) ? JSON_PRETTY_PRINT : 15));
-
         } catch (\Exception $e) {
-
             if ('Exception' === get_class($e) && 0 === strpos($e->getMessage(), 'Failed calling ')) {
                 throw $e->getPrevious() ?: $e;
             }

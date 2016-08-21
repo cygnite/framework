@@ -140,4 +140,4 @@ class Header extends Collection
 
         return $name;
     }
-} 
+}

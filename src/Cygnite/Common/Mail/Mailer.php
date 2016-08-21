@@ -97,11 +97,11 @@ class Mailer implements MailerInterface
 
     /**
      * Set Transport Type Mail/Smtp/Sendmail
-     * 
-     * @access public 
+     *
+     * @access public
      * @param  $type
      * @return void
-     * 
+     *
      */
     protected function setTransportType($type)
     {
@@ -149,12 +149,12 @@ class Mailer implements MailerInterface
     }
     
     /**
-     * Set SMTP transport 
-     * 
-     * @access public 
+     * Set SMTP transport
+     *
+     * @access public
      * @param  null
      * @return void
-     * 
+     *
      */
     protected function createSmtpTransport()
     {
@@ -174,12 +174,12 @@ class Mailer implements MailerInterface
     }
     
      /**
-     * Set SendMail transport 
-     * 
-     * @access public 
+     * Set SendMail transport
+     *
+     * @access public
      * @param  null
      * @return void
-     * 
+     *
      */
     protected function createSendMailTransport()
     {
@@ -199,12 +199,12 @@ class Mailer implements MailerInterface
     }
     
     /**
-     * Set Mail transport 
-     * 
-     * @access public 
+     * Set Mail transport
+     *
+     * @access public
      * @param  null
      * @return void
-     * 
+     *
      */
     protected function createMailTransport()
     {
@@ -225,11 +225,11 @@ class Mailer implements MailerInterface
 
      /**
      * Get Transport instance (object). By default it will return smtp instance
-     * 
-     * @access public 
+     *
+     * @access public
      * @param  $type string
      * @return object
-     * 
+     *
      */
     public function transport($type = 'smtp')
     {
@@ -243,12 +243,12 @@ class Mailer implements MailerInterface
     }
 
      /**
-     * Get Message Instance 
-     * 
-     * @access public 
+     * Get Message Instance
+     *
+     * @access public
      * @param  null
      * @return object of MailMessage
-     * 
+     *
      */
     public function message()
     {
@@ -283,12 +283,12 @@ class Mailer implements MailerInterface
     }
 
     /**
-     * Add attachment to your email 
-     * 
-     * @access public 
+     * Add attachment to your email
+     *
+     * @access public
      * @param  $path path of your email attachment
      * @return unknown
-     * 
+     *
      */
     public function attach($path)
     {

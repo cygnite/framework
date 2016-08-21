@@ -242,10 +242,9 @@ class Cookie implements CookieInterface
         }
 
         if (isset(static::$cookies[$name])) {
-
             if (is_array(static::$cookies[$name])) {
                 return json_decode(static::$cookies[$name]);
-        }
+            }
 
             return $this->security->sanitize(static::$cookies[$name]);
         }

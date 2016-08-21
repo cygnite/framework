@@ -156,11 +156,11 @@ class Validator implements ValidatorInterface
      * Get error string
      *
      * <code>
-     *   $validator->after(function($v) 
+     *   $validator->after(function($v)
      *   {
-     *       $v->setCustomError('field', 'Error Message!!');    
+     *       $v->setCustomError('field', 'Error Message!!');
      *   });
-     *   
+     *
      * </code>
      * @param $callback
      * @return $this Clouser Instance
@@ -204,7 +204,7 @@ class Validator implements ValidatorInterface
 
         /*
         | We will fire all after validation callbacks
-        | This is useful to override error message with 
+        | This is useful to override error message with
         | custom messages
         */
         foreach ($this->after as $event) {
