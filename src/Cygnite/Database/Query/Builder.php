@@ -1333,7 +1333,7 @@ class Builder extends Joins implements QueryBuilderInterface
             return $table->getColumns();
         });
 
-        $columns = $this->query($select->schema)->getAll();
+        $columns = $this->sql($select->getSchemaPreparedQuery())->getAll();
 
         // Get all column name which need to remove from the result set
         $exceptColumns = $ar->skip();
