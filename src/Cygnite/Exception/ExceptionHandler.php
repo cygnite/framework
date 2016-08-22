@@ -214,7 +214,6 @@ class ExceptionHandler implements ExceptionInterface
 
         //Add new panel to debug bar
         $this->addPanel(function ($e) use ($handler) {
-
             if (!is_null($path = $handler->assetsPath())) {
                 $contents = $handler->includeAssets($path);
             }

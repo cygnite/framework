@@ -60,8 +60,7 @@ class ArrayAccessorTest extends PHPUnit_Framework_TestCase
                 "author"  => 'Sanjoy Dey'
             ]
         ];
-        $output = ArrayAccessor::make($array, function($a)
-        {
+        $output = ArrayAccessor::make($array, function ($a) {
             return $a->toString('profile.author');
         });
 
@@ -75,8 +74,7 @@ class ArrayAccessorTest extends PHPUnit_Framework_TestCase
                 "bar"  => 'Foo Bar'
             ]
         ];
-        $output = ArrayAccessor::make($array, function($a)
-        {
+        $output = ArrayAccessor::make($array, function ($a) {
             return $a->toJson();
         });
 
@@ -91,8 +89,7 @@ class ArrayAccessorTest extends PHPUnit_Framework_TestCase
             ]
         ];
 
-        $output = ArrayAccessor::make($array, function($a)
-        {
+        $output = ArrayAccessor::make($array, function ($a) {
             return $a->has('bar');
         });
 

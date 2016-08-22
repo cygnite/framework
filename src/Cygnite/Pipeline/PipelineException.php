@@ -11,5 +11,4 @@ namespace Cygnite\Pipeline;
 
 class PipelineException extends \Exception
 {
-
 }

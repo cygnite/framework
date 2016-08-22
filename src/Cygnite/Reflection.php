@@ -125,7 +125,6 @@ class Reflection
         $return = $this->methodScopes;
 
         foreach (array_keys($return) as $key) {
-
             $validScope = false;
             $validScope = $this->getScopeType($key);
 
@@ -163,7 +162,6 @@ class Reflection
     public function getClassMethods(&$methods, &$inherit, &$key, &$static, &$return)
     {
         foreach ($methods as $method) {
-
             $isStatic = $method->isStatic();
 
             if (!is_null($static) && $static && !$isStatic) {

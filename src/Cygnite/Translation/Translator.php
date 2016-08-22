@@ -2,6 +2,7 @@
 namespace Cygnite\Translation;
 
 use Cygnite\Common\ArrayManipulator\ArrayAccessor;
+
 /**
  * Class Translator
  *
@@ -126,8 +127,7 @@ class Translator implements TranslatorInterface
             $translator = $this->load($locale.'-'.$exp[0]);
             unset($exp[0]);
 
-            $string = ArrayAccessor::make($translator, function ($a) use($exp)
-            {
+            $string = ArrayAccessor::make($translator, function ($a) use ($exp) {
                 return $a->toString(implode('.', $exp));
             });
 

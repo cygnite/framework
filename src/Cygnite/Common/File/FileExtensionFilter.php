@@ -43,7 +43,7 @@ class FileExtensionFilter extends FilterIterator
     {
         $file = $this->getInnerIterator()->current();
 
-        // If we somehow have something other than an SplFileInfo object, just 
+        // If we somehow have something other than an SplFileInfo object, just
         // return false
         if (!$file instanceof \SplFileInfo) {
             return false;

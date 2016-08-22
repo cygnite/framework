@@ -14,8 +14,7 @@ class MailServiceProvider extends ServiceProvider
      */
     public function register(Application $app)
     {
-        $app->singleton('mailer', function()
-        {
+        $app->singleton('mailer', function () {
             $mailer = new \Cygnite\Common\Mail\Mailer();
             $mailer->setSwiftMailer(new \Swift_Mailer($mailer->getTransportInstance()));
 

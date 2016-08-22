@@ -68,8 +68,7 @@ class Config extends StaticResolver
          | ]
          | Config::get('module-config.config.name');
          */
-        return ArrayAccessor::make($config, function ($a) use ($key)
-        {
+        return ArrayAccessor::make($config, function ($a) use ($key) {
             return $a->toString($key);
         });
     }

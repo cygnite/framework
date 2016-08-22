@@ -182,7 +182,6 @@ trait ResourceControllerTrait
             strtoupper($method),
             $pattern,
             function ($router, $id) use ($controller, $action, $type) {
-
                 $args = [$controller . '@' . $action];
                 if ($type) {
                     $args = [$controller . '@' . $action, $id];// delete, update

@@ -39,5 +39,4 @@ class RedisCacheTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('foo', $stub->get('foo'));
         $this->assertNotNull($stub->get('foo'));
     }
-
 }

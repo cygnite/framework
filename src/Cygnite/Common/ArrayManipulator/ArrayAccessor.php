@@ -26,7 +26,7 @@ class ArrayAccessor implements ArrayAccessorInterface
      * @param callable|null $callback
      * @return mixed
      */
-    public static function make(array $array,\Closure $callback = null)
+    public static function make(array $array, \Closure $callback = null)
     {
         if ($callback instanceof \Closure) {
             return $callback(new static($array));
@@ -103,7 +103,6 @@ class ArrayAccessor implements ArrayAccessorInterface
         }
 
         foreach ($array as $k => $value) {
-
             if (!is_array($value)) {
                 continue;
             }

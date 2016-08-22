@@ -28,7 +28,7 @@ class PipelineTest extends PHPUnit_Framework_TestCase
         $this->pipeline->send(2)
              ->through($pipes)
              ->then(function ($request) {
-                return $request + 4; // 3+ 4 = 7
+                 return $request + 4; // 3+ 4 = 7
              });
 
         $this->assertEquals(7, $this->pipeline->run());
@@ -118,7 +118,7 @@ class PipelineTest extends PHPUnit_Framework_TestCase
         $this->pipeline->send("Foo")
             ->through(['pipeline.request'], 'run');
 
-        $this->assertSame('Foo Bar',$this->pipeline->run());
+        $this->assertSame('Foo Bar', $this->pipeline->run());
     }
 
     public function testResolvingPipesThroughContainerWithParameter()
@@ -131,7 +131,7 @@ class PipelineTest extends PHPUnit_Framework_TestCase
         $this->pipeline->send("Foo")
             ->through(['PipelineRequest:'.implode(',', $parameters)], 'process');
 
-        $this->assertSame('Foo-first-second',$this->pipeline->run());
+        $this->assertSame('Foo-first-second', $this->pipeline->run());
     }
 
     public function testResolvingMultiplePipesThroughContainerWithParameter()
@@ -144,8 +144,8 @@ class PipelineTest extends PHPUnit_Framework_TestCase
         $this->pipeline->send("Foo")
             ->through(['PipelineRequest:'.implode(',', $parameters), 'pipeline.resolver'], 'process');
 
-        $this->assertEquals('Foo-third-fourth-Bar',$this->pipeline->run());
-        $this->assertSame('Foo-third-fourth-Bar',$this->pipeline->run());
+        $this->assertEquals('Foo-third-fourth-Bar', $this->pipeline->run());
+        $this->assertSame('Foo-third-fourth-Bar', $this->pipeline->run());
     }
 
     private function setValueToApplication($key = 'pipeline.request')

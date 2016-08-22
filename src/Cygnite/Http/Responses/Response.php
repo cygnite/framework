@@ -91,7 +91,7 @@ class Response implements ResponseInterface
 
     /**
      * Create Json response
-     * 
+     *
      * @param type $content
      * @param array $headers
      * @param type $prettyPrint
@@ -104,7 +104,7 @@ class Response implements ResponseInterface
 
     /**
      * Create a Streamed Response
-     * 
+     *
      * @param \Cygnite\Http\Responses\callable $callback
      * @param type $status
      * @param type $headers
@@ -382,7 +382,6 @@ class Response implements ResponseInterface
         }
 
         foreach ($this->headers->all() as $name => $values) {
-
             foreach ($values as $value) {
                 // Create the header and send it
                 is_string($name) && $value = "{$name}: {$value}";

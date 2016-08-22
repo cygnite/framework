@@ -137,7 +137,6 @@ class Model
     {
         $validationCode = '';
         foreach ($this->command->getColumns() as $key=> $value) {
-
             if ($value['COLUMN_NAME'] !== 'id') {
                 $validationCode .= $this->generateValidatorRules($value);
             }

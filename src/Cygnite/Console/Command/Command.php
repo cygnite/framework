@@ -271,7 +271,7 @@ class Command extends SymfonyCommand
         $method = method_exists($this, 'process') ? 'process' : 'handle';
 
         return $this->{$method}();
-}
+    }
 
     /**
      * Get the value from command argument.

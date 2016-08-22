@@ -155,7 +155,7 @@ class Encrypt
         $encryptKey = Config::get('global.config', 'encryption.key');
 
         if (self::$instance === null) {
-           self::$instance = new static($encryptKey);
+            self::$instance = new static($encryptKey);
         }
 
         return self::$instance;

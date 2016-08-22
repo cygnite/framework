@@ -76,8 +76,8 @@ class Kernel implements KernelInterface
              *
              */
             if (!$response instanceof ResponseInterface && !is_array($response)) {
-               $r = $this->app->has('response') ? $this->app->get('response') : '';
-               $response = Response::make($r);
+                $r = $this->app->has('response') ? $this->app->get('response') : '';
+                $response = Response::make($r);
             }
         } catch (\Exception $e) {
             $this->handleException($e);
@@ -104,7 +104,7 @@ class Kernel implements KernelInterface
                 break;
 
             }
-        }
+    }
 
     /**
      * Report and throw exception
@@ -164,7 +164,7 @@ class Kernel implements KernelInterface
         foreach ($middlewares as $middleware) {
             if (is_object($middleware)) {
                 $pipes[] = $middleware;
-            } elseif (string_has($middleware, ':')){
+            } elseif (string_has($middleware, ':')) {
                 $pipes[] = $middleware;
             } else {
                 $pipes[] = $this->app->make($middleware);

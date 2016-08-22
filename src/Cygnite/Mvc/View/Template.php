@@ -183,7 +183,7 @@ class Template
     public function filter($function, $callback, $options = array())
     {
         return new \Twig_SimpleFilter($function, $callback, $options);
-}
+    }
 
     /**
      * @param $function

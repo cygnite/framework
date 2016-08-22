@@ -521,7 +521,7 @@ class Session extends ActiveRecord implements PacketInterface
          */
         if (! $this->has('_token')) {
             $this->regenerateToken();
-}
+        }
     }
 
     /**

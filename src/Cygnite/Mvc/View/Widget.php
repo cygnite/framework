@@ -115,7 +115,7 @@ class Widget implements \ArrayAccess
         }
     }
 
-    private function getWidgetPath($widget, $moduleName = '',  $isModule = false)
+    private function getWidgetPath($widget, $moduleName = '', $isModule = false)
     {
         $modulePath = 'Views';
         if ($isModule) {
