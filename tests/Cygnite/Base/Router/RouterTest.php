@@ -253,7 +253,6 @@ class RouterTest extends PHPUnit_Framework_TestCase
             $route->where('{:any_string}', '(\w+)')->get('cygnite/{:any_string}', function ($route, $string) {
                 echo "Photo_Where_Image_Name:_$string";
             });
-
         });
 
         $this->obStart();

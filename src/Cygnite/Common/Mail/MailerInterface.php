@@ -34,20 +34,20 @@ interface MailerInterface
 
      /**
      * Get Transport instance (object). By default it will return smtp instance
-     * 
-     * @access public 
+     *
+     * @access public
      * @param  $type string
      * @return object
-     * 
+     *
      */
     public function transport($type = 'smtp');
      /**
-     * Get Message Instance 
-     * 
-     * @access public 
+     * Get Message Instance
+     *
+     * @access public
      * @param  null
      * @return object of MailMessage
-     * 
+     *
      */
     public function message();
 
@@ -62,12 +62,12 @@ interface MailerInterface
     public function send($message);
 
     /**
-     * Add attachment to your email 
-     * 
-     * @access public 
+     * Add attachment to your email
+     *
+     * @access public
      * @param  $path path of your email attachment
      * @return unknown
-     * 
+     *
      */
     public function attach($path);
 }

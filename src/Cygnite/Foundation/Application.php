@@ -23,7 +23,6 @@ use Cygnite\Base\Request\Dispatcher;
 use Cygnite\Http\Responses\ResponseInterface;
 use Cygnite\Exception\Handler as ExceptionHandler;
 
-
 if (!defined('CF_SYSTEM')) {
     exit('External script access not allowed');
 }
@@ -78,7 +77,6 @@ class Application extends Container implements ApplicationInterface
 
     public function __construct($argument = [])
     {
-
     }
 
     /**
@@ -369,7 +367,9 @@ class Application extends Container implements ApplicationInterface
      */
     private function bootInternals()
     {
-        if ($this->isBooted()) return;
+        if ($this->isBooted()) {
+            return;
+        }
 
         $this['debugger']->setEnv(ENV)->handleException();
         $this->registerCoreBootstrappers();
@@ -416,7 +416,6 @@ class Application extends Container implements ApplicationInterface
         $appEvents = $this['event']->getAppEvents();
 
         if (!empty($appEvents)) {
-
             foreach ($appEvents as $event => $namespace) {
                 // attach all before and after event to handler
                 $this['event']->attach("$event", $namespace);

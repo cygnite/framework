@@ -34,7 +34,6 @@ class EventTest extends PHPUnit_Framework_TestCase
     public function testEventClouserInstance()
     {
         $event = Event::create(function ($event) {
-            
             $event->attach('some', 'Some');
 
             $event->attach('something', function () {

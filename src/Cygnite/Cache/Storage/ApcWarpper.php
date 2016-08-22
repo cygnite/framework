@@ -31,12 +31,12 @@ class ApcWarpper
 {
     // life time
     protected $lifeTime;
-    protected $defaultTime = 10; //default time is set 10 * 60 = 600 sec    
+    protected $defaultTime = 10; //default time is set 10 * 60 = 600 sec
     protected $option = false; // flag set false
     protected $isApcUEnabled = false;
 
     /*
-    * Constructor function to check availability of apc extension, 
+    * Constructor function to check availability of apc extension,
     * throws exception if not available
     *
     */

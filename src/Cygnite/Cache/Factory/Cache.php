@@ -76,7 +76,6 @@ class Cache
 
         $memcached = null;
         if ($config['memcached']['autoconnnect']) {
-
             $uniqueId = $config['memcached']['uniqueId'];
             $memCachedInstance = (!is_null($uniqueId)) ? new Memcached($uniqueId) : new Memcached();
 
