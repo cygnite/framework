@@ -34,8 +34,7 @@ class HasManyThough
         $foreignId = null,
         $firstKey = null,
         $secondKey = null
-    )
-    {
+    ) {
         $this->baseClass = get_class($ar);
         $this->foreignClass = $foreignClass;
         $this->mapClass = $mapClass;

@@ -42,10 +42,10 @@ class Memcached implements StorageInterface
     *  Cache::make('memcached', function ($memcached) use($connection)
     *  {
     *      $memcached->setConnector($connection);
-    *    
-    *      $memcached->store('foo', 'Foo Bar'); 
+    *
+    *      $memcached->store('foo', 'Foo Bar');
     *  });
-    * 
+    *
     * </code>
     */
     public function setConnector($connector)

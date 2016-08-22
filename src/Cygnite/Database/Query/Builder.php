@@ -194,7 +194,6 @@ class Builder extends Joins implements QueryBuilderInterface
 
             // we will bind all parameters into the statement using execute method
             if ($return = $statement->execute($arguments)) {
-
                 $ar->{$ar->getKeyName()} = (int)$this->resolveConnection()->lastInsertId();
                 /*
                  | Trigger after create events if
@@ -205,7 +204,6 @@ class Builder extends Joins implements QueryBuilderInterface
 
                 return $return;
             }
-
         } catch (PDOException  $exception) {
             throw new \RuntimeException($exception->getMessage());
         }
@@ -287,7 +285,6 @@ class Builder extends Joins implements QueryBuilderInterface
         $sql = $this->getUpdateQuery($data, strtoupper(__FUNCTION__)).$whereStr;
 
         try {
-
             $stmt = $this->resolveConnection()->prepare($sql);
 
             //Bind all values to query statement
@@ -295,7 +292,7 @@ class Builder extends Joins implements QueryBuilderInterface
                 $stmt->bindValue(":$key", $val);
             }
 
-            foreach($where as $key => $value){
+            foreach ($where as $key => $value) {
                 $stmt->bindValue(":$key", $value);
             }
 
@@ -310,9 +307,7 @@ class Builder extends Joins implements QueryBuilderInterface
             $this->triggerEvent('afterUpdate');
 
             return $affectedRow;
-
         } catch (\PDOException  $exception) {
-
             throw new \Exception($exception->getMessage());
         }
     }
@@ -373,7 +368,6 @@ class Builder extends Joins implements QueryBuilderInterface
             $this->triggerEvent('afterDelete');
 
             return $affectedRow;
-
         } catch (\PDOException  $ex) {
             throw new DatabaseException($ex->getMessage());
         }
@@ -415,7 +409,6 @@ class Builder extends Joins implements QueryBuilderInterface
 
     public function truncate()
     {
-        
     }
 
     /**
@@ -571,7 +564,7 @@ class Builder extends Joins implements QueryBuilderInterface
 
     /**
      * Add having clause to the query prefixing OR keyword
-     * 
+     *
      * @param        $column
      * @param string $operator
      * @param null   $value
@@ -598,7 +591,7 @@ class Builder extends Joins implements QueryBuilderInterface
     {
         $multiple = is_array($column) ? $column : [$column => $value];
 
-        foreach($multiple as $key => $val) {
+        foreach ($multiple as $key => $val) {
 
             // Add the table name in case of ambiguous columns
             if (count($this->joinSources) > 0 && string_has($key, '.')) {
@@ -834,7 +827,6 @@ class Builder extends Joins implements QueryBuilderInterface
             } else {
                 return new Collection([]);
             }
-
         } catch (PDOException $ex) {
             throw new \Exception("Database exceptions: Invalid query x" . $ex->getMessage());
         }
@@ -965,7 +957,6 @@ class Builder extends Joins implements QueryBuilderInterface
             } else {
                 $this->statement->execute();
             }
-
         } catch (\PDOException $e) {
             throw new Exception($e->getMessage());
         }
@@ -1145,7 +1136,6 @@ class Builder extends Joins implements QueryBuilderInterface
     public function find($method, $options = [])
     {
         if (isset($options['primaryKey']) && $method == __FUNCTION__) {
-
             return $this->select('all')
                 ->where(self::cyrus()->getKeyName(), '=', array_shift($options['args']))
                 ->orderBy(self::cyrus()->getKeyName(), 'DESC')
@@ -1336,12 +1326,11 @@ class Builder extends Joins implements QueryBuilderInterface
         }
 
         // we will get the table schema
-        $select = Schema::make($this, function ($table) use ($ar)
-        {
-                $table->database = $ar->getDatabase();
-                $table->tableName = $ar->getTableName();
+        $select = Schema::make($this, function ($table) use ($ar) {
+            $table->database = $ar->getDatabase();
+            $table->tableName = $ar->getTableName();
 
-                return $table->getColumns();
+            return $table->getColumns();
         });
 
         $columns = $this->query($select->schema)->getAll();
@@ -1351,7 +1340,6 @@ class Builder extends Joins implements QueryBuilderInterface
         $columnArray = [];
 
         foreach ($columns as $key => $value) {
-
             if (!in_array($value->COLUMN_NAME, $exceptColumns)) {
                 $columnArray[] = $value->COLUMN_NAME;
             }

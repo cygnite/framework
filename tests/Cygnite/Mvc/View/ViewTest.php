@@ -32,11 +32,11 @@ class ViewTest extends PHPUnit_Framework_TestCase
         ViewFactory::setApplication($app);
 
         $data = ['foo' => 'Cygnite!'];
-        $content = View::create("fixtures.hello", $data);        
+        $content = View::create("fixtures.hello", $data);
         $this->assertEquals('Hello Cygnite!', Response::make($content)->getContent());
 
         $data = ['foo' => 'Foo Bar!'];
-        $composeContent = View::compose("fixtures.hello", $data);        
+        $composeContent = View::compose("fixtures.hello", $data);
         $this->assertEquals('Hello Foo Bar!', Response::make($composeContent)->getContent());
     }
 
@@ -51,11 +51,9 @@ class ViewTest extends PHPUnit_Framework_TestCase
         $content = $view->render('fixtures.template', ['bar' => 'FooBar'], true);
         
         $this->assertEquals('FooBar', $content);
-
     }
 
     public function tearDown()
     {
-
     }
 }

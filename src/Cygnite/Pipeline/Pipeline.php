@@ -135,17 +135,16 @@ class Pipeline implements PipelineInterface
     {
         return function ($stack, $pipe) {
             return function ($request) use ($stack, $pipe) {
-
                 if ($pipe instanceof Closure) {
                     return call_user_func($pipe, $request, $stack);
                 } elseif (! is_object($pipe)) {
-                    list ($callback, $parameters) = $this->createParameters($pipe, $request, $stack, true);
+                    list($callback, $parameters) = $this->createParameters($pipe, $request, $stack, true);
                 } else {
                     if (!method_exists($pipe, $this->method)) {
                         throw new PipelineException(sprintf("%s::%s doesn't exist", get_class($pipe), $this->method));
                     }
 
-                    list ($callback, $parameters) = $this->createParameters($pipe, $request, $stack);
+                    list($callback, $parameters) = $this->createParameters($pipe, $request, $stack);
                 }
 
                 return $this->call($callback, $parameters);

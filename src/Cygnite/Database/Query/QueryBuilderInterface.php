@@ -119,7 +119,7 @@ interface QueryBuilderInterface
     public function distinct($column);
 
     /**
-     * 
+     *
      * @param type $limit
      * @param type $offset
      */
@@ -203,9 +203,9 @@ interface QueryBuilderInterface
     public function execute();
 
     /**
-     * Will return the single row 
+     * Will return the single row
      * from the table
-     * 
+     *
      * @return mixed
      */
     public function getOne();

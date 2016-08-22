@@ -64,7 +64,7 @@ class Migrator
 
     /**
      * Get the template path
-     * 
+     *
      * @return type
      */
     public function getTemplatePath()
@@ -76,7 +76,7 @@ class Migrator
 
     /**
      * Check has direectory
-     * 
+     *
      * @param type $directory
      * @return type
      */
@@ -207,7 +207,7 @@ class Migrator
         if (is_array($string)) {
             $parts = [];
             foreach ($string as $key => $str) {
-               $parts[$key] = preg_split('((\d+|\D+))', $str, -1, PREG_SPLIT_DELIM_CAPTURE|PREG_SPLIT_NO_EMPTY);
+                $parts[$key] = preg_split('((\d+|\D+))', $str, -1, PREG_SPLIT_DELIM_CAPTURE|PREG_SPLIT_NO_EMPTY);
             }
 
             return $parts;
@@ -247,7 +247,7 @@ class Migrator
 
     /**
      * Get the migration class name
-     * 
+     *
      * @return type
      */
     public function getMigrationClass()

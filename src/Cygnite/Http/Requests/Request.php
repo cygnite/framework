@@ -154,8 +154,7 @@ class Request
         array $files = null,
         array $env = null,
         $content = null
-    )
-    {
+    ) {
         $query = isset($query) ? $query : $_GET;
         $post = isset($post) ? $post : $_POST;
         $cookie = isset($cookie) ? $cookie : $_COOKIE;
@@ -212,8 +211,7 @@ class Request
         array $files = [],
         array $env = [],
         $rawBody = null
-    )
-    {
+    ) {
         // Define some basic server vars, but override them with the input on collision
         $server = array_replace([
                 "HTTP_ACCEPT" => "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
@@ -633,7 +631,6 @@ class Request
         }
 
         return $value;
-
     }
 
     /**
@@ -1004,4 +1001,4 @@ class Request
         $this->files = clone $this->files;
         $this->env = clone $this->env;
     }
-} 
+}
