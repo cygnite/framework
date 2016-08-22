@@ -7,15 +7,12 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-
 namespace Cygnite\Mvc;
 
 use Cygnite\Foundation\Application;
 
 /**
- * trait ControllerViewBridgeTrait
- *
- * @package Cygnite\Mvc
+ * trait ControllerViewBridgeTrait.
  */
 trait ControllerViewBridgeTrait
 {
@@ -24,6 +21,7 @@ trait ControllerViewBridgeTrait
     /**
      * @param $method
      * @param $arguments
+     *
      * @return AbstractBaseController|mixed
      */
     public function setFlashMessage($method, $arguments)
@@ -32,6 +30,7 @@ trait ControllerViewBridgeTrait
 
         if ($method == 'setFlash') {
             $this->_call($flashSession, $method, $arguments);
+
             return $this;
         } else {
             return $this->_call($flashSession, $method, $arguments);
@@ -40,11 +39,13 @@ trait ControllerViewBridgeTrait
 
     /**
      * @param $class
+     *
      * @return object
      */
     public function get($class)
     {
         $container = Application::instance();
+
         return $container->resolve($class);
     }
 
@@ -52,6 +53,7 @@ trait ControllerViewBridgeTrait
      * @param       $instance
      * @param       $method
      * @param array $arguments
+     *
      * @return mixed
      */
     public function _call($instance, $method, $arguments = [])

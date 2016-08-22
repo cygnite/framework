@@ -8,18 +8,14 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-
 namespace Cygnite\Mvc\Controller;
 
-use Exception;
-use Cygnite\Common\Encrypt;
-use Cygnite\Helpers\Inflector;
-use Cygnite\Mvc\View\ViewFactory;
 use Cygnite\Common\UrlManager\Url;
-use Cygnite\Base\EventHandler\Event;
-use Cygnite\Common\SessionManager\Session;
 use Cygnite\Foundation\Application as App;
+use Cygnite\Helpers\Inflector;
 use Cygnite\Mvc\ControllerViewBridgeTrait;
+use Cygnite\Mvc\View\ViewFactory;
+use Exception;
 
 /**
  * AbstractBaseController.
@@ -37,7 +33,7 @@ abstract class AbstractBaseController
     private $class;
 
     /**
-     * Constructor function
+     * Constructor function.
      *
      * Configure parameters for View
      */
@@ -56,8 +52,10 @@ abstract class AbstractBaseController
      *
      * @param $method
      * @param $arguments
-     * @return AbstractBaseController|mixed|void
+     *
      * @throws \Exception
+     *
+     * @return AbstractBaseController|mixed|void
      */
     public function __call($method, $arguments)
     {
@@ -74,6 +72,7 @@ abstract class AbstractBaseController
      * @param string $uri
      * @param string $type
      * @param int    $httpResponseCode
+     *
      * @return $this
      */
     protected function redirectTo($uri = '', $type = 'location', $httpResponseCode = 302)
@@ -86,7 +85,7 @@ abstract class AbstractBaseController
     /**
      * <code>
      * // Call the "index" method on the "user" controller
-     *  $response = $this->call('admin::user@index');
+     *  $response = $this->call('admin::user@index');.
      *
      * // Call the "user/admin" controller and pass parameters
      *   $response = $this->call('modules.admin.user@profile', $arguments);
@@ -102,7 +101,7 @@ abstract class AbstractBaseController
         $namespace = str_replace(end($class), '', $class);
         $class = '\\'.APP_NS.'\\'.implode('\\', $namespace).$className;
 
-        return $this->_call(new $class, $method, $arguments);
+        return $this->_call(new $class(), $method, $arguments);
     }
 
     public function getContainer()
@@ -126,11 +125,9 @@ abstract class AbstractBaseController
         return isset($this->class) ? $this->class : get_called_class();
     }
 
-
     public function configure()
     {
         foreach ($this->validProperties as $key => $property) {
-
             $method = 'set'.ucfirst($property);
 
             if ($this->property($this, $property)) {
@@ -142,6 +139,7 @@ abstract class AbstractBaseController
     /**
      * @param $class
      * @param $property
+     *
      * @return bool
      */
     public function property($class, $property)
@@ -152,7 +150,8 @@ abstract class AbstractBaseController
     /**
      * @param       $view
      * @param array $params
-     * @param bool $return
+     * @param bool  $return
+     *
      * @return mixed
      */
     public function render($view, $params = [], $return = false)
@@ -163,7 +162,8 @@ abstract class AbstractBaseController
     /**
      * @param $view
      * @param array $params
-     * @param bool $return
+     * @param bool  $return
+     *
      * @return mixed
      */
     public function template($view, $params = [], $return = false)
@@ -180,7 +180,7 @@ abstract class AbstractBaseController
     }
 
     /**
-     * Return the Template instance
+     * Return the Template instance.
      *
      * @return bool
      */

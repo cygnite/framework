@@ -1,4 +1,5 @@
 <?php
+
 namespace Cygnite\FormBuilder;
 
 if (!defined('CF_SYSTEM')) {
@@ -6,24 +7,24 @@ if (!defined('CF_SYSTEM')) {
 }
 
 /**
- * Class FormInterface
- *
- * @package Cygnite\FormBuilder
+ * Class FormInterface.
  */
 interface FormInterface
 {
     /**
-     * Create a form instance and return it
+     * Create a form instance and return it.
      *
      * @param Closure $callback
+     *
      * @return mixed
      */
     public static function make(\Closure $callback = null);
 
     /**
-     * Alias method of make()
+     * Alias method of make().
      *
      * @param Closure $callback
+     *
      * @return mixed
      */
     public static function instance(\Closure $callback = null);
@@ -37,25 +38,27 @@ interface FormInterface
      * @param       $type
      * @param       $key
      * @param array $values
+     *
      * @return mixed
      */
     public function addElement($type, $key, $values = []);
 
     /**
      * @param array $elements
+     *
      * @return mixed
      */
     public function addElements($elements = []);
 
     /**
-     * Get the html form
+     * Get the html form.
      *
      * @return mixed
      */
     public function getForm();
 
     /**
-     * If you wish to get only html elements
+     * If you wish to get only html elements.
      */
     public function getHtmlElements();
 }

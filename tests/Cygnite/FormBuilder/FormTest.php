@@ -1,12 +1,11 @@
 <?php
-use Cygnite\Common\Input;
-use Cygnite\FormBuilder\Form;
-use Cygnite\FormBuilder\Html\Elements;
-use Cygnite\Common\UrlManager\Url;
+
 use Cygnite\Base\Router\Router;
+use Cygnite\Common\Input;
+use Cygnite\Common\UrlManager\Url;
+use Cygnite\FormBuilder\Form;
 use Cygnite\Foundation\Application;
 use Cygnite\Helpers\Config;
-use Mockery as m;
 
 class FormTest extends PHPUnit_Framework_TestCase
 {
@@ -37,13 +36,13 @@ class FormTest extends PHPUnit_Framework_TestCase
         $_SERVER['HTTP_HOST'] = 'localhost';
         $configuration = [
             'global.config' => [
-                'encoding' => 'utf-8'
-            ]
+                'encoding' => 'utf-8',
+            ],
         ];
 
         Config::$config = $configuration;
 
-        Url::setBase('/cygnite/');//$app['router']->getBaseUrl()
+        Url::setBase('/cygnite/'); //$app['router']->getBaseUrl()
     }
 
     public function testCreateFormLabelAndTextBox()
@@ -56,18 +55,18 @@ class FormTest extends PHPUnit_Framework_TestCase
                         [
                             'method' => 'post',
                             'action' => Url::sitePath('contact/add'),
-                            'role' => 'form',
-                            'style' => 'width:500px;margin-top:35px;float:left;'
+                            'role'   => 'form',
+                            'style'  => 'width:500px;margin-top:35px;float:left;',
                         ]
                     )->addElement('label', 'User Name',
                         [
                             'class' => 'col-sm-2 control-label',
-                            'style' => 'width:37.667%;'
+                            'style' => 'width:37.667%;',
                         ]
                     )->addElement('text', 'user_name',
                         [
                             'value' => '',
-                            'class' => 'form-control'
+                            'class' => 'form-control',
                         ]
                     )
                     ->close()
@@ -91,33 +90,33 @@ class FormTest extends PHPUnit_Framework_TestCase
                         [
                             'method' => 'post',
                             'action' => Url::sitePath('contact/add'),
-                            'role' => 'form',
-                            'style' => 'width:500px;margin-top:35px;float:left;'
+                            'role'   => 'form',
+                            'style'  => 'width:500px;margin-top:35px;float:left;',
                         ]
                     )->addElement('label', 'User Name',
                         [
                             'class' => 'col-sm-2 control-label',
-                            'style' => 'width:37.667%;'
+                            'style' => 'width:37.667%;',
                         ]
                     )->addElement('textarea', 'description',
                         [
                             'value' => '',
-                            'class' => 'form-control'
+                            'class' => 'form-control',
                         ]
                     )->addElement('file', 'photo',
                         [
                             'value' => '',
-                            'class' => 'form-control'
+                            'class' => 'form-control',
                         ]
                     )->addElement('checkbox', 'Useful',
                         [
                             'value' => '',
-                            'class' => 'form-control'
+                            'class' => 'form-control',
                         ]
                     )->addElement('radio', 'Male',
                         [
                             'value' => '',
-                            'class' => 'form-control'
+                            'class' => 'form-control',
                         ]
                     )
                     ->close()
@@ -144,14 +143,14 @@ class FormTest extends PHPUnit_Framework_TestCase
                         [
                             'method' => 'post',
                             'action' => Url::sitePath('contact/add'),
-                            'role' => 'form',
-                            'style' => 'width:500px;margin-top:35px;float:left;'
+                            'role'   => 'form',
+                            'style'  => 'width:500px;margin-top:35px;float:left;',
                         ]
                     )->addElement('custom', 'dl',
                         [
                             'name'  => 'Custom Tag',
                             'class' => 'col-sm-2 control-label',
-                            'style' => 'width:37.667%;'
+                            'style' => 'width:37.667%;',
                         ]
                     )->createForm()
                     ->close();
@@ -173,16 +172,16 @@ class FormTest extends PHPUnit_Framework_TestCase
                         [
                             'method' => 'post',
                             'action' => Url::sitePath('contact/add'),
-                            'role' => 'form',
-                            'style' => 'width:500px;margin-top:35px;float:left;'
+                            'role'   => 'form',
+                            'style'  => 'width:500px;margin-top:35px;float:left;',
                         ]
                     )
                        ->addElement('openTag', 'div_1', ['style' => 'border:1px solid red;height:40px;'])
-                        ->addElement('text', 'I am Inside Div 1', ["class" => "col-sm-2 control-label", "style" => "width:100%;"])
+                        ->addElement('text', 'I am Inside Div 1', ['class' => 'col-sm-2 control-label', 'style' => 'width:100%;'])
                     ->addElement('closeTag', 'div_1')
 
                     ->addElement('openTag', 'div_2', ['style' => 'border:1px solid red;height:40px;'])
-                        ->addElement('text', 'I am Inside Div 2', ["class" => "col-sm-2 control-label", "style" => "width:100%;"])
+                        ->addElement('text', 'I am Inside Div 2', ['class' => 'col-sm-2 control-label', 'style' => 'width:100%;'])
                     ->addElement('closeTag', 'div_2')
 
                     ->createForm()
@@ -197,7 +196,7 @@ class FormTest extends PHPUnit_Framework_TestCase
 			</div>
 			</form>"));
 
-        // It works though But we cannot Test it because it generate random name for Div or Span Element 
+        // It works though But we cannot Test it because it generate random name for Div or Span Element
         // For Example [name='div_2_1224' or name='div_1_1331']
     }
 }

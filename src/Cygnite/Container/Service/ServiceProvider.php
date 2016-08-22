@@ -1,15 +1,14 @@
 <?php
+
 namespace Cygnite\Container\Service;
 
 use Cygnite\Foundation\Application;
 
 /**
- * Class Container
+ * Class Container.
  *
- * @package Cygnite\Container\Service
  * @author  Sanjoy Dey
  */
-
 abstract class ServiceProvider
 {
     protected $app;
@@ -28,6 +27,7 @@ abstract class ServiceProvider
      * Register the service provider.
      *
      * @param \Cygnite\Foundation\Application $app
+     *
      * @return void
      */
     abstract public function register(Application $app);

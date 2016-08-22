@@ -1,10 +1,9 @@
 <?php
+
 namespace Cygnite\Common\SessionManager;
 
 /**
- * Class Manager
- *
- * @package Cygnite\Common\SessionManager
+ * Class Manager.
  */
 class Manager extends AbstractPacket implements PacketInterface
 {
@@ -12,7 +11,8 @@ class Manager extends AbstractPacket implements PacketInterface
     protected $storage = [];
 
     /**
-     * Constructor of Session Manager
+     * Constructor of Session Manager.
+     *
      * @param array $storage
      */
     public function __construct(array $storage = [])
@@ -21,7 +21,7 @@ class Manager extends AbstractPacket implements PacketInterface
     }
 
     /**
-     * Get value from the storage if exists
+     * Get value from the storage if exists.
      *
      * @param string $key
      * @param mixed  $default
@@ -33,6 +33,7 @@ class Manager extends AbstractPacket implements PacketInterface
         if ($key === null) {
             return $this->all();
         }
+
         return $this->getStackReference($this->storage, explode(self::SEPARATOR, $key), $default);
     }
 
@@ -47,6 +48,7 @@ class Manager extends AbstractPacket implements PacketInterface
 
     /**
      * @param $key
+     *
      * @return null
      */
     public function __get($key)
@@ -65,10 +67,11 @@ class Manager extends AbstractPacket implements PacketInterface
     }
 
     /**
-     * Sets value to session storage
+     * Sets value to session storage.
      *
      * @param string $key
      * @param mixed  $value
+     *
      * @return $this
      */
     public function set($key, $value = null)
@@ -94,9 +97,10 @@ class Manager extends AbstractPacket implements PacketInterface
 
     /**
      * We will check if session key exists
-     * return boolean value
+     * return boolean value.
      *
      * @param string $key
+     *
      * @return bool
      */
     public function has($key = null)
@@ -105,27 +109,29 @@ class Manager extends AbstractPacket implements PacketInterface
             return $this->count() > 0;
         }
 
-        $arr = & $this->getStackByReference($key);
+        $arr = &$this->getStackByReference($key);
 
         return is_array($arr) ? array_key_exists($key, $arr) : false;
     }
 
     /**
      * Remove key from the stack
-     * if key given null we will remove all values
+     * if key given null we will remove all values.
      *
      * @param string $key attribute to remove from
+     *
      * @return $this
      */
     public function delete($key = null)
     {
         if ($key === null) {
             $this->reset();
+
             return $this;
         }
 
-        $arr = & $this->getStackByReference($key);
-        
+        $arr = &$this->getStackByReference($key);
+
         if (is_array($arr) && array_key_exists($key, $arr)) {
             unset($arr[$key]);
         }
@@ -136,9 +142,10 @@ class Manager extends AbstractPacket implements PacketInterface
     /**
      * Returns all elements
      * If array passed, we will store into storage property
-     * as stack
+     * as stack.
      *
      * @param array $array overwrites values
+     *
      * @return array
      */
     public function all($array = [])
@@ -151,7 +158,7 @@ class Manager extends AbstractPacket implements PacketInterface
     }
 
     /**
-     * Return the array reference
+     * Return the array reference.
      *
      * @param string $key
      *
@@ -162,9 +169,9 @@ class Manager extends AbstractPacket implements PacketInterface
         $key = explode(self::SEPARATOR, $key);
 
         if (count($key) > 1) {
-            $arr = & $this->getStackReference($this->storage, array_slice($key, 0, -1), false);
+            $arr = &$this->getStackReference($this->storage, array_slice($key, 0, -1), false);
         } else {
-            $arr = & $this->storage;
+            $arr = &$this->storage;
         }
 
         $key = array_slice($key, -1);
@@ -174,7 +181,7 @@ class Manager extends AbstractPacket implements PacketInterface
     }
 
     /**
-     * Returns array element matching key
+     * Returns array element matching key.
      *
      * @param array $array
      * @param array $keys
@@ -198,7 +205,7 @@ class Manager extends AbstractPacket implements PacketInterface
     }
 
     /**
-     * Sets array elements value
+     * Sets array elements value.
      *
      * @param array $array
      * @param array $keys
@@ -211,7 +218,7 @@ class Manager extends AbstractPacket implements PacketInterface
         $k = array_shift($keys);
 
         if (is_scalar($array)) {
-            $array = (array)$array;
+            $array = (array) $array;
         }
 
         if (!isset($array[$k])) {
@@ -219,7 +226,7 @@ class Manager extends AbstractPacket implements PacketInterface
         }
 
         if (empty($keys)) {
-            return $array[$k] = & $value;
+            return $array[$k] = &$value;
         }
 
         return $this->setValueToStack($array[$k], $keys, $value);

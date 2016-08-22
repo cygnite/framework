@@ -7,22 +7,17 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-
 namespace Cygnite\Foundation;
 
 use Closure;
-use Exception;
-use Tracy\Helpers;
-use Cygnite\Helpers\Config;
-use Cygnite\Helpers\Inflector;
+use Cygnite\Base\Request\Dispatcher;
 use Cygnite\Base\Router\Router;
 use Cygnite\Container\Container;
-use Cygnite\Common\UrlManager\Url;
-use Cygnite\Translation\Translator;
-use Cygnite\Base\Request\Dispatcher;
+use Cygnite\Helpers\Config;
 use Cygnite\Http\Responses\ResponseInterface;
-use Cygnite\Exception\Handler as ExceptionHandler;
-
+use Cygnite\Translation\Translator;
+use Exception;
+use Tracy\Helpers;
 
 if (!defined('CF_SYSTEM')) {
     exit('External script access not allowed');
@@ -31,13 +26,14 @@ if (!defined('CF_SYSTEM')) {
 class Application extends Container implements ApplicationInterface
 {
     /**
-     * Store instance of the Application
+     * Store instance of the Application.
      *
      * @var instance
      */
     public static $instance;
     /**
      * The Cygnite Framework Version.
+     *
      * @var string
      */
     const VERSION = 'v2.0';
@@ -64,12 +60,12 @@ class Application extends Container implements ApplicationInterface
      * ---------------------------------------------------
      * You cannot directly create object of Application
      * instance method will dynamically return you instance of
-     * Application
+     * Application.
      *
      * @param $argument
+     *
      * @return \Cygnite\Foundation\Application
      */
-
     protected function __construct($argument = [])
     {
     }
@@ -79,6 +75,7 @@ class Application extends Container implements ApplicationInterface
      * or static instance.
      *
      * @param Closure $callback
+     *
      * @return Application
      */
     public static function instance(Closure $callback = null, $argument = [])
@@ -93,22 +90,23 @@ class Application extends Container implements ApplicationInterface
     /**
      * ----------------------------------------------------
      * Return instance of Application
-     * ----------------------------------------------------
+     * ----------------------------------------------------.
      *
      * @param Autoloader $loader
+     *
      * @return Application object
      */
     public static function getInstance($argument = [])
     {
-        if (static::$instance instanceof Application) {
+        if (static::$instance instanceof self) {
             return static::$instance;
         }
 
-        return static::$instance = new Application($argument);
+        return static::$instance = new self($argument);
     }
 
     /**
-     * Get framework version
+     * Get framework version.
      *
      * @return string
      */
@@ -119,19 +117,21 @@ class Application extends Container implements ApplicationInterface
 
     /**
      * @warning You can't change this!
+     *
      * @return string
      */
     public static function poweredBy()
     {
-        return 'Cygnite PHP Framework - ' . static::version() . ' (<a href="http://www.cygniteframework.com">
+        return 'Cygnite PHP Framework - '.static::version().' (<a href="http://www.cygniteframework.com">
             http://www.cygniteframework.com
             </a>)';
     }
 
     /**
-     * Import files using import function
+     * Import files using import function.
      *
      * @param $path
+     *
      * @return bool
      */
     public static function import($path)
@@ -140,26 +140,29 @@ class Application extends Container implements ApplicationInterface
     }
 
     /**
-     * Service Closure callback
+     * Service Closure callback.
+     *
      * @param callable $callback
-     * @return mixed
+     *
      * @throws \Exception
+     *
+     * @return mixed
      */
     public static function service(Closure $callback)
     {
         if (!$callback instanceof Closure) {
-            throw new \Exception("Application::service() accept only valid closure callback");
+            throw new \Exception('Application::service() accept only valid closure callback');
         }
 
         return $callback(static::$instance);
     }
 
-
     /**
-     * Override parent method
+     * Override parent method.
      *
      * @param $key
      * @param $value
+     *
      * @return $this
      */
     public function set($key, $value)
@@ -174,7 +177,7 @@ class Application extends Container implements ApplicationInterface
 
     /**
      * We will register all class definition for
-     * dependency injections
+     * dependency injections.
      */
     public function registerClassDefinition()
     {
@@ -194,9 +197,10 @@ class Application extends Container implements ApplicationInterface
     }
 
     /**
-     * Set language to the translator
+     * Set language to the translator.
      *
      * @param null $localization
+     *
      * @return $localization
      */
     public function setLocale($localization = null)
@@ -209,20 +213,23 @@ class Application extends Container implements ApplicationInterface
         $fallbackLocale = Config::get('global.config', 'fallback.locale');
 
         $trans = $this->getTranslator();
-        return $trans->setRootDirectory(APPPATH . DS.'Resources'.DS)
+
+        return $trans->setRootDirectory(APPPATH.DS.'Resources'.DS)
               ->setFallback($fallbackLocale)
               ->locale($locale);
     }
 
     /**
-     * We will include services
+     * We will include services.
+     *
      * @return $this
      */
     public function setServices()
     {
         $this['service.provider'] = function () {
             $paths = Config::getPaths();
-            return include $paths['app.path']. DS.$paths['app.config']['directory'] .'services' . EXT;
+
+            return include $paths['app.path'].DS.$paths['app.config']['directory'].'services'.EXT;
         };
 
         return $this;
@@ -230,6 +237,7 @@ class Application extends Container implements ApplicationInterface
 
     /**
      * @param $directories
+     *
      * @return mixed
      */
     public function registerDirectories($directories)
@@ -238,15 +246,16 @@ class Application extends Container implements ApplicationInterface
     }
 
     /**
-     * We will register all service providers into application
+     * We will register all service providers into application.
      *
      * @param array $services
+     *
      * @return $this
      */
     public function registerServiceProvider($services = [])
     {
         foreach ($services as $key => $serviceProvider) {
-            $this->createProvider('\\' . $serviceProvider)->register($this);
+            $this->createProvider('\\'.$serviceProvider)->register($this);
         }
 
         return $this;
@@ -255,7 +264,8 @@ class Application extends Container implements ApplicationInterface
     /**
      * Create a new provider instance.
      *
-     * @param             $provider
+     * @param   $provider
+     *
      * @return mixed
      */
     public function createProvider($provider)
@@ -266,6 +276,7 @@ class Application extends Container implements ApplicationInterface
     /**
      * @param $key
      * @param $class
+     *
      * @return void
      */
     public function setServiceController($key, $class)
@@ -280,19 +291,21 @@ class Application extends Container implements ApplicationInterface
     }
 
     /**
-     * We will include Supporting Helpers
+     * We will include Supporting Helpers.
+     *
      * @return mixed
      * @issue Path Issue Fixed And Identified By Peter Moulding https://www.linkedin.com/profile/view?id=1294355
      */
     public function importHelpers()
     {
-        return include __DIR__ . '/../'.'Helpers/Support'.EXT;
+        return include __DIR__.'/../'.'Helpers/Support'.EXT;
     }
 
     /**
-     * Set up all required configurations
+     * Set up all required configurations.
      *
      * @internal param $config
+     *
      * @return $this
      */
     public function configure()
@@ -310,6 +323,7 @@ class Application extends Container implements ApplicationInterface
 
     /**
      * @param $path
+     *
      * @return $this
      */
     public function setPaths($path)
@@ -320,7 +334,7 @@ class Application extends Container implements ApplicationInterface
     }
 
     /**
-     * Set all configurations and boot application
+     * Set all configurations and boot application.
      *
      * @return $this
      */
@@ -350,7 +364,9 @@ class Application extends Container implements ApplicationInterface
      */
     private function bootInternals()
     {
-        if ($this->booted) return;
+        if ($this->booted) {
+            return;
+        }
 
         $this->registerCoreAlias();
         $this->setEnvironment();
@@ -363,7 +379,7 @@ class Application extends Container implements ApplicationInterface
     }
 
     /**
-     * Indicate if Application booted or not
+     * Indicate if Application booted or not.
      *
      * @return bool
      */
@@ -374,7 +390,8 @@ class Application extends Container implements ApplicationInterface
 
     /**
      * We will activate middle ware events if set as true in
-     * Configs/application.php
+     * Configs/application.php.
+     *
      * @return mixed
      */
     public function activateEventMiddleWare()
@@ -382,22 +399,20 @@ class Application extends Container implements ApplicationInterface
         $eventMiddleware = Config::get('global.config', 'activate.event.middleware');
 
         if ($eventMiddleware) {
-            $class = "\\".APP_NS."\\Middleware\\Events\\Event";
-            return (new $class)->register($this);
+            $class = '\\'.APP_NS.'\\Middleware\\Events\\Event';
+
+            return (new $class())->register($this);
         }
     }
 
-
     /**
      * Attach all application events to event handler.
-     *
      */
     public function attachEvents()
     {
         $appEvents = $this['event']->getAppEvents();
 
         if (!empty($appEvents)) {
-
             foreach ($appEvents as $event => $namespace) {
                 // attach all before and after event to handler
                 $this['event']->attach("$event", $namespace);
@@ -407,7 +422,7 @@ class Application extends Container implements ApplicationInterface
 
     /**
      * We will trigger after booting application event if it is
-     * activated in Event Middleware
+     * activated in Event Middleware.
      *
      * @return bool
      */
@@ -424,7 +439,7 @@ class Application extends Container implements ApplicationInterface
 
     /**
      * We will trigger after booting application event if it is
-     * activated in Event Middleware
+     * activated in Event Middleware.
      *
      * @return bool
      */
@@ -450,9 +465,10 @@ class Application extends Container implements ApplicationInterface
     }
 
     /**
-     * Create an instance of the class and return it
+     * Create an instance of the class and return it.
      *
      * @param $class
+     *
      * @return mixed
      */
     public function compose($class, $arguments = [])
@@ -461,13 +477,14 @@ class Application extends Container implements ApplicationInterface
     }
 
     /**
-     * We will register all core class into container
+     * We will register all core class into container.
+     *
      * @return $this
      */
     public function registerCoreAlias()
     {
         foreach ($this->getCoreAlias() as $key => $class) {
-            $this->set($key, $this->compose("\\".$class));
+            $this->set($key, $this->compose('\\'.$class));
         }
 
         $this->registerClassDefinition()
@@ -482,15 +499,17 @@ class Application extends Container implements ApplicationInterface
     private function setEnvironment()
     {
         $app = $this;
-        return include __DIR__ . '/../'.'BootStrap'.EXT;
+
+        return include __DIR__.'/../'.'BootStrap'.EXT;
     }
 
     /**
      * Application booting completed!
-     * Lets run our awesome Application
+     * Lets run our awesome Application.
+     *
+     * @throws \Exception
      *
      * @return mixed
-     * @throws \Exception
      */
     public function run()
     {
@@ -511,7 +530,6 @@ class Application extends Container implements ApplicationInterface
             }
 
             return $response;
-
         } catch (\Exception $e) {
             if (ENV == 'development') {
                 throw $e;
@@ -519,7 +537,7 @@ class Application extends Container implements ApplicationInterface
 
             if (ENV == 'production') {
 
-                /**
+                /*
                  * We will log exception if logger enabled
                  */
                 if ($this['debugger']->isLoggerEnabled()) {
@@ -548,13 +566,13 @@ class Application extends Container implements ApplicationInterface
     /**
      * Throw an HttpException with the given message.
      *
-     * @param  int     $code
-     * @param  string  $message
-     * @param  array   $headers
-     * @return void
+     * @param int    $code
+     * @param string $message
+     * @param array  $headers
      *
+     * @return void
      */
-    public function abort($code, $message = '', array $headers = array())
+    public function abort($code, $message = '', array $headers = [])
     {
         if ($code == 404) {
             throw new \Cygnite\Exception\Http\HttpNotFoundException($message);

@@ -23,7 +23,9 @@ class Html
      * Encoding will be used based  on configuration given in Config file.
      *
      * @false  string  $value
+     *
      * @param $value
+     *
      * @return string
      */
     public static function entities($value)
@@ -35,7 +37,9 @@ class Html
      * Convert entities to Html characters.
      *
      * @false  string  $value
+     *
      * @param $value
+     *
      * @return string
      */
     public static function decode($value)
@@ -49,31 +53,35 @@ class Html
      * Encoding will be used based  on configuration given in Config file.
      *
      * @false  string  $value
+     *
      * @param $value
+     *
      * @throws InvalidArgumentException
+     *
      * @return string
      */
     public static function specialCharacters($value)
     {
         if (is_null($value)) {
-            throw new InvalidArgumentException("Cannot pass null argument to ".__METHOD__);
+            throw new InvalidArgumentException('Cannot pass null argument to '.__METHOD__);
         }
 
         return htmlspecialchars($value, ENT_QUOTES, Config::get('global.config', 'encoding'), false);
     }
 
     /**
-     * The method to sanitize data
+     * The method to sanitize data.
+     *
      * @false mixed $data
      */
     public function santize($value, $type = '')
     {
         switch ($type) {
             default:
-                return htmlspecialchars($value, ENT_QUOTES, "UTF-8");
+                return htmlspecialchars($value, ENT_QUOTES, 'UTF-8');
                 break;
             case 'strong':
-                return htmlentities($value, ENT_QUOTES | ENT_IGNORE, "UTF-8");
+                return htmlentities($value, ENT_QUOTES | ENT_IGNORE, 'UTF-8');
                 break;
             case 'strict':
                 return urlencode($value);

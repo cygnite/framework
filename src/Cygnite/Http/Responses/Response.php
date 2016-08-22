@@ -9,15 +9,11 @@
  */
 namespace Cygnite\Http\Responses;
 
-use Cygnite\Http\Responses\ResponseHeader;
 use Cygnite\Exception\Http\ResponseException;
 
 /**
- * Class Response
- *
- * @package Cygnite\Foundation\Http
+ * Class Response.
  */
-
 class Response implements ResponseInterface
 {
     const PROTOCOL = 'HTTP/1.1';
@@ -31,14 +27,14 @@ class Response implements ResponseInterface
     protected $statusMessage;
 
     /**
-     * @var  array  An array of headers
+     * @var array An array of headers
      *
      * @since  2.0
      */
     protected $headers = [];
 
     /**
-     * @var  string  The content of the response
+     * @var string The content of the response
      *
      * @since  2.0
      */
@@ -65,12 +61,11 @@ class Response implements ResponseInterface
             foreach ($headers as $key => $value) {
                 $this->setHeader($key, $value);
             }
-       }
-
+        }
     }
 
     /**
-     * Returns Response object
+     * Returns Response object.
      *
      * <code>
      *  Response::make($content, ResponseHeader::HTTP_OK)->send();
@@ -84,6 +79,7 @@ class Response implements ResponseInterface
      * @param string       $content
      * @param callable|int $statusCode
      * @param array        $headers
+     *
      * @return static
      */
     public static function make($content = '', $statusCode = ResponseHeader::HTTP_OK, $headers = [])
@@ -98,8 +94,10 @@ class Response implements ResponseInterface
 
     /**
      * @param $content
-     * @return $this
+     *
      * @throws \Cygnite\Exception\Http\ResponseException
+     *
+     * @return $this
      */
     public function setContent($content = null)
     {
@@ -122,6 +120,7 @@ class Response implements ResponseInterface
 
     /**
      * @param int $statusCode
+     *
      * @return $this
      */
     public function setStatusCode($statusCode = 200)
@@ -141,8 +140,10 @@ class Response implements ResponseInterface
 
     /**
      * @param string $message
-     * @return $this
+     *
      * @throws \Cygnite\Exception\Http\ResponseException
+     *
+     * @return $this
      */
     public function statusMessage($message = '')
     {
@@ -167,12 +168,13 @@ class Response implements ResponseInterface
      * @param      $name
      * @param      $value
      * @param bool $replace
+     *
      * @return $this
      */
     public function setHeader($name, $value, $replace = true)
     {
         if ($replace || !isset($this->headers[$name])) {
-            $this->headers[$name] = array($value);
+            $this->headers[$name] = [$value];
         } else {
             array_push($this->headers[$name], $value);
         }
@@ -182,13 +184,14 @@ class Response implements ResponseInterface
 
     /**
      * @param $contentType
+     *
      * @return $this
      */
     public function setContentType($contentType)
     {
         $this->contentType = $contentType;
 
-        $this->setHeader('Content-Type', $contentType . '; charset=' . $this->getCharset());
+        $this->setHeader('Content-Type', $contentType.'; charset='.$this->getCharset());
 
         return $this;
     }
@@ -198,11 +201,12 @@ class Response implements ResponseInterface
      */
     public function getContentType()
     {
-        return (isset($this->contentType) ? $this->contentType : self::CONTENT_TYPE);
+        return isset($this->contentType) ? $this->contentType : self::CONTENT_TYPE;
     }
 
     /**
      * @param $charset
+     *
      * @return $this
      */
     public function setCharset($charset)
@@ -218,7 +222,7 @@ class Response implements ResponseInterface
      */
     public function getCharset()
     {
-        return (isset($this->charset) ? $this->charset : self::CHARSET);
+        return isset($this->charset) ? $this->charset : self::CHARSET;
     }
 
     public function setAsNotModified()
@@ -232,7 +236,7 @@ class Response implements ResponseInterface
             'Content-Length',
             'Content-MD5',
             'Content-Type',
-            'Last-Modified'
+            'Last-Modified',
         ];
 
         foreach ($headersToRemove as $header) {
@@ -244,6 +248,7 @@ class Response implements ResponseInterface
 
     /**
      * @param $name
+     *
      * @return bool
      */
     public function server($name)
@@ -252,8 +257,9 @@ class Response implements ResponseInterface
     }
 
     /**
-     * @return $this
      * @throws \Cygnite\Exception\Http\ResponseException
+     *
+     * @return $this
      */
     public function sendHeaders()
     {
@@ -280,7 +286,6 @@ class Response implements ResponseInterface
         }
 
         foreach ($this->headers as $name => $values) {
-
             foreach ($values as $value) {
                 // Create the header and send it
                 is_string($name) && $value = "{$name}: {$value}";
@@ -292,7 +297,7 @@ class Response implements ResponseInterface
     }
 
     /**
-     * We will set header for server script
+     * We will set header for server script.
      */
     protected function setFastCgiHeader()
     {
@@ -306,7 +311,7 @@ class Response implements ResponseInterface
     }
 
     /**
-     * Set header for FCGI based servers
+     * Set header for FCGI based servers.
      */
     protected function setHeaderForServer()
     {
@@ -332,7 +337,7 @@ class Response implements ResponseInterface
     }
 
     /**
-     * Send header and content to the browser
+     * Send header and content to the browser.
      *
      * @return $this
      */

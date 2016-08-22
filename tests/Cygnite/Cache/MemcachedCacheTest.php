@@ -1,13 +1,11 @@
 <?php
-use Mockery as m;
-use Cygnite\Helpers\Config;
-use Cygnite\Cache\Factory\Cache;
+
 
 class MemcachedCacheTest extends PHPUnit_Framework_TestCase
 {
     public function testStoreData()
     {
-        $memcacheObject = $this->getMock('StdClass', ['set', 'get','getResultCode']);
+        $memcacheObject = $this->getMock('StdClass', ['set', 'get', 'getResultCode']);
 
         $memcacheObject->expects($this->once())
             ->method('set')

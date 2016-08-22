@@ -1,22 +1,9 @@
 <?php
+
 namespace Cygnite\Proxy;
 
-use Cygnite\Proxy\Resolver;
-use Cygnite\DependencyInjection\Container;
-use Cygnite\Foundation\Application;
-
 /**
- * Class Asset
- *
- * @package Cygnite\Proxy
- *
- * <code>
- * use Cygnite\Proxy\Asset;
- *
- * Asset::style("path-to-your-asset");
- *
- * </code>
- *
+ * Class Asset.
  */
 class Asset
 {

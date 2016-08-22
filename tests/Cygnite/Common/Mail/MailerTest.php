@@ -1,7 +1,8 @@
 <?php
-use Mockery as m;
-use Cygnite\Helpers\Config;
+
 use Cygnite\Common\Mail\Mailer;
+use Cygnite\Helpers\Config;
+use Mockery as m;
 
 class MailerTest extends PHPUnit_Framework_TestCase
 {
@@ -14,19 +15,19 @@ class MailerTest extends PHPUnit_Framework_TestCase
                     'protocol' => 'smtp',
 
                     'smtp' => [
-                        'host' => 'smtp.gmail.com',
-                        'username' => 'sanjoyinfotech@gmail.com',
-                        'password' => 'lovemesanjoy',
-                        'port' => '465',
+                        'host'       => 'smtp.gmail.com',
+                        'username'   => 'sanjoyinfotech@gmail.com',
+                        'password'   => 'lovemesanjoy',
+                        'port'       => '465',
                         'encryption' => 'ssl',
                     ],
                     'sendmail' => [
-                        'path' => '/usr/sbin/exim -bs'
+                        'path' => '/usr/sbin/exim -bs',
                     ],
 
                 ],
 
-            ]
+            ],
         ];
 
         Config::$config = $configuration;
@@ -34,8 +35,7 @@ class MailerTest extends PHPUnit_Framework_TestCase
 
     public function testMailerClosureInstance()
     {
-        list($mailer, $message) = Mailer::compose(function ($mailer, $message)
-        {
+        list($mailer, $message) = Mailer::compose(function ($mailer, $message) {
             return [$mailer, $message];
         });
 
@@ -67,16 +67,17 @@ class MailerTest extends PHPUnit_Framework_TestCase
         //$swiftMessage = $mailer->message();
 
         $message->shouldReceive('setBody')->with('rendered.view', 'text/html');
-        $message->shouldReceive('getBody')->andReturn("rendered.view");
+        $message->shouldReceive('getBody')->andReturn('rendered.view');
         $message->shouldReceive('setFrom')->never();
 
-        $this->assertEquals("rendered.view", $message->getBody());
+        $this->assertEquals('rendered.view', $message->getBody());
     }
 
     private function createTransport()
     {
         return m::mock('Swift_Transport')->shouldIgnoreMissing();
     }
+
     private function createMessage()
     {
         return m::mock('Swift_Mime_Message')->shouldIgnoreMissing();
@@ -94,6 +95,7 @@ class TestFailureTransportStub
     {
         $failed[] = 'dey.sanjoy0@gmail.com';
     }
+
     public function getTransport()
     {
         $transport = m::mock('Swift_Transport');

@@ -1,8 +1,8 @@
 <?php
-use Mockery as m;
-use Cygnite\Foundation\Application;
-use Cygnite\Common\UrlManager\Url;
+
 use Cygnite\Base\Router\Router;
+use Cygnite\Common\UrlManager\Url;
+use Cygnite\Foundation\Application;
 
 class UrlTest extends PHPUnit_Framework_TestCase
 {
@@ -54,7 +54,7 @@ class UrlTest extends PHPUnit_Framework_TestCase
 
     public function testReferredFrom()
     {
-        $_SERVER["HTTP_REFERER"] = 'http://localhost/index.php/home/';
-        $this->assertEquals($_SERVER["HTTP_REFERER"], $this->url->referredFrom());
+        $_SERVER['HTTP_REFERER'] = 'http://localhost/index.php/home/';
+        $this->assertEquals($_SERVER['HTTP_REFERER'], $this->url->referredFrom());
     }
 }
