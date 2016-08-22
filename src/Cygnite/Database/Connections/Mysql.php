@@ -10,8 +10,6 @@
 
 namespace Cygnite\Database\Connections;
 
-use PDO;
-
 class Mysql extends Connector
 {
     public function __construct(array $config)

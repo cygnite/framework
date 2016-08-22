@@ -9,20 +9,18 @@
  */
 namespace Cygnite\Pipeline;
 
-use Cygnite\Pipeline\Pipeline;
-use Cygnite\Foundation\Application;
 use Cygnite\Container\Service\ServiceProvider;
+use Cygnite\Foundation\Application;
 
 /**
- * Class PipelineServiceProvider
- * @package Cygnite\Pipeline
+ * Class PipelineServiceProvider.
  */
 class PipelineServiceProvider extends ServiceProvider
 {
     protected $app;
 
     /**
-     * Register Pipeline into application container
+     * Register Pipeline into application container.
      *
      * @param Application $app
      */

@@ -1,8 +1,9 @@
 <?php
+
 namespace Cygnite\Helpers;
 
-use Cygnite\Proxy\StaticResolver;
 use Cygnite\Common\ArrayManipulator\ArrayAccessor;
+use Cygnite\Proxy\StaticResolver;
 
 if (defined('CF_SYSTEM') == false) {
     exit('No External script access allowed');
@@ -10,9 +11,7 @@ if (defined('CF_SYSTEM') == false) {
 /**
  * Class Config
  * This class used to load all configurations files in order to
- * quick access of user request
- *
- * @package Cygnite\Helpers
+ * quick access of user request.
  */
 class Config extends StaticResolver
 {
@@ -30,13 +29,15 @@ class Config extends StaticResolver
     public $default = 'config.items';
 
     /**
-     *  Get the configuration by index
+     *  Get the configuration by index.
      *
      * @param      $key
      * @param bool $value
-     * @return mixed|null
+     *
      * @throws \InvalidArgumentException
      * @throws \Exception
+     *
+     * @return mixed|null
      */
     protected function get($key, $value = false)
     {
@@ -68,14 +69,13 @@ class Config extends StaticResolver
          | ]
          | Config::get('module-config.config.name');
          */
-        return ArrayAccessor::make($config, function ($a) use ($key)
-        {
+        return ArrayAccessor::make($config, function ($a) use ($key) {
             return $a->toString($key);
         });
     }
 
     /**
-     * Set configuration parameter
+     * Set configuration parameter.
      *
      * @param       $key
      * @param array $value
@@ -87,6 +87,7 @@ class Config extends StaticResolver
 
     /**
      * @param $paths
+     *
      * @return $this
      */
     protected function setPaths($paths)
@@ -110,6 +111,7 @@ class Config extends StaticResolver
     {
         return isset(static::$paths) ? static::$paths : [];
     }
+
     /*
      * Import application configurations
      */
@@ -122,12 +124,13 @@ class Config extends StaticResolver
     }
 
     /**
-     * @return array
      * @throws \Exception
+     *
+     * @return array
      */
     private function importConfigurations()
     {
-        $configPath = "";
+        $configPath = '';
         $configPath = static::$paths['app.path'].DS.toPath(static::$paths['app.config']['directory']);
         $files = [];
         $files = array_merge($this->files, static::$paths['app.config']['files']);
@@ -137,12 +140,12 @@ class Config extends StaticResolver
                 throw new \Exception("File doesn't exists in the path ".$configPath.$file.EXT);
             }
 
-            /**
+            /*
             | We will include configuration file into array only
             | for the first time
              */
             if (!isset(self::$config[$key])) {
-                Config::set($key, include $configPath.$file.EXT);
+                self::set($key, include $configPath.$file.EXT);
             }
         }
     }

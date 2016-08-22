@@ -7,18 +7,13 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 namespace Cygnite\Base\Router;
 
-use Exception;
-use Reflection;
-use ErrorException;
-use Cygnite\Helpers\Inflector;
-use Cygnite\Helpers\Helper;
-use Cygnite\Foundation\Application as App;
-use Cygnite\Http\Responses\ResponseInterface;
 use Cygnite\Base\Router\Controller\Controller;
-use Cygnite\Base\Router\Controller\RouteControllerTrait;
 use Cygnite\Base\Router\Controller\ResourceControllerTrait;
+use Cygnite\Base\Router\Controller\RouteControllerTrait;
+use Cygnite\Http\Responses\ResponseInterface;
 
 /*
  * Cygnite Router
@@ -50,18 +45,18 @@ class Router implements RouterInterface
      *
      * @var array
      */
-    public $patterns = array(
-        '{:num}' => '([0-9]+)',
-        '{:id}' => '(\d+)',
-        '{:name}' => '(\w+)',
-        '{:any}' => '([a-zA-Z0-9\.\-_%]+)',
-        '{:all}' => '(.*)',
-        '{:module}' => '([a-zA-Z0-9_-]+)',
+    public $patterns = [
+        '{:num}'       => '([0-9]+)',
+        '{:id}'        => '(\d+)',
+        '{:name}'      => '(\w+)',
+        '{:any}'       => '([a-zA-Z0-9\.\-_%]+)',
+        '{:all}'       => '(.*)',
+        '{:module}'    => '([a-zA-Z0-9_-]+)',
         '{:namespace}' => '([a-zA-Z0-9_-]+)',
-        '{:year}' => '\d{4}',
-        '{:month}' => '\d{2}',
-        '{:day}' => '\d{2}(/[a-z0-9_-]+)'
-    );
+        '{:year}'      => '\d{4}',
+        '{:month}'     => '\d{2}',
+        '{:day}'       => '\d{2}(/[a-z0-9_-]+)',
+    ];
 
     /**
      * @var array The route patterns and their handling functions
@@ -96,11 +91,13 @@ class Router implements RouterInterface
     }
 
     /**
-     * Set RouteCollection
+     * Set RouteCollection.
      *
      * @param $namespace
-     * @return mixed
+     *
      * @throws InvalidRouterCollectionException
+     *
+     * @return mixed
      */
     public function collection($namespace)
     {
@@ -109,16 +106,18 @@ class Router implements RouterInterface
         }
 
         $routeCollection = $this->getApplication()->make($namespace);
+
         return $routeCollection->setRouter($this);
     }
 
     /**
      * Store a before middle-ware route and a handling function to be executed
-     * when accessed using one of the specified methods
+     * when accessed using one of the specified methods.
      *
      * @param string $methods Allowed methods, | delimited
      * @param string $pattern A route pattern such as /about/system
      * @param object $func    The handling function to be executed
+     *
      * @return mixed|void
      */
     public function before($methods, $pattern, $func)
@@ -143,18 +142,19 @@ class Router implements RouterInterface
 
     /**
      * @param $pattern
+     *
      * @return string
      */
     private function setBaseRoute($pattern)
     {
-        $pattern = $this->routeBasePath . '/' . trim($pattern, '/');
+        $pattern = $this->routeBasePath.'/'.trim($pattern, '/');
 
         return $this->routeBasePath ? rtrim($pattern, '/') : $pattern;
     }
 
     /**
      * Sometime you may also want to change the 'modules' directory
-     * name. Such cases set module directory name to be identified by Router
+     * name. Such cases set module directory name to be identified by Router.
      *
      * @param $name
      */
@@ -165,11 +165,12 @@ class Router implements RouterInterface
 
     /**
      * Store a route and a handling function to be executed.
-     * Routes will execute when accessed using specific pattern and methods
+     * Routes will execute when accessed using specific pattern and methods.
      *
      * @param string $methods Allowed methods, | delimited
      * @param string $pattern A route pattern such as /service/contact-us
      * @param object $func    The handling function to be executed
+     *
      * @return bool
      */
     public function match($methods, $pattern, $func)
@@ -184,10 +185,11 @@ class Router implements RouterInterface
     }
 
     /**
-     * Shorthand for a route accessed using GET
+     * Shorthand for a route accessed using GET.
      *
      * @param string $pattern A route pattern such as /about/system
      * @param object $func    The handling function to be executed
+     *
      * @return bool
      */
     public function get($pattern, $func)
@@ -206,11 +208,12 @@ class Router implements RouterInterface
      * @param        $func
      * @param        $method
      * @param string $overrideWith
+     *
      * @return bool
      */
     public function override($pattern, $func, $method, $overrideWith = 'GET')
     {
-        /**
+        /*
          * We will bind static routes to callable
          *
          * closure object
@@ -231,6 +234,7 @@ class Router implements RouterInterface
 
     /**
      * @param $uri
+     *
      * @return object
      */
     public function callStaticRoute($uri)
@@ -241,10 +245,11 @@ class Router implements RouterInterface
     }
 
     /**
-     * Shorthand for a route accessed using POST
+     * Shorthand for a route accessed using POST.
      *
      * @param string $pattern A route pattern such as /about/system
      * @param object $func    The handling function to be executed
+     *
      * @return bool
      */
     public function post($pattern, $func)
@@ -259,10 +264,11 @@ class Router implements RouterInterface
     }
 
     /**
-     * Shorthand for a route accessed using DELETE
+     * Shorthand for a route accessed using DELETE.
      *
      * @param string $pattern A route pattern such as /about/system
      * @param object $func    The handling function to be executed
+     *
      * @return bool
      */
     public function delete($pattern, $func)
@@ -273,10 +279,11 @@ class Router implements RouterInterface
     }
 
     /**
-     * Shorthand for a route accessed using PUT
+     * Shorthand for a route accessed using PUT.
      *
      * @param string $pattern A route pattern such as /about/system
      * @param object $func    The handling function to be executed
+     *
      * @return bool
      */
     public function put($pattern, $func)
@@ -287,9 +294,11 @@ class Router implements RouterInterface
     }
 
     /**
-     * Shorthand for route accessed using patch
+     * Shorthand for route accessed using patch.
+     *
      * @param $pattern
      * @param $func
+     *
      * @return bool
      */
     public function patch($pattern, $func)
@@ -300,10 +309,11 @@ class Router implements RouterInterface
     }
 
     /**
-     * Shorthand for a route accessed using OPTIONS
+     * Shorthand for a route accessed using OPTIONS.
      *
      * @param string $pattern A route pattern such as /about/system
      * @param object $func    The handling function to be executed
+     *
      * @return bool
      */
     public function options($pattern, $func)
@@ -314,6 +324,7 @@ class Router implements RouterInterface
     /**
      * @param $pattern
      * @param $func
+     *
      * @return bool
      */
     public function any($pattern, $func)
@@ -321,11 +332,12 @@ class Router implements RouterInterface
         return $this->match('GET|POST|PUT|PATCH|DELETE|OPTIONS', $pattern, $func);
     }
 
-     /**
-     * Customize the routing pattern using where
+    /**
+     * Customize the routing pattern using where.
      *
      * @param $key
      * @param $pattern
+     *
      * @return $this
      */
     public function where($key, $pattern)
@@ -336,6 +348,7 @@ class Router implements RouterInterface
     /**
      * @param $key
      * @param $pattern
+     *
      * @return $this
      */
     public function pattern($key, $pattern)
@@ -347,6 +360,7 @@ class Router implements RouterInterface
 
     /**
      * @param $key
+     *
      * @return string
      */
     public function getPattern($key = null)
@@ -391,10 +405,11 @@ class Router implements RouterInterface
     /**
      * Set the controller as Resource Controller
      * Cygnite Router knows how to respond to resource controller
-     * request automatically
+     * request automatically.
      *
      * @param $name
      * @param $controller
+     *
      * @return $this
      */
     public function resource($name, $controller)
@@ -404,21 +419,22 @@ class Router implements RouterInterface
 
     /**
      * @param $controllerName
+     *
      * @return mixed
      */
     public function routeController($controllerName)
     {
-        return (new Controller)->{__FUNCTION__}($controllerName);
+        return (new Controller())->{__FUNCTION__}($controllerName);
     }
 
     /**
-     * Route to controller implicitly based on HTTP verbs prefixed
+     * Route to controller implicitly based on HTTP verbs prefixed.
      *
      * @param $controller
      */
     public function controller($controller)
     {
-        return (new Controller)->implicitController($controller);
+        return (new Controller())->implicitController($controller);
     }
 
     /**
@@ -433,9 +449,10 @@ class Router implements RouterInterface
 
     /**
      * Execute the router: Loop all defined before middle-wares and routes,
-     * and call function to handle request if any matching pattern found
+     * and call function to handle request if any matching pattern found.
      *
      * @param null $callback
+     *
      * @return mixed
      */
     public function run($callback = null)
@@ -477,10 +494,11 @@ class Router implements RouterInterface
     }
 
     /**
-     * Handle a a set of routes: if a match is found, execute the relating handling function
+     * Handle a a set of routes: if a match is found, execute the relating handling function.
      *
-     * @param         $routes Collection of route patterns
-     * @param bool    $fireAfterRoutingCallback
+     * @param      $routes                   Collection of route patterns
+     * @param bool $fireAfterRoutingCallback
+     *
      * @return int The number of routes handled
      */
     private function handle($routes, $fireAfterRoutingCallback = false)
@@ -499,7 +517,7 @@ class Router implements RouterInterface
 
             // we have a match!
             if (preg_match_all(
-                '#^' . $pattern . '$#',
+                '#^'.$pattern.'$#',
                 $uri,
                 $matches,
                 PREG_SET_ORDER
@@ -535,6 +553,7 @@ class Router implements RouterInterface
 
     /**
      * @param $matches
+     *
      * @return array
      */
     private function extractParams($matches)
@@ -542,6 +561,7 @@ class Router implements RouterInterface
         return array_map(
             function ($match) {
                 $args = explode('/', trim($match, '/'));
+
                 return isset($args[0]) ? $args[0] : null;
             },
             array_slice(
@@ -550,8 +570,10 @@ class Router implements RouterInterface
             )
         );
     }
+
     /**
      * @param $uri
+     *
      * @return mixed|string
      */
     public function removeIndexDotPhpAndTrillingSlash($uri)
@@ -566,7 +588,7 @@ class Router implements RouterInterface
     }
 
     /**
-     * Define the current relative URI
+     * Define the current relative URI.
      *
      * @return string
      */
@@ -584,13 +606,13 @@ class Router implements RouterInterface
         }
 
         // Remove trailing slash + enforce a slash at the start
-        $uri = '/' . trim($uri, '/');
+        $uri = '/'.trim($uri, '/');
 
         return $uri;
     }
 
     /**
-     * Get the base url
+     * Get the base url.
      *
      * @return string
      */
@@ -600,13 +622,14 @@ class Router implements RouterInterface
         $this->currentUrl = $_SERVER['REQUEST_URI'];
 
         // Remove rewrite base path (= allows one to run the router in a sub folder)
-        $basePath = implode('/', array_slice(explode('/', $_SERVER['SCRIPT_NAME']), 0, -1)) . '/';
+        $basePath = implode('/', array_slice(explode('/', $_SERVER['SCRIPT_NAME']), 0, -1)).'/';
 
         return $basePath;
     }
 
     /**
      * @param $pattern
+     *
      * @return bool|mixed
      */
     public function hasNamedPattern($pattern)
@@ -616,6 +639,7 @@ class Router implements RouterInterface
 
     /**
      * @param $string
+     *
      * @return mixed
      */
     protected function replace($string)
@@ -630,13 +654,15 @@ class Router implements RouterInterface
     public function getResponse()
     {
         $app = $this->getApplication();
+
         return $app['response'];
     }
 
     /**
-     * Set the 404 handling function
+     * Set the 404 handling function.
      *
      * @param object $func The function to be executed
+     *
      * @return mixed|void
      */
     public function set404Page($func)

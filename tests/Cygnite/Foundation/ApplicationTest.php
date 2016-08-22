@@ -1,6 +1,6 @@
 <?php
+
 use Cygnite\Foundation\Application;
-use Cygnite\Foundation\Autoloader;
 use Mockery as m;
 
 class ApplicationTest extends PHPUnit_Framework_TestCase
@@ -28,15 +28,14 @@ class ApplicationTest extends PHPUnit_Framework_TestCase
         $router = new \Cygnite\Base\Router\Router();
         $url = new \Cygnite\Common\UrlManager\Url($router);
         $madeUrl = $app->make('\Cygnite\Common\UrlManager\Url');
-        
+
         $this->assertEquals($url, $madeUrl);
     }
 
     public function testServiceCreation()
     {
         $app = Application::instance();
-        $app->service(function($app)
-        {
+        $app->service(function ($app) {
             $app->registerServiceProvider(['FooBarServiceProvider']);
 
             $app->setServiceController('bar.controller', 'BarController');
@@ -44,10 +43,10 @@ class ApplicationTest extends PHPUnit_Framework_TestCase
 
         $this->assertInstanceOf('\FooBar', $app['foo.bar']());
         $this->assertNotNull($app['foo.bar']()->greet());
-        $this->assertEquals("Hello FooBar!", $app['foo.bar']()->greet());
+        $this->assertEquals('Hello FooBar!', $app['foo.bar']()->greet());
 
         $app['greet.bar.controller'] = 'Hello BarController!';
-        $this->assertEquals("Hello BarController!", $app['bar.controller']()->indexAction());
+        $this->assertEquals('Hello BarController!', $app['bar.controller']()->indexAction());
     }
 
     public function testComposeMethod()
@@ -56,7 +55,7 @@ class ApplicationTest extends PHPUnit_Framework_TestCase
         $bazBar = $app->compose('BazBar', ['greet' => 'Hello!']);
 
         $this->assertArrayHasKey('greet', $app);
-        $this->assertEquals("Hello!", $bazBar->greet());
+        $this->assertEquals('Hello!', $bazBar->greet());
     }
 
     public function tearDown()
@@ -72,7 +71,7 @@ class FooBarServiceProvider
     public function register(Application $app)
     {
         $app['foo.bar'] = $app->share(function ($c) {
-             return new FooBar();
+            return new FooBar();
         });
     }
 }
@@ -104,7 +103,7 @@ class BarController
 
 class BazBar
 {
-    private $arguments= [];
+    private $arguments = [];
 
     public function __construct($arguments = [])
     {

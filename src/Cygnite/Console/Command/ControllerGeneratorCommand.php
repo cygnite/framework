@@ -1,35 +1,32 @@
 <?php
+
 namespace Cygnite\Console\Command;
 
-use Cygnite\Database\Table\Table;
-use Cygnite\Helpers\Inflector;
-use Cygnite\Foundation\Application;
 use Cygnite\Console\Generator\Controller;
-use Cygnite\Console\Command\Command;
+use Cygnite\Database\Table\Table;
+use Cygnite\Foundation\Application;
+use Cygnite\Helpers\Inflector;
 use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 
 class ControllerGeneratorCommand extends Command
 {
     /**
-     * Name of your console command
+     * Name of your console command.
      *
      * @var string
      */
     protected $name = 'controller:create';
 
     /**
-     * Description of your console command
+     * Description of your console command.
      *
      * @var string
      */
     protected $description = 'Generate Sample Controller Using Cygnite CLI';
 
     /**
-     * Console command arguments
+     * Console command arguments.
      *
      * @var array
      */
@@ -41,7 +38,7 @@ class ControllerGeneratorCommand extends Command
      * @var array
      */
     protected $options = [
-        ['resource', null, InputOption::VALUE_NONE, 'If set, will create RESTful resource controller.']
+        ['resource', null, InputOption::VALUE_NONE, 'If set, will create RESTful resource controller.'],
     ];
 
     /**
@@ -66,6 +63,7 @@ class ControllerGeneratorCommand extends Command
 
     /**
      * @param Table $table
+     *
      * @throws \InvalidArgumentException
      */
     public function __construct(Table $table)
@@ -80,10 +78,11 @@ class ControllerGeneratorCommand extends Command
     }
 
     /**
-     * We will execute the controller command and generate classes
+     * We will execute the controller command and generate classes.
+     *
+     * @throws \Exception
      *
      * @return mixed|void
-     * @throws \Exception
      */
     public function process()
     {
@@ -104,8 +103,7 @@ class ControllerGeneratorCommand extends Command
     }
 
     /**
-     * Set controller type
-     *
+     * Set controller type.
      */
     private function setControllerType()
     {
@@ -113,7 +111,7 @@ class ControllerGeneratorCommand extends Command
     }
 
     /**
-     * Get controller type either normal controller or resource controller
+     * Get controller type either normal controller or resource controller.
      *
      * @return null
      */
@@ -137,6 +135,7 @@ class ControllerGeneratorCommand extends Command
         $controller->setControllerTemplatePath($controllerTemplateDir);
         $controller->setApplicationDirectory(CYGNITE_BASE.DS.APPPATH);
         $controller->setControllerName($this->controller);
+
         return $controller->{__FUNCTION__}();
     }
 }

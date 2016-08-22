@@ -7,6 +7,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 namespace Cygnite\Cache\Storage;
 
 use Predis\Client as RedisClient;
@@ -16,9 +17,8 @@ if (!defined('CF_SYSTEM')) {
 }
 
 /**
- * Class RedisConnector
+ * Class RedisConnector.
  *
- * @package Cygnite\Cache\Storage
  * @source https://github.com/nrk/predis
  */
 class RedisConnector
@@ -46,6 +46,7 @@ class RedisConnector
 
     /**
      * @param array $servers
+     *
      * @return array
      */
     public function connect(array $servers)
@@ -74,11 +75,13 @@ class RedisConnector
     public function connectDefault()
     {
         $class = $this->redisClient;
+
         return $this->connections['default'] = new $class();
     }
 
     /**
      * @param string $key
+     *
      * @return mixed
      */
     public function connection($key = 'default')
@@ -89,12 +92,13 @@ class RedisConnector
     /**
      * Dynamically call methods of Redis.
      *
-     * @param  string  $method
-     * @param  array   $arguments
+     * @param string $method
+     * @param array  $arguments
+     *
      * @return mixed
      */
     public function __call($method, array $arguments = [])
     {
-        return call_user_func_array(array($this->connection(), $method), $arguments);
+        return call_user_func_array([$this->connection(), $method], $arguments);
     }
 }

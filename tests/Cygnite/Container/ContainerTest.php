@@ -1,6 +1,6 @@
 <?php
+
 use Cygnite\Container\Container;
-use Mockery as m;
 
 class ContainerTest extends PHPUnit_Framework_TestCase
 {
@@ -45,15 +45,17 @@ class ContainerTest extends PHPUnit_Framework_TestCase
 
     public function testSingletonClouserResolution()
     {
-        $class = new stdClass;
-        $this->container->singleton('social', function () use ($class) { return $class; });
+        $class = new stdClass();
+        $this->container->singleton('social', function () use ($class) {
+            return $class;
+        });
         $this->assertSame($class, $this->container['social']);
     }
 
     public function testShareMethod()
     {
         $closure = $this->container->share(function () {
-            return new stdClass;
+            return new stdClass();
         });
 
         $class1 = $closure($this->container);
@@ -81,7 +83,9 @@ class ContainerTest extends PHPUnit_Framework_TestCase
 
     public function testExtendWithoutOverrideIntoKey()
     {
-        $this->container->foo = function () { return 'foo'; };
+        $this->container->foo = function () {
+            return 'foo';
+        };
 
         $this->container->extend('foo', function ($foo) {
             return $foo.'bar';
@@ -94,6 +98,6 @@ class ContainerTest extends PHPUnit_Framework_TestCase
     {
         $stdClass = $this->container->makeInstance('\stdClass');
 
-        $this->assertEquals(new stdClass, $stdClass);
+        $this->assertEquals(new stdClass(), $stdClass);
     }
 }

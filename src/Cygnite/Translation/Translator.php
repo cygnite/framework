@@ -1,21 +1,21 @@
 <?php
+
 namespace Cygnite\Translation;
 
 use Cygnite\Common\ArrayManipulator\ArrayAccessor;
+
 /**
- * Class Translator
- *
- * @package Cygnite\Translation
+ * Class Translator.
  */
 class Translator implements TranslatorInterface
 {
     /**
-     * @var  string   target language: en, en-us, es-es, zh-cn, etc
+     * @var string target language: en, en-us, es-es, zh-cn, etc
      */
     public static $locale = 'en-us';
 
     /**
-     * @var  string  source language: en-us, es-es, zh-cn, etc
+     * @var string source language: en-us, es-es, zh-cn, etc
      */
     public static $source = 'en-us';
 
@@ -28,20 +28,22 @@ class Translator implements TranslatorInterface
     protected $ext = '.php';
 
     /**
-     * @var  array  cache of loaded languages
+     * @var array cache of loaded languages
      */
     protected $cache = [];
 
     protected static $instance;
 
     /**
-     * Create Translator instance and return
+     * Create Translator instance and return.
      *
      *  Translator::make(function($trans)
      *  {
      *      $trans->locale('es');
      *  });
+     *
      * @param callable $callback
+     *
      * @return static
      */
     public static function make(\Closure $callback = null)
@@ -66,14 +68,15 @@ class Translator implements TranslatorInterface
      *     // Change the current language to Spanish
      *     $trans->locale('es');
      *
-     * @param   string $locale   new language setting
-     * @return  string
+     * @param string $locale new language setting
+     *
+     * @return string
      */
     public function locale($locale = null)
     {
         if ($locale) {
             // Normalize the language
-            self::$locale = strtolower(str_replace(array(' ', '_'), '-', $locale));
+            self::$locale = strtolower(str_replace([' ', '_'], '-', $locale));
         }
 
         return self::$locale;
@@ -82,7 +85,8 @@ class Translator implements TranslatorInterface
     /**
      * Set the fallback locale being used.
      *
-     * @param  string  $fallback
+     * @param string $fallback
+     *
      * @return void
      */
     public function setFallback($fallback)
@@ -109,9 +113,10 @@ class Translator implements TranslatorInterface
      * trans('Hello, :user', array(':user' => $username));
      * $hello = $trans->get('welcome.Hello friends, my name is :name');
      *
-     * @param      $key to translate
+     * @param      $key    to translate
      * @param null $locale target language
-     * @return  string
+     *
+     * @return string
      */
     public function get($key, $locale = null)
     {
@@ -126,8 +131,7 @@ class Translator implements TranslatorInterface
             $translator = $this->load($locale.'-'.$exp[0]);
             unset($exp[0]);
 
-            $string = ArrayAccessor::make($translator, function ($a) use($exp)
-            {
+            $string = ArrayAccessor::make($translator, function ($a) use ($exp) {
                 return $a->toString(implode('.', $exp));
             });
 
@@ -142,10 +146,11 @@ class Translator implements TranslatorInterface
     }
 
     /**
-     * Check if language file exists
+     * Check if language file exists.
      *
      * @param      $key
      * @param null $locale
+     *
      * @return bool
      */
     public function has($key, $locale = null)
@@ -157,12 +162,13 @@ class Translator implements TranslatorInterface
      * Set root directory of language files.
      *
      * @param $dir
+     *
      * @return $this
      */
     public function setRootDirectory($dir)
     {
         static::$rootDir = $dir;
-        
+
         return $this;
     }
 
@@ -174,13 +180,14 @@ class Translator implements TranslatorInterface
      */
     public function getRootDirectory()
     {
-        return isset(static::$rootDir) ? static::$rootDir : APPPATH . DS;
+        return isset(static::$rootDir) ? static::$rootDir : APPPATH.DS;
     }
 
     /**
-     * Set language directory name
+     * Set language directory name.
      *
      * @param $dir
+     *
      * @return $this
      */
     public function setLangDir($dir)
@@ -192,7 +199,7 @@ class Translator implements TranslatorInterface
 
     /**
      * Get language directory name, if not set we will return default
-     * name
+     * name.
      *
      * @return string
      */
@@ -202,9 +209,10 @@ class Translator implements TranslatorInterface
     }
 
     /**
-     * Set language files extension
+     * Set language files extension.
      *
      * @param $ext
+     *
      * @return $this;
      */
     public function setFileExtension($ext)
@@ -215,7 +223,7 @@ class Translator implements TranslatorInterface
     }
 
     /**
-     * Get language file extension
+     * Get language file extension.
      *
      * @return string
      */
@@ -226,15 +234,16 @@ class Translator implements TranslatorInterface
 
     /**
      * Find the language file if exists load it into list
-     * else search for fallback locale and load
+     * else search for fallback locale and load.
      *
      * @param $file
+     *
      * @return array
      */
     public function findLanguageFile($file)
     {
         // Create a partial path of the filename
-        $path = DS . $file . $this->getFileExtension();
+        $path = DS.$file.$this->getFileExtension();
         // Include paths must be searched in reverse
         $paths = array_reverse([$this->getRootDirectory().$this->getLangDir()]);
 
@@ -242,9 +251,9 @@ class Translator implements TranslatorInterface
         $locale = [];
 
         foreach ($paths as $dir) {
-            if (is_file($dir . $path)) {
+            if (is_file($dir.$path)) {
                 // This path has a file, add it to the list
-                $locale[] = $dir . $path;
+                $locale[] = $dir.$path;
             } else {
                 //Fallback Locale
                 $fallbackFile = str_replace($this->locale(), $this->getFallback(), $path);
@@ -252,8 +261,8 @@ class Translator implements TranslatorInterface
                  | We will search for fallback locale if
                  | found we will load it into the list
                  */
-                if (is_file($dir .$fallbackFile)) {
-                    $locale[] = $dir .$fallbackFile;
+                if (is_file($dir.$fallbackFile)) {
+                    $locale[] = $dir.$fallbackFile;
                 }
             }
         }
@@ -267,8 +276,9 @@ class Translator implements TranslatorInterface
      *     // Get all defined Spanish messages
      *     $messages = $trans->load('es');
      *
-     * @param   string $locale   language to load
-     * @return  array
+     * @param string $locale language to load
+     *
+     * @return array
      */
     public function load($locale)
     {
@@ -298,10 +308,11 @@ class Translator implements TranslatorInterface
     }
 
     /**
-     * We will load all messages into array
+     * We will load all messages into array.
      *
      * @param $files
      * @param $trans
+     *
      * @return array
      */
     private function loadMessages($files, $trans)

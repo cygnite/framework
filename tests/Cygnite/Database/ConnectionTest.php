@@ -1,25 +1,24 @@
 <?php
+
 use Cygnite\Database\Configure;
-use Cygnite\Database\ConnectionManagerTrait;
 
 class ConnectionTest extends PHPUnit_Framework_TestCase
 {
     public function setUp()
     {
-        Configure::database(function ($config)
-        {
+        Configure::database(function ($config) {
             $config->default = 'db';
             $config->set([
                     'db' => [
-                        'driver' => 'mysql',
-                        'host' => 'localhostf',
-                        'port' => '',
-                        'database' => 'foo_bar',
-                        'username' => 'root',
-                        'password' => '',
+                        'driver'    => 'mysql',
+                        'host'      => 'localhostf',
+                        'port'      => '',
+                        'database'  => 'foo_bar',
+                        'username'  => 'root',
+                        'password'  => '',
                         'charset'   => 'utf8',
                         'collation' => 'utf8_unicode_ci',
-                    ]
+                    ],
                 ]);
         });
     }

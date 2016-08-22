@@ -15,15 +15,12 @@ use Closure;
 use Cygnite\Common\Security;
 
 /**
- * Class Cookie
- *
- * @package Cygnite\Common\Input\CookieManager
+ * Class Cookie.
  */
-
 class Cookie implements CookieInterface
 {
     /**
-     * Cookie attributes
+     * Cookie attributes.
      */
     private $name;
 
@@ -67,12 +64,12 @@ class Cookie implements CookieInterface
         }
     }
 
-
     /**
-     * Create Cookie Instance and return to user
+     * Create Cookie Instance and return to user.
      *
      * @param callable $callback
      * @param array    $request
+     *
      * @return object
      */
     public static function create(Closure $callback = null, $request = [])
@@ -83,17 +80,18 @@ class Cookie implements CookieInterface
     }
 
     /**
-     * Set cookie name
+     * Set cookie name.
      *
-     * @access public
      * @param string $name cookie name
+     *
      * @throws \InvalidCookieException
+     *
      * @return mixed obj or bool false
      */
     public function name($name)
     {
         if (is_null($name)) {
-            throw new \InvalidCookieException("Cookie name cannot be null");
+            throw new \InvalidCookieException('Cookie name cannot be null');
 
             return false;
         }
@@ -103,30 +101,32 @@ class Cookie implements CookieInterface
         return $this;
     }
 
-
     /**
-     * Set cookie value
+     * Set cookie value.
      *
-     * @access   public
      * @param string $value cookie value
+     *
      * @throws \InvalidCookieException
+     *
      * @internal param bool $encrypt
+     *
      * @return bool whether the string was a string
      */
     public function value($value = null)
     {
         if (is_null($value)) {
-            throw new \InvalidCookieException("Cookie value cannot be null.");
+            throw new \InvalidCookieException('Cookie value cannot be null.');
         }
 
         if (is_array($value)) {
             $value = json_encode($this->security->sanitize($value));
         }
 
-        $length = (function_exists('mb_strlen')? mb_strlen($value) : strlen($value));
+        $length = (function_exists('mb_strlen') ? mb_strlen($value) : strlen($value));
 
         if ($length > 4096) {
             throw new \InvalidCookieException('Cookie maximum size exceeds 4kb');
+
             return false;
         }
 
@@ -136,12 +136,14 @@ class Cookie implements CookieInterface
     }
 
     /**
-     * Set cookie expire time
+     * Set cookie expire time.
      *
-     * @access   public
      * @param int $expire
+     *
      * @throws \InvalidCookieException
+     *
      * @internal param string $time +1 day, etc.
+     *
      * @return bool whether the string was a string
      */
     public function expire($expire = 0)
@@ -167,8 +169,10 @@ class Cookie implements CookieInterface
     }
 
     /**
-     * Set cookie path
+     * Set cookie path.
+     *
      * @param string $path The cookie path
+     *
      * @return $this
      */
     public function path($path = '/')
@@ -178,14 +182,13 @@ class Cookie implements CookieInterface
         return $this;
     }
 
-
     /**
-     * Set the cookie domain
-     * @access public
+     * Set the cookie domain.
+     *
      * @param string $domain The cookie path
+     *
      * @return $this
      */
-
     public function domain($domain = null)
     {
         if ($domain !== null) {
@@ -196,37 +199,38 @@ class Cookie implements CookieInterface
     }
 
     /**
-     * Set the cookie status to be secure or not
+     * Set the cookie status to be secure or not.
      *
      * @param bool $bool true/false if secure
+     *
      * @return $this
      */
-
     public function secure($bool = false)
     {
-        $this->secure = (bool)$bool;
+        $this->secure = (bool) $bool;
 
         return $this;
     }
 
-
     /**
-     * Set the cookie type http only, or not
+     * Set the cookie type http only, or not.
+     *
      * @param bool $bool true/false if http only
+     *
      * @return $this
      */
     public function httpOnly($bool = false)
     {
-        $this->httpOnly = (bool)$bool;
+        $this->httpOnly = (bool) $bool;
 
         return $this;
     }
 
-
     /**
-     * Get a cookie's value
+     * Get a cookie's value.
      *
      * @param string $name The cookie name
+     *
      * @return mixed string /bool - The value of the cookie name
      */
     public function get($name = null)
@@ -238,24 +242,24 @@ class Cookie implements CookieInterface
         $name = $this->security->sanitize($name);
 
         if (!isset(static::$cookies[$name])) {
-            throw new InvalidCookieException("Cookie ".$name.' not found');
+            throw new InvalidCookieException('Cookie '.$name.' not found');
         }
 
         if (isset(static::$cookies[$name])) {
-
             if (is_array(static::$cookies[$name])) {
                 return json_decode(static::$cookies[$name]);
-        }
+            }
 
             return $this->security->sanitize(static::$cookies[$name]);
         }
     }
 
     /**
-     * Set the cookie
+     * Set the cookie.
+     *
+     * @throws \Exceptions Cookies already set
      *
      * @return bool
-     * @throws \Exceptions  Cookies already set
      */
     public function store()
     {
@@ -281,9 +285,10 @@ class Cookie implements CookieInterface
     }
 
     /**
-     * Check cookie existance
+     * Check cookie existance.
      *
      * @param $cookie
+     *
      * @return bool|mixed
      */
     public function has($cookie)
@@ -296,11 +301,12 @@ class Cookie implements CookieInterface
     }
 
     /**
-     * Destroy the cookie
+     * Destroy the cookie.
      *
-     * @access   public
      * @param null $name
+     *
      * @internal param string $cookieName to kill
+     *
      * @return bool true/false
      */
     public function destroy($name = null)
@@ -309,7 +315,7 @@ class Cookie implements CookieInterface
             $name = $this->name;
         }
 
-        return setcookie($name, null, (time()-1), $this->path, $this->domain);
+        return setcookie($name, null, (time() - 1), $this->path, $this->domain);
     }
 
     public function __destruct()

@@ -1,9 +1,10 @@
 <?php
+
 namespace Cygnite\Database\Exceptions;
 
-use PDOStatement;
-use PDOException;
 use Cygnite\Database\Connection;
+use PDOException;
+use PDOStatement;
 
 class DatabaseException extends PDOException
 {
@@ -11,12 +12,12 @@ class DatabaseException extends PDOException
     {
         if ($exceptions instanceof Connection) {
             parent::__construct(
-                join(", ", $exceptions->connection->errorInfo()),
+                implode(', ', $exceptions->connection->errorInfo()),
                 intval($exceptions->connection->errorCode())
             );
         } elseif ($exceptions instanceof PDOStatement) {
             parent::__construct(
-                join(", ", $exceptions->errorInfo()),
+                implode(', ', $exceptions->errorInfo()),
                 intval($exceptions->errorCode())
             );
         }

@@ -7,16 +7,17 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 namespace Cygnite\Console\Generator;
 
 use Cygnite\Helpers\Inflector;
 
 /**
- * Cygnite View Generator
+ * Cygnite View Generator.
  *
  * This class used to generate views
- * @author Sanjoy Dey <dey.sanjoy0@gmail.com>
  *
+ * @author Sanjoy Dey <dey.sanjoy0@gmail.com>
  */
 class View
 {
@@ -55,7 +56,7 @@ class View
     private function __construct($command = null)
     {
         $this->command = $command;
-        $this->controller = Inflector::deCamelize(str_replace("Controller", "", $command->controller));
+        $this->controller = Inflector::deCamelize(str_replace('Controller', '', $command->controller));
     }
 
     public static function __callStatic($method, $arguments = [])
@@ -71,7 +72,8 @@ class View
     }
 
     /**
-     * Return table columns
+     * Return table columns.
+     *
      * @return array|null
      */
     public function getTableColumns()
@@ -95,7 +97,7 @@ class View
 
     /**
      * We will set the type of layout
-     * to generate either php / twig view pages
+     * to generate either php / twig view pages.
      *
      * @param $type
      */
@@ -106,12 +108,14 @@ class View
 
     private function viewLayoutName()
     {
-        return ($this->layoutType == 'twig') ? 'base.html.stub': 'base.view.stub';
+        return ($this->layoutType == 'twig') ? 'base.html.stub' : 'base.view.stub';
     }
 
     /**
-     * Check has directory or we will create directory
+     * Check has directory or we will create directory.
+     *
      * @param $directory
+     *
      * @return bool
      */
     private function hasDirectory($directory)
@@ -121,9 +125,10 @@ class View
 
     /**
      * We will get the layout and generate into the application
-     * directory
+     * directory.
      *
      * @param $layout
+     *
      * @return bool
      */
     public function generateLayout($layout)
@@ -150,6 +155,7 @@ class View
 
         if (file_exists($layoutFile)) {
             echo "\n Layout file already exists in $layoutFile directory \n";
+
             return true;
         }
 
@@ -166,7 +172,7 @@ class View
     }
 
     /**
-     * Read template view contents
+     * Read template view contents.
      *
      * @param        $view
      * @param string $page
@@ -177,7 +183,7 @@ class View
 
         $content = '';
         /*read operation ->*/
-        $this->filePointer = fopen($view, "r");
+        $this->filePointer = fopen($view, 'r');
         $content = fread($this->filePointer, filesize($view));
 
         switch ($page) {
@@ -197,11 +203,11 @@ class View
     }
 
     /**
-     * generate views into application directory
+     * generate views into application directory.
      */
     public function generateViews()
     {
-        $viewPath  = $viewExtension = '';
+        $viewPath = $viewExtension = '';
         $viewDir = $this->command->applicationDir.DS.'Views'.DS.$this->controller;
         $this->hasDirectory($viewDir);
 
@@ -216,15 +222,17 @@ class View
     }
 
     /**
-     * Replace the index content with template content
+     * Replace the index content with template content.
+     *
      * @param $content
+     *
      * @return mixed
      */
     private function replaceIndexTemplateContents($content)
     {
         /* Index View Page */
-        #replace table headers - <th> {%tableColumns%}</th>
-        #replace table td - {%controllerColumns%}
+        //replace table headers - <th> {%tableColumns%}</th>
+        //replace table td - {%controllerColumns%}
 
         $content = str_replace('#controllerName#', $this->controller, $content);
         $content = str_replace('#ControllerName#', Inflector::classify($this->controller), $content);
@@ -245,15 +253,17 @@ class View
     }
 
     /**
-     * Replace table content with database columns
+     * Replace table content with database columns.
+     *
      * @param string $type
+     *
      * @return string
      */
     private function replaceTableElements($type = 'th')
     {
         $column = '';
 
-        foreach ($this->getTableColumns() as $key=> $value) {
+        foreach ($this->getTableColumns() as $key => $value) {
             if ($value['COLUMN_NAME'] !== 'id') {
                 if ($type == 'th') {
                     $tableHead = Inflector::underscoreToSpace($value['COLUMN_NAME']);
@@ -273,15 +283,14 @@ class View
         return $column;
     }
 
-
     private function replaceCreateOrUpdateTemplateContents($content)
     {
         /* Create View Page */
-        # replace controller name - #controllerName#
+        // replace controller name - #controllerName#
         /* Update View Page */
-        # replace controller name - #controllerName#
+        // replace controller name - #controllerName#
 
-        $controller = str_replace("Controller", "", $this->controller);
+        $controller = str_replace('Controller', '', $this->controller);
         $content = str_replace('#controllerName#', strtolower($this->controller), $content);
         $content = str_replace('#Controller#', Inflector::classify($this->controller), $content);
 
@@ -291,11 +300,11 @@ class View
     private function replaceViewTemplateContents($content)
     {
         /* Show View Page */
-        # replace controller name - #controllerName#
-        #replace with table columns - {%recordDivElements%}
+        // replace controller name - #controllerName#
+        //replace with table columns - {%recordDivElements%}
 
         $column = '';
-        foreach ($this->getTableColumns() as $key=> $value) {
+        foreach ($this->getTableColumns() as $key => $value) {
             if ($value['COLUMN_NAME'] !== 'id') {
                 if ($this->layoutType == 'php') {
                     $rowType = '<?php echo $record->'.$value['COLUMN_NAME'].'; ?>';
@@ -327,7 +336,8 @@ class View
     }
 
     /**
-     * Generate views
+     * Generate views.
+     *
      * @param $viewName
      */
     public function generate($viewName)
@@ -341,13 +351,13 @@ class View
             $viewName = str_replace('.stub', '.twig', $viewName);
         }
 
-        $filePath =  $appViewPath.strtolower($viewName);
+        $filePath = $appViewPath.strtolower($viewName);
         $this->hasDirectory($appViewPath);
 
         /*write operation ->*/
-        $writeTmp =fopen(
+        $writeTmp = fopen(
             $filePath,
-            "w"
+            'w'
         ) or die('Unable to generate model');
 
         fwrite($writeTmp, $this->replacedContent);

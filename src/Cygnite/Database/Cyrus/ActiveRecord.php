@@ -7,20 +7,18 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-
 namespace Cygnite\Database\Cyrus;
 
-/**
+/*
  * Database ActiveRecord.
  *
  * @author Sanjoy Dey <dey.sanjoy0@gmail.com>
  */
-use Cygnite\Helpers\Inflector;
 use Cygnite\Common\Pagination;
 use Cygnite\Database\Connection;
-use Cygnite\Foundation\Collection;
-use Cygnite\Database\Table\Schema;
 use Cygnite\Database\Query\Builder as QueryBuilder;
+use Cygnite\Foundation\Collection;
+use Cygnite\Helpers\Inflector;
 
 abstract class ActiveRecord implements ActiveRecordInterface
 {
@@ -42,7 +40,7 @@ abstract class ActiveRecord implements ActiveRecordInterface
         'beforeSelect',
         'afterSelect',
         'beforeDelete',
-        'afterDelete'
+        'afterDelete',
     ];
     // Holds primary key value
     private $index;
@@ -57,7 +55,7 @@ abstract class ActiveRecord implements ActiveRecordInterface
         'findBySql',
         'findByAnd',
         'findByOr',
-        'save'
+        'save',
     ];
 
     //set user defined table name into it.
@@ -94,8 +92,7 @@ abstract class ActiveRecord implements ActiveRecordInterface
     protected $relations = [];
 
     /**
-     * Set Model Attributes and start booting Cyrus ActiveRecord ORM
-     *
+     * Set Model Attributes and start booting Cyrus ActiveRecord ORM.
      */
     public function __construct()
     {
@@ -108,24 +105,25 @@ abstract class ActiveRecord implements ActiveRecordInterface
     }
 
     /**
-     * Get the model class instance
+     * Get the model class instance.
+     *
+     * @throws DatabaseException
      *
      * @return mixed
-     * @throws DatabaseException
      */
     public static function model()
     {
         $class = get_called_class();
 
         if ($class == __CLASS__) {
-            throw new DatabaseException(sprintf("Abstract Class %s cannot be instantiated.", __CLASS__));
+            throw new DatabaseException(sprintf('Abstract Class %s cannot be instantiated.', __CLASS__));
         }
 
         return (!class_exists($class)) ?: new $class();
     }
 
     /**
-     * Return empty model object
+     * Return empty model object.
      *
      * @return mixed
      */
@@ -135,9 +133,10 @@ abstract class ActiveRecord implements ActiveRecordInterface
     }
 
     /**
-     * Configure and set all attributes into model class
+     * Configure and set all attributes into model class.
      *
      * @param $model
+     *
      * @throws \InvalidArgumentException
      */
     protected function setModelAttributes($model)
@@ -156,7 +155,7 @@ abstract class ActiveRecord implements ActiveRecordInterface
 
         if (is_null($this->getDatabase())) {
             throw new \InvalidArgumentException(
-                "Please specify database name in your model. " . get_called_class()
+                'Please specify database name in your model. '.get_called_class()
             );
         }
 
@@ -164,7 +163,7 @@ abstract class ActiveRecord implements ActiveRecordInterface
     }
 
     /**
-     * Set model class name
+     * Set model class name.
      *
      * @param $value
      */
@@ -174,7 +173,7 @@ abstract class ActiveRecord implements ActiveRecordInterface
     }
 
     /**
-     * get model class name
+     * get model class name.
      *
      * @return null
      */
@@ -184,7 +183,7 @@ abstract class ActiveRecord implements ActiveRecordInterface
     }
 
     /**
-     * set the database name to connect
+     * set the database name to connect.
      *
      * @param $value
      */
@@ -194,7 +193,7 @@ abstract class ActiveRecord implements ActiveRecordInterface
     }
 
     /**
-     * get the database
+     * get the database.
      *
      * @return mixed|null
      */
@@ -204,8 +203,7 @@ abstract class ActiveRecord implements ActiveRecordInterface
     }
 
     /**
-     * Set the primary key
-     *
+     * Set the primary key.
      */
     protected function setPrimaryKey()
     {
@@ -218,7 +216,7 @@ abstract class ActiveRecord implements ActiveRecordInterface
     }
 
     /**
-     * Get the primary key of table
+     * Get the primary key of table.
      *
      * @return null|string
      */
@@ -228,7 +226,7 @@ abstract class ActiveRecord implements ActiveRecordInterface
     }
 
     /**
-     * Get primary Key Value
+     * Get primary Key Value.
      *
      * @return mixed|null
      */
@@ -238,7 +236,7 @@ abstract class ActiveRecord implements ActiveRecordInterface
     }
 
     /**
-     * Set the primary key id value
+     * Set the primary key id value.
      *
      * @param $key
      * @param $value
@@ -249,9 +247,10 @@ abstract class ActiveRecord implements ActiveRecordInterface
     }
 
     /**
-     * Get the Id stored into object
+     * Get the Id stored into object.
      *
      * @param null $key
+     *
      * @return mixed
      */
     public function getId($key = null)
@@ -262,20 +261,21 @@ abstract class ActiveRecord implements ActiveRecordInterface
     }
 
     /**
-     * Get Id column Alias method of getId()
+     * Get Id column Alias method of getId().
      *
      * @param $class
+     *
      * @return null|string
      */
     public function getIdColumn($class)
     {
         $column = $this->getTableNameFromClass($class, 'primaryKey');
 
-        return (is_null($column) ? $this->getKeyName() : $column);
+        return is_null($column) ? $this->getKeyName() : $column;
     }
 
     /**
-     * Return Model Class with Namespace
+     * Return Model Class with Namespace.
      *
      * @return string
      */
@@ -285,11 +285,12 @@ abstract class ActiveRecord implements ActiveRecordInterface
     }
 
     /**
-     * Returns table name from Model class properties
+     * Returns table name from Model class properties.
      *
      * @param        $class
      * @param string $property
      * @param null   $default
+     *
      * @return null
      */
     public function getTableNameFromClass($class, $property = 'tableName', $default = null)
@@ -304,9 +305,10 @@ abstract class ActiveRecord implements ActiveRecordInterface
     }
 
     /**
-     * Get Foreign key of table
+     * Get Foreign key of table.
      *
      * @param $table
+     *
      * @return string
      */
     protected static function getForeignKey($table)
@@ -315,9 +317,10 @@ abstract class ActiveRecord implements ActiveRecordInterface
     }
 
     /**
-     * Find method to retrive data based on primary key id
+     * Find method to retrive data based on primary key id.
      *
      * @param $argument
+     *
      * @return mixed
      */
     public static function find($argument)
@@ -326,7 +329,7 @@ abstract class ActiveRecord implements ActiveRecordInterface
     }
 
     /**
-     * It will return first row of the table
+     * It will return first row of the table.
      *
      * @return mixed
      */
@@ -336,9 +339,10 @@ abstract class ActiveRecord implements ActiveRecordInterface
     }
 
     /**
-     * Return all collection of model data
+     * Return all collection of model data.
      *
      * @param array $arguments
+     *
      * @return mixed
      */
     public static function all($arguments = [])
@@ -347,7 +351,7 @@ abstract class ActiveRecord implements ActiveRecordInterface
     }
 
     /**
-     * We will return last row of the table
+     * We will return last row of the table.
      *
      * @return mixed
      */
@@ -358,9 +362,10 @@ abstract class ActiveRecord implements ActiveRecordInterface
 
     /**
      * We will execute raw query into table given by user
-     * and return resultset
+     * and return resultset.
      *
      * @param string $query
+     *
      * @return object Collection
      */
     public static function sql($query)
@@ -369,11 +374,12 @@ abstract class ActiveRecord implements ActiveRecordInterface
     }
 
     /**
-     * Join model with another model and return query instance
+     * Join model with another model and return query instance.
      *
      * $model->joinWith(['person', 'constraint', 'alias']);
      *
      * @param $arguments
+     *
      * @return mixed
      */
     public function joinWith($arguments)
@@ -383,30 +389,30 @@ abstract class ActiveRecord implements ActiveRecordInterface
         $tableWith = Inflector::tabilize($arguments[0]);
 
         $params = [
-            $class->tableName . '.' . $class->primaryKey,
+            $class->tableName.'.'.$class->primaryKey,
             '=',
-            $tableWith . '.' . Inflector::singularize($class->tableName) . self::DEFAULT_FOREIGN_KEY_SUFFIX
+            $tableWith.'.'.Inflector::singularize($class->tableName).self::DEFAULT_FOREIGN_KEY_SUFFIX,
         ];
 
         if (isset($arguments[1])) {
             $params = $arguments[1];
-                }
-
-        return $this->query()->leftOuterJoin($tableWith, $params, $arguments[2]);
         }
 
+        return $this->query()->leftOuterJoin($tableWith, $params, $arguments[2]);
+    }
+
     /**
-     * Return Last Executed query
+     * Return Last Executed query.
      *
      * @return mixed
      */
     public static function lastQuery()
     {
         return static::model()->query()->lastQuery();
-        }
+    }
 
     /**
-     * Create Pagination links and return
+     * Create Pagination links and return.
      *
      * @return $this|mixed
      */
@@ -432,9 +438,10 @@ abstract class ActiveRecord implements ActiveRecordInterface
     }
 
     /**
-     * Set the table name
+     * Set the table name.
      *
      * @param $value
+     *
      * @return $this
      */
     public function setTableName($value)
@@ -445,7 +452,7 @@ abstract class ActiveRecord implements ActiveRecordInterface
     }
 
     /**
-     * get table name
+     * get table name.
      *
      * @return null
      */
@@ -455,16 +462,18 @@ abstract class ActiveRecord implements ActiveRecordInterface
     }
 
     /**
-     * Set array of attributes directly into model object
+     * Set array of attributes directly into model object.
      *
      * @param array $attributes
-     * @return mixed|void
+     *
      * @throws DatabaseException
+     *
+     * @return mixed|void
      */
     public function setAttributes($attributes = [])
     {
         if (empty($attributes) || !is_array($attributes)) {
-            throw new DatabaseException(sprintf("Invalid argument passed to %s", __FUNCTION__));
+            throw new DatabaseException(sprintf('Invalid argument passed to %s', __FUNCTION__));
         }
 
         foreach ($attributes as $key => $value) {
@@ -473,7 +482,7 @@ abstract class ActiveRecord implements ActiveRecordInterface
     }
 
     /**
-     * Get attributes array
+     * Get attributes array.
      *
      * @return array|null
      */
@@ -483,7 +492,7 @@ abstract class ActiveRecord implements ActiveRecordInterface
     }
 
     /**
-     * Set attributes into model class
+     * Set attributes into model class.
      *
      * @param $key
      * @param $value
@@ -494,11 +503,13 @@ abstract class ActiveRecord implements ActiveRecordInterface
     }
 
     /**
-     * Getter method
+     * Getter method.
      *
      * @param $key
-     * @return null
+     *
      * @throws \Exception
+     *
+     * @return null
      */
     public function __get($key)
     {
@@ -511,23 +522,25 @@ abstract class ActiveRecord implements ActiveRecordInterface
         }
 
         try {
-        return isset($this->attributes[$key]) ? $this->attributes[$key] : null;
+            return isset($this->attributes[$key]) ? $this->attributes[$key] : null;
         } catch (\Exception $ex) {
             throw new \Exception($ex->getMessage());
-    }
+        }
     }
 
     /**
      * (PHP 5 &gt;= 5.0.0)<br/>
-     * Offset to set
+     * Offset to set.
      *
      * @link http://php.net/manual/en/arrayaccess.offsetset.php
-     * @param  mixed $offset <p>
-     *                       The offset to assign the value to.
-     *                       </p>
-     * @param  mixed $value  <p>
-     *                       The value to set.
-     *                       </p>
+     *
+     * @param mixed $offset <p>
+     *                      The offset to assign the value to.
+     *                      </p>
+     * @param mixed $value  <p>
+     *                      The value to set.
+     *                      </p>
+     *
      * @return void
      */
     public function offsetSet($offset, $value)
@@ -541,12 +554,14 @@ abstract class ActiveRecord implements ActiveRecordInterface
 
     /**
      * (PHP 5 &gt;= 5.0.0)<br/>
-     * Offset to retrieve
+     * Offset to retrieve.
      *
      * @link http://php.net/manual/en/arrayaccess.offsetget.php
-     * @param  mixed $offset <p>
-     *                       The offset to retrieve.
-     *                       </p>
+     *
+     * @param mixed $offset <p>
+     *                      The offset to retrieve.
+     *                      </p>
+     *
      * @return mixed Can return all value types.
      */
     public function offsetGet($offset)
@@ -556,18 +571,19 @@ abstract class ActiveRecord implements ActiveRecordInterface
 
     /**
      * (PHP 5 &gt;= 5.0.0)<br/>
-     * Whether a offset exists
+     * Whether a offset exists.
      *
      * @link                  http://php.net/manual/en/arrayaccess.offsetexists.php
-     * @param  mixed $offset   <p>
-     *                         An offset to check for.
-     *                         </p>
-     * @return boolean true on success or false on failure.
-     *                        </p>
-     *                        <p>
-     *                        The return value will be casted to boolean if non-boolean was returned.
+     *
+     * @param mixed $offset <p>
+     *                      An offset to check for.
+     *                      </p>
+     *
+     * @return bool true on success or false on failure.
+     *              </p>
+     *              <p>
+     *              The return value will be casted to boolean if non-boolean was returned.
      */
-
     public function offsetExists($offset)
     {
         return isset($this->attributes[$offset]);
@@ -575,6 +591,7 @@ abstract class ActiveRecord implements ActiveRecordInterface
 
     /**
      * @param $key
+     *
      * @return bool
      */
     public function __isset($key)
@@ -584,12 +601,14 @@ abstract class ActiveRecord implements ActiveRecordInterface
 
     /**
      * (PHP 5 &gt;= 5.0.0)<br/>
-     * Offset to unset
+     * Offset to unset.
      *
      * @link http://php.net/manual/en/arrayaccess.offsetunset.php
-     * @param  mixed $offset <p>
-     *                       The offset to unset.
-     *                       </p>
+     *
+     * @param mixed $offset <p>
+     *                      The offset to unset.
+     *                      </p>
+     *
      * @return void
      */
     public function offsetUnset($offset)
@@ -600,9 +619,10 @@ abstract class ActiveRecord implements ActiveRecordInterface
     }
 
     /**
-     * Save model attributes into database
+     * Save model attributes into database.
      *
      * @param array $attributes
+     *
      * @return mixed
      */
     public function save($attributes = [])
@@ -614,9 +634,10 @@ abstract class ActiveRecord implements ActiveRecordInterface
 
     /**
      * Interally called to identify user tries to insert or
-     * update the object
+     * update the object.
      *
      * @param $arguments
+     *
      * @return mixed
      */
     private function _save($arguments)
@@ -631,7 +652,7 @@ abstract class ActiveRecord implements ActiveRecordInterface
     }
 
     /** Check id is null or not.
-     *  If null return true else false
+     *  If null return true else false.
      *
      * @return bool
      */
@@ -643,6 +664,7 @@ abstract class ActiveRecord implements ActiveRecordInterface
     /**
      * @param $arguments
      * @param $method
+     *
      * @return mixed
      */
     private function setAttributesForInsertOrUpdate($arguments, $method)
@@ -658,10 +680,11 @@ abstract class ActiveRecord implements ActiveRecordInterface
     }
 
     /**
-     * Intermediate method to call query builder trash method
+     * Intermediate method to call query builder trash method.
      *
      * @param      $arguments
      * @param bool $multiple
+     *
      * @return mixed
      */
     public function trash($arguments, $multiple = false)
@@ -670,9 +693,10 @@ abstract class ActiveRecord implements ActiveRecordInterface
     }
 
     /**
-     * Find Record by Primary Key Id
+     * Find Record by Primary Key Id.
      *
      * @param $arguments
+     *
      * @return $this|mixed
      */
     public function findByPK($arguments)
@@ -681,7 +705,7 @@ abstract class ActiveRecord implements ActiveRecordInterface
 
         $args = [
             'primaryKey' => $this->getKeyName(),
-            'args' => $arguments
+            'args'       => $arguments,
         ];
 
         $fetch = $this->query()->find('find', $args);
@@ -703,7 +727,7 @@ abstract class ActiveRecord implements ActiveRecordInterface
     }
 
     /**
-     * We will assign values to model properties
+     * We will assign values to model properties.
      *
      * @param array $attributes
      */
@@ -720,7 +744,7 @@ abstract class ActiveRecord implements ActiveRecordInterface
     /** ------------- Pagination functionalities ---------**/
 
     /**
-     * Set the pagination limit
+     * Set the pagination limit.
      *
      * @param null $number
      */
@@ -735,7 +759,7 @@ abstract class ActiveRecord implements ActiveRecordInterface
     }
 
     /**
-     * Set Page Number for Pagination
+     * Set Page Number for Pagination.
      *
      * @param $number
      */
@@ -745,7 +769,7 @@ abstract class ActiveRecord implements ActiveRecordInterface
     }
 
     /**
-     * Get the page number
+     * Get the page number.
      *
      * @return null
      */
@@ -755,7 +779,7 @@ abstract class ActiveRecord implements ActiveRecordInterface
     }
 
     /**
-     * Get Pagination Offset
+     * Get Pagination Offset.
      *
      * @return null
      */
@@ -765,7 +789,7 @@ abstract class ActiveRecord implements ActiveRecordInterface
     }
 
     /**
-     * Set Pagination Offset
+     * Set Pagination Offset.
      *
      * @param $offset
      */
@@ -775,7 +799,7 @@ abstract class ActiveRecord implements ActiveRecordInterface
     }
 
     /**
-     * We will get Fluent Query Object
+     * We will get Fluent Query Object.
      *
      * @return Query
      */
@@ -785,9 +809,10 @@ abstract class ActiveRecord implements ActiveRecordInterface
     }
 
     /**
-     * Use Connection to build fluent queries against any table
+     * Use Connection to build fluent queries against any table.
      *
      * @param $database
+     *
      * @return mixed
      */
     public static function db($database)
@@ -800,9 +825,10 @@ abstract class ActiveRecord implements ActiveRecordInterface
     }
 
     /**
-     * Query on Table
+     * Query on Table.
      *
      * @param $table
+     *
      * @return QueryBuilder
      */
     public function table($table)
@@ -813,9 +839,10 @@ abstract class ActiveRecord implements ActiveRecordInterface
     }
 
     /**
-     * Get Database Connection
+     * Get Database Connection.
      *
      * @param $database
+     *
      * @return mixed
      */
     public static function connection($database)
@@ -829,11 +856,12 @@ abstract class ActiveRecord implements ActiveRecordInterface
 
     /**
      * This method is to build one-to-one releationship between
-     * two table
+     * two table.
      *
      * @param      $associatedClass
      * @param null $foreignKey
      * @param null $mappingKeyInBaseTable
+     *
      * @return Query\Builder
      */
     protected function hasOne($associatedClass, $foreignKey = null, $mappingKeyInBaseTable = null)
@@ -848,6 +876,7 @@ abstract class ActiveRecord implements ActiveRecordInterface
      * @param      $associatedClass
      * @param null $foreignKey
      * @param null $mappingKeyInBaseTable
+     *
      * @return Query\Builder
      */
     protected function hasMany($associatedClass, $foreignKey = null, $mappingKeyInBaseTable = null)
@@ -857,7 +886,7 @@ abstract class ActiveRecord implements ActiveRecordInterface
 
     /**
      * This method is use to construct one-to-one and one-to-many relationship
-     * Make sure your base table has primary key as 'id' and mapped key table_name_id
+     * Make sure your base table has primary key as 'id' and mapped key table_name_id.
      *
      * example: user : id , comment_id
      *          comment: id, commment
@@ -865,6 +894,7 @@ abstract class ActiveRecord implements ActiveRecordInterface
      * @param      $associatedClass
      * @param null $foreignKey
      * @param null $mappingId
+     *
      * @return Query\Builder Object
      */
     protected function belongsTo($associatedClass, $foreignKey = null, $mappingId = null)
@@ -873,11 +903,11 @@ abstract class ActiveRecord implements ActiveRecordInterface
         $foreignKey = $this->buildForeignKeyName($foreignKey, $associatedTable);
         $associatedTableId = $this->$foreignKey;
 
-        if( is_null($mappingId) ) {
-            return (new $associatedClass)->where($this->primaryKey, '=', $associatedTableId);
+        if (is_null($mappingId)) {
+            return (new $associatedClass())->where($this->primaryKey, '=', $associatedTableId);
         }
 
-        return (new $associatedClass)->where($mappingId, '=', $associatedTableId);
+        return (new $associatedClass())->where($mappingId, '=', $associatedTableId);
     }
 
     /**
@@ -886,6 +916,7 @@ abstract class ActiveRecord implements ActiveRecordInterface
      * @param      $associatedClass
      * @param null $foreignKey
      * @param null $mappingId
+     *
      * @return Query\Builder Object
      */
     protected function findHasOneOrMany($associatedClass, $foreignKey = null, $mappingId = null)
@@ -896,7 +927,7 @@ abstract class ActiveRecord implements ActiveRecordInterface
         $whereValue = '';
         $whereValue = $this->{$this->primaryKey};
 
-        if(!is_null($mappingId)) {
+        if (!is_null($mappingId)) {
             $whereValue = $this->{$mappingId};
         }
 
@@ -905,7 +936,7 @@ abstract class ActiveRecord implements ActiveRecordInterface
          | to the user, to either make use of findAll() or findOne() method
          | to get data
          */
-        return (new $associatedClass)->where($foreignKey, '=', $whereValue);
+        return (new $associatedClass())->where($foreignKey, '=', $whereValue);
     }
 
     /**
@@ -917,6 +948,7 @@ abstract class ActiveRecord implements ActiveRecordInterface
      * @param null $associatedTableId
      * @param null $firstKey
      * @param null $secondKey
+     *
      * @return Query\Builder Object
      *
      * @note Model Class must contain the property $tableName = 'table_name';
@@ -928,8 +960,7 @@ abstract class ActiveRecord implements ActiveRecordInterface
         $associatedTableId = null,
         $firstKey = null,
         $secondKey = null
-    )
-    {
+    ) {
         $baseClass = get_class($this);
 
         if (is_null($joinModelClass)) {
@@ -948,17 +979,18 @@ abstract class ActiveRecord implements ActiveRecordInterface
         $mappingId = $this->buildForeignKeyName($baseTableId, $baseTable);
         $associatedTableId = $this->buildForeignKeyName($associatedTableId, $associatedTable);
 
-        return (new $associatedClass)
+        return (new $associatedClass())
             ->select("{$associatedTable}.*")
             ->innerJoin($joinTable, [
                     "{$associatedTable}.{$associatedTableId}",
                     '=',
-                    "{$joinTable}.{$associatedTableId}"]
+                    "{$joinTable}.{$associatedTableId}", ]
             )->where("{$joinTable}.{$mappingId}", '=', $this->$baseTableId);
     }
 
     /**
      * @param array $classes
+     *
      * @return array
      */
     protected function filterTableNameFromClass(array $classes)
@@ -971,10 +1003,11 @@ abstract class ActiveRecord implements ActiveRecordInterface
     }
 
     /**
-     * Get Join class name
+     * Get Join class name.
      *
      * @param $baseClass
      * @param $associatedClass
+     *
      * @return string
      */
     private function getJoinClassName($baseClass, $associatedClass)
@@ -982,18 +1015,19 @@ abstract class ActiveRecord implements ActiveRecordInterface
         $classs = [Inflector::getClassName($baseClass), $associatedClass];
         sort($classs, SORT_STRING);
 
-        return join("", $classs);
+        return implode('', $classs);
     }
 
     /**
      * @param $foreignKey
      * @param $baseTable
+     *
      * @return string
      */
     protected function buildForeignKeyName($foreignKey, $baseTable)
     {
         return (is_null($foreignKey)) ?
-            Inflector::singularize($baseTable). self::DEFAULT_FOREIGN_KEY_SUFFIX :
+            Inflector::singularize($baseTable).self::DEFAULT_FOREIGN_KEY_SUFFIX :
             $foreignKey;
     }
 
@@ -1038,20 +1072,21 @@ abstract class ActiveRecord implements ActiveRecordInterface
      * collection object.
      *
      * @param $model
+     *
      * @return mixed
      */
     public static function with($model)
     {
         $data = static::model()->findAll();
 
-        $idKey= null;
+        $idKey = null;
         $whereIn = [];
         foreach ($data as $key => $value) {
             $idKey = $value->primaryKey;
             $whereIn[] = $value->{$value->primaryKey};
         }
 
-        $associatedModel = new $model;
+        $associatedModel = new $model();
         $associatedData = $associatedModel
             ->where(static::getForeignKey(static::model()->tableName), 'IN', implode(',', $whereIn))
             ->findAll();
@@ -1065,17 +1100,16 @@ abstract class ActiveRecord implements ActiveRecordInterface
      * @param $data
      * @param $associatedModel
      * @param $associatedData
+     *
      * @return mixed
      */
     protected static function buildRelations($data, $associatedModel, $associatedData)
     {
-        foreach($data as $parentKey => &$class) {
-
+        foreach ($data as $parentKey => &$class) {
             $associateId = static::getForeignKey($class->tableName);
             $tempArray = [];
             $i = 0;
             foreach ($associatedData as $key => $value) {
-
                 if ($value->{$associateId} == $class->{$class->primaryKey}) {
                     $tempArray[$i] = $value;
                     $i++;
@@ -1097,12 +1131,12 @@ abstract class ActiveRecord implements ActiveRecordInterface
     /**
      * The finder make use of __callStatic() to invoke
      * undefined static methods dynamically. This magic method is mainly used
-     * for dynamic finders
+     * for dynamic finders.
      *
      * @param $method    String
      * @param $arguments array
-     * @return object
      *
+     * @return object
      */
     public static function __callStatic($method, $arguments)
     {
@@ -1110,7 +1144,7 @@ abstract class ActiveRecord implements ActiveRecordInterface
         $class = self::model();
 
         switch ($method) {
-            case (substr($method, 0, 6) == 'findBy') :
+            case substr($method, 0, 6) == 'findBy':
 
                 if (strpos($method, 'And') !== false) {
                     return self::callFinderBy($method, $class, $arguments, 'And'); // findByAnd
@@ -1126,7 +1160,7 @@ abstract class ActiveRecord implements ActiveRecordInterface
 
                 return self::model()->query()->find('findBy', $params);
                 break;
-            case 'joinWith' :
+            case 'joinWith':
                 return static::$ar->joinWith($class, $arguments);
                 break;
         }
@@ -1147,18 +1181,18 @@ abstract class ActiveRecord implements ActiveRecordInterface
     {
         if (string_has($method, $type)) {
             $query = static::$ar->query()->buildFindersWhereCondition($method, $arguments, $type);
+
             return $query->findAll();
         }
     }
 
     /**
      * Call framework defined method based on user input
-     * We will call PDO methods using Model object
+     * We will call PDO methods using Model object.
      *
      * $name method name
      * $arguments pass arguments to method dynamically
      * return mixed
-     *
      */
     public function __call($method, $arguments = [])
     {

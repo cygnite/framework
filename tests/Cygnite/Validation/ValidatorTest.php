@@ -1,8 +1,7 @@
 <?php
-use Cygnite\Validation\Validator;
-use Cygnite\Helpers\Inflector;
+
 use Cygnite\Common\Input\Input;
-use Mockery as m;
+use Cygnite\Validation\Validator;
 
 class ValidatorTest extends PHPUnit_Framework_TestCase
 {
@@ -19,9 +18,8 @@ class ValidatorTest extends PHPUnit_Framework_TestCase
     }
 
     /**
-    * @expectedException \Cygnite\Validation\Exception\ValidatorException
-    *
-    */
+     * @expectedException \Cygnite\Validation\Exception\ValidatorException
+     */
     public function testInputExceptionThrownOnIncorrectParameterPassed()
     {
         $input = Input::make();
@@ -38,10 +36,9 @@ class ValidatorTest extends PHPUnit_Framework_TestCase
         $this->assertFalse($v->run());
     }
 
-    
     public function testWorkingWithArrayOfInputs()
     {
-        $input = ['foo' => 'bar', 'bar' => 'foobar','baz' => 'barbaz'];
+        $input = ['foo' => 'bar', 'bar' => 'foobar', 'baz' => 'barbaz'];
 
         $v = Validator::create($input, function ($v) {
             $v->addRule('foo', 'required|min:3|max:5')
@@ -56,7 +53,7 @@ class ValidatorTest extends PHPUnit_Framework_TestCase
 
     public function testAfterValidationCallback()
     {
-        $input = ['foo' => 'bar', 'bar' => 'foobar','baz' => 'barbaz'];
+        $input = ['foo' => 'bar', 'bar' => 'foobar', 'baz' => 'barbaz'];
 
         $v = Validator::create($input, function ($v) {
             $v->addRule('foo', 'required')
@@ -79,7 +76,7 @@ class ValidatorTest extends PHPUnit_Framework_TestCase
 
     public function testValidationPassedNonEmptyErrors()
     {
-        $input = ['foo' => 'bar', 'bar' => 1025770,'baz' => 'barbaz@gmail.com'];
+        $input = ['foo' => 'bar', 'bar' => 1025770, 'baz' => 'barbaz@gmail.com'];
 
         $v = Validator::create($input, function ($v) {
             $v->addRule('foo', 'required')
@@ -96,7 +93,7 @@ class ValidatorTest extends PHPUnit_Framework_TestCase
 
     public function testValidationFailedHasErrors()
     {
-        $input = ['foo' => 'bar', 'bar' => 'Hi Bar!','foobar' => 323,'baz' => 'barbaz@gmail.com'];
+        $input = ['foo' => 'bar', 'bar' => 'Hi Bar!', 'foobar' => 323, 'baz' => 'barbaz@gmail.com'];
 
         $v = Validator::create($input, function ($v) {
             $v->addRule('foo', 'required:min:3')
@@ -117,19 +114,19 @@ class ValidatorTest extends PHPUnit_Framework_TestCase
 
     public function testWorkingWithArrayOfRulesFailure()
     {
-        $input = ['foo' => 'bar', 'bar' => 1025770,'baz' => '12.4.11',
+        $input = ['foo'    => 'bar', 'bar' => 1025770, 'baz' => '12.4.11',
                   'foobar' => 'foo!#$bar', 'foobaz' => 38025770, 'barbaz' => '12345',
-                  'barbar' => 'foo!#$bar_'
+                  'barbar' => 'foo!#$bar_',
                 ];
-                
+
         $rules = [
-                'foo' => 'required|min:3|max:5',
-                'bar' => 'is_string',
-                'baz' => 'is_ip',
+                'foo'    => 'required|min:3|max:5',
+                'bar'    => 'is_string',
+                'baz'    => 'is_ip',
                 'foobar' => 'is_alpha_numeric',
                 'foobaz' => 'phone',
                 'barbaz' => 'valid_date',
-                'barbar' => 'is_alpha_num_with_under_score'
+                'barbar' => 'is_alpha_num_with_under_score',
         ];
 
         $v = Validator::create($input);
@@ -151,17 +148,17 @@ class ValidatorTest extends PHPUnit_Framework_TestCase
     public function testWorkingWithArrayOfRulesPassed()
     {
         $input = [
-                  'foo' => 'foobar1', 'bar' => 'Hello World!','baz' => '127.0.0.1',
-                  'foobar' => 'AbCd1zyZ9', 'foobaz' => 8189814854, 'barbaz' => '2015-07-25'
+                  'foo'    => 'foobar1', 'bar' => 'Hello World!', 'baz' => '127.0.0.1',
+                  'foobar' => 'AbCd1zyZ9', 'foobaz' => 8189814854, 'barbaz' => '2015-07-25',
                 ];
 
         $rules = [
-                'foo' => 'required|min:3|max:5',
-                'bar' => 'is_string',
-                'baz' => 'is_ip',
+                'foo'    => 'required|min:3|max:5',
+                'bar'    => 'is_string',
+                'baz'    => 'is_ip',
                 'foobar' => 'is_alpha_numeric',
                 'foobaz' => 'phone',
-                'barbaz' => 'valid_date'
+                'barbaz' => 'valid_date',
         ];
 
         $v = Validator::create($input);

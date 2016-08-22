@@ -1,7 +1,5 @@
 <?php
-use Mockery as m;
-use Cygnite\Helpers\Config;
-use Cygnite\Cache\Factory\Cache;
+
 
 class RedisCacheTest extends PHPUnit_Framework_TestCase
 {
@@ -39,5 +37,4 @@ class RedisCacheTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('foo', $stub->get('foo'));
         $this->assertNotNull($stub->get('foo'));
     }
-
 }

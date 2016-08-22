@@ -8,7 +8,6 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-
 namespace Cygnite\Common;
 
 use Closure;
@@ -29,9 +28,7 @@ use Closure;
  *  $instance->sanitize($string);
  * </code>
  * Inspired by TravianZ and Kohana security library http://kohanaphp.com/
- *
  */
-
 class Security
 {
     // Instance of the security class.
@@ -55,7 +52,7 @@ class Security
         '_COOKIE',
         '_SERVER',
         '_ENV',
-        '_SESSION'
+        '_SESSION',
     ];
     private $sqlReplace = [
         '/[\']/',
@@ -63,7 +60,7 @@ class Security
         '/\bdrop\b/i',
         '/\bdelete\b/i',
         '/\binsert\b/i',
-        '/\bupdate\b/i'
+        '/\bupdate\b/i',
     ];
 
     /**
@@ -73,6 +70,7 @@ class Security
      * access instance directly.
      *
      * @throws \Exception
+     *
      * @return \Cygnite\Common\Security
      */
     public function __construct()
@@ -105,7 +103,7 @@ class Security
     }
 
     /**
-     * Check magic quote and disable it
+     * Check magic quote and disable it.
      */
     private function checkMagicQuoteRuntime()
     {
@@ -117,7 +115,7 @@ class Security
     }
 
     /**
-     * disable all global variable
+     * disable all global variable.
      */
     private function disableGlobals()
     {
@@ -153,17 +151,19 @@ class Security
      * Enforces W3C specifications to prevent malicious exploitation.
      *
      * @param  string Key to clean
+     *
      * @throws \Exception
+     *
      * @return string
      */
     protected function cleanKeys($data)
     {
-        $pregMatches = (bool)preg_match(self::PREG_PROPERTIES, '?');
+        $pregMatches = (bool) preg_match(self::PREG_PROPERTIES, '?');
         $chars = '';
         $chars = $pregMatches ? '\pL' : 'a-zA-Z';
 
 
-        if (!preg_match('#^[' . $chars . '0-9:_.-]++$#uD', $data)) {
+        if (!preg_match('#^['.$chars.'0-9:_.-]++$#uD', $data)) {
             throw new \Exception('Illegal key characters in global data');
         }
 
@@ -174,6 +174,7 @@ class Security
      * Escapes data.
      *
      * @param  mixed Data to clean
+     *
      * @return mixed
      */
     public function sanitize($data)
@@ -201,6 +202,7 @@ class Security
      * Cross site filtering (XSS). Recursive.
      *
      * @param  string Data to be cleaned
+     *
      * @return mixed
      */
     public function xssClean($data)
@@ -357,14 +359,14 @@ class Security
 
     public static function decode($matches)
     {
-        if (!is_int($matches[1]{0})) {
-            $val = '0' . $matches[1] + 0;
+        if (!is_int($matches[1][0])) {
+            $val = '0'.$matches[1] + 0;
         } else {
-            $val = (int)$matches[1];
+            $val = (int) $matches[1];
         }
 
         if ($val > 255) {
-            return '&#' . $val . ';';
+            return '&#'.$val.';';
         }
 
         if ($val >= 65 && $val <= 90 //A-Z
@@ -419,7 +421,7 @@ class Security
             '/[\x00-\x08]/',
             '/\x0b/',
             '/\x0c/',
-            '/[\x0e-\x1f]/'
+            '/[\x0e-\x1f]/',
         ];
 
         foreach ($nonDisplayable as $regex) {
@@ -450,6 +452,7 @@ class Security
      * Gets the instance of the Security class.
      *
      * @param callable| Closure $callback
+     *
      * @return object Instance of Security
      */
     public static function create(Closure $callback = null)

@@ -1,31 +1,32 @@
 <?php
-use Mockery as m;
+
 use Cygnite\Foundation\Collection;
+use Mockery as m;
 
 class CollectionTest extends PHPUnit_Framework_TestCase
 {
     private $data = [];
 
     private $collection;
-    
+
     public function setUp()
     {
         $this->data = ['foo' => 'Hello Foo', 'bar' => 'Hello Bar'];
 
         $this->collection = new Collection($this->data);
     }
-    
+
     public function testCollectionInstance()
     {
         $this->assertInstanceOf('Cygnite\Foundation\Collection', $this->collection);
     }
-    
+
     public function testGetDataCollection()
     {
         $this->assertEmpty(!$this->collection->getData());
         $this->assertEquals($this->data, $this->collection->getData());
     }
-    
+
     public function testCollectionMethods()
     {
         $this->assertEquals($this->data, $this->collection->asArray());

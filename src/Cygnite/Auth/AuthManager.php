@@ -7,6 +7,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 namespace Cygnite\Auth;
 
 use Cygnite\Foundation\Application;
@@ -20,7 +21,8 @@ abstract class AuthManager
     public static $model;
 
     /**
-     * Set the model class name to authenticate user
+     * Set the model class name to authenticate user.
+     *
      * @param $model
      */
     public static function model($model)
@@ -32,7 +34,8 @@ abstract class AuthManager
     }
 
     /**
-     * get model class name
+     * get model class name.
+     *
      * @return null
      */
     public function getModel()
@@ -41,7 +44,8 @@ abstract class AuthManager
     }
 
     /**
-     * Get the application instance
+     * Get the application instance.
+     *
      * @return Application
      */
     public static function getContainer()
@@ -50,17 +54,20 @@ abstract class AuthManager
     }
 
     /**
-     * Get the model object to check user existance against database
+     * Get the model object to check user existance against database.
+     *
      * @return object
      */
     public function user()
     {
         $app = self::getContainer();
+
         return $app->make(static::getModel());
     }
 
     /**
-     * Get the current table name
+     * Get the current table name.
+     *
      * @return mixed
      */
     public function table()

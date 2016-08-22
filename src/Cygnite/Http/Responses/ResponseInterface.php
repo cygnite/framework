@@ -1,15 +1,14 @@
 <?php
+
 namespace Cygnite\Http\Responses;
 
 /**
- * Class ResponseInterface
- *
- * @package Cygnite\Http\Responses
+ * Class ResponseInterface.
  */
 interface ResponseInterface
 {
     /**
-     * <code>
+     * <code>.
      *
      *  Response::make($content, ResponseHeader::HTTP_OK)->send();
      *
@@ -23,12 +22,14 @@ interface ResponseInterface
      * @param string       $content
      * @param callable|int $statusCode
      * @param array        $headers
+     *
      * @return static
      */
     public static function make($content = '', $statusCode = ResponseHeader::HTTP_OK, $headers = []);
 
     /**
      * @param null $content
+     *
      * @return mixed
      */
     public function setContent($content = null);
@@ -40,6 +41,7 @@ interface ResponseInterface
 
     /**
      * @param int $statusCode
+     *
      * @return mixed
      */
     public function setStatusCode($statusCode = ResponseHeader::HTTP_OK);
@@ -53,12 +55,14 @@ interface ResponseInterface
      * @param      $name
      * @param      $value
      * @param bool $replace
+     *
      * @return mixed
      */
     public function setHeader($name, $value, $replace = true);
 
     /**
      * @param $contentType
+     *
      * @return mixed
      */
     public function setContentType($contentType);
@@ -70,6 +74,7 @@ interface ResponseInterface
 
     /**
      * @param $charset
+     *
      * @return mixed
      */
     public function setCharset($charset);
@@ -80,7 +85,7 @@ interface ResponseInterface
     public function getCharset();
 
     /**
-     * Send header and content to the browser
+     * Send header and content to the browser.
      *
      * @return $this
      */

@@ -1,4 +1,5 @@
 <?php
+
 namespace Cygnite\Common\SessionManager;
 
 interface PacketInterface extends \ArrayAccess, \Iterator, \Countable
@@ -6,7 +7,7 @@ interface PacketInterface extends \ArrayAccess, \Iterator, \Countable
     const SEPARATOR = '.';
 
     /**
-     * Retrieves offset value
+     * Retrieves offset value.
      *
      * @param string $offset
      * @param mixed  $default
@@ -16,7 +17,7 @@ interface PacketInterface extends \ArrayAccess, \Iterator, \Countable
     public function get($offset = null, $default = null);
 
     /**
-     * Sets value to offset
+     * Sets value to offset.
      *
      * @param string $offset
      * @param mixed  $value
@@ -26,7 +27,7 @@ interface PacketInterface extends \ArrayAccess, \Iterator, \Countable
     public function set($offset, $value = null);
 
     /**
-     * Returns true if offset exists in bag
+     * Returns true if offset exists in bag.
      *
      * @param string $offset
      *
@@ -36,7 +37,7 @@ interface PacketInterface extends \ArrayAccess, \Iterator, \Countable
 
     /**
      * Removes offset from bag
-     * If no offset set, removes all values
+     * If no offset set, removes all values.
      *
      * @param string $offset attribute to remove from
      *
@@ -46,7 +47,7 @@ interface PacketInterface extends \ArrayAccess, \Iterator, \Countable
 
     /**
      * Returns all elements
-     * If array passed, becomes bag content
+     * If array passed, becomes bag content.
      *
      * @param array $array overwrites values
      *
@@ -55,7 +56,7 @@ interface PacketInterface extends \ArrayAccess, \Iterator, \Countable
     public function all($array = []);
 
     /**
-     * Removes all elements
+     * Removes all elements.
      *
      * @return $this
      */

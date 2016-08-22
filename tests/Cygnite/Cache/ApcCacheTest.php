@@ -1,6 +1,5 @@
 <?php
-use Mockery as m;
-use Cygnite\Cache\Factory\Cache;
+
 
 class ApcCacheTest extends PHPUnit_Framework_TestCase
 {

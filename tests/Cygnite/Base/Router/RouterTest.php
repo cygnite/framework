@@ -1,6 +1,6 @@
 <?php
+
 use Cygnite\Base\Router\Router;
-use Mockery as m;
 
 class RouterTest extends PHPUnit_Framework_TestCase
 {
@@ -59,7 +59,7 @@ class RouterTest extends PHPUnit_Framework_TestCase
     private function getRequest($output = '')
     {
         $this->router->get('/', function () {
-            echo "Hello World!!";
+            echo 'Hello World!!';
         });
 
          // Test GET REQUEST
@@ -73,7 +73,7 @@ class RouterTest extends PHPUnit_Framework_TestCase
     private function postRequest($output = '')
     {
         $this->router->post('/', function () {
-            echo "post";
+            echo 'post';
         });
 
         // Test POST REQUEST with Param
@@ -88,7 +88,7 @@ class RouterTest extends PHPUnit_Framework_TestCase
     private function putRequest($output = '')
     {
         $this->router->put('/', function () {
-            echo "put";
+            echo 'put';
         });
 
         // Test POST REQUEST with Param
@@ -103,7 +103,7 @@ class RouterTest extends PHPUnit_Framework_TestCase
     private function patchRequest($output = '')
     {
         $this->router->patch('/', function () {
-            echo "patch";
+            echo 'patch';
         });
 
         // Test POST REQUEST with Param
@@ -118,7 +118,7 @@ class RouterTest extends PHPUnit_Framework_TestCase
     private function deleteRequest($output = '')
     {
         $this->router->delete('/', function () {
-            echo "delete";
+            echo 'delete';
         });
 
         // Test POST REQUEST with Param
@@ -129,7 +129,6 @@ class RouterTest extends PHPUnit_Framework_TestCase
         $this->assertEquals($output, ob_get_contents());
         $this->obBufferClean();
     }
-
 
     private function headRequest($output = '')
     {
@@ -145,7 +144,7 @@ class RouterTest extends PHPUnit_Framework_TestCase
     private function optionsRequest($output = '')
     {
         $this->router->options('/', function () {
-            echo "options";
+            echo 'options';
         });
 
         // Test POST REQUEST with Param
@@ -174,7 +173,7 @@ class RouterTest extends PHPUnit_Framework_TestCase
     public function testAnyRouteRequest()
     {
         $this->router->any('/', function () {
-            echo "any_request";
+            echo 'any_request';
         });
 
         //We will Test GET
@@ -218,7 +217,7 @@ class RouterTest extends PHPUnit_Framework_TestCase
         $this->router->run();
         $this->assertEquals('', ob_get_contents());
         $this->obBufferClean();
-        
+
         // Test Options method
         $this->obStart();
         $this->requestMethod('OPTIONS');
@@ -238,7 +237,7 @@ class RouterTest extends PHPUnit_Framework_TestCase
     {
         $this->router->group('/photos', function ($route) {
             $route->get('/overview/', function () {
-                echo "Photos_Overview";
+                echo 'Photos_Overview';
             });
 
             $route->get('/abstract/{:id}', function ($route, $id) {
@@ -248,7 +247,6 @@ class RouterTest extends PHPUnit_Framework_TestCase
             $route->where('{:any_string}', '(\w+)')->get('cygnite/{:any_string}', function ($route, $string) {
                 echo "Photo_Where_Image_Name:_$string";
             });
-
         });
 
         $this->obStart();
@@ -273,7 +271,7 @@ class RouterTest extends PHPUnit_Framework_TestCase
     public function testBeforeRoutingFilter()
     {
         $this->router->before('GET', '/{:all}', function () {
-            echo "before_routing_middleware";
+            echo 'before_routing_middleware';
         });
 
         $this->obStart();
@@ -286,11 +284,11 @@ class RouterTest extends PHPUnit_Framework_TestCase
     public function testAfterRoutingFilter()
     {
         $this->router->get('/hello/', function () {
-            echo "hello_";
+            echo 'hello_';
         });
 
         $this->router->after(function () {
-            echo "after_routing_middleware";
+            echo 'after_routing_middleware';
         });
 
         $this->obStart();
@@ -303,11 +301,11 @@ class RouterTest extends PHPUnit_Framework_TestCase
     public function test404PageError()
     {
         $this->router->get('/user/', function () {
-            echo "Hello";
+            echo 'Hello';
         });
 
         $this->router->set404Page(function () {
-            echo "Abort 404 Page Not Found!";
+            echo 'Abort 404 Page Not Found!';
         });
 
         $this->obStart();

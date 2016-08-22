@@ -7,15 +7,14 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 namespace Cygnite\Console;
 
-use Cygnite\Foundation\Application as CygniteApplication;
 use Cygnite\Console\Foundation\Application as ConsoleApplication;
+use Cygnite\Foundation\Application as CygniteApplication;
 
 /**
- * Class CygniteConsoleApplication
- *
- * @package Cygnite\Console
+ * Class CygniteConsoleApplication.
  */
 class CygniteConsoleApplication
 {
@@ -30,7 +29,7 @@ class CygniteConsoleApplication
     }
 
     /**
-     * We will run Cygnite Console Application
+     * We will run Cygnite Console Application.
      */
     public function run()
     {

@@ -1,12 +1,11 @@
 <?php
+
 namespace Cygnite\Http;
 
 use Cygnite\Http\Requests\RequestMethods;
 
 /**
- * Class CsrfValidator
- *
- * @package Cygnite\Http
+ * Class CsrfValidator.
  */
 class CsrfValidator
 {
@@ -21,7 +20,7 @@ class CsrfValidator
     public static $instance;
 
     /**
-     * Constructor of CsrfValidator
+     * Constructor of CsrfValidator.
      *
      * We will initialize session and set token into it
      *
@@ -36,11 +35,11 @@ class CsrfValidator
         $this->setTokenIntoSession();
     }
 
-
     /**
      * @param $session
-     * @param null $random
+     * @param null     $random
      * @param callable $callback
+     *
      * @return static
      */
     public static function make($session, $random = null, \Closure $callback = null)
@@ -56,7 +55,6 @@ class CsrfValidator
         return self::$instance;
     }
 
-
     /**
      * @param $storage
      */
@@ -67,8 +65,7 @@ class CsrfValidator
 
     /**
      * Set unique token for the form
-     * and store into session
-     *
+     * and store into session.
      */
     public function setTokenIntoSession()
     {
@@ -85,6 +82,7 @@ class CsrfValidator
 
     /**
      * @param null $value
+     *
      * @return $this
      */
     public function setRandomToken($value = null)
@@ -109,7 +107,7 @@ class CsrfValidator
     }
 
     /**
-     * Get the csrf token
+     * Get the csrf token.
      *
      * Alias function csrf_token();
      *
@@ -122,7 +120,7 @@ class CsrfValidator
 
     /**
      * We will validate if requested method is other then
-     * spoofed methods for validating csrf token
+     * spoofed methods for validating csrf token.
      *
      * @return bool
      */
@@ -133,6 +131,7 @@ class CsrfValidator
 
     /**
      * @param bool $throw
+     *
      * @return bool
      */
     public function validateRequest($throw = false)
@@ -144,9 +143,10 @@ class CsrfValidator
 
     /**
      * Validate token and return boolean value
-     * if matched with input
+     * if matched with input.
      *
      * @param $token
+     *
      * @return bool
      */
     public function validateToken($token)
@@ -168,7 +168,7 @@ class CsrfValidator
     }
 
     /**
-     * We will kill script
+     * We will kill script.
      */
     protected function killScript()
     {
@@ -178,11 +178,12 @@ class CsrfValidator
 
     /**
      * Validate csrf token with stored token, if matches
-     * we will return true else false;
+     * we will return true else false;.
      *
      * alias method: validate_token($token);
      *
      * @param $token
+     *
      * @return bool
      */
     public function validateRequestToken($token)

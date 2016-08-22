@@ -1,4 +1,5 @@
 <?php
+
 namespace Cygnite\Database\Cyrus\Relations;
 
 class HasManyThough
@@ -34,8 +35,7 @@ class HasManyThough
         $foreignId = null,
         $firstKey = null,
         $secondKey = null
-    )
-    {
+    ) {
         $this->baseClass = get_class($ar);
         $this->foreignClass = $foreignClass;
         $this->mapClass = $mapClass;
@@ -63,12 +63,12 @@ class HasManyThough
         $mappingId = $this->buildForeignKeyName($localId, $baseTable);
         $foreignId = $this->buildForeignKeyName($foreignId, $associatedTable);
 
-        return (new $this->foreignClass)
+        return (new $this->foreignClass())
             ->select("{$associatedTable}.*")
             ->innerJoin($joinTable, [
                     "{$associatedTable}.{$foreignId}",
                     '=',
-                    "{$joinTable}.{$foreignId}"]
+                    "{$joinTable}.{$foreignId}", ]
             )->where("{$joinTable}.{$mappingId}", '=', $this->$localId);
     }
 }

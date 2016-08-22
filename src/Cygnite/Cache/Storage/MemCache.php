@@ -7,6 +7,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 namespace Cygnite\Cache\Storage;
 
 use Cygnite\Cache\StorageInterface;
@@ -16,12 +17,10 @@ if (!defined('CF_SYSTEM')) {
 }
 
 /**
- * Cygnite Memcache Cache Wrapper Class
+ * Cygnite Memcache Cache Wrapper Class.
  *
  * @author Sanjoy Dey <dey.sanjoy0@gmail.com>
- *
  */
-
 class MemCache implements StorageInterface
 {
     /**
@@ -47,18 +46,20 @@ class MemCache implements StorageInterface
     public function __construct()
     {
         if (!class_exists('Memcache')) {
-            throw new \RuntimeException("Memcache extension not available !");
+            throw new \RuntimeException('Memcache extension not available !');
         }
     }
 
     /**
      * Connect memcache based on its host and port.
-     * Connect with default port if hostname and port number not passed
+     * Connect with default port if hostname and port number not passed.
      *
      * @false string $host
      * @false mix $port
+     *
      * @param string $host
      * @param string $port
+     *
      * @return void
      */
     public function create($host = '', $port = '')
@@ -85,31 +86,34 @@ class MemCache implements StorageInterface
     }
 
     /**
-    * We will return boolean value of connection status
-    */
+     * We will return boolean value of connection status.
+     */
     public function isConnected()
     {
         return $this->isEnabled;
     }
 
     /**
-     * Store the value in the memcache memory (overwrite if key exists)
+     * Store the value in the memcache memory (overwrite if key exists).
      *
      * @false string $key
      * @false mix $value
      * @false bool $compress
      * @false int $expire (seconds before item expires)
+     *
      * @param     $key
      * @param     $value
      * @param int $compress
      * @param int $expire_time
+     *
      * @throws \Exception
+     *
      * @return bool
      */
     public function store($key, $value, $compress = 0, $expire_time = 600)
     {
         if (is_null($key)) {
-            throw new \InvalidArgumentException("Invalid key passed to MemCache::" . __FUNCTION__);
+            throw new \InvalidArgumentException('Invalid key passed to MemCache::'.__FUNCTION__);
         }
 
         //Used MEMCACHE_COMPRESSED to store the item compressed (uses zlib).  $this->life_time
@@ -117,10 +121,12 @@ class MemCache implements StorageInterface
     }
 
     /**
-     * Get data from memory based on its key
+     * Get data from memory based on its key.
      *
      * @false string $key
+     *
      * @param $key
+     *
      * @return bool
      */
     public function get($key)
@@ -132,17 +138,20 @@ class MemCache implements StorageInterface
     }
 
     /**
-     * Delete values from memory based on its key
+     * Delete values from memory based on its key.
      *
      * @false string $key
+     *
      * @param $key
+     *
      * @throws \Exception
+     *
      * @return bool
      */
     public function destroy($key)
     {
-        if (is_null($key) || $key == "") {
-            throw new \InvalidArgumentException("Empty key passed to MemCache::" . __FUNCTION__);
+        if (is_null($key) || $key == '') {
+            throw new \InvalidArgumentException('Empty key passed to MemCache::'.__FUNCTION__);
         }
 
         return $this->memory->delete($key);

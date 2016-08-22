@@ -11,10 +11,8 @@
 
 namespace Cygnite\Database;
 
-use PDO;
-use Exception;
-use Cygnite\Database\Configure;
 use Cygnite\Database\Connections\ConnectionFactory;
+use PDO;
 
 trait ConnectionManagerTrait
 {
@@ -30,6 +28,7 @@ trait ConnectionManagerTrait
 
     /**
      * @param $key
+     *
      * @return null
      */
     public static function get($key)
@@ -39,26 +38,28 @@ trait ConnectionManagerTrait
 
     /**
      * @param $config
+     *
      * @throws \Exception
+     *
      * @return array
      */
     public function parseUrl($config)
     {
         $info = [];
 
-        $info['driver']   = $config['driver'];
+        $info['driver'] = $config['driver'];
         $info['hostname'] = $config['host'];
-        $info['port']     = isset($config['port']) ? $config['port'] : '';
+        $info['port'] = isset($config['port']) ? $config['port'] : '';
         $info['username'] = isset($config['username']) ? $config['username'] : null;
         $info['password'] = isset($config['password']) ? $config['password'] : null;
         $info['database'] = isset($config['database']) ? $config['database'] : null;
-        $info['charset']  = (isset($config['charset'])) ? $config['charset'] : '' ;
-        $info['collation']  = (isset($config['collation'])) ? $config['collation'] : '' ;
-        $info['prefix']  = (isset($config['prefix'])) ? $config['prefix'] : '' ;
+        $info['charset'] = (isset($config['charset'])) ? $config['charset'] : '';
+        $info['collation'] = (isset($config['collation'])) ? $config['collation'] : '';
+        $info['prefix'] = (isset($config['prefix'])) ? $config['prefix'] : '';
 
         if ($info['hostname'] == 'unix(') {
             $socketDb = null;
-            $socketDb =  $info['hostname'] . '/' .  $info['database'];
+            $socketDb = $info['hostname'].'/'.$info['database'];
             if (preg_match_all('/^unix\((.+)\)\/(.+)$/', $socketDb, $matches) > 0) {
                 $info['hostname'] = $matches[1][0];
                 $info['database'] = $matches[2][0];
@@ -81,6 +82,7 @@ trait ConnectionManagerTrait
 
     /**
      * @param $key
+     *
      * @return null
      */
     public static function getConfig($key)
@@ -115,8 +117,10 @@ trait ConnectionManagerTrait
 
     /**
      * @param $connectionConfig
-     * @return mixed
+     *
      * @throws \Exception
+     *
+     * @return mixed
      */
     public function setConnection($connectionConfig)
     {
@@ -137,12 +141,11 @@ trait ConnectionManagerTrait
         if (is_object(static::$config)) {
             return static::$config;
         }
-
-        return null;
     }
 
     /**
      * @param $connKey
+     *
      * @return mixed
      */
     public function getConnection($connKey)
@@ -166,7 +169,7 @@ trait ConnectionManagerTrait
      */
     public function getDefaultConnection()
     {
-        $connection= $this->parseUrl(Configure::getDefault());
+        $connection = $this->parseUrl(Configure::getDefault());
 
         return $connection['database'];
     }

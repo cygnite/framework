@@ -1,12 +1,12 @@
 <?php
+
 namespace Cygnite\Common\SessionManager\Native;
 
-use Cygnite\Helpers\Config;
-use Cygnite\Helpers\Str;
+use Cygnite\Common\SessionManager\Exceptions\SessionNotStartedException;
 use Cygnite\Common\SessionManager\Manager;
 use Cygnite\Common\SessionManager\SessionInterface;
-use Cygnite\Common\SessionManager\Session as SessionManager;
-use Cygnite\Common\SessionManager\Exceptions\SessionNotStartedException;
+use Cygnite\Helpers\Config;
+use Cygnite\Helpers\Str;
 
 class Session extends Manager implements SessionInterface
 {
@@ -14,7 +14,7 @@ class Session extends Manager implements SessionInterface
 
     /**
      * We will create instance of session wrapper and
-     * validate existing session - if session is invalid, we will resets it
+     * validate existing session - if session is invalid, we will resets it.
      *
      * @param string $sessionName
      * @param string $cacheLimiter
@@ -47,7 +47,7 @@ class Session extends Manager implements SessionInterface
             $this->startSession();
         }
 
-        $this->storage = & $_SESSION;
+        $this->storage = &$_SESSION;
 
         /*
          | Check csrf token already exists into session
@@ -65,7 +65,7 @@ class Session extends Manager implements SessionInterface
     }
 
     /**
-     * Get the instance of session manager
+     * Get the instance of session manager.
      *
      * @return null
      */
@@ -92,9 +92,8 @@ class Session extends Manager implements SessionInterface
         $sessionManager->setCookieParams($config['secure'], $config['httponly']);
     }
 
-
     /**
-     * Starts session
+     * Starts session.
      *
      * @throws \RuntimeException
      */
@@ -120,7 +119,7 @@ class Session extends Manager implements SessionInterface
     }
 
     /**
-     * Destroy all session data and regenerates session ID
+     * Destroy all session data and regenerates session ID.
      *
      * @return $this
      */
@@ -137,20 +136,20 @@ class Session extends Manager implements SessionInterface
 
         $this->startSession();
 
-        $this->storage = & $_SESSION;
+        $this->storage = &$_SESSION;
 
         return $this;
     }
 
     /**
      * We will check referer url from the same server or not
-     * else we will destroy the session
+     * else we will destroy the session.
      */
     protected function checkReferer()
     {
         if (!empty($_SERVER['HTTP_REFERER'])) {
             $url = parse_url($_SERVER['HTTP_REFERER']);
-			
+
             $hostUrl = (array_key_exists('port', $url)) ? $url['host'].':'.$url['port'] : $url['host'];
 
             if ($hostUrl != $_SERVER['HTTP_HOST']) {
@@ -158,8 +157,9 @@ class Session extends Manager implements SessionInterface
             }
         }
     }
+
     /**
-     * Regenerate the session ID
+     * Regenerate the session ID.
      *
      * @return $this
      */
@@ -179,13 +179,13 @@ class Session extends Manager implements SessionInterface
         }
 
         // we will store session global variable reference into storage property
-        $this->storage = & $_SESSION;
+        $this->storage = &$_SESSION;
 
         return $this;
     }
 
     /**
-     * Check is session started, if set then return session id
+     * Check is session started, if set then return session id.
      *
      * @param string $id
      *
@@ -199,8 +199,9 @@ class Session extends Manager implements SessionInterface
 
         return session_id();
     }
+
     /**
-     * Set or return session name
+     * Set or return session name.
      *
      * @param string $name
      *
@@ -214,8 +215,9 @@ class Session extends Manager implements SessionInterface
 
         return session_name();
     }
+
     /**
-     * Set or return session cache limiter
+     * Set or return session cache limiter.
      *
      * @param string $cacheLimiter
      *
@@ -239,7 +241,7 @@ class Session extends Manager implements SessionInterface
          | We will check if token already exists in session
          | else we will regenerate token id
          */
-        if (! $this->has('_token')) {
+        if (!$this->has('_token')) {
             $this->regenerateToken();
         }
     }
@@ -265,10 +267,11 @@ class Session extends Manager implements SessionInterface
     }
 
     /**
-     * We will call Manager method
+     * We will call Manager method.
      *
      * @param $method
      * @param $args
+     *
      * @return mixed
      */
     public function __call($method, $args)

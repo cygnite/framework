@@ -7,15 +7,14 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 namespace Cygnite\Base\Request;
 
-use Exception;
-use Cygnite\Helpers\Config;
-use Cygnite\Helpers\Inflector;
 use Cygnite\Foundation\ApplicationInterface;
+use Cygnite\Helpers\Config;
 
 /**
- * Cygnite Dispatcher
+ * Cygnite Dispatcher.
  *
  * Handle all user request and send response to the browser.
  *
@@ -24,7 +23,7 @@ use Cygnite\Foundation\ApplicationInterface;
 class Dispatcher
 {
     /**
-     * The name of the entry page
+     * The name of the entry page.
      *
      * @var string
      */
@@ -38,6 +37,7 @@ class Dispatcher
 
     /**
      * @param \Cygnite\Foundation\Application $app
+     *
      * @internal param $route
      */
     public function __construct(ApplicationInterface $app)
@@ -54,16 +54,17 @@ class Dispatcher
     }
 
     /**
-     * Validate user request and send response to browser
+     * Validate user request and send response to browser.
      *
      * @throws \Exception
+     *
      * @return mixed
      */
     public function run()
     {
         // If no argument passed or single slash call default controller
         if ($this->router->getCurrentUri() == '/' ||
-            $this->router->getCurrentUri() == '/' . self::$indexPage
+            $this->router->getCurrentUri() == '/'.self::$indexPage
         ) {
             if ($this->default['controller'] != '') {
                 $this->router->getRouteControllerInstance();
@@ -91,8 +92,7 @@ class Dispatcher
      */
     public function getRoutes()
     {
-        $routes = function ()
-        {
+        $routes = function () {
             $app = $this->app;
             require APPPATH.DS.'Routing'.DS.'Routes'.EXT;
         };

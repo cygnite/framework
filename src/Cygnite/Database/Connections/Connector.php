@@ -13,9 +13,7 @@ namespace Cygnite\Database\Connections;
 use PDO;
 
 /**
- * Class Connector
- *
- * @package Cygnite\Database\Connections
+ * Class Connector.
  */
 class Connector
 {
@@ -23,12 +21,12 @@ class Connector
      * @var array
      */
     public $options = [
-        PDO::ATTR_ERRMODE           =>  PDO::ERRMODE_EXCEPTION,
-        PDO::ATTR_CASE              =>  PDO::CASE_NATURAL,
-        PDO::ATTR_ORACLE_NULLS      =>  PDO::NULL_NATURAL,
-        PDO::ATTR_PERSISTENT        =>  true,
-        PDO::ATTR_STRINGIFY_FETCHES    =>  false,
-        PDO::ATTR_EMULATE_PREPARES  =>  false,
+        PDO::ATTR_ERRMODE              => PDO::ERRMODE_EXCEPTION,
+        PDO::ATTR_CASE                 => PDO::CASE_NATURAL,
+        PDO::ATTR_ORACLE_NULLS         => PDO::NULL_NATURAL,
+        PDO::ATTR_PERSISTENT           => true,
+        PDO::ATTR_STRINGIFY_FETCHES    => false,
+        PDO::ATTR_EMULATE_PREPARES     => false,
     ];
 
     protected $config;
@@ -50,7 +48,7 @@ class Connector
     }
 
     /**
-     * Get DSN string
+     * Get DSN string.
      *
      * @return string
      */
@@ -63,6 +61,7 @@ class Connector
 
     /**
      * @param $options
+     *
      * @return $this
      */
     public function setOptions($options)

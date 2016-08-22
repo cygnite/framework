@@ -1,14 +1,14 @@
 <?php
-use Tracy\Helpers;
-use Tracy\Debugger;
-use Cygnite\Foundation\Application as App;
-use Cygnite\AssetManager\Html;
-use Cygnite\Translation\Translator;
-use Cygnite\Foundation\Http\CsrfValidator;
-use Cygnite\Common\SessionManager\Session;
-use Cygnite\Foundation\Collection;
 
-if (! function_exists('clear_sanity')) {
+use Cygnite\AssetManager\Html;
+use Cygnite\Common\SessionManager\Session;
+use Cygnite\Foundation\Application as App;
+use Cygnite\Foundation\Collection;
+use Cygnite\Foundation\Http\CsrfValidator;
+use Cygnite\Translation\Translator;
+use Tracy\Debugger;
+
+if (!function_exists('clear_sanity')) {
     /*
     * $_POST   = array_map("clear_sanity", $_POST);
     * Strip html encoding out of a string, useful to prevent cross site scripting attacks
@@ -17,36 +17,37 @@ if (! function_exists('clear_sanity')) {
     function clear_sanity($values)
     {
         $values = (is_array($values)) ?
-            array_map("clear_sanity", $values) :
+            array_map('clear_sanity', $values) :
             Html::santize($values);
 
         return $values;
     }
 }
 
-if (! function_exists('days_diff')) {
+if (!function_exists('days_diff')) {
     /**
      * @param $date
+     *
      * @return int
      */
     function days_diff($date)
     {
         if (!$date) {
-            $date ="0000-00-00 00:00:00";
+            $date = '0000-00-00 00:00:00';
         }
 
         if (preg_match("/(\d+)-(\d+)-(\d+)/", $date, $f)) {
-            $time_val=mktime(0, 0, 0, $f[2], $f[3], $f[1]);
+            $time_val = mktime(0, 0, 0, $f[2], $f[3], $f[1]);
         }
-        $today = mktime(0, 0, 0, date("m"), date("d"), date("Y"));
+        $today = mktime(0, 0, 0, date('m'), date('d'), date('Y'));
         $s = $today - $time_val;
-        $d = intval($s/86400);
+        $d = intval($s / 86400);
 
         return $d;
     }
 }
 
-if (! function_exists('show')) {
+if (!function_exists('show')) {
     /**
      * @param array $data
      * @param bool  $hasExit
@@ -63,24 +64,27 @@ if (! function_exists('show')) {
 }
 
 
-if (! function_exists('string_split')) {
+if (!function_exists('string_split')) {
     /**
      * @param        $string
      * @param string $needle
+     *
      * @return array
      */
     function string_split($string, $needle = '.')
     {
         $expression = [];
         $expression = explode($needle, $string);
+
         return $expression;
     }
 }
 
-if (! function_exists('string_has')) {
+if (!function_exists('string_has')) {
     /**
      * @param $haystack
      * @param $needle
+     *
      * @return bool
      */
     function string_has($haystack, $needle)
@@ -89,7 +93,7 @@ if (! function_exists('string_has')) {
     }
 }
 
-if (! function_exists('app')) {
+if (!function_exists('app')) {
     /*
     * We will get the Application instance
     */
@@ -99,12 +103,13 @@ if (! function_exists('app')) {
     }
 }
 
-if (! function_exists('compress')) {
+if (!function_exists('compress')) {
     /**
      * We will remove comments and empty spaces from the resource
-     * and compress contents
+     * and compress contents.
      *
      * @param $content
+     *
      * @return mixed
      */
     function compress($content)
@@ -112,15 +117,16 @@ if (! function_exists('compress')) {
         // We will remove comments from the string content
         $content = preg_replace('!/\*[^*]*\*+([^/][^*]*\*+)*/!', '', $content);
         // We will remove tabs, spaces, newlines, etc. from the string
-        $content = str_replace(array("\r\n", "\r", "\n", "\t", '  ', '    ', '    '), '', $content);
+        $content = str_replace(["\r\n", "\r", "\n", "\t", '  ', '    ', '    '], '', $content);
 
         return $content;
     }
 }
 
-if (! function_exists('isCli')) {
+if (!function_exists('isCli')) {
     /**
-     * Check if code is running via command line interface or web
+     * Check if code is running via command line interface or web.
+     *
      * @return bool
      */
     function isCli()
@@ -129,11 +135,12 @@ if (! function_exists('isCli')) {
     }
 }
 
-if (! function_exists('e')) {
+if (!function_exists('e')) {
     /**
      * Escape HTML entities in a string.
      *
-     * @param  string  $value
+     * @param string $value
+     *
      * @return string
      */
     function e($value)
@@ -144,17 +151,20 @@ if (! function_exists('e')) {
 
 if (!function_exists('trans')) {
     /**
-     * trans('Hello, :user', array(':user' => $username));
+     * trans('Hello, :user', array(':user' => $username));.
      *
      * The target language is defined by [Translator::$locale].
      *
      * @uses     Translator::get()
-     * @param         $key
-     * @param   array $replace values to replace in the translated text
-     * @param string  $locale
+     *
+     * @param        $key
+     * @param array  $replace values to replace in the translated text
+     * @param string $locale
+     *
      * @internal param string $string text to translate
      * @internal param string $lang source language
-     * @return  string
+     *
+     * @return string
      */
     function trans($key, array $replace = null, $locale = 'en-us')
     {
@@ -162,20 +172,21 @@ if (!function_exists('trans')) {
         $local = $trans->locale();
 
         if ($locale !== $local) {
-                // The message and target languages are different
+            // The message and target languages are different
                 // Get the translation for this message
                 $key = $trans->get($key);
-            }
+        }
 
         return empty($replace) ? $trans->get($key) : strtr($key, $replace);
     }
 }
 
-if (! function_exists('toPath')) {
+if (!function_exists('toPath')) {
     /**
-     * We will replace dot / slash(/) to directory separator
+     * We will replace dot / slash(/) to directory separator.
      *
      * @param $string
+     *
      * @return string
      */
     function toPath($string)
@@ -193,23 +204,24 @@ if (! function_exists('toPath')) {
     }
 }
 
-if (! function_exists('csrf')) {
+if (!function_exists('csrf')) {
 
     /**
-     * Get Csrfvalidator instance
+     * Get Csrfvalidator instance.
      *
      * @return static
      */
     function csrf()
     {
         $session = Session::make()->factory();
+
         return CsrfValidator::make($session);
     }
 }
 
-if (! function_exists('csrf_token')) {
+if (!function_exists('csrf_token')) {
     /**
-     * We will get csrf token generated by CsrfValidator
+     * We will get csrf token generated by CsrfValidator.
      *
      * @return string
      */
@@ -219,12 +231,13 @@ if (! function_exists('csrf_token')) {
     }
 }
 
-if (! function_exists('validate_token')) {
+if (!function_exists('validate_token')) {
 
     /**
-     * Validate csrf token
+     * Validate csrf token.
      *
      * @param $token
+     *
      * @return mixed
      */
     function validate_token($token)
@@ -233,20 +246,20 @@ if (! function_exists('validate_token')) {
     }
 }
 
-if (! function_exists('d')) {
+if (!function_exists('d')) {
 
     /**
      * @param       $data
      * @param null  $title
      * @param array $options
      */
-    function d($data, $title = NULL, array $options = NULL)
+    function d($data, $title = null, array $options = null)
     {
         Debugger::barDump($data, $title, $options);
     }
 }
 
-if (! function_exists('logMessage')) {
+if (!function_exists('logMessage')) {
 
     /**
      * @param      $msg
@@ -274,17 +287,18 @@ if (!function_exists('time_bench')) {
     /**
      * @param null $name
      */
-    function time_bench($name = NULL)
+    function time_bench($name = null)
     {
         Debugger::timer($name);
     }
 }
 
-if ( ! function_exists('collecttion')) {
+if (!function_exists('collecttion')) {
     /**
      * Create a collection of array.
      *
-     * @param  mixed  $data
+     * @param mixed $data
+     *
      * @return \Cygnite\Foundation\Collection
      */
     function collecttion($data = null)
