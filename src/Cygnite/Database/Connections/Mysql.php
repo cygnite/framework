@@ -12,7 +12,7 @@ namespace Cygnite\Database\Connections;
 
 use PDO;
 
-class MySql extends Connector
+class Mysql extends Connector
 {
     /**
      * @param array $config

@@ -1,12 +1,11 @@
 <?php
+
 namespace Cygnite\Base\EventHandler;
 
 use Cygnite\Helpers\Inflector;
 
 /**
- * Class EventRegistrarTrait
- *
- * @package Cygnite\Base\EventHandler
+ * Class EventRegistrarTrait.
  */
 trait EventRegistrarTrait
 {
@@ -21,7 +20,7 @@ trait EventRegistrarTrait
     }
 
     /**
-     * Get user defined application events from event middle wares
+     * Get user defined application events from event middle wares.
      *
      * @return array|bool
      */
@@ -37,15 +36,16 @@ trait EventRegistrarTrait
     }
 
     /**
-     * We will register user defined events, it will trigger event when matches
+     * We will register user defined events, it will trigger event when matches.
      *
      * @param $events
+     *
      * @throws \RuntimeException
      */
     public function registerEvents($events)
     {
         if (empty($events)) {
-            throw new \RuntimeException(sprintf("Empty argument passed %s", __FUNCTION__));
+            throw new \RuntimeException(sprintf('Empty argument passed %s', __FUNCTION__));
         }
 
         foreach ($events as $event => $namespace) {
@@ -58,9 +58,10 @@ trait EventRegistrarTrait
     }
 
     /**
-     * Fire all events registered with EventHandler
+     * Fire all events registered with EventHandler.
      *
      * @param $event
+     *
      * @return $this
      */
     public function fire($event)

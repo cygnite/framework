@@ -7,16 +7,15 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 namespace Cygnite\Console\Foundation;
 
 use Cygnite\Console\Command\Command;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Command\Command as SymfonyCommand;
 use Symfony\Component\Console\Application as SymfonyApplication;
+use Symfony\Component\Console\Command\Command as SymfonyCommand;
 
 /**
- * Cygnite Console Application
+ * Cygnite Console Application.
  *
  * Class Application
  *
@@ -24,14 +23,13 @@ use Symfony\Component\Console\Application as SymfonyApplication;
  * a middle ware of all your console commands.
  * Cygnite CLI powered by Symfony2 Console Component.
  *
- * @package Cygnite\Console\Foundation
  * @author Sanjoy Dey <dey.sanjoy0@gmail.com>
  */
 class Application extends SymfonyApplication implements ConsoleApplicationInterface
 {
     /**
      * Stack of Commands, Need to be registered into console
-     * application
+     * application.
      *
      * @var array
      */
@@ -49,7 +47,7 @@ class Application extends SymfonyApplication implements ConsoleApplicationInterf
     public $cygnite;
 
     /**
-     * Create Cyrus Console Application
+     * Create Cyrus Console Application.
      *
      * @param string $cygniteApplication
      * @param string $version
@@ -69,9 +67,10 @@ class Application extends SymfonyApplication implements ConsoleApplicationInterf
     }
 
     /**
-     * Add new command into stack
+     * Add new command into stack.
      *
      * @param $command
+     *
      * @return $this
      */
     public function setCommand($command)
@@ -80,7 +79,6 @@ class Application extends SymfonyApplication implements ConsoleApplicationInterf
 
         return $this;
     }
-
 
     /**
      * Get the Cygnite application instance.
@@ -92,9 +90,9 @@ class Application extends SymfonyApplication implements ConsoleApplicationInterf
         return $this->cygnite;
     }
 
-
     /**
      * @param $command
+     *
      * @return \Symfony\Component\Console\Command\Command|void
      */
     public function add(SymfonyCommand $command)
@@ -107,7 +105,7 @@ class Application extends SymfonyApplication implements ConsoleApplicationInterf
     }
 
     /**
-     * We will register all the cyrus console command into container
+     * We will register all the cyrus console command into container.
      *
      * @return void
      */
@@ -125,6 +123,7 @@ class Application extends SymfonyApplication implements ConsoleApplicationInterf
      * add command into the console.
      *
      * @param $command
+     *
      * @return \Symfony\Component\Console\Command\Command
      */
     public function resolveConsoleCommand($command)

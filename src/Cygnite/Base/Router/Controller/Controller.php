@@ -7,21 +7,18 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 namespace Cygnite\Base\Router\Controller;
 
-use Cygnite\Helpers\Inflector;
 use Cygnite\Base\Router\Router;
-use Cygnite\Foundation\Application;
-use Cygnite\Http\Requests\RequestMethods;
+use Cygnite\Helpers\Inflector;
 
 if (!defined('CF_SYSTEM')) {
     exit('No External script access allowed');
 }
 
 /**
- * Class Controller
- *
- * @package Cygnite\Base\Router\Controller
+ * Class Controller.
  */
 class Controller implements RouteControllerInterface
 {
@@ -29,9 +26,9 @@ class Controller implements RouteControllerInterface
 
     protected $verbs = [
         'any', 'get', 'post', 'put', 'patch',
-        'delete', 'head', 'options'
+        'delete', 'head', 'options',
     ];
-    
+
     private $routes = [];
 
     private $router;
@@ -49,8 +46,10 @@ class Controller implements RouteControllerInterface
     /**
      * Set the controller as Route Controller
      * Cygnite Router knows how to respond to routes controller
-     * request automatically
+     * request automatically.
+     *
      * @param $controller
+     *
      * @return $this
      */
     public function routeController($controller)
@@ -64,7 +63,7 @@ class Controller implements RouteControllerInterface
                 $this->{'set'.$method.'Route'}(Inflector::deCamelize($controller), $action);
             }
         }
-        
+
         $this->mapRoute();
 
         return $this;
@@ -72,12 +71,13 @@ class Controller implements RouteControllerInterface
 
     /**
      * @param $actions
+     *
      * @return array
      */
     public function setActions($actions)
     {
         $this->controllerRoutes = array_merge($this->controllerRoutes, $actions);
-        
+
         return $this;
     }
 
@@ -92,34 +92,36 @@ class Controller implements RouteControllerInterface
     /**
      * @param $controller
      * @param $action
+     *
      * @return mixed
      */
     protected function setIndexRoute($controller, $action)
     {
         $this->routes['get'] = [
-            "/$controller/" => Inflector::classify($controller).'@'.$action,
+            "/$controller/"              => Inflector::classify($controller).'@'.$action,
             "/$controller/$action/{:id}" => Inflector::classify($controller).'@'.$action,
-            "/$controller/$action/" => Inflector::classify($controller).'@'.$action
+            "/$controller/$action/"      => Inflector::classify($controller).'@'.$action,
         ];
-        
+
         return $this;
     }
 
     /**
      * @param $controller
      * @param $action
+     *
      * @return mixed
      */
     protected function setAddRoute($controller, $action)
     {
         $callTo = Inflector::classify($controller).'@'.$action;
-        
+
         $this->routes['get'] = array_merge($this->routes['get'], [
-            "/$controller/$action/" => $callTo
+            "/$controller/$action/" => $callTo,
         ]);
-        
+
         $this->routes['post'] = [
-            "/$controller/$action/" => $callTo
+            "/$controller/$action/" => $callTo,
         ];
 
         return $this;
@@ -128,18 +130,19 @@ class Controller implements RouteControllerInterface
     /**
      * @param $controller
      * @param $action
+     *
      * @return mixed
      */
     protected function setEditRoute($controller, $action)
     {
         $callTo = Inflector::classify($controller).'@'.$action;
-        
+
         $this->routes['get'] = array_merge($this->routes['get'], [
-            "/$controller/$action/{:id}/" => $callTo
+            "/$controller/$action/{:id}/" => $callTo,
         ]);
-        
+
         $this->routes['post'] = array_merge($this->routes['post'], [
-            "/$controller/$action/" => $callTo
+            "/$controller/$action/" => $callTo,
         ]);
 
         return $this;
@@ -148,55 +151,59 @@ class Controller implements RouteControllerInterface
     /**
      * @param $controller
      * @param $action
+     *
      * @return mixed
      */
     protected function setShowRoute($controller, $action)
     {
         $this->routes['get'] = array_merge($this->routes['get'], [
-            "/$controller/$action/{:id}/" => Inflector::classify($controller).'@'.$action
+            "/$controller/$action/{:id}/" => Inflector::classify($controller).'@'.$action,
         ]);
-        
+
         return $this;
     }
 
     /**
      * @param $controller
      * @param $action
+     *
      * @return mixed
      */
     protected function setDeleteRoute($controller, $action)
     {
         $this->routes['get'] = array_merge($this->routes['get'], [
-            "/$controller/$action/{:id}/" => Inflector::classify($controller).'@'.$action
+            "/$controller/$action/{:id}/" => Inflector::classify($controller).'@'.$action,
         ]);
-        
+
         return $this;
     }
 
     /**
      * @param $pattern
      * @param $func
-     * @return mixed
+     *
      * @throws \Exception
+     *
+     * @return mixed
      */
     protected function mapRoute()
     {
         foreach ($this->routes['get'] as $pattern => $func) {
             $this->mapStaticRoutes($pattern, $func);
         }
-        
+
         foreach ($this->routes['post'] as $pattern => $func) {
             $this->mapStaticRoutes($pattern, $func, 'post');
         }
-        
+
         return $this;
     }
-    
+
     /**
-     *
      * @param type $pattern
      * @param type $func
      * @param type $method
+     *
      * @return \Cygnite\Base\Router\Controller\Controller
      */
     private function mapStaticRoutes($pattern, $func, $method = 'get')
@@ -204,15 +211,15 @@ class Controller implements RouteControllerInterface
         if (!is_string($func)) {
             throw new \Exception("$func must be string!");
         }
-        
+
         $this->router->{$method}($pattern, $func);
-        
+
         return $this;
     }
 
     /**
      * Route to controller action using HTTP verbs
-     * and defined pattern names as arguments
+     * and defined pattern names as arguments.
      *
      * @param $controller
      */
@@ -231,7 +238,7 @@ class Controller implements RouteControllerInterface
                     throw new \RuntimeException("Invalid HTTP verb ($verb) exception.");
                 }
 
-                $classParam = ['controller' =>$controller, 'method' => $method, 'args' => $args];
+                $classParam = ['controller' => $controller, 'method' => $method, 'args' => $args];
 
                 $this->handleRoute($app, $classParam, $verb, $uri);
             }
@@ -239,7 +246,7 @@ class Controller implements RouteControllerInterface
     }
 
     /**
-     * Route to controller action
+     * Route to controller action.
      *
      * @param $app
      * @param $classParam
@@ -248,9 +255,10 @@ class Controller implements RouteControllerInterface
      */
     public function handleRoute($app, $classParam, $verb, $uri)
     {
-        $app->router->{$verb}($uri, function () use ($app,$classParam) {
+        $app->router->{$verb}($uri, function () use ($app, $classParam) {
             extract($classParam);
             $app['response'] = $app->router->handleControllerDependencies($controller, $method, $args);
+
             return $app['response'];
         });
     }
@@ -260,6 +268,7 @@ class Controller implements RouteControllerInterface
      * @param        $controller
      * @param        $reflection
      * @param string $replace
+     *
      * @return array
      */
     public function getRoutesParameters($method, $controller, $reflection, $replace = 'Controller')
@@ -287,21 +296,24 @@ class Controller implements RouteControllerInterface
     }
 
     /**
-     * Return uri arguments
+     * Return uri arguments.
      *
      * @param $url
+     *
      * @return array
      */
     public function getUriArguments($url)
     {
         $uriParam = str_replace($url, '', $this->router->getCurrentUri());
+
         return array_filter(explode('/', $uriParam));
     }
 
     /**
-     * Get controller action name
+     * Get controller action name.
      *
      * @param $name
+     *
      * @return array
      */
     public function getActionName($name)
@@ -312,7 +324,8 @@ class Controller implements RouteControllerInterface
     /**
      * Extract the verb from a controller action.
      *
-     * @param  string  $name
+     * @param string $name
+     *
      * @return string
      */
     public function getVerb($name)
@@ -333,7 +346,8 @@ class Controller implements RouteControllerInterface
     /**
      * Add wildcards to the given URI.
      *
-     * @param  string  $uri
+     * @param string $uri
+     *
      * @return string
      */
     public function addUriWildcards($uri, $reflection, $method)

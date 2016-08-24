@@ -7,42 +7,37 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 namespace Cygnite\Console\Command;
 
-use Cygnite\Helpers\Inflector;
-use Cygnite\Console\Command\Command;
 use Apps\Resources\Database\Seeding\DatabaseTable;
 use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 
 /**
- * Cygnite Seeder Command
+ * Cygnite Seeder Command.
  *
  * Migration Command class used to take care of your database migrations using Cygnite CLI.
- * @author Sanjoy Dey <dey.sanjoy0@gmail.com>
  *
+ * @author Sanjoy Dey <dey.sanjoy0@gmail.com>
  */
 class SeederCommand extends Command
 {
     /**
-     * Name of your console command
+     * Name of your console command.
      *
      * @var string
      */
     protected $name = 'database:seed';
 
     /**
-     * Description of your console command
+     * Description of your console command.
      *
      * @var string
      */
     protected $description = 'Seed Database By Cygnite CLI';
 
     /**
-     * Console command arguments
+     * Console command arguments.
      *
      * @var array
      */
@@ -57,6 +52,7 @@ class SeederCommand extends Command
 
     /**
      * @param DatabaseTable $seeder
+     *
      * @throws \InvalidArgumentException
      */
     public function __construct(DatabaseTable $seeder)
@@ -79,7 +75,7 @@ class SeederCommand extends Command
     }
 
     /**
-     * Execute the command
+     * Execute the command.
      *
      * @return int|null|void
      */
@@ -98,11 +94,11 @@ class SeederCommand extends Command
 
         $this->seeder()->run();
 
-        $this->info("Seeding Completed Successfully!");
+        $this->info('Seeding Completed Successfully!');
     }
 
     /**
-     * Seeder directory path
+     * Seeder directory path.
      *
      * @return string
      */

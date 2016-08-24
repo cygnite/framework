@@ -1,6 +1,7 @@
 <?php
-use Mockery as m;
+
 use Cygnite\Mvc\View\Widget;
+use Mockery as m;
 
 class WidgetTest extends PHPUnit_Framework_TestCase
 {
@@ -12,7 +13,7 @@ class WidgetTest extends PHPUnit_Framework_TestCase
         $widgetInstance = Widget::make('foo_bar', [], function ($w) {
             return $w;
         });
-        
+
         $this->assertEquals($widget, $widgetInstance);
     }
 

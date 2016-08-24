@@ -21,7 +21,10 @@
          "tracy/tracy": "2.3.*",
          "ircmaxell/password-compat": "~1.0",
          "swiftmailer/swiftmailer": "5.4.*"
-   },	
+   },
+    "replace": {
+        "cygnite/stripe": "self.version" 
+	},
    "require-dev": {
        "mockery/mockery": "~0.9.1",
        "phpunit/phpunit": "~4.0",

@@ -1,4 +1,5 @@
 <?php
+
 namespace Cygnite\Database;
 
 use Cygnite\Database\Cyrus\ActiveRecord;
@@ -6,13 +7,11 @@ use Cygnite\Database\Cyrus\ActiveRecord;
 /**
  * Class Migration
  * Seed your table with sample data using migration.
- *
- * @package Cygnite\Database
  */
 class Migration extends ActiveRecord
 {
     /**
-     * Migration constructor
+     * Migration constructor.
      */
     public function __construct()
     {
@@ -20,10 +19,11 @@ class Migration extends ActiveRecord
     }
 
     /**
-     * Seed a table using migration
+     * Seed a table using migration.
      *
      * @param       $table
      * @param array $attributes
+     *
      * @return bool
      */
     public function insert($table, $attributes = [])
@@ -39,10 +39,11 @@ class Migration extends ActiveRecord
     }
 
     /**
-     * Delete rows using migration
+     * Delete rows using migration.
      *
      * @param       $table
      * @param array $attribute
+     *
      * @return bool
      */
     public function delete($table, $attribute)

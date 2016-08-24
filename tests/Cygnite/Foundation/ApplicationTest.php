@@ -1,6 +1,6 @@
 <?php
+
 use Cygnite\Foundation\Application;
-use Cygnite\Foundation\Autoloader;
 use Mockery as m;
 
 class ApplicationTest extends PHPUnit_Framework_TestCase
@@ -32,7 +32,7 @@ class ApplicationTest extends PHPUnit_Framework_TestCase
 
         $madeUrl = $this->app->make('\Cygnite\Common\UrlManager\Url');
         $madeUrl->setApplication($this->app);
-        
+
         $this->assertEquals($this->app['url'], $madeUrl);
     }
 
@@ -44,10 +44,10 @@ class ApplicationTest extends PHPUnit_Framework_TestCase
 
         $this->assertInstanceOf('\FooBar', $app['foo.bar']());
         $this->assertNotNull($app['foo.bar']()->greet());
-        $this->assertEquals("Hello FooBar!", $app['foo.bar']()->greet());
+        $this->assertEquals('Hello FooBar!', $app['foo.bar']()->greet());
 
         $app['greet.bar.controller'] = 'Hello BarController!';
-        $this->assertEquals("Hello BarController!", $app['bar.controller']()->indexAction());
+        $this->assertEquals('Hello BarController!', $app['bar.controller']()->indexAction());
     }
 
     public function testComposeMethod()
@@ -56,7 +56,7 @@ class ApplicationTest extends PHPUnit_Framework_TestCase
         $bazBar = $app->compose('BazBar', ['greet' => 'Hello!']);
 
         $this->assertArrayHasKey('greet', $app);
-        $this->assertEquals("Hello!", $bazBar->greet());
+        $this->assertEquals('Hello!', $bazBar->greet());
     }
 
     public function tearDown()
@@ -104,7 +104,7 @@ class BarController
 
 class BazBar
 {
-    private $arguments= [];
+    private $arguments = [];
 
     public function __construct($arguments = [])
     {

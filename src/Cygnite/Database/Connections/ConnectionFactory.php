@@ -11,18 +11,13 @@
 
 namespace Cygnite\Database\Connections;
 
-use PDO;
-use Exception;
-
 /**
- * Class ConnectionFactory
- *
- * @package Cygnite\Database\Connections
+ * Class ConnectionFactory.
  */
 class ConnectionFactory
 {
     /**
-     * Defined various database drivers
+     * Defined various database drivers.
      *
      * @var array
      */
@@ -35,9 +30,10 @@ class ConnectionFactory
     protected $config = [];
 
     /**
-     * We will set configuration for database connections
+     * We will set configuration for database connections.
      *
      * @param $config
+     *
      * @return $this
      */
     public function setConfig($config)
@@ -57,6 +53,7 @@ class ConnectionFactory
 
     /**
      * @param $class
+     *
      * @return mixed
      */
     public function make($class)

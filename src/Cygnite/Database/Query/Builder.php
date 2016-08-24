@@ -7,25 +7,21 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-
 namespace Cygnite\Database\Query;
 
-use PDO;
 use Cygnite;
-use Exception;
-use PDOException;
-use Cygnite\Helpers\Inflector;
 use Cygnite\Common\Pagination;
+use Cygnite\Database\ConnectionManagerTrait;
+use Cygnite\Database\Cyrus\ActiveRecord;
 use Cygnite\Database\Table\Schema;
 use Cygnite\Foundation\Collection;
-use Cygnite\Database\Cyrus\ActiveRecord;
-use Cygnite\Database\ConnectionManagerTrait;
-use Cygnite\Database\Exceptions\DatabaseExeception;
+use Cygnite\Helpers\Inflector;
+use Exception;
+use PDO;
+use PDOException;
 
 /**
- * Class Builder
- *
- * @package Cygnite\Database\Query
+ * Class Builder.
  */
 class Builder extends Joins implements QueryBuilderInterface
 {
@@ -34,8 +30,8 @@ class Builder extends Joins implements QueryBuilderInterface
     const DELETE = 'DELETE';
 
     //hold all your fields name which to select from table
-    const LIMIT_STYLE_TOP_N = "top";
-    const LIMIT_STYLE_LIMIT = "limit";
+    const LIMIT_STYLE_TOP_N = 'top';
+    const LIMIT_STYLE_LIMIT = 'limit';
 
     // Holds query builder instance
     public static $query;
@@ -82,15 +78,13 @@ class Builder extends Joins implements QueryBuilderInterface
     // Table name
     protected $fromTable;
     /**
-     * @access protected
-     * @var Array $where
+     * @var array
      */
     protected $where = [];
     /**
-     * Bindings for where sql statement
+     * Bindings for where sql statement.
      *
-     * @access protected
-     * @var Array $bindings
+     * @var array
      */
     protected $bindings = [];
 
@@ -107,7 +101,7 @@ class Builder extends Joins implements QueryBuilderInterface
     protected $havingType;
 
     /**
-     * Constructor of Query Builder
+     * Constructor of Query Builder.
      *
      * @param ActiveRecord $ar
      */
@@ -121,7 +115,7 @@ class Builder extends Joins implements QueryBuilderInterface
     }
 
     /**
-     * Set ActiveRecord instance
+     * Set ActiveRecord instance.
      *
      * @param $instance
      */
@@ -133,7 +127,7 @@ class Builder extends Joins implements QueryBuilderInterface
     }
 
     /**
-     * Get Cyrus ActiveRecord instance
+     * Get Cyrus ActiveRecord instance.
      *
      * @return null
      */
@@ -143,7 +137,7 @@ class Builder extends Joins implements QueryBuilderInterface
     }
 
     /**
-     * We will set Database Connection object
+     * We will set Database Connection object.
      *
      * @param $connection
      */
@@ -154,7 +148,7 @@ class Builder extends Joins implements QueryBuilderInterface
 
     /**
      * Get Database Connection Object based on database name
-     * provided into model class
+     * provided into model class.
      *
      * @return null|object
      */
@@ -168,11 +162,13 @@ class Builder extends Joins implements QueryBuilderInterface
     }
 
     /**
-     * Insert a record into database
+     * Insert a record into database.
      *
      * @param array $arguments
-     * @return mixed
+     *
      * @throws \RuntimeException
+     *
+     * @return mixed
      */
     public function insert($arguments = [])
     {
@@ -194,7 +190,7 @@ class Builder extends Joins implements QueryBuilderInterface
 
             // we will bind all parameters into the statement using execute method
             if ($return = $statement->execute($arguments)) {
-                $ar->{$ar->getKeyName()} = (int)$this->resolveConnection()->lastInsertId();
+                $ar->{$ar->getKeyName()} = (int) $this->resolveConnection()->lastInsertId();
                 /*
                  | Trigger after create events if
                  | defined by user into model class
@@ -211,6 +207,7 @@ class Builder extends Joins implements QueryBuilderInterface
 
     /**
      * @param $where
+     *
      * @return string
      */
     public function buildWherePlaceholderName($where)
@@ -232,6 +229,7 @@ class Builder extends Joins implements QueryBuilderInterface
 
     /**
      * @param $where
+     *
      * @return array
      */
     protected function formatWhereToNamePlaceHolder($where)
@@ -248,7 +246,7 @@ class Builder extends Joins implements QueryBuilderInterface
     }
 
     /**
-     * Build where condition for Update query
+     * Build where condition for Update query.
      *
      * @return array
      */
@@ -261,11 +259,13 @@ class Builder extends Joins implements QueryBuilderInterface
     }
 
     /**
-     * Update record with new values
+     * Update record with new values.
      *
      * @param $args
-     * @return mixed
+     *
      * @throws \Exception
+     *
+     * @return mixed
      */
     public function update($data, $where = [])
     {
@@ -313,7 +313,7 @@ class Builder extends Joins implements QueryBuilderInterface
     }
 
     /**
-     * Trash method
+     * Trash method.
      *
      * Delete a row from the table
      *
@@ -326,12 +326,14 @@ class Builder extends Joins implements QueryBuilderInterface
      *
      * </code>
      *
-     * @access    public
-     * @param  array $where
-     *                              $multiple false
-     * @param  bool  $multiple
+     * @param array $where
+     *                        $multiple false
+     * @param bool  $multiple
+     *
      * @throws \Exception
+     *
      * @internal  param \Cygnite\Database\the $string table to retrieve the results from
+     *
      * @return object
      */
     public function trash($where = null, $multiple = false)
@@ -348,9 +350,9 @@ class Builder extends Joins implements QueryBuilderInterface
         // Bind where conditions
         $this->bindWhereClause($where, $multiple, $ar);
 
-        $sql = self::DELETE .
-            " FROM " . $this->quoteIdentifier($ar->getDatabase()) . '.' . $this->quoteIdentifier($ar->getTableName())
-            . $this->getWhere();
+        $sql = self::DELETE.
+            ' FROM '.$this->quoteIdentifier($ar->getDatabase()).'.'.$this->quoteIdentifier($ar->getTableName())
+            .$this->getWhere();
 
         try {
             /*
@@ -379,9 +381,10 @@ class Builder extends Joins implements QueryBuilderInterface
      * $user->trash(1);
      * $user->trash([1,4,6,33,54], true)
      * $user->trash(['id' => 23])
-     * $user->where('name', '=', 'application')->trash();
+     * $user->where('name', '=', 'application')->trash();.
      *
      * </code>
+     *
      * @param $where
      * @param $multiple
      * @param $ar
@@ -412,14 +415,15 @@ class Builder extends Joins implements QueryBuilderInterface
     }
 
     /**
-     * Find Function to selecting Table columns
+     * Find Function to selecting Table columns.
      *
      * Generates the SELECT portion of the query
      *
-     * @access    public
-     * @param     $column
-     * @throws    \Exception
-     * @return     object
+     * @param   $column
+     *
+     * @throws \Exception
+     *
+     * @return object
      */
     public function select($column)
     {
@@ -430,9 +434,10 @@ class Builder extends Joins implements QueryBuilderInterface
     }
 
     /**
-     * Internally build select Columns
+     * Internally build select Columns.
      *
      * @param $column
+     *
      * @return $this
      */
     private function _select($column)
@@ -440,13 +445,13 @@ class Builder extends Joins implements QueryBuilderInterface
         if ($column === 'all' || $column == '*') {
             $this->selectColumns = $this->quoteIdentifier(
                     self::cyrus()->getTableName()
-                ) . '.*';
+                ).'.*';
         } else {
             if (string_has($column, 'as') || string_has($column, 'AS')) {
                 return $this->selectExpr($column);
             }
 
-            $this->selectColumns = (string)str_replace(' ', '', $this->quoteIdentifier(explode(',', $column)));
+            $this->selectColumns = (string) str_replace(' ', '', $this->quoteIdentifier(explode(',', $column)));
         }
 
         return $this;
@@ -458,23 +463,24 @@ class Builder extends Joins implements QueryBuilderInterface
      * the alias to return the column as.
      *
      * @param $expr
+     *
      * @return $this
      */
     public function selectExpr($expr)
     {
-        $this->selectColumns = (string)$expr;
+        $this->selectColumns = (string) $expr;
 
         return $this;
     }
 
     /**
      * Adding an element in the where array with the value
-     * to the bindings
+     * to the bindings.
      *
-     * @access public
-     * @param String $key
-     * @param String $operator
-     * @param String $value
+     * @param string $key
+     * @param string $operator
+     * @param string $value
+     *
      * @return void
      */
     public function where($key, $operator, $value)
@@ -483,7 +489,7 @@ class Builder extends Joins implements QueryBuilderInterface
             return $this->whereIn($key, $value);
         }
 
-        $this->where[] = "AND " . $key . ' ' . $operator . ' ' . "?";
+        $this->where[] = 'AND '.$key.' '.$operator.' '.'?';
         $this->bindings[] = $value;
 
         return $this;
@@ -491,16 +497,17 @@ class Builder extends Joins implements QueryBuilderInterface
 
     /**
      * Adding an element in the where array with the value
-     * to the bindings
+     * to the bindings.
      *
      * @param $key
      * @param $value
+     *
      * @return $this|mixed
      */
     public function whereIn($key, $value)
     {
         $exp = explode(',', $value);
-        $this->where[] = "AND " . $key . ' IN (' . $this->createPlaceHolder($exp) . ') ';
+        $this->where[] = 'AND '.$key.' IN ('.$this->createPlaceHolder($exp).') ';
 
         foreach ($exp as $key => $val) {
             $this->bindings[$key] = $val;
@@ -511,34 +518,35 @@ class Builder extends Joins implements QueryBuilderInterface
 
     /**
      * Adding an element in the where array with the value
-     * to the bindings
+     * to the bindings.
      *
-     * @access public
-     * @param String $key
-     * @param String $operator
-     * @param String $value
+     * @param string $key
+     * @param string $operator
+     * @param string $value
+     *
      * @return void
      */
     public function orWhere($key, $operator, $value)
     {
-        $this->where[] = "OR " . $key . ' ' . $operator . ' ' . "?";
+        $this->where[] = 'OR '.$key.' '.$operator.' '.'?';
         $this->bindings[] = $value;
 
         return $this;
     }
 
     /**
-     * Where conditions with "or"
+     * Where conditions with "or".
      *
      * @param        $key
      * @param        $value
      * @param string $operator
+     *
      * @return $this
      */
     public function orWhereIn($key, $value, $operator = 'IN')
     {
         $exp = explode(',', $value);
-        $this->where[] = "OR OR" . $key . ' ' . $operator . ' (' . $this->createPlaceHolder($exp) . ') ';
+        $this->where[] = 'OR OR'.$key.' '.$operator.' ('.$this->createPlaceHolder($exp).') ';
 
         foreach ($exp as $key => $val) {
             $this->bindings[$key] = $val;
@@ -548,11 +556,12 @@ class Builder extends Joins implements QueryBuilderInterface
     }
 
     /**
-     * Add having clause to the query
+     * Add having clause to the query.
      *
      * @param        $column
      * @param string $operator
      * @param null   $value
+     *
      * @return $this
      */
     public function having($column, $operator = '=', $value = null)
@@ -563,11 +572,12 @@ class Builder extends Joins implements QueryBuilderInterface
     }
 
     /**
-     * Add having clause to the query prefixing OR keyword
+     * Add having clause to the query prefixing OR keyword.
      *
      * @param        $column
      * @param string $operator
      * @param null   $value
+     *
      * @return $this|Builder
      */
     public function orHaving($column, $operator = '=', $value = null)
@@ -579,12 +589,13 @@ class Builder extends Joins implements QueryBuilderInterface
 
     /**
      * Method to compile a simple column separated value for HAVING clause.
-     * If column passed as array, we will add condition for each column
+     * If column passed as array, we will add condition for each column.
      *
      * @param $type
      * @param $column
      * @param $separator
      * @param $value
+     *
      * @return $this
      */
     protected function addCondition($type, $column, $separator, $value)
@@ -610,10 +621,11 @@ class Builder extends Joins implements QueryBuilderInterface
     /**
      * Add a raw HAVING clause to the query. You can also bing values by passing
      * second parameter as array. Make sure you clause should contain question mark
-     * placeholder
+     * placeholder.
      *
      * @param       $clause
      * @param array $values
+     *
      * @return $this
      */
     public function havingRaw($clause, $values = [])
@@ -622,14 +634,15 @@ class Builder extends Joins implements QueryBuilderInterface
     }
 
     /**
-     * Build Having Conditions for the query
+     * Build Having Conditions for the query.
      *
      * @param       $type
      * @param       $key
      * @param array $values
+     *
      * @return $this
      */
-    protected function bindCondition($type, $key, $values= [])
+    protected function bindCondition($type, $key, $values = [])
     {
         $conditionHolder = "{$type}Conditions";
         if (!is_array($values)) {
@@ -642,7 +655,7 @@ class Builder extends Joins implements QueryBuilderInterface
     }
 
     /**
-     * Build the HAVING clause(s)
+     * Build the HAVING clause(s).
      *
      * @return string
      */
@@ -655,10 +668,11 @@ class Builder extends Joins implements QueryBuilderInterface
     }
 
     /**
-     * Build a HAVING clause conditions
+     * Build a HAVING clause conditions.
      *
      * @param string $type
      * @param string $join
+     *
      * @return string
      */
     protected function makeConditions($type, $join = 'AND')
@@ -680,33 +694,34 @@ class Builder extends Joins implements QueryBuilderInterface
             $this->bindings = array_merge($this->bindings, $condition[1]);
         }
 
-        return strtoupper($type) . " " . join(" $join ", $conditions);
+        return strtoupper($type).' '.implode(" $join ", $conditions);
     }
 
     /**
-     * Get the distinct value of the column
+     * Get the distinct value of the column.
      *
-     * @access public
      * @param $column
-     * @return $this
      *
+     * @return $this
      */
     public function distinct($column)
     {
-        $this->distinct = (string)(strtolower(__FUNCTION__) . ($column));
+        $this->distinct = (string) (strtolower(__FUNCTION__).($column));
 
         return $this;
     }
 
     /**
-     * Limit the record and fetch from database
+     * Limit the record and fetch from database.
      *
      * @param type   $limit
      * @param string $offset
-     * @return $this
+     *
      * @throws \Exception
+     *
+     * @return $this
      */
-    public function limit($limit, $offset = "")
+    public function limit($limit, $offset = '')
     {
         if (is_null($limit)) {
             throw new \Exception('Empty parameter given to limit clause ');
@@ -724,14 +739,16 @@ class Builder extends Joins implements QueryBuilderInterface
     }
 
     /**
-     * This function to make order for selected query
+     * This function to make order for selected query.
      *
      * @param        $column
      * @param string $orderType
-     * @return $this
+     *
      * @throws \Exception
+     *
+     * @return $this
      */
-    public function orderBy($column, $orderType = "ASC")
+    public function orderBy($column, $orderType = 'ASC')
     {
         if (empty($column) || is_null($column)) {
             throw new \Exception('Empty parameter given to order by clause');
@@ -740,6 +757,7 @@ class Builder extends Joins implements QueryBuilderInterface
 
         if (is_array($column)) {
             $this->columnName = $this->extractArrayAttributes($column);
+
             return $this;
         }
 
@@ -751,31 +769,36 @@ class Builder extends Joins implements QueryBuilderInterface
     }
 
     /**
-     * Group By function to group columns based on aggregate functions
+     * Group By function to group columns based on aggregate functions.
      *
      * @param $column
-     * @return $this
+     *
      * @throws \InvalidArgumentException
+     *
+     * @return $this
      */
     public function groupBy($column)
     {
         if (is_null($column)) {
-            throw new \InvalidArgumentException("Cannot pass null argument to " . __METHOD__);
+            throw new \InvalidArgumentException('Cannot pass null argument to '.__METHOD__);
         }
 
         if (is_array($column)) {
             $this->groupBy = $this->extractArrayAttributes($column);
+
             return $this;
         }
 
         $this->groupBy = $this->quoteIdentifier($column);
+
         return $this;
     }
 
     /**
-     * Add an alias for the main table to be used in SELECT queries
+     * Add an alias for the main table to be used in SELECT queries.
      *
      * @param $alias
+     *
      * @return $this
      */
     public function tableAlias($alias)
@@ -791,13 +814,15 @@ class Builder extends Joins implements QueryBuilderInterface
      * You can simply pass fetchMode into findAll to get various
      * format output.
      *
-     * @access   public
-     * @param  string $type
+     * @param string $type
+     *
      * @throws \Exception
+     *
      * @internal param string $type
-     * @return array      or object
+     *
+     * @return array or object
      */
-    public function findAll($type = "")
+    public function findAll($type = '')
     {
         $data = [];
         $ar = self::cyrus();
@@ -828,28 +853,29 @@ class Builder extends Joins implements QueryBuilderInterface
                 return new Collection([]);
             }
         } catch (PDOException $ex) {
-            throw new \Exception("Database exceptions: Invalid query x" . $ex->getMessage());
+            throw new \Exception('Database exceptions: Invalid query x'.$ex->getMessage());
         }
     }
 
     /**
-     * This is alias method of findAll()
+     * This is alias method of findAll().
      *
      * @param string $type
+     *
      * @return mixed
      */
-    public function findMany($type = "")
+    public function findMany($type = '')
     {
         return $this->findAll($type);
     }
 
     /**
      * This method is alias of findAll, We will get only the
-     * zeroth row from the collection object
+     * zeroth row from the collection object.
      *
      * @return object|null
      */
-    public function findOne($type = "")
+    public function findOne($type = '')
     {
         $rows = $this->findAll($type)->asArray();
 
@@ -857,10 +883,11 @@ class Builder extends Joins implements QueryBuilderInterface
     }
 
     /**
-     * Allows to fetch records as type specified
+     * Allows to fetch records as type specified.
      *
      * @param      $stmt
      * @param null $type
+     *
      * @return string
      */
     public function fetchAs($stmt, $type = null)
@@ -889,10 +916,10 @@ class Builder extends Joins implements QueryBuilderInterface
                 $data = $stmt->fetchAll(\PDO::FETCH_COLUMN);
                 break;
             case 'class':
-                $data = $stmt->fetchAll(\PDO::FETCH_CLASS, "\\Cygnite\\Database\\ResultSet");
+                $data = $stmt->fetchAll(\PDO::FETCH_CLASS, '\\Cygnite\\Database\\ResultSet');
                 break;
             default:
-                $data = $stmt->fetchAll(\PDO::FETCH_CLASS, '\\' . self::cyrus()->getModelClassNs());
+                $data = $stmt->fetchAll(\PDO::FETCH_CLASS, '\\'.self::cyrus()->getModelClassNs());
                 break;
         }
 
@@ -902,23 +929,23 @@ class Builder extends Joins implements QueryBuilderInterface
     public function getGroupBy()
     {
         return (isset($this->groupBy) && !is_null($this->groupBy)) ?
-            'GROUP BY ' . $this->groupBy : '';
+            'GROUP BY '.$this->groupBy : '';
     }
 
     public function getOrderBy()
     {
         return (isset($this->columnName) && isset($this->orderType)) ?
-            " ORDER BY " . $this->columnName . "  " . $this->orderType : '';
+            ' ORDER BY '.$this->columnName.'  '.$this->orderType : '';
     }
 
     public function getLimit()
     {
         return (isset($this->limitValue) && isset($this->offsetValue)) ?
-            " LIMIT " . $this->limitValue . "," . $this->offsetValue . " " : '';
+            ' LIMIT '.$this->limitValue.','.$this->offsetValue.' ' : '';
     }
 
     /**
-     * Get row count
+     * Get row count.
      *
      * @return mixed
      */
@@ -931,6 +958,7 @@ class Builder extends Joins implements QueryBuilderInterface
 
     /**
      * @param $key
+     *
      * @return null
      */
     public function getDbStatement($key)
@@ -939,13 +967,14 @@ class Builder extends Joins implements QueryBuilderInterface
     }
 
     /**
-     * Build raw queries
+     * Build raw queries.
      *
-     * @access public
-     * @param  string $sql
-     * @param  array  $attributes
+     * @param string $sql
+     * @param array  $attributes
+     *
      * @throws \Exception|\PDOException
-     * @return object                   pointer $this
+     *
+     * @return object pointer $this
      */
     public function sql($sql, $attributes = [])
     {
@@ -965,7 +994,7 @@ class Builder extends Joins implements QueryBuilderInterface
     }
 
     /**
-     * Execute Prepared Query
+     * Execute Prepared Query.
      *
      * @return mixed
      */
@@ -983,7 +1012,7 @@ class Builder extends Joins implements QueryBuilderInterface
     }
 
     /**
-     * Get all rows of table as Collection
+     * Get all rows of table as Collection.
      *
      * @return array|Collection
      */
@@ -997,6 +1026,7 @@ class Builder extends Joins implements QueryBuilderInterface
      * @param array      $array     : associative array containing the values ??to bind
      * @param array|bool $typeArray : associative array with the desired value for its
      *                              corresponding key in $array
+     *
      * @link http://us2.php.net/manual/en/pdostatement.bindvalue.php#104939
      */
     public function bindArrayValue($req, $array, $typeArray = false)
@@ -1034,9 +1064,10 @@ class Builder extends Joins implements QueryBuilderInterface
      * @param $method    String
      * @param $arguments array
      * @param $type      string
-     * @throws \Exception
-     * @return object
      *
+     * @throws \Exception
+     *
+     * @return object
      */
     public function buildFindersWhereCondition($method, $arguments, $type = 'And')
     {
@@ -1063,9 +1094,10 @@ class Builder extends Joins implements QueryBuilderInterface
     }
 
     /**
-     * Find result using raw sql query
+     * Find result using raw sql query.
      *
      * @param $sql
+     *
      * @return Collection
      */
     public function findBySql($sql)
@@ -1079,9 +1111,10 @@ class Builder extends Joins implements QueryBuilderInterface
     }
 
     /**
-     * Select from table. Alias method of table
+     * Select from table. Alias method of table.
      *
      * @param $table
+     *
      * @return $this
      */
     public function from($table)
@@ -1100,9 +1133,10 @@ class Builder extends Joins implements QueryBuilderInterface
     }
 
     /**
-     * Set table to run fluent query without model class
+     * Set table to run fluent query without model class.
      *
      * @param $table
+     *
      * @return $this
      */
     public function table($table)
@@ -1115,10 +1149,11 @@ class Builder extends Joins implements QueryBuilderInterface
     }
 
     /**
-     * Internally call finder methods
+     * Internally call finder methods.
      *
      * @param       $method
      * @param array $params
+     *
      * @return mixed
      */
     public function callFinder($method, array $params)
@@ -1127,10 +1162,11 @@ class Builder extends Joins implements QueryBuilderInterface
     }
 
     /**
-     * Find a single row
+     * Find a single row.
      *
      * @param       $method
      * @param array $options
+     *
      * @return mixed
      */
     public function find($method, $options = [])
@@ -1146,7 +1182,7 @@ class Builder extends Joins implements QueryBuilderInterface
     }
 
     /**
-     * We will return last executed query
+     * We will return last executed query.
      *
      * @return string
      */
@@ -1156,7 +1192,7 @@ class Builder extends Joins implements QueryBuilderInterface
     }
 
     /**
-     *  Flush Connection object
+     *  Flush Connection object.
      */
     public function flush()
     {
@@ -1183,7 +1219,7 @@ class Builder extends Joins implements QueryBuilderInterface
     }
 
     /**
-     * We will trigger event
+     * We will trigger event.
      *
      * @param $event
      */
@@ -1199,28 +1235,29 @@ class Builder extends Joins implements QueryBuilderInterface
     }
 
     /**
-     * Get insert sql statement
+     * Get insert sql statement.
      *
-     * @access   private
      * @param $function
      * @param $ar
      * @param $arguments
+     *
      * @return string
      */
     private function getInsertQuery($function, $ar, $arguments)
     {
         $keys = array_keys($arguments);
 
-        return $function . " INTO `" . $ar->getDatabase() . "`.`" . $ar->getTableName() .
-        "` (" . implode(", ", $keys) . ")" .
-        " VALUES(:" . implode(", :", $keys) . ")";
+        return $function.' INTO `'.$ar->getDatabase().'`.`'.$ar->getTableName().
+        '` ('.implode(', ', $keys).')'.
+        ' VALUES(:'.implode(', :', $keys).')';
     }
 
     /**
-     * Get update sql statement
+     * Get update sql statement.
      *
      * @param $data
      * @param $function
+     *
      * @return string
      */
     private function getUpdateQuery($data, $function)
@@ -1238,13 +1275,13 @@ class Builder extends Joins implements QueryBuilderInterface
             $sql .= "$key = :$key,";
         }
 
-        $sql = rtrim($sql, ",");
+        $sql = rtrim($sql, ',');
 
-        return $function . " `" . $ar->getDatabase() . "`.`" . $ar->getTableName() . "` SET " ." " . $sql;
+        return $function.' `'.$ar->getDatabase().'`.`'.$ar->getTableName().'` SET '.' '.$sql;
     }
 
     /**
-     * We will bind Parameters to execute queries
+     * We will bind Parameters to execute queries.
      *
      * @param $stmt
      */
@@ -1265,9 +1302,10 @@ class Builder extends Joins implements QueryBuilderInterface
     }
 
     /**
-     * Create placeholders for arguments
+     * Create placeholders for arguments.
      *
      * @param $arguments
+     *
      * @return string
      */
     private function createPlaceHolder($arguments)
@@ -1280,14 +1318,14 @@ class Builder extends Joins implements QueryBuilderInterface
     }
 
     /**
-     *
      * @param $columns
+     *
      * @return string
      */
     private function extractArrayAttributes($columns)
     {
         $i = 0;
-        $str = "";
+        $str = '';
         $count = count($columns);
         while ($i < $count) { //Create conditions with and if value is passed as array
             $str .= $this->quoteIdentifier($columns[$i]);
@@ -1299,7 +1337,7 @@ class Builder extends Joins implements QueryBuilderInterface
     }
 
     /**
-     * Build query internally
+     * Build query internally.
      *
      * @return $this
      */
@@ -1315,14 +1353,14 @@ class Builder extends Joins implements QueryBuilderInterface
 
     /**
      * we will prepare query except columns given in model
-     * and assign it to selectColumns to find the results
+     * and assign it to selectColumns to find the results.
      */
     private function prepareExceptColumns()
     {
         $ar = self::cyrus();
 
         if (!method_exists($ar, 'skip')) {
-            return ;
+            return;
         }
 
         // we will get the table schema
@@ -1333,7 +1371,7 @@ class Builder extends Joins implements QueryBuilderInterface
             return $table->getColumns();
         });
 
-        $columns = $this->query($select->schema)->getAll();
+        $columns = $this->sql($select->getSchemaPreparedQuery())->getAll();
 
         // Get all column name which need to remove from the result set
         $exceptColumns = $ar->skip();
@@ -1345,7 +1383,7 @@ class Builder extends Joins implements QueryBuilderInterface
             }
         }
 
-        $this->selectColumns = (string)implode(',', $columnArray);
+        $this->selectColumns = (string) implode(',', $columnArray);
     }
 
     /**
@@ -1354,10 +1392,10 @@ class Builder extends Joins implements QueryBuilderInterface
     protected function buildSqlQuery()
     {
         $this->sqlQuery =
-            'SELECT ' . $this->buildSelectedColumns() . ' FROM ' . $this->quoteIdentifier(
+            'SELECT '.$this->buildSelectedColumns().' FROM '.$this->quoteIdentifier(
                 self::cyrus()->getTableName()
-            ) . ' ' . $this->tableAlias . $this->getJoinSource() . $this->getWhere() .
-            ' ' . $this->getGroupBy() . ' ' .$this->buildHavingConditions(). ' '. $this->getOrderBy() . ' ' . $this->getLimit();
+            ).' '.$this->tableAlias.$this->getJoinSource().$this->getWhere().
+            ' '.$this->getGroupBy().' '.$this->buildHavingConditions().' '.$this->getOrderBy().' '.$this->getLimit();
 
         static::$queries[] = $this->sqlQuery;
 
@@ -1366,17 +1404,17 @@ class Builder extends Joins implements QueryBuilderInterface
 
     /**
      * We can use this method to debug query which
-     * executed last
+     * executed last.
      *
      * @return string
      */
     private function buildOriginalQuery()
     {
         return
-            'SELECT ' . $this->buildSelectedColumns() . ' FROM ' . $this->quoteIdentifier(
+            'SELECT '.$this->buildSelectedColumns().' FROM '.$this->quoteIdentifier(
                 self::cyrus()->getTableName()
-            ) . ' ' . $this->getWhere() .
-            ' ' . $this->getGroupBy() . ' ' .$this->buildHavingConditions(). ' '. $this->getOrderBy() . ' ' . $this->getLimit();
+            ).' '.$this->getWhere().
+            ' '.$this->getGroupBy().' '.$this->buildHavingConditions().' '.$this->getOrderBy().' '.$this->getLimit();
     }
 
     /**
@@ -1391,7 +1429,7 @@ class Builder extends Joins implements QueryBuilderInterface
         return ($this->selectColumns == '*') ?
             $this->quoteIdentifier(
                 self::cyrus()->getTableName()
-            ) . ' .' . $this->selectColumns : $this->selectColumns;
+            ).' .'.$this->selectColumns : $this->selectColumns;
     }
 
     /**
@@ -1410,10 +1448,9 @@ class Builder extends Joins implements QueryBuilderInterface
     }
 
     /**
-     * Get where statement
+     * Get where statement.
      *
-     * @access private
-     * @return String
+     * @return string
      */
     private function getWhere()
     {
@@ -1423,7 +1460,7 @@ class Builder extends Joins implements QueryBuilderInterface
         }
 
         // Implode where pecices then remove the first AND or OR
-        return ' WHERE ' . ltrim(implode(" ", $this->where), "ANDOR");
+        return ' WHERE '.ltrim(implode(' ', $this->where), 'ANDOR');
     }
 
     /**
@@ -1436,9 +1473,10 @@ class Builder extends Joins implements QueryBuilderInterface
     }
 
     /**
-     * Find all values from the database table
+     * Find all values from the database table.
      *
      * @param $arguments
+     *
      * @return mixed
      */
     public function all($arguments)
@@ -1464,7 +1502,7 @@ class Builder extends Joins implements QueryBuilderInterface
 
         // applying pagination limit
         if (isset($arguments[0]['paginate']) || method_exists(self::cyrus(), 'pageLimit')) {
-            $page = $offset = $start = "";
+            $page = $offset = $start = '';
             $offset = self::cyrus()->perPage; //how many items to show per page
             $limit = !isset($arguments[0]['paginate']['limit']) ?
                 self::cyrus()->pageLimit() :
@@ -1490,7 +1528,7 @@ class Builder extends Joins implements QueryBuilderInterface
     }
 
     /**
-     * We will get first row of table
+     * We will get first row of table.
      *
      * @return mixed
      */
@@ -1500,9 +1538,10 @@ class Builder extends Joins implements QueryBuilderInterface
     }
 
     /**
-     * Method to find first oof last row of the table
+     * Method to find first oof last row of the table.
      *
      * @param null $order
+     *
      * @return mixed
      */
     private function findFirstOrLast($order = null)
@@ -1522,7 +1561,7 @@ class Builder extends Joins implements QueryBuilderInterface
     }
 
     /**
-     * Get last row of table
+     * Get last row of table.
      *
      * @return mixed
      */
@@ -1533,6 +1572,7 @@ class Builder extends Joins implements QueryBuilderInterface
 
     /**
      * @param $arguments
+     *
      * @return mixed
      */
     private function findBy($arguments)
@@ -1549,7 +1589,7 @@ class Builder extends Joins implements QueryBuilderInterface
     /**
      * Check whether reader is closed or not.
      *
-     * @return boolean whether the reader is closed or not.
+     * @return bool whether the reader is closed or not.
      */
     private function isClosed()
     {

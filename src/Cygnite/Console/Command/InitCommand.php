@@ -7,47 +7,41 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 namespace Cygnite\Console\Command;
 
-use Cygnite\Database\Table\Table;
-use Cygnite\Helpers\Inflector;
-use Cygnite\Foundation\Application;
 use Cygnite\Console\Generator\Migrator;
-use Cygnite\Console\Command\Command;
 use Cygnite\Database\ConnectionManagerTrait;
+use Cygnite\Database\Table\Table;
 use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 
 /**
- * Cygnite Migration Command
+ * Cygnite Migration Command.
  *
  * Init Command class used to generate your migration file using Cygnite CLI.
- * @author Sanjoy Dey <dey.sanjoy0@gmail.com>
  *
+ * @author Sanjoy Dey <dey.sanjoy0@gmail.com>
  */
 class InitCommand extends Command
 {
     use ConnectionManagerTrait;
 
     /**
-     * Name of your console command
+     * Name of your console command.
      *
      * @var string
      */
     protected $name = 'migrate:init';
 
     /**
-     * Description of your console command
+     * Description of your console command.
      *
      * @var string
      */
     protected $description = 'Initializing Migration By Cygnite CLI';
 
     /**
-     * Console command arguments
+     * Console command arguments.
      *
      * @var array
      */
@@ -64,6 +58,7 @@ class InitCommand extends Command
 
     /**
      * @param Table $table
+     *
      * @throws \InvalidArgumentException
      */
     public function __construct(Table $table)
@@ -83,19 +78,19 @@ class InitCommand extends Command
     }
 
     /**
-     * Set Help Message for the command
+     * Set Help Message for the command.
      */
     protected function configure()
     {
-        $this->setHelp("<<<EOT
+        $this->setHelp('<<<EOT
                 The <info>init</info> command creates a skeleton file and a migrations directory
                 <info>cygnite migrate:init</info>
-                EOT>>>"
+                EOT>>>'
             );
     }
 
     /**
-     * Execute Command To Initialize Migration Class
+     * Execute Command To Initialize Migration Class.
      *
      * @return int|null|void
      */
@@ -118,15 +113,15 @@ class InitCommand extends Command
 
             if ($file) {
                 $file = APP_NS.DS.'Resources'.DS.'Database'.DS.'Migrations'.DS.$file;
-                $this->info("Your migration class generated in ".$file);
+                $this->info('Your migration class generated in '.$file);
             }
 
-            $this->info("Cool!! You are ready to use migration!");
+            $this->info('Cool!! You are ready to use migration!');
         }
     }
 
     /**
-     * Get Migration Path
+     * Get Migration Path.
      *
      * @return string
      */
@@ -136,7 +131,7 @@ class InitCommand extends Command
     }
 
     /**
-     * Get Database Connection Name
+     * Get Database Connection Name.
      *
      * @return array|mixed|string
      */

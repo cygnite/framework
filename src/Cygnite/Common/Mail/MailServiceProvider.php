@@ -1,9 +1,9 @@
 <?php
+
 namespace Cygnite\Common\Mail;
 
-use Swift_Mailer;
-use Cygnite\Foundation\Application;
 use Cygnite\Container\Service\ServiceProvider;
+use Cygnite\Foundation\Application;
 
 class MailServiceProvider extends ServiceProvider
 {

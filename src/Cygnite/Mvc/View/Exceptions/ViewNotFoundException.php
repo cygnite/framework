@@ -1,4 +1,5 @@
 <?php
+
 namespace Cygnite\Mvc\View\Exceptions;
 
 if (!defined('CF_SYSTEM')) {

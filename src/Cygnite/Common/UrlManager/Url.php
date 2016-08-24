@@ -14,9 +14,8 @@ namespace Cygnite\Common\UrlManager;
 use Cygnite\Base\Router\Router;
 
 /**
- * Class Url
+ * Class Url.
  *
- * @package Cygnite\Common\UrlManager
  * @author Sanjoy Dey <dey.sanjoy0@gmail.com>
  */
 class Url
@@ -31,9 +30,10 @@ class Url
 
     /**
      * Set application instance
-     * Set router and request
+     * Set router and request.
      *
      * @param $app
+     *
      * @return $this
      */
     public function setApplication($app)
@@ -45,7 +45,7 @@ class Url
         return $this;
     }
 
-   /**
+    /**
      * @param $route
      */
     public function setRouter($route)
@@ -55,6 +55,7 @@ class Url
 
     /**
      * @param $request
+     *
      * @return $this
      */
     public function setRequest($request)
@@ -65,11 +66,11 @@ class Url
     }
 
     /**
-     * Header Redirect
+     * Header Redirect.
      *
      * @param string $uri
      * @param string $type
-     * @param int $httpResponseCode
+     * @param int    $httpResponseCode
      */
     public static function redirectTo($uri = '', $type = 'location', $httpResponseCode = 302)
     {
@@ -81,21 +82,22 @@ class Url
 
         switch ($type) {
             case 'refresh':
-                header("Refresh:0;url=" . $uri);
+                header('Refresh:0;url='.$uri);
                 break;
             case 'location':
-                header("Location: " . $uri, true, $httpResponseCode);
+                header('Location: '.$uri, true, $httpResponseCode);
                 break;
         }
         exit;
     }
 
     /**
-     * This Function is to get the url sitePath with index.php
+     * This Function is to get the url sitePath with index.php.
      *
-     * @access public
      * @false $uri
+     *
      * @param $uri
+     *
      * @return string
      */
     public static function sitePath($uri)
@@ -103,23 +105,24 @@ class Url
         $expression = array_filter(explode('/', static::$request->server['REQUEST_URI']));
         $index = (false !== array_search(Router::$indexPage, $expression)) ? Router::$indexPage.'/' : '';
 
-        return Url::getBase() . $index . $uri;
+        return self::getBase().$index.$uri;
     }
 
     /**
      * @param $method
      * @param array $args
+     *
      * @return mixed
      */
     public static function __callStatic($method, $args = [])
     {
-        $instance = Url::make();
+        $instance = self::make();
         $arguments = ['method' => $method, 'args' => $args, 'instance' => $instance];
+
         return call_user_func_array([$instance, 'call'], [$arguments]);
     }
 
     /** Return Url Instance
-     *
      * @return static
      */
     public static function make()
@@ -128,22 +131,22 @@ class Url
     }
 
     /**
-     * Used to get the previous visited url based on current url
+     * Used to get the previous visited url based on current url.
      *
-     * @access public
      * @return string
      */
     public function referredFrom()
     {
-        return isset(static::$request->server["HTTP_REFERER"]) ? static::$request->server["HTTP_REFERER"] : null;
+        return isset(static::$request->server['HTTP_REFERER']) ? static::$request->server['HTTP_REFERER'] : null;
     }
 
     /**
-     * This Function is to get Uri Segment of the url
+     * This Function is to get Uri Segment of the url.
      *
-     * @access public
      * @false  int
+     *
      * @param array|int $segment
+     *
      * @return string
      */
     public function getSegment($segment = [])
@@ -155,10 +158,11 @@ class Url
 
         if ($indexCount == true) {
             $num = $indexCount + $segment;
-            return (isset($urlArray[$num]) ? $urlArray[$num] : null);
+
+            return isset($urlArray[$num]) ? $urlArray[$num] : null;
         }
 
-        return (isset($urlArray[$segment]) ? $urlArray[$segment] : null);
+        return isset($urlArray[$segment]) ? $urlArray[$segment] : null;
     }
 
     /**
@@ -170,11 +174,12 @@ class Url
     }
 
     /**
-     * This Function is to encode the url
+     * This Function is to encode the url.
      *
-     * @access public
      * @false  string
+     *
      * @param $str
+     *
      * @return string
      */
     public function encode($str)
@@ -183,11 +188,12 @@ class Url
     }
 
     /**
-     * This Function is to decode the url
+     * This Function is to decode the url.
      *
-     * @access public
      * @false  string
+     *
      * @param $str
+     *
      * @return string
      */
     public function decode($str)
@@ -197,8 +203,10 @@ class Url
 
     /**
      * @param $arguments
-     * @return string
+     *
      * @throws \InvalidArgumentException
+     *
+     * @return string
      */
     private function configureBase($arguments)
     {
@@ -207,16 +215,16 @@ class Url
         $protocol = $this->protocol(); // get the server protocol
 
         $reflector = new \ReflectionClass(__CLASS__);
-        $property = strtolower($match[2]) . $match[3];
+        $property = strtolower($match[2]).$match[3];
 
         if ($reflector->hasProperty($property)) {
             $property = $reflector->getProperty($property);
 
             switch ($match[1]) {
                 case 'get':
-                    return $protocol . static::$request->server->get('HTTP_HOST') . '/' . ltrim($property->getValue(), "/");
+                    return $protocol.static::$request->server->get('HTTP_HOST').'/'.ltrim($property->getValue(), '/');
                 case 'set':
-                    return $protocol . static::$request->server->get('HTTP_HOST') . $property->setValue($args[0]);
+                    return $protocol.static::$request->server->get('HTTP_HOST').$property->setValue($args[0]);
             }
         }
 
@@ -234,6 +242,7 @@ class Url
 
     /**
      * @param $arguments
+     *
      * @return mixed
      */
     private function call($arguments)
@@ -247,11 +256,12 @@ class Url
                 return $url;
                 break;
             case 'segment':
-                return $this->{'get' . ucfirst($method)}($args);
+                return $this->{'get'.ucfirst($method)}($args);
                 break;
             default:
                 if (preg_match('/^([gs]et)([A-Z])(.*)$/', $method, $match)) {
                     $parameters = ['args' => $args, 'match' => $match];
+
                     return call_user_func_array([$url, 'configureBase'], [$parameters]);
                 }
                 break;

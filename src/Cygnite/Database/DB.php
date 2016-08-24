@@ -1,13 +1,11 @@
 <?php
+
 namespace Cygnite\Database;
 
 use Cygnite\Database\Query\Builder as QueryBuilder;
-use Cygnite\Helpers\Inflector;
 
 /**
- * Class DB
- *
- * @package Cygnite\Database
+ * Class DB.
  */
 class DB
 {
@@ -23,9 +21,10 @@ class DB
     protected $primaryKeyValue;
 
     /**
-     * Get DB instance
+     * Get DB instance.
      *
      * @param callable $callback
+     *
      * @return static
      */
     public static function make(\Closure $callback = null)
@@ -38,10 +37,11 @@ class DB
     }
 
     /**
-     * Configure parameters
+     * Configure parameters.
      *
      * @param        $table
      * @param string $connection
+     *
      * @return QueryBuilder
      */
     public function setup($table, $connection = 'default')
@@ -55,10 +55,11 @@ class DB
     }
 
     /**
-     * Get Query instance
+     * Get Query instance.
      *
      * @param        $table
      * @param string $connection
+     *
      * @return QueryBuilder
      */
     public static function table($table, $connection = 'default')
@@ -67,7 +68,7 @@ class DB
     }
 
     /**
-     * Return Query Builder Instance
+     * Return Query Builder Instance.
      *
      * @return QueryBuilder
      */
@@ -79,9 +80,10 @@ class DB
     }
 
     /**
-     * Set table name to run queries
+     * Set table name to run queries.
      *
      * @param $table
+     *
      * @return $this
      */
     public function setTableName($table)
@@ -92,7 +94,7 @@ class DB
     }
 
     /**
-     * Get Table name
+     * Get Table name.
      *
      * @return mixed
      */
@@ -102,18 +104,19 @@ class DB
     }
 
     /**
-     * This method won't be used though
+     * This method won't be used though.
+     *
      * @return string
      */
     public function getModelClassNs()
     {
-        return ;
     }
 
     /**
-     * Set database name to retrieve connection object
+     * Set database name to retrieve connection object.
      *
      * @param $database
+     *
      * @return $this
      */
     public function setDatabase($database)
@@ -124,7 +127,7 @@ class DB
     }
 
     /**
-     * Get database name
+     * Get database name.
      *
      * @return mixed
      */
@@ -134,8 +137,7 @@ class DB
     }
 
     /**
-     * Set the primary key
-     *
+     * Set the primary key.
      */
     protected function setPrimaryKey($key)
     {
@@ -145,7 +147,7 @@ class DB
     }
 
     /**
-     * Get the primary key of table
+     * Get the primary key of table.
      *
      * @return null|string
      */

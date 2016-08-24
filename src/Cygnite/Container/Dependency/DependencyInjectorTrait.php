@@ -1,17 +1,17 @@
 <?php
+
 namespace Cygnite\Container\Dependency;
 
 use Cygnite\Helpers\Inflector;
 
 /**
- * Trait DependencyInjectorTrait
- *
- * @package Cygnite\Container\Dependency
+ * Trait DependencyInjectorTrait.
  */
 trait DependencyInjectorTrait
 {
     /**
      * @param $dependency
+     *
      * @return array
      */
     public function getReflectionParam($dependency)
@@ -19,11 +19,13 @@ trait DependencyInjectorTrait
         $resolveClass = null;
         //Get constructor class name
         $resolveClass = $dependency->getClass()->name;
+
         return [$resolveClass, new \ReflectionClass($resolveClass)];
     }
 
     /**
      * @param $dependency
+     *
      * @return mixed
      */
     public function isOptionalArgs($dependency)
@@ -38,9 +40,10 @@ trait DependencyInjectorTrait
     }
 
     /**
-     * We will inject interface implementation
+     * We will inject interface implementation.
      *
      * @param $reflectionParam
+     *
      * @return array
      */
     public function interfaceInjection($reflectionParam)

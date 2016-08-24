@@ -10,9 +10,7 @@
 namespace Cygnite\Http\Responses;
 
 /**
- * Class Response
- *
- * @package Cygnite\Http\Responses
+ * Class Response.
  */
 class RedirectResponse extends Response
 {
@@ -21,7 +19,7 @@ class RedirectResponse extends Response
 
     public function __construct($targetUrl, $statusCode = ResponseHeader::HTTP_FOUND, array $headers = [])
     {
-        parent::__construct("", $statusCode, $headers);
+        parent::__construct('', $statusCode, $headers);
 
         $this->setRedirectToUrl($targetUrl);
     }
@@ -40,6 +38,6 @@ class RedirectResponse extends Response
     public function setRedirectToUrl($redirectUrl)
     {
         $this->redirectUrl = $redirectUrl;
-        $this->headers->set("Location", $this->redirectUrl);
+        $this->headers->set('Location', $this->redirectUrl);
     }
 }

@@ -1,5 +1,5 @@
 <?php
-use Mockery as m;
+
 use Cygnite\Http\Requests\Request;
 use Cygnite\Http\Requests\RequestHeaderConstants;
 
@@ -20,61 +20,61 @@ class RequestTest extends PHPUnit_Framework_TestCase
 
     public function testDetectingHttpMethod()
     {
-        $_SERVER["REQUEST_METHOD"] = "PATCH";
+        $_SERVER['REQUEST_METHOD'] = 'PATCH';
         $request = Request::createFromGlobals();
-        $this->assertEquals("PATCH", $request->getMethod());
+        $this->assertEquals('PATCH', $request->getMethod());
 
-        $_SERVER["REQUEST_METHOD"] = "GET";
+        $_SERVER['REQUEST_METHOD'] = 'GET';
         $request = Request::createFromGlobals();
-        $this->assertEquals("GET", $request->getMethod());
+        $this->assertEquals('GET', $request->getMethod());
 
-        $_SERVER["REQUEST_METHOD"] = "POST";
+        $_SERVER['REQUEST_METHOD'] = 'POST';
         $request = Request::createFromGlobals();
-        $this->assertEquals("POST", $request->getMethod());
+        $this->assertEquals('POST', $request->getMethod());
 
-        $_SERVER["REQUEST_METHOD"] = "PUT";
+        $_SERVER['REQUEST_METHOD'] = 'PUT';
         $request = Request::createFromGlobals();
-        $this->assertEquals("PUT", $request->getMethod());
+        $this->assertEquals('PUT', $request->getMethod());
 
-        $_SERVER["REQUEST_METHOD"] = "DELETE";
+        $_SERVER['REQUEST_METHOD'] = 'DELETE';
         $request = Request::createFromGlobals();
-        $this->assertEquals("DELETE", $request->getMethod());
+        $this->assertEquals('DELETE', $request->getMethod());
 
-        $_SERVER["REQUEST_METHOD"] = "OPTIONS";
+        $_SERVER['REQUEST_METHOD'] = 'OPTIONS';
         $request = Request::createFromGlobals();
-        $this->assertEquals("OPTIONS", $request->getMethod());
+        $this->assertEquals('OPTIONS', $request->getMethod());
     }
 
     public function testReturnsHttpHeaderValueCorrectly()
     {
-        $_SERVER["HTTP_CONTENT_TYPE"] = "application/json";
-        $_SERVER["HTTP_CONTENT_LENGTH"] = 11;
+        $_SERVER['HTTP_CONTENT_TYPE'] = 'application/json';
+        $_SERVER['HTTP_CONTENT_LENGTH'] = 11;
 
         $request = Request::createFromGlobals();
-        $this->assertEquals("application/json", $request->header->get("CONTENT_TYPE"));
-        $this->assertEquals(11, $request->header->get("CONTENT_LENGTH"));
+        $this->assertEquals('application/json', $request->header->get('CONTENT_TYPE'));
+        $this->assertEquals(11, $request->header->get('CONTENT_LENGTH'));
     }
 
     public function testReturnsHttpHeaderWithMockArray()
     {
         $server = [];
-        $server["HTTP_CONTENT_TYPE"] = "application/json";
-        $server["HTTP_CONTENT_LENGTH"] = 11;
+        $server['HTTP_CONTENT_TYPE'] = 'application/json';
+        $server['HTTP_CONTENT_LENGTH'] = 11;
 
         $request = Request::createFromGlobals(null, null, null, $server, null, null, null);
-        $this->assertEquals("application/json", $request->header->get("CONTENT_TYPE"));
-        $this->assertEquals(11, $request->header->get("CONTENT_LENGTH"));
+        $this->assertEquals('application/json', $request->header->get('CONTENT_TYPE'));
+        $this->assertEquals(11, $request->header->get('CONTENT_LENGTH'));
     }
 
     public function testIfRequestVariableIsSet()
     {
-        $_GET["foo"] = "bar";
+        $_GET['foo'] = 'bar';
         $this->request->query->exchangeArray($_GET);
-        $this->assertTrue($this->request->query->has("foo"));
+        $this->assertTrue($this->request->query->has('foo'));
 
-        $_POST["foo"] = "bar";
+        $_POST['foo'] = 'bar';
         $this->request->getPost()->exchangeArray($_POST);
-        $this->assertTrue($this->request->post->has("foo"));
+        $this->assertTrue($this->request->post->has('foo'));
     }
 
     public function testIfGetVariableIsNotSet()
@@ -91,7 +91,7 @@ class RequestTest extends PHPUnit_Framework_TestCase
 
     public function testIfPatchVariableIsNotSet()
     {
-        $this->assertFalse($this->request->patch->has("foo"));
+        $this->assertFalse($this->request->patch->has('foo'));
     }
 
     public function testPathMethod()
@@ -118,18 +118,18 @@ class RequestTest extends PHPUnit_Framework_TestCase
     {
         $_SERVER['HTTP_HOST'] = 'https://xyz.com';
         $_SERVER['SERVER_PORT'] = 80;
-        $_SERVER["REQUEST_URI"] = '/foo/bar';
-        $_SERVER["SCRIPT_NAME"] = '/index.php';
+        $_SERVER['REQUEST_URI'] = '/foo/bar';
+        $_SERVER['SCRIPT_NAME'] = '/index.php';
         $request = Request::createFromGlobals();
         $this->assertEquals('/foo/bar', $request->getCurrentUri());
     }
 
     public function testIfClientIpAddressSet()
     {
-        $_SERVER["HTTP_CLIENT_IP"] = "192.168.23.2";
-        Request::setTrustedHeaderName(RequestHeaderConstants::CLIENT_IP, "HTTP_CLIENT_IP");
+        $_SERVER['HTTP_CLIENT_IP'] = '192.168.23.2';
+        Request::setTrustedHeaderName(RequestHeaderConstants::CLIENT_IP, 'HTTP_CLIENT_IP');
         $request = Request::createFromGlobals();
-        $this->assertEquals("192.168.23.2", $request->getClientIPAddress());
+        $this->assertEquals('192.168.23.2', $request->getClientIPAddress());
     }
 
     public function testIsAjaxRequest()
@@ -162,6 +162,7 @@ class RequestTest extends PHPUnit_Framework_TestCase
         $user = $request->getUser();
         $this->assertEquals('user_test', $user);
     }
+
     public function testGetPassword()
     {
         $request = Request::create('http://user_test:password_test@test.com/', 'GET');
@@ -171,10 +172,10 @@ class RequestTest extends PHPUnit_Framework_TestCase
 
     public function testClientProtoPortWithTrustedProxy()
     {
-        $_SERVER["REMOTE_ADDR"] = "192.168.23.1";
-        $_SERVER["X-Forwarded-Proto"] = "https";
-        Request::setTrustedProxies("192.168.23.1");
-        Request::setTrustedHeaderName(RequestHeaderConstants::CLIENT_PROTO, "X-Forwarded-Proto");
+        $_SERVER['REMOTE_ADDR'] = '192.168.23.1';
+        $_SERVER['X-Forwarded-Proto'] = 'https';
+        Request::setTrustedProxies('192.168.23.1');
+        Request::setTrustedHeaderName(RequestHeaderConstants::CLIENT_PROTO, 'X-Forwarded-Proto');
 
         $this->assertEquals(443, Request::createFromGlobals()->getPort());
     }
@@ -219,14 +220,14 @@ class RequestTest extends PHPUnit_Framework_TestCase
 
     public function testSettingContentTypeForUnsupportedMethods()
     {
-        $put = Request::create("/url", "PUT");
-        $this->assertEquals("application/x-www-form-urlencoded", $put->server->get("CONTENT_TYPE"));
+        $put = Request::create('/url', 'PUT');
+        $this->assertEquals('application/x-www-form-urlencoded', $put->server->get('CONTENT_TYPE'));
 
-        $patch = Request::create("/url", "PATCH");
-        $this->assertEquals("application/x-www-form-urlencoded", $patch->server->get("CONTENT_TYPE"));
+        $patch = Request::create('/url', 'PATCH');
+        $this->assertEquals('application/x-www-form-urlencoded', $patch->server->get('CONTENT_TYPE'));
 
-        $delete = Request::create("/url", "DELETE");
-        $this->assertEquals("application/x-www-form-urlencoded", $delete->server->get("CONTENT_TYPE"));
+        $delete = Request::create('/url', 'DELETE');
+        $this->assertEquals('application/x-www-form-urlencoded', $delete->server->get('CONTENT_TYPE'));
     }
 
     //public function test

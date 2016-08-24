@@ -1,4 +1,5 @@
 <?php
+
 use Cygnite\Common\ArrayManipulator\ArrayAccessor;
 
 class ArrayAccessorTest extends PHPUnit_Framework_TestCase
@@ -13,11 +14,11 @@ class ArrayAccessorTest extends PHPUnit_Framework_TestCase
     {
         $array = [
             'profile' => [
-                "experience"  => [
-                    "field" => "Web Development",
-                    "technology"    => "PHP"
-                ]
-            ]
+                'experience'  => [
+                    'field'         => 'Web Development',
+                    'technology'    => 'PHP',
+                ],
+            ],
         ];
 
         $accessor = ArrayAccessor::make($array);
@@ -29,10 +30,10 @@ class ArrayAccessorTest extends PHPUnit_Framework_TestCase
     {
         $array = [
             'profile' => [
-                "experience"  => [
-                    "technology.version"  => "Welcome to PHP v5.4"
-                ]
-            ]
+                'experience'  => [
+                    'technology.version'  => 'Welcome to PHP v5.4',
+                ],
+            ],
         ];
 
         $accessor = ArrayAccessor::make($array);
@@ -45,8 +46,8 @@ class ArrayAccessorTest extends PHPUnit_Framework_TestCase
     {
         $array = [
             'profile' => [
-                "experience"  => '4 Years'
-            ]
+                'experience'  => '4 Years',
+            ],
         ];
 
         $accessor = ArrayAccessor::make($array);
@@ -57,8 +58,8 @@ class ArrayAccessorTest extends PHPUnit_Framework_TestCase
     {
         $array = [
             'profile' => [
-                "author"  => 'Sanjoy Dey'
-            ]
+                'author'  => 'Sanjoy Dey',
+            ],
         ];
         $output = ArrayAccessor::make($array, function ($a) {
             return $a->toString('profile.author');
@@ -71,8 +72,8 @@ class ArrayAccessorTest extends PHPUnit_Framework_TestCase
     {
         $array = [
             'foo' => [
-                "bar"  => 'Foo Bar'
-            ]
+                'bar'  => 'Foo Bar',
+            ],
         ];
         $output = ArrayAccessor::make($array, function ($a) {
             return $a->toJson();
@@ -85,8 +86,8 @@ class ArrayAccessorTest extends PHPUnit_Framework_TestCase
     {
         $array = [
             'foo' => [
-                "bar"  => 'Foo Bar'
-            ]
+                'bar'  => 'Foo Bar',
+            ],
         ];
 
         $output = ArrayAccessor::make($array, function ($a) {

@@ -1,4 +1,5 @@
 <?php
+
 namespace Cygnite\Mvc\View;
 
 use Cygnite\AssetManager\Asset;
@@ -9,9 +10,7 @@ if (!defined('CF_SYSTEM')) {
 }
 /**
  * Class Template
- * This file is used to Define all necessary configurations for twig template engine
- *
- * @package Cygnite\Mvc\View
+ * This file is used to Define all necessary configurations for twig template engine.
  */
 class Template
 {
@@ -27,12 +26,13 @@ class Template
         'getAutoReload',
         'isDebugModeOn',
         'getTemplateExtension',
-        'getLayout'
+        'getLayout',
     ];
 
     public $twigEnvironment;
+
     /**
-     * @param            $view
+     * @param   $view
      */
     public function configure($view)
     {
@@ -52,6 +52,7 @@ class Template
 
     /**
      * @param $method
+     *
      * @internal param $property
      */
     public function setValue($method)
@@ -67,9 +68,9 @@ class Template
         $this->methods['twigLoader'] = new \Twig_Loader_Filesystem($this->view->getTemplateLocation());
 
         $this->twigEnvironment = new \Twig_Environment($this->methods['twigLoader'], [
-            'cache' => CYGNITE_BASE.DS. 'public'.DS.'storage' . DS . 'temp' . DS . 'twig' . DS . 'tmp' . DS . 'cache',
+            'cache'       => CYGNITE_BASE.DS.'public'.DS.'storage'.DS.'temp'.DS.'twig'.DS.'tmp'.DS.'cache',
             'auto_reload' => $this->methods['getAutoReload'],
-            'debug' => $this->methods['isDebugModeOn'],
+            'debug'       => $this->methods['isDebugModeOn'],
         ]);
         $this->setDefaultFunctions();
 
@@ -77,7 +78,7 @@ class Template
     }
 
     /**
-     * Set default functions for the framework
+     * Set default functions for the framework.
      */
     public function setDefaultFunctions()
     {
@@ -90,7 +91,8 @@ class Template
     }
 
     /**
-     * register baseUrl function in twig
+     * register baseUrl function in twig.
+     *
      * @return $this
      */
     private function setTwigBaseUrl()
@@ -108,6 +110,7 @@ class Template
     /**
      * @param $name
      * @param $callback
+     *
      * @return \Twig_SimpleFunction
      */
     public function getTwigSimpleFunctionInstance($name, $callback)
@@ -149,6 +152,7 @@ class Template
 
     /**
      * @param null $extension
+     *
      * @return void
      */
     public function addExtension($extension = null)
@@ -161,7 +165,7 @@ class Template
     }
 
     /**
-     * @param null $funcName
+     * @param null     $funcName
      * @param callable $callback
      * @param callable $callback
      */
@@ -178,9 +182,10 @@ class Template
      * @param $function
      * @param $callback
      * @param array $options
+     *
      * @return Twig_SimpleFilter
      */
-    public function filter($function, $callback, $options = array())
+    public function filter($function, $callback, $options = [])
     {
         return new \Twig_SimpleFilter($function, $callback, $options);
     }
@@ -188,10 +193,11 @@ class Template
     /**
      * @param $function
      * @param callable $callback
-     * @param array $options
+     * @param array    $options
+     *
      * @return mixed
      */
-    public function addFilter($function, $callback = null, $options = array())
+    public function addFilter($function, $callback = null, $options = [])
     {
         $filter = $this->filter($function, $callback, $options);
 
@@ -199,10 +205,11 @@ class Template
     }
 
     /**
-     * Add global variable available in all templates and macros
+     * Add global variable available in all templates and macros.
      *
      * @param $name
      * @param $func
+     *
      * @return mixed
      */
     public function addGlobal($name, $func)
