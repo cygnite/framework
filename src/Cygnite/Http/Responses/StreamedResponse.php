@@ -10,9 +10,7 @@
 namespace Cygnite\Http\Responses;
 
 /**
- * Class StreamedResponse
- *
- * @package Cygnite\Http\Responses
+ * Class StreamedResponse.
  */
 class StreamedResponse extends Response
 {
@@ -21,15 +19,15 @@ class StreamedResponse extends Response
     protected $streamed = false;
 
     /**
-     * Constructor of StreamedResponse class
+     * Constructor of StreamedResponse class.
      *
      * @param \Cygnite\Http\Responses\callable $callback
-     * @param type $status
-     * @param type $headers
+     * @param type                             $status
+     * @param type                             $headers
      */
     public function __construct(callable $callback = null, $status = ResponseHeaders::HTTP_OK, $headers = [])
     {
-        parent::__construct("", $status, $headers);
+        parent::__construct('', $status, $headers);
 
         if ($callback !== null) {
             $this->setCallback($callback);
@@ -37,11 +35,12 @@ class StreamedResponse extends Response
     }
 
     /**
-     * Factory method to return StreamedResponse object to chain methods
+     * Factory method to return StreamedResponse object to chain methods.
      *
      * @param type $callback
      * @param type $status
      * @param type $headers
+     *
      * @return \static
      */
     public static function make($callback = null, $status = ResponseHeaders::HTTP_OK, $headers = [])
@@ -50,7 +49,7 @@ class StreamedResponse extends Response
     }
 
     /**
-     * Send streamed contents
+     * Send streamed contents.
      *
      * @throws \LogicException
      */
@@ -71,20 +70,21 @@ class StreamedResponse extends Response
      * StreamedResponse.
      *
      * @param type $content
+     *
      * @throws \LogicException
      */
     public function setContent($content = null)
     {
         //you are not alowed to set content for a stream response
-        if ($content !== null && $content !== "") {
-            throw new \LogicException("Cannot set content in a stream response");
+        if ($content !== null && $content !== '') {
+            throw new \LogicException('Cannot set content in a stream response');
         }
     }
 
     /**
-     * Returns false
+     * Returns false.
      *
-     * @return boolean
+     * @return bool
      */
     public function getContent()
     {
@@ -92,7 +92,7 @@ class StreamedResponse extends Response
     }
 
     /**
-     * Set the callback for streaming response
+     * Set the callback for streaming response.
      *
      * @param \Cygnite\Http\Responses\callable $callback
      */

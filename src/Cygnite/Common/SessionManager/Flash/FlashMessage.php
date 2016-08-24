@@ -7,6 +7,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 namespace Cygnite\Common\SessionManager\Flash;
 
 use Cygnite\Common\SessionManager\Session;
@@ -21,8 +22,7 @@ class FlashMessage
     private $inflection;
 
     /**
-     * Constructor
-     *
+     * Constructor.
      */
     public function __construct()
     {
@@ -32,12 +32,14 @@ class FlashMessage
     }
 
     /**
-     * Set a flash message to the queue
+     * Set a flash message to the queue.
      *
-     * @param  string $key      Flash type to set
-     * @param  string $message  Flash Message
+     * @param string $key     Flash type to set
+     * @param string $message Flash Message
+     *
      * @throws \Exception
-     * @return  bool
+     *
+     * @return bool
      */
     public function setFlash($key, $message)
     {
@@ -51,7 +53,7 @@ class FlashMessage
 
         // Verify $key is a valid message type or not
         if (!in_array($key, $this->validFlashTypes)) {
-            throw new \Exception('"' . strip_tags($key) . '" is not a valid message type!');
+            throw new \Exception('"'.strip_tags($key).'" is not a valid message type!');
         }
 
         // If the flash session array doesn't exist, make it
@@ -65,11 +67,11 @@ class FlashMessage
     }
 
     /**
-     * Get the Queued message and return it
+     * Get the Queued message and return it.
      *
-     * @param  string $key
+     * @param string $key
+     *
      * @return mixed
-     *
      */
     public function getFlash($key = null)
     {
@@ -85,7 +87,7 @@ class FlashMessage
         if (in_array($key, $this->validFlashTypes)) {
             if (isset($flashArray[$key])) {
                 foreach ($flashArray[$key] as $msg) {
-                    $messages .= '<p>' . $msg . "</p>\n";
+                    $messages .= '<p>'.$msg."</p>\n";
                 }
             }
 
@@ -104,7 +106,7 @@ class FlashMessage
             foreach ($flashArray as $key => $msgArray) {
                 $messages = '';
                 foreach ($msgArray as $msg) {
-                    $messages .= '<p>' . $msg . "</p>\n";
+                    $messages .= '<p>'.$msg."</p>\n";
                 }
 
                 $flash .= sprintf($this->flashWrapper, strtolower($this->class), $key, $messages);
@@ -122,11 +124,11 @@ class FlashMessage
     }
 
     /**
-     * Clear viewed messages from the session
+     * Clear viewed messages from the session.
      *
-     * @param  string $key
+     * @param string $key
+     *
      * @return bool
-     *
      */
     public function clearViewedMessages($key = null)
     {
@@ -140,22 +142,23 @@ class FlashMessage
     }
 
     /**
-     * Check is there any error messages
+     * Check is there any error messages.
      *
-     * @return bool  true/false
+     * @return bool true/false
      */
     public function hasError()
     {
         $flashArray = Session::get('flashMessages');
+
         return empty($flashArray['error']) ? false : true;
     }
 
     /**
-     * Check is there any flash message in session
+     * Check is there any flash message in session.
      *
-     * @param  string $key
+     * @param string $key
+     *
      * @return bool
-     *
      */
     public function hasFlash($key = null)
     {

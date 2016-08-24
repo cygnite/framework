@@ -1,7 +1,7 @@
 <?php
-use Cygnite\Foundation\Application;
-use Cygnite\Foundation\Autoloader;
+
 use Cygnite\Base\EventHandler\Event;
+use Cygnite\Foundation\Application;
 use Mockery as m;
 
 class EventTest extends PHPUnit_Framework_TestCase
@@ -37,7 +37,7 @@ class EventTest extends PHPUnit_Framework_TestCase
             $event->attach('some', 'Some');
 
             $event->attach('something', function () {
-                echo "Hello_Something";
+                echo 'Hello_Something';
             });
 
             $event->attach('somethingelse', 'Custom@somethingElse');
@@ -48,31 +48,31 @@ class EventTest extends PHPUnit_Framework_TestCase
         //Testing some function event
         $this->obStart();
         $event->trigger('some');
-        $this->assertEquals("hello world", ob_get_contents());
+        $this->assertEquals('hello world', ob_get_contents());
         $this->obBufferClean();
-        
+
         //Testing something anynomous function event
         $this->obStart();
         $event->trigger('something');
-        $this->assertEquals("Hello_Something", ob_get_contents());
+        $this->assertEquals('Hello_Something', ob_get_contents());
         $this->obBufferClean();
 
         //Testing something else class function event
         $this->obStart();
         $event->trigger('somethingelse');
-        $this->assertEquals("Hello_SomeThing_Else", ob_get_contents());
+        $this->assertEquals('Hello_SomeThing_Else', ob_get_contents());
         $this->obBufferClean();
     }
 
     /**
-    * @expectedException \Exception
-    */
+     * @expectedException \Exception
+     */
     public function testFlushEvents()
     {
         $event = Event::create();
 
         $event->attach('order', function () {
-            echo "Order Iphone6";
+            echo 'Order Iphone6';
         });
 
         $event->flush('order');
@@ -82,13 +82,13 @@ class EventTest extends PHPUnit_Framework_TestCase
 
 function Some()
 {
-    echo "hello world";
+    echo 'hello world';
 }
 
 class Custom
 {
     public function somethingElse()
     {
-        echo "Hello_SomeThing_Else";
+        echo 'Hello_SomeThing_Else';
     }
 }

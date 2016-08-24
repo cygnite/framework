@@ -7,6 +7,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 namespace Cygnite\Base\Router\Controller;
 
 if (!defined('CF_SYSTEM')) {
@@ -14,23 +15,24 @@ if (!defined('CF_SYSTEM')) {
 }
 
 /**
- * Class RouteControllerInterface
- *
- * @package Cygnite\Base\Router\Controller
+ * Class RouteControllerInterface.
  */
 interface RouteControllerInterface
 {
     /**
      * Set the controller as Route Controller
      * Cygnite Router knows how to respond to routes controller
-     * request automatically
+     * request automatically.
+     *
      * @param $controller
+     *
      * @return $this
      */
     public function routeController($controller);
 
     /**
      * @param $actions
+     *
      * @return array
      */
     public function setActions($actions);

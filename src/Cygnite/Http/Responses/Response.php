@@ -9,15 +9,11 @@
  */
 namespace Cygnite\Http\Responses;
 
-use Cygnite\Http\Responses\ResponseHeader;
 use Cygnite\Exception\Http\ResponseException;
 
 /**
- * Class Response
- *
- * @package Cygnite\Http\Responses
+ * Class Response.
  */
-
 class Response implements ResponseInterface
 {
     const PROTOCOL = 'HTTP/1.1';
@@ -31,14 +27,14 @@ class Response implements ResponseInterface
     protected $statusMessage;
 
     /**
-     * @var  array  An array of headers
+     * @var array An array of headers
      *
      * @since  2.0
      */
     protected $headers = [];
 
     /**
-     * @var  string  The content of the response
+     * @var string The content of the response
      *
      * @since  2.0
      */
@@ -63,7 +59,7 @@ class Response implements ResponseInterface
     }
 
     /**
-     * Returns Response object
+     * Returns Response object.
      *
      * <code>
      *  Response::make($content, ResponseHeader::HTTP_OK)->send();
@@ -77,6 +73,7 @@ class Response implements ResponseInterface
      * @param string       $content
      * @param callable|int $statusCode
      * @param array        $headers
+     *
      * @return static
      */
     public static function make($content = '', $statusCode = ResponseHeader::HTTP_OK, $headers = [])
@@ -90,11 +87,12 @@ class Response implements ResponseInterface
     }
 
     /**
-     * Create Json response
+     * Create Json response.
      *
-     * @param type $content
+     * @param type  $content
      * @param array $headers
-     * @param type $prettyPrint
+     * @param type  $prettyPrint
+     *
      * @return \Cygnite\Http\Responses\JsonResponse
      */
     public static function json($content = null, array $headers = [], $prettyPrint = false)
@@ -103,11 +101,12 @@ class Response implements ResponseInterface
     }
 
     /**
-     * Create a Streamed Response
+     * Create a Streamed Response.
      *
      * @param \Cygnite\Http\Responses\callable $callback
-     * @param type $status
-     * @param type $headers
+     * @param type                             $status
+     * @param type                             $headers
+     *
      * @return \Cygnite\Http\Responses\StreamedResponse
      */
     public static function streamed(callable $callback = null, $status = ResponseHeader::HTTP_OK, $headers = [])
@@ -116,11 +115,13 @@ class Response implements ResponseInterface
     }
 
     /**
-     * Set content for the http response object
+     * Set content for the http response object.
      *
      * @param $content
-     * @return $this
+     *
      * @throws \Cygnite\Exception\Http\ResponseException
+     *
+     * @return $this
      */
     public function setContent($content = null)
     {
@@ -134,7 +135,7 @@ class Response implements ResponseInterface
     }
 
     /**
-     * Get response body
+     * Get response body.
      *
      * @return string
      */
@@ -144,9 +145,10 @@ class Response implements ResponseInterface
     }
 
     /**
-     * Set Status code
+     * Set Status code.
      *
      * @param int $statusCode
+     *
      * @return $this
      */
     public function setStatusCode($statusCode = 200)
@@ -157,7 +159,7 @@ class Response implements ResponseInterface
     }
 
     /**
-     * Get Status Code
+     * Get Status Code.
      *
      * @return int
      */
@@ -167,11 +169,13 @@ class Response implements ResponseInterface
     }
 
     /**
-     * Set Status Message
+     * Set Status Message.
      *
      * @param string $message
-     * @return $this
+     *
      * @throws \Cygnite\Exception\Http\ResponseException
+     *
+     * @return $this
      */
     public function statusMessage($message = '')
     {
@@ -198,12 +202,13 @@ class Response implements ResponseInterface
     }
 
     /**
-     * Set HTTP headers here
+     * Set HTTP headers here.
      *
-     * @param      $name
-     * @param      $value
-     * @param      $replace
-     * @return     $this
+     * @param   $name
+     * @param   $value
+     * @param   $replace
+     *
+     * @return $this
      */
     public function setHeader($name, $value, $replace = false)
     {
@@ -222,7 +227,7 @@ class Response implements ResponseInterface
     }
 
     /**
-     * Return all response headers
+     * Return all response headers.
      *
      * @return ResponseHeader
      */
@@ -232,7 +237,7 @@ class Response implements ResponseInterface
     }
 
     /**
-     * Set http version
+     * Set http version.
      *
      * @param string $version
      */
@@ -250,34 +255,36 @@ class Response implements ResponseInterface
     }
 
     /**
-     * Set Content type of the page
+     * Set Content type of the page.
      *
      * @param $contentType
+     *
      * @return $this
      */
     public function setContentType($contentType)
     {
         $this->contentType = $contentType;
 
-        $this->setHeader('Content-Type', $contentType . '; charset=' . $this->getCharset());
+        $this->setHeader('Content-Type', $contentType.'; charset='.$this->getCharset());
 
         return $this;
     }
 
     /**
-     * Get content type of the page
+     * Get content type of the page.
      *
      * @return string
      */
     public function getContentType()
     {
-        return (isset($this->contentType) ? $this->contentType : self::CONTENT_TYPE);
+        return isset($this->contentType) ? $this->contentType : self::CONTENT_TYPE;
     }
 
     /**
-     * Set Charset
+     * Set Charset.
      *
      * @param $charset
+     *
      * @return $this
      */
     public function setCharset($charset)
@@ -289,23 +296,23 @@ class Response implements ResponseInterface
     }
 
     /**
-     * Get charset
+     * Get charset.
      *
      * @return string
      */
     public function getCharset()
     {
-        return (isset($this->charset) ? $this->charset : self::CHARSET);
+        return isset($this->charset) ? $this->charset : self::CHARSET;
     }
 
     /**
-     * Sets the expiration time of the page
+     * Sets the expiration time of the page.
      *
      * @param DateTime $expiration The expiration time
      */
     public function setExpiration(\DateTime $expiration)
     {
-        $this->headers->set("Expires", $expiration->format("r"));
+        $this->headers->set('Expires', $expiration->format('r'));
     }
 
     /**
@@ -324,7 +331,7 @@ class Response implements ResponseInterface
             'Content-Length',
             'Content-MD5',
             'Content-Type',
-            'Last-Modified'
+            'Last-Modified',
         ];
 
         foreach ($headersToRemove as $header) {
@@ -337,6 +344,7 @@ class Response implements ResponseInterface
 
     /**
      * @param $name
+     *
      * @return bool
      */
     public function server($name)
@@ -345,8 +353,7 @@ class Response implements ResponseInterface
     }
 
     /**
-     * Return boolean value if headers sent already
-     *
+     * Return boolean value if headers sent already.
      */
     public function headersSent()
     {
@@ -354,10 +361,11 @@ class Response implements ResponseInterface
     }
 
     /**
-     * Send HTTP response headers
+     * Send HTTP response headers.
+     *
+     * @throws \Cygnite\Exception\Http\ResponseException
      *
      * @return $this
-     * @throws \Cygnite\Exception\Http\ResponseException
      */
     public function sendHeaders()
     {
@@ -393,7 +401,7 @@ class Response implements ResponseInterface
     }
 
     /**
-     * We will set header for server script
+     * We will set header for server script.
      */
     protected function setFastCgiHeader()
     {
@@ -407,7 +415,7 @@ class Response implements ResponseInterface
     }
 
     /**
-     * Set header for FCGI based servers
+     * Set header for FCGI based servers.
      */
     protected function setHeaderForServer()
     {
@@ -415,7 +423,7 @@ class Response implements ResponseInterface
     }
 
     /**
-     * Return server protocol
+     * Return server protocol.
      *
      * @return string
      */
@@ -425,7 +433,7 @@ class Response implements ResponseInterface
     }
 
     /**
-     * Send response content
+     * Send response content.
      *
      * @return $this
      */
@@ -437,7 +445,7 @@ class Response implements ResponseInterface
     }
 
     /**
-     * Send header and content to the browser
+     * Send header and content to the browser.
      *
      * @return $this
      */

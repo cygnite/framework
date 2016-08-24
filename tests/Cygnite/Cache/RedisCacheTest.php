@@ -1,7 +1,5 @@
 <?php
-use Mockery as m;
-use Cygnite\Helpers\Config;
-use Cygnite\Cache\Factory\Cache;
+
 
 class RedisCacheTest extends PHPUnit_Framework_TestCase
 {

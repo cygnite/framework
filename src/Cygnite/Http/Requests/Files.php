@@ -12,14 +12,14 @@ namespace Cygnite\Http\Requests;
 use Cygnite\Foundation\Collection;
 
 /**
- * Class Files
- * @package Cygnite\Http\Requests
+ * Class Files.
  */
 class Files extends Collection
 {
     /**
      * @param $name
      * @param $value
+     *
      * @return $this|void
      */
     public function add($name, $value)
@@ -29,7 +29,8 @@ class Files extends Collection
 
     /**
      * @param mixed $name
-     * @param null $default
+     * @param null  $default
+     *
      * @return mixed
      */
     public function get($name, $default = null)

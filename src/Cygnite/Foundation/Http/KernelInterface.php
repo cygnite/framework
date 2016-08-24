@@ -9,9 +9,10 @@ interface KernelInterface
      *
      * @param $request
      *
+     * @throws Exception|\Exception
+     *
      * @return array|ResponseInterface|mixed|static
      *
-     * @throws Exception|\Exception
      *
      * @note this function is incomplete, need to enhance
      * for better exception handling

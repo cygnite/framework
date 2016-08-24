@@ -1,5 +1,5 @@
 <?php
-use Mockery as m;
+
 use Cygnite\Common\Singleton;
 
 class SingletonTest extends PHPUnit_Framework_TestCase

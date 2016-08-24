@@ -9,40 +9,40 @@
  */
 namespace Cygnite\Container;
 
-use Closure;
 use ArrayAccess;
-use Cygnite\Reflection;
-use Cygnite\Helpers\Inflector;
+use Closure;
 use Cygnite\Container\Dependency\Builder as DependencyBuilder;
 use Cygnite\Container\Dependency\DependencyInjectorTrait;
 use Cygnite\Container\Exceptions\ContainerException;
+use Cygnite\Helpers\Inflector;
+use Cygnite\Reflection;
 
 /**
- * Class Container
+ * Class Container.
  *
- * @package Cygnite\Container
  * @author  Sanjoy Dey
  */
 class Container extends DependencyBuilder implements ContainerAwareInterface, ArrayAccess
 {
     use DependencyInjectorTrait;
-    
+
     /**
-     * The container's bind data
+     * The container's bind data.
      *
      * @var array
-     * @access private
      */
     private $stack = [];
 
     /**
-     * Get a data by key
+     * Get a data by key.
      *
      * @param $key
+     *
      * @throws \InvalidArgumentException
+     *
      * @return
+     *
      * @internal param \Cygnite\Container\The $string key data to retrieve
-     * @access   public
      */
     public function &__get($key)
     {
@@ -62,11 +62,10 @@ class Container extends DependencyBuilder implements ContainerAwareInterface, Ar
     }
 
     /**
-     * Assigns a value to the specified data
+     * Assigns a value to the specified data.
      *
      * @param string The data key to assign the value to
      * @param mixed  The value to set
-     * @access public
      */
     public function __set($key, $value)
     {
@@ -75,10 +74,12 @@ class Container extends DependencyBuilder implements ContainerAwareInterface, Ar
 
     /**
      * Reference
-     * http://fabien.potencier.org/article/17/on-php-5-3-lambda-functions-and-closures
+     * http://fabien.potencier.org/article/17/on-php-5-3-lambda-functions-and-closures.
      *
      * @param Closure $callable
+     *
      * @internal param $callable
+     *
      * @return type
      */
     public function share(Closure $callable)
@@ -96,10 +97,10 @@ class Container extends DependencyBuilder implements ContainerAwareInterface, Ar
     }
 
     /**
-     * Adds an object to the shared pool
+     * Adds an object to the shared pool.
      *
-     * @access public
      * @param mixed $key
+     *
      * @return bool
      */
     public function isShared($key)
@@ -108,10 +109,10 @@ class Container extends DependencyBuilder implements ContainerAwareInterface, Ar
     }
 
     /**
-     * Removes an object from the shared pool
+     * Removes an object from the shared pool.
      *
-     * @access public
      * @param mixed $class
+     *
      * @return void
      */
     public function unShare($class)
@@ -122,11 +123,11 @@ class Container extends DependencyBuilder implements ContainerAwareInterface, Ar
     }
 
     /**
-     * Whether or not an data exists by key
+     * Whether or not an data exists by key.
      *
      * @param string An data key to check for
-     * @access public
-     * @return boolean
+     *
+     * @return bool
      */
     public function __isset($key)
     {
@@ -134,10 +135,9 @@ class Container extends DependencyBuilder implements ContainerAwareInterface, Ar
     }
 
     /**
-     * Unset an data by key
+     * Unset an data by key.
      *
      * @param string The key to unset
-     * @access public
      */
     public function __unset($key)
     {
@@ -145,11 +145,10 @@ class Container extends DependencyBuilder implements ContainerAwareInterface, Ar
     }
 
     /**
-     * Assigns a value to the specified offset
+     * Assigns a value to the specified offset.
      *
      * @param mixed $offset
      * @param mixed $value
-     * @access   public
      */
     public function offsetSet($offset, $value)
     {
@@ -161,12 +160,13 @@ class Container extends DependencyBuilder implements ContainerAwareInterface, Ar
     }
 
     /**
-     * Whether or not an offset exists
+     * Whether or not an offset exists.
      *
      * @param mixed $offset
+     *
      * @internal param $string offset to check for
-     * @access   public
-     * @return boolean
+     *
+     * @return bool
      */
     public function offsetExists($offset)
     {
@@ -174,11 +174,11 @@ class Container extends DependencyBuilder implements ContainerAwareInterface, Ar
     }
 
     /**
-     * Unset an offset
+     * Unset an offset.
      *
      * @param mixed $offset
+     *
      * @internal param $string offset to unset
-     * @access   public
      */
     public function offsetUnset($offset)
     {
@@ -188,11 +188,12 @@ class Container extends DependencyBuilder implements ContainerAwareInterface, Ar
     }
 
     /**
-     * Returns the value at specified offset
+     * Returns the value at specified offset.
      *
      * @param mixed $offset
+     *
      * @internal param \Cygnite\Container\The $string offset to retrieve
-     * @access   public
+     *
      * @return mixed
      */
     public function offsetGet($offset)
@@ -203,8 +204,10 @@ class Container extends DependencyBuilder implements ContainerAwareInterface, Ar
     /**
      * @param          $key
      * @param callable $callable
-     * @return callable
+     *
      * @throws \InvalidArgumentException
+     *
+     * @return callable
      */
     public function extend($key, Closure $callable)
     {
@@ -258,10 +261,11 @@ class Container extends DependencyBuilder implements ContainerAwareInterface, Ar
     }
 
     /**
-     * Get singleton instance of your class
+     * Get singleton instance of your class.
      *
      * @param      $name
      * @param null $callback
+     *
      * @return mixed
      */
     public function singleton($name, $callback = null)
@@ -295,6 +299,7 @@ class Container extends DependencyBuilder implements ContainerAwareInterface, Ar
      *
      * @param       $class
      * @param array $arguments
+     *
      * @return object
      */
     public function resolve($class, $arguments = [])
@@ -306,11 +311,13 @@ class Container extends DependencyBuilder implements ContainerAwareInterface, Ar
 
     /**
      * Resolve all dependencies of your class and return instance of
-     * your class
+     * your class.
      *
      * @param $class
-     * @return mixed
+     *
      * @throws \Cygnite\Container\Exceptions\ContainerException
+     *
+     * @return mixed
      */
     public function make($class, $arguments = [])
     {
@@ -378,6 +385,7 @@ class Container extends DependencyBuilder implements ContainerAwareInterface, Ar
     /**
      * @param $dependency
      * @param $arguments
+     *
      * @return array|mixed
      */
     private function resolverClass($dependency, $arguments)
@@ -396,6 +404,7 @@ class Container extends DependencyBuilder implements ContainerAwareInterface, Ar
     /**
      * @param $dependency
      * @param $arguments
+     *
      * @return mixed
      */
     private function checkIfConstructorHasDefaultArgs($dependency, $arguments)
@@ -410,11 +419,13 @@ class Container extends DependencyBuilder implements ContainerAwareInterface, Ar
     }
 
     /**
-     * Create new instance
+     * Create new instance.
      *
      * @param       $class
      * @param array $arguments
+     *
      * @throws Exceptions\ContainerException
+     *
      * @return mixed
      */
     public function makeInstance($class, $arguments = [])
@@ -422,7 +433,7 @@ class Container extends DependencyBuilder implements ContainerAwareInterface, Ar
         if (!class_exists($class)) {
             throw new ContainerException(sprintf('Class "%s" not exists.', $class));
         }
-        
+
         if ($this->offsetExists($class)) {
             return $this[$class];
         }
@@ -432,6 +443,7 @@ class Container extends DependencyBuilder implements ContainerAwareInterface, Ar
 
     /**
      * @param string $key
+     *
      * @return bool
      */
     public function has($key)
@@ -441,6 +453,7 @@ class Container extends DependencyBuilder implements ContainerAwareInterface, Ar
 
     /**
      * @param string $id
+     *
      * @return mixed
      */
     public function get($id)
