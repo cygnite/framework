@@ -26,6 +26,7 @@ class Upload implements FileUploadInterface
      * @to do : Is it like you are setting file ext type
      *     to restrict user to upload files. If so then we need to give
      *     provision to user to set file extensions type not here.
+     *
      * @var array
      */
     protected $fileInfo = [
@@ -54,6 +55,7 @@ class Upload implements FileUploadInterface
 
     /**
      * @description array validations
+     *
      * @var : array
      */
     private $_validationArray = [
