@@ -1,4 +1,5 @@
 <?php
+
 namespace Cygnite\Common\ArrayManipulator;
 
 class ArrayAccessor implements ArrayAccessorInterface
@@ -20,10 +21,11 @@ class ArrayAccessor implements ArrayAccessorInterface
     }
 
     /**
-     * Get the instance of ArrayAccessor
+     * Get the instance of ArrayAccessor.
      *
-     * @param array  $array
+     * @param array         $array
      * @param callable|null $callback
+     *
      * @return mixed
      */
     public static function make(array $array, \Closure $callback = null)
@@ -37,6 +39,7 @@ class ArrayAccessor implements ArrayAccessorInterface
 
     /**
      * @param array $array
+     *
      * @return $this
      */
     public function set(array $array)
@@ -48,6 +51,7 @@ class ArrayAccessor implements ArrayAccessorInterface
 
     /**
      * @param string $string
+     *
      * @return array
      */
     protected function getKeysFromString($string)
@@ -65,9 +69,10 @@ class ArrayAccessor implements ArrayAccessorInterface
 
     /**
      * We will manipulate the string to get each array index
-     * and find array value
+     * and find array value.
      *
      * @param string $string
+     *
      * @return mixed
      */
     protected function manipulate($string)
@@ -79,9 +84,10 @@ class ArrayAccessor implements ArrayAccessorInterface
     }
 
     /**
-     * Check Array key Existence
+     * Check Array key Existence.
      *
      * @param $key
+     *
      * @return bool
      */
     public function has($key)
@@ -90,10 +96,11 @@ class ArrayAccessor implements ArrayAccessorInterface
     }
 
     /**
-     * Determine if array key exists from multi-dimensional array
+     * Determine if array key exists from multi-dimensional array.
      *
      * @param $key
      * @param $array
+     *
      * @return bool
      */
     public function keyExists($key, $array)
@@ -122,7 +129,7 @@ class ArrayAccessor implements ArrayAccessorInterface
          */
         foreach ($chunks as $index) {
             if (!isset($array[$index])) {
-                return null;
+                return;
             }
 
             $array = $array[$index];
@@ -132,7 +139,7 @@ class ArrayAccessor implements ArrayAccessorInterface
     }
 
     /**
-     * Return array
+     * Return array.
      *
      * @return array
      */
@@ -142,7 +149,7 @@ class ArrayAccessor implements ArrayAccessorInterface
     }
 
     /**
-     * We will convert array to json objects
+     * We will convert array to json objects.
      *
      * @return string
      */
@@ -152,23 +159,26 @@ class ArrayAccessor implements ArrayAccessorInterface
     }
 
     /**
-     * Return value as string
+     * Return value as string.
      *
      * @param        $key
      * @param string $default
+     *
      * @return string
      */
     public function toString($key, $default = '')
     {
         $value = $this->manipulate($key);
+
         return $this->convertAs('strval', $value, $default);
     }
 
     /**
-     * Return value as string
+     * Return value as string.
      *
      * @param        $key
      * @param string $default
+     *
      * @return int
      */
     public function toInt($key, $default = '')
@@ -182,6 +192,7 @@ class ArrayAccessor implements ArrayAccessorInterface
      * @param $func
      * @param $value
      * @param $default
+     *
      * @return mixed
      */
     private function convertAs($func, $value, $default)

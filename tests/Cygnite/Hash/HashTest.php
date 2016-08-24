@@ -1,7 +1,7 @@
 <?php
 
-use Cygnite\Hash\Hash;
 use Cygnite\Hash\BCrypt;
+use Cygnite\Hash\Hash;
 use Mockery as m;
 
 class HashTest extends PHPUnit_Framework_TestCase

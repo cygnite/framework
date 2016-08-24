@@ -7,13 +7,14 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 namespace Cygnite\Console\Command;
 
-use Symfony\Component\Console\Question\Question;
+use Symfony\Component\Console\Command\Command as SymfonyCommand;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
-use Symfony\Component\Console\Command\Command as SymfonyCommand;
+use Symfony\Component\Console\Question\Question;
 
 class Command extends SymfonyCommand
 {
@@ -63,7 +64,7 @@ class Command extends SymfonyCommand
     /**
      * Set configuration for console command
      * We will set command description, arguments and optional
-     * parameters into console command
+     * parameters into console command.
      *
      * @return void
      */
@@ -76,7 +77,7 @@ class Command extends SymfonyCommand
 
     /**
      * We will add arguments and optional parameters into console
-     * command
+     * command.
      *
      * @param        $consoleInputs
      * @param string $method
@@ -90,12 +91,13 @@ class Command extends SymfonyCommand
          |
          */
         foreach ($consoleInputs as $arguments) {
-            call_user_func_array(array($this, $method), $arguments);
+            call_user_func_array([$this, $method], $arguments);
         }
     }
 
     /**
      * @param $input
+     *
      * @return $this
      */
     protected function setInput($input)
@@ -107,6 +109,7 @@ class Command extends SymfonyCommand
 
     /**
      * @param $output
+     *
      * @return $this
      */
     protected function setOutput($output)
@@ -133,9 +136,10 @@ class Command extends SymfonyCommand
     }
 
     /**
-     * We will get the console helper instance
+     * We will get the console helper instance.
      *
      * @param $name
+     *
      * @return mixed
      */
     public function helper($name)
@@ -144,7 +148,7 @@ class Command extends SymfonyCommand
     }
 
     /**
-     * Get Process helper
+     * Get Process helper.
      *
      * @return mixed
      */
@@ -156,8 +160,9 @@ class Command extends SymfonyCommand
     /**
      * We will ask user to confirm a question.
      *
-     * @param  string  $question
-     * @param  bool    $default
+     * @param string $question
+     * @param bool   $default
+     *
      * @return bool
      */
     public function confirm($question, $default = false)
@@ -170,8 +175,9 @@ class Command extends SymfonyCommand
     /**
      * We will ask user for input.
      *
-     * @param  string  $question
-     * @param  string  $default
+     * @param string $question
+     * @param string $default
+     *
      * @return string
      */
     public function ask($question, $default = null)
@@ -184,7 +190,8 @@ class Command extends SymfonyCommand
     /**
      * Write a string as information output.
      *
-     * @param  string  $string
+     * @param string $string
+     *
      * @return void
      */
     public function info($string)
@@ -193,9 +200,10 @@ class Command extends SymfonyCommand
     }
 
     /**
-     * Write as standard string output
+     * Write as standard string output.
      *
-     * @param  string  $string
+     * @param string $string
+     *
      * @return void
      */
     public function write($string)
@@ -206,7 +214,8 @@ class Command extends SymfonyCommand
     /**
      * Write as comment string.
      *
-     * @param  string  $string
+     * @param string $string
+     *
      * @return void
      */
     public function comment($string)
@@ -217,7 +226,8 @@ class Command extends SymfonyCommand
     /**
      * Write string as question.
      *
-     * @param  string  $string
+     * @param string $string
+     *
      * @return void
      */
     public function question($string)
@@ -228,7 +238,8 @@ class Command extends SymfonyCommand
     /**
      * Write string as error.
      *
-     * @param  string  $string
+     * @param string $string
+     *
      * @return void
      */
     public function error($string)
@@ -237,7 +248,7 @@ class Command extends SymfonyCommand
     }
 
     /**
-     * Set Cygnite Application
+     * Set Cygnite Application.
      *
      * @param $cygnite
      */
@@ -249,8 +260,9 @@ class Command extends SymfonyCommand
     /**
      * Run the console command.
      *
-     * @param  \Symfony\Component\Console\Input\InputInterface  $input
-     * @param  \Symfony\Component\Console\Output\OutputInterface  $output
+     * @param \Symfony\Component\Console\Input\InputInterface   $input
+     * @param \Symfony\Component\Console\Output\OutputInterface $output
+     *
      * @return int
      */
     public function run(InputInterface $input, OutputInterface $output)
@@ -264,6 +276,7 @@ class Command extends SymfonyCommand
     /**
      * @param InputInterface  $input
      * @param OutputInterface $output
+     *
      * @return int|null
      */
     protected function execute(InputInterface $input, OutputInterface $output)
@@ -276,7 +289,8 @@ class Command extends SymfonyCommand
     /**
      * Get the value from command argument.
      *
-     * @param  string  $key
+     * @param string $key
+     *
      * @return string|array
      */
     public function argument($name)
@@ -287,9 +301,10 @@ class Command extends SymfonyCommand
     }
 
     /**
-     * Get optional parameter from command argument
+     * Get optional parameter from command argument.
      *
-     * @param  string  $key
+     * @param string $key
+     *
      * @return string|array
      */
     public function option($name)

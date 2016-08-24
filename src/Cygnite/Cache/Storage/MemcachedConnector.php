@@ -7,6 +7,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 namespace Cygnite\Cache\Storage;
 
 use Memcached;
@@ -16,18 +17,16 @@ if (!defined('CF_SYSTEM')) {
 }
 
 /**
- * Cygnite Memcached Cache Connection Wrapper Class
+ * Cygnite Memcached Cache Connection Wrapper Class.
  *
  * @author Sanjoy Dey <dey.sanjoy0@gmail.com>
- *
  */
-
 class MemcachedConnector
 {
     protected $memcached;
 
     /**
-     * Set Memcached Instance
+     * Set Memcached Instance.
      *
      * @param $memCached Memcached
      */
@@ -41,10 +40,14 @@ class MemcachedConnector
      *
      * @false    string $host
      * @false    mix $port
+     *
      * @param array $servers
+     *
      * @throws \RuntimeException
+     *
      * @internal param string $host
      * @internal param string $port
+     *
      * @return void
      */
     public function create(array $servers)
@@ -52,7 +55,7 @@ class MemcachedConnector
         $this->memcached = $this->getMemcachedInstance();
 
         if (empty($servers)) {
-            throw new \RuntimeException(sprintf("Empty configuration passed to %s::create() method.", __CLASS__));
+            throw new \RuntimeException(sprintf('Empty configuration passed to %s::create() method.', __CLASS__));
         }
 
         foreach ($servers as $server) {
@@ -71,7 +74,7 @@ class MemcachedConnector
     }
 
     /**
-     * Connection object
+     * Connection object.
      *
      * @return Memcached
      */

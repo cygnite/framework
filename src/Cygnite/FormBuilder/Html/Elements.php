@@ -10,16 +10,13 @@
 
 namespace Cygnite\FormBuilder\Html;
 
-use Closure;
 use Cygnite\Common\Input;
 
 if (!defined('CF_SYSTEM')) {
     exit('No External script access allowed');
 }
 /**
- * Class Elements
- *
- * @package Cygnite\FormBuilder
+ * Class Elements.
  */
 class Elements
 {
@@ -30,44 +27,45 @@ class Elements
     /**
      * @param $key
      * @param $val
+     *
      * @return $this
      */
     protected function input($key, $val)
     {
         $extra = [
-            'type' => strtolower(__FUNCTION__)
+            'type' => strtolower(__FUNCTION__),
         ];
 
         return $this->composeElement($key, $val, $extra, true);
     }
 
     /**
-     *
      * <code>
      * ->addElement('custom', 'dl', ['name' => '<span style="color:red;">Custom Tag</span>',)
-     * </code>
+     * </code>.
      *
      * @param $key
      * @param $val
+     *
      * @return $this
      */
     protected function custom($key, $val)
     {
         $extra = [
-            'value' => (isset($val['name'])) ? $val['name'] : $key
+            'value' => (isset($val['name'])) ? $val['name'] : $key,
         ];
 
         return $this->composeElement($key, $val, $extra);
     }
 
     /**
-     *
      * <code>
      * ->addElement('openTag', 'div_1', ['style' => 'height:40px;'])
-     * </code>
+     * </code>.
      *
      * @param $key
      * @param $val
+     *
      * @return $this
      */
     protected function openTag($key, $val)
@@ -76,19 +74,19 @@ class Elements
         $this->openTagHolder = $exp[1];
 
         $extra = [
-            'type' => $exp[0]
+            'type' => $exp[0],
         ];
 
         return $this->composeElement($key, $val, $extra, true);
     }
 
     /**
-     *
      * <code>
      * ->addElement('closeTag', 'div_1')
-     * </code>
+     * </code>.
      *
      * @param $key
+     *
      * @return $this
      */
     protected function closeTag($key)
@@ -105,12 +103,13 @@ class Elements
     /**
      * @param $key
      * @param $val
+     *
      * @return $this
      */
     protected function label($key, $val)
     {
         $extra = [
-            'type' => strtolower(__FUNCTION__)
+            'type' => strtolower(__FUNCTION__),
         ];
 
         return $this->composeElement($key, $val, $extra);
@@ -121,6 +120,7 @@ class Elements
      * @param       $attributes
      * @param array $extra
      * @param bool  $hasCloseTag
+     *
      * @return $this
      */
     private function composeElement($key, $attributes, $extra = [], $hasCloseTag = false)
@@ -130,13 +130,13 @@ class Elements
 
         if ($hasCloseTag) {
             $this->elements[static::$formHolder[static::$formName]][$key] =
-                "<$type name='".$key."' ".$this->attributes($attributes)." />".PHP_EOL;
+                "<$type name='".$key."' ".$this->attributes($attributes).' />'.PHP_EOL;
 
             return $this;
         }
 
         $this->elements[static::$formHolder[static::$formName]][$key] =
-            "<$type for='".$key."' ".$this->attributes($attributes).">".$value."</$type>".PHP_EOL;
+            "<$type for='".$key."' ".$this->attributes($attributes).'>'.$value."</$type>".PHP_EOL;
 
         return $this;
     }
@@ -144,6 +144,7 @@ class Elements
     /**
      * @param $key
      * @param $val
+     *
      * @return $this
      */
     protected function textarea($key, $val)
@@ -153,7 +154,7 @@ class Elements
         unset($val['value']);
 
         $extra = [
-            'type' => strtolower(__FUNCTION__),
+            'type'  => strtolower(__FUNCTION__),
             'value' => $value,
         ];
 
@@ -163,6 +164,7 @@ class Elements
     /**
      * @param $key
      * @param $params
+     *
      * @return $this
      */
     protected function select($key, $params)
@@ -177,7 +179,7 @@ class Elements
             unset($params['selected']);
         }
 
-        $select .= "<".strtolower(__FUNCTION__)." name='".$key."' ".$this->attributes($params).">".PHP_EOL;
+        $select .= '<'.strtolower(__FUNCTION__)." name='".$key."' ".$this->attributes($params).'>'.PHP_EOL;
 
         /*
          | Build select box options and return as string
@@ -194,6 +196,7 @@ class Elements
     /**
      * @param $options
      * @param $selected
+     *
      * @return string
      */
     private function getSelectOptions($options, $selected)
@@ -202,7 +205,7 @@ class Elements
 
         foreach ($options as $key => $value) {
             $isSelected = ($selected == $key) ? 'selected="selected"' : '';
-            $select .= "<option $isSelected value='".$key."'>".$value."</option>".PHP_EOL;
+            $select .= "<option $isSelected value='".$key."'>".$value.'</option>'.PHP_EOL;
         }
 
         return $select;
@@ -210,11 +213,12 @@ class Elements
 
     /**
      * @param $attributes
+     *
      * @return string
      */
     protected function attributes($attributes)
     {
-        $elementStr = "";
+        $elementStr = '';
 
         foreach ($attributes as $key => $value) {
             $elementStr .= "{$key}='{$value}' ";

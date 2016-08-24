@@ -1,4 +1,5 @@
 <?php
+
 namespace Cygnite\Exception\Http;
 
 interface HttpExceptionInterface

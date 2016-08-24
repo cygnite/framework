@@ -7,22 +7,17 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 namespace Cygnite\Console\Command;
 
+use Cygnite\Console\Generator\Controller;
+use Cygnite\Console\Generator\Form;
+use Cygnite\Console\Generator\View;
+use Cygnite\Database\Schema;
+use Cygnite\Database\Table\Table;
 use Cygnite\Foundation\Application;
 use Cygnite\Helpers\Inflector;
-use Cygnite\Database\Table\Table;
-use Cygnite\Database\Schema;
-use Cygnite\Console\Generator\Form;
-use Cygnite\Console\Generator\Model;
-use Cygnite\Console\Generator\View;
-use Cygnite\Console\Generator\Controller;
-use Cygnite\Console\Command\Command;
 use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 
 /*
  * Form Generator Command
@@ -34,21 +29,21 @@ use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 class FormGeneratorCommand extends Command
 {
     /**
-     * Name of your console command
+     * Name of your console command.
      *
      * @var string
      */
     protected $name = 'form:create';
 
     /**
-     * Description of your console command
+     * Description of your console command.
      *
      * @var string
      */
     protected $description = 'Generate Form Class Using Cygnite CLI';
 
     /**
-     * Console command arguments
+     * Console command arguments.
      *
      * @var array
      */
@@ -83,6 +78,7 @@ class FormGeneratorCommand extends Command
 
     /**
      * @param Table $table
+     *
      * @throws \InvalidArgumentException
      */
     public function __construct(Table $table)
@@ -105,13 +101,13 @@ class FormGeneratorCommand extends Command
     }
 
     /**
-     * We will execute the crud command and generate files
+     * We will execute the crud command and generate files.
      *
      * @return int|null|void
      */
     public function process()
     {
-        /**
+        /*
          | Check for argument database name if not given we will use default
          |  database connection
          */
@@ -127,11 +123,12 @@ class FormGeneratorCommand extends Command
         $this->applicationDir = realpath(CYGNITE_BASE.DS.APPPATH);
         $this->generateForm();
 
-        $this->info("Form ".APPPATH."/Form/".Inflector::classify($this->tableName)."Form".EXT." Generated Successfully!.");
+        $this->info('Form '.APPPATH.'/Form/'.Inflector::classify($this->tableName).'Form'.EXT.' Generated Successfully!.');
     }
 
     /**
-     * We will get all column schema from database
+     * We will get all column schema from database.
+     *
      * @return mixed
      */
     private function getColumns()
@@ -142,7 +139,7 @@ class FormGeneratorCommand extends Command
     }
 
     /**
-     * We will generate Form
+     * We will generate Form.
      */
     private function generateForm()
     {

@@ -7,16 +7,17 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 namespace Cygnite\Console\Generator;
 
 use Cygnite\Helpers\Inflector;
 
 /**
- * Cygnite Model Generator
+ * Cygnite Model Generator.
  *
  * This class is used to generate your model code using cygnite console
- * @author Sanjoy Dey <dey.sanjoy0@gmail.com>
  *
+ * @author Sanjoy Dey <dey.sanjoy0@gmail.com>
  */
 class Model
 {
@@ -73,7 +74,7 @@ class Model
         //file_exists($file) or die("Model Template File doesn't exists");
 
         /*read operation ->*/
-        $this->filePointer = fopen($file, "r");
+        $this->filePointer = fopen($file, 'r');
         $content = fread($this->filePointer, filesize($file));
         $content = $this->replaceModelTemplate($content);
 
@@ -98,8 +99,10 @@ class Model
     }
 
     /**
-     * Set validation code
+     * Set validation code.
+     *
      * @param $code
+     *
      * @return $this
      */
     private function setValidationRules($code)
@@ -110,7 +113,8 @@ class Model
     }
 
     /**
-     * Get validation code
+     * Get validation code.
+     *
      * @return null|string
      */
     private function getValidationRules()
@@ -121,8 +125,10 @@ class Model
     }
 
     /**
-     * Generate form validation code
+     * Generate form validation code.
+     *
      * @param $value
+     *
      * @return string
      */
     private function generateValidatorRules($value)
@@ -136,7 +142,7 @@ class Model
     public function replaceValidationRules()
     {
         $validationCode = '';
-        foreach ($this->command->getColumns() as $key=> $value) {
+        foreach ($this->command->getColumns() as $key => $value) {
             if ($value['COLUMN_NAME'] !== 'id') {
                 $validationCode .= $this->generateValidatorRules($value);
             }
@@ -149,16 +155,16 @@ class Model
     public function generate()
     {
         $filePath = '';
-        $filePath =  $this->command->applicationDir.DS.'Models'.DS.$this->command->getModel().EXT;
+        $filePath = $this->command->applicationDir.DS.'Models'.DS.$this->command->getModel().EXT;
         /*write operation ->*/
-        $writeTmp =fopen(
+        $writeTmp = fopen(
             $filePath,
-            "w"
+            'w'
         ) or die('Unable to generate model');
 
         $contentAppendWith = '<?php '.PHP_EOL;
 
-        fwrite($writeTmp, $contentAppendWith .$this->replacedContent);
+        fwrite($writeTmp, $contentAppendWith.$this->replacedContent);
         fclose($writeTmp);
         fclose($this->filePointer);
     }

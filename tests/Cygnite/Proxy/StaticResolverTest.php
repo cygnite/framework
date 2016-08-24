@@ -1,4 +1,5 @@
 <?php
+
 use Cygnite\Proxy\StaticResolver;
 
 class StaticResolverTest extends PHPUnit_Framework_TestCase
@@ -19,6 +20,6 @@ class FooStub extends StaticResolver
 {
     protected function fooBar()
     {
-        return "Hello FooBar!";
+        return 'Hello FooBar!';
     }
 }

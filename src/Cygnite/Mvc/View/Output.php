@@ -1,4 +1,5 @@
 <?php
+
 namespace Cygnite\Mvc\View;
 
 if (!defined('CF_SYSTEM')) {
@@ -6,15 +7,14 @@ if (!defined('CF_SYSTEM')) {
 }
 
 /**
- * trait Output
- *
- * @package Cygnite\Mvc\View
+ * trait Output.
  */
 trait Output
 {
     /**
      * @param $path
      * @param $data
+     *
      * @return string
      */
     protected function renderView($path, $data)
@@ -39,6 +39,7 @@ trait Output
     /**
      * @param $e
      * @param $obLevel
+     *
      * @throws
      */
     protected function handleViewException($e, $obLevel)

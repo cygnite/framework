@@ -1,6 +1,5 @@
 <?php
 
-use Mockery as m;
 use Cygnite\Common\Input\Input;
 
 class InputTest extends PHPUnit_Framework_TestCase
@@ -16,9 +15,9 @@ class InputTest extends PHPUnit_Framework_TestCase
     {
         $_POST = [
             'user' => [
-                'name' => 'Foo Bar',
-                'email' => 'foo@bar.com'
-            ]
+                'name'  => 'Foo Bar',
+                'email' => 'foo@bar.com',
+            ],
         ];
         $this->input->setRequest('post', $_POST);
         $this->assertEquals(['name' => 'Foo Bar', 'email' => 'foo@bar.com'], $this->input->post('user'));
@@ -28,9 +27,9 @@ class InputTest extends PHPUnit_Framework_TestCase
     {
         $_POST = [
             'user' => [
-                'name' => 'Foo Bar',
-                'email' => 'foo@bar.com'
-            ]
+                'name'  => 'Foo Bar',
+                'email' => 'foo@bar.com',
+            ],
         ];
         $this->input->setRequest('post', $_POST);
         $this->assertEquals('Foo Bar', $this->input->post('user.name'));
@@ -39,8 +38,8 @@ class InputTest extends PHPUnit_Framework_TestCase
     public function testGetPostValueExceptKey()
     {
         $_POST = [
-            'name' => 'Foo Bar',
-            'email' => 'foo@bar.com'
+            'name'  => 'Foo Bar',
+            'email' => 'foo@bar.com',
         ];
 
         $this->input->setRequest('post', $_POST);
@@ -52,8 +51,8 @@ class InputTest extends PHPUnit_Framework_TestCase
         $_SERVER['HTTP_X_REQUESTED_WITH'] = 'xmlhttprequest';
 
         $_POST = [
-            'name' => 'Foo Bar',
-            'email' => 'foo@bar.com'
+            'name'  => 'Foo Bar',
+            'email' => 'foo@bar.com',
         ];
 
         $this->input->setRequest('post', $_POST);

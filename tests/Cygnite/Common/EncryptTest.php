@@ -1,6 +1,7 @@
 <?php
-use Cygnite\Helpers\Config;
+
 use Cygnite\Common\Encrypt;
+use Cygnite\Helpers\Config;
 
 class EncryptTest extends PHPUnit_Framework_TestCase
 {
@@ -16,8 +17,8 @@ class EncryptTest extends PHPUnit_Framework_TestCase
     {
         $configuration = [
             'global.config' => [
-                "encryption.key"  => 'cygnite-shaXatBNHQ434'
-            ]
+                'encryption.key'  => 'cygnite-shaXatBNHQ434',
+            ],
         ];
 
         Config::$config = $configuration;
