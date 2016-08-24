@@ -19,13 +19,14 @@ use Cygnite\Helpers\Config;
 class Session
 {
     /**
-     * Available drivers for session storage
+     * Available drivers for session storage.
+     *
      * @var array
      */
     protected $drivers = [
-        'native' => 'Native\\Session',
+        'native'   => 'Native\\Session',
         'database' => 'Database\\Session',
-        'redis' => 'Memory\\Redis'
+        'redis'    => 'Memory\\Redis',
     ];
 
     protected $config = [];
@@ -38,7 +39,7 @@ class Session
     public static $instance;
 
     /**
-     * Session Constructor
+     * Session Constructor.
      */
     public function __construct()
     {
@@ -54,6 +55,7 @@ class Session
 
     /**
      * @param $name
+     *
      * @return void
      */
     public function setName($name)
@@ -72,6 +74,7 @@ class Session
 
     /**
      * @param $name
+     *
      * @return void
      */
     public function setCacheLimiter($name)
@@ -93,15 +96,16 @@ class Session
      * Session::get();
      * Session::has();
      * Session::delete();
-     * Session::destroy();
+     * Session::destroy();.
      *
      * @param       $method
      * @param array $arguments
+     *
      * @return mixed
      */
     public static function __callStatic($method, $arguments)
     {
-        self::$instance = new static;
+        self::$instance = new static();
         $session = self::$instance->factory();
 
         return call_user_func_array([$session, $method], $arguments);
@@ -109,11 +113,12 @@ class Session
 
     /**
      * @param callable $callback
+     *
      * @return static
      */
     public static function make(\Closure $callback = null)
     {
-        self::$instance = new static;
+        self::$instance = new static();
 
         if ($callback instanceof \Closure) {
             return $callback(self::$instance);
@@ -123,9 +128,10 @@ class Session
     }
 
     /**
-     * Factory method. We will get the session driver and call methods
+     * Factory method. We will get the session driver and call methods.
      *
      * @param $args
+     *
      * @return mixed
      */
     public function factory()
@@ -144,7 +150,8 @@ class Session
     }
 
     /**
-     * Get the instance of session manager
+     * Get the instance of session manager.
+     *
      * @return null
      */
     public static function getInstance()
@@ -153,7 +160,7 @@ class Session
     }
 
     /**
-     * We will set hashing algorithm for session
+     * We will set hashing algorithm for session.
      */
     public function setHash()
     {
@@ -186,6 +193,6 @@ class Session
         // Get session cookie parameters
         $cookieParams = session_get_cookie_params();
         // Set the parameters
-        session_set_cookie_params($cookieParams["lifetime"], $cookieParams["path"], $cookieParams["domain"], $secure, $httpOnly);
+        session_set_cookie_params($cookieParams['lifetime'], $cookieParams['path'], $cookieParams['domain'], $secure, $httpOnly);
     }
 }

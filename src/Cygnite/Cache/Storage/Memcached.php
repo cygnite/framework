@@ -7,22 +7,20 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 namespace Cygnite\Cache\Storage;
 
 use Cygnite\Cache\StorageInterface;
-use Cygnite\Cache\Storage\MemcachedConnector;
 
 if (!defined('CF_SYSTEM')) {
     exit('External script access not allowed');
 }
 
 /**
- * Cygnite Memcache Cache Wrapper Class
+ * Cygnite Memcache Cache Wrapper Class.
  *
  * @author Sanjoy Dey <dey.sanjoy0@gmail.com>
- *
  */
-
 class Memcached implements StorageInterface
 {
     public $memcached;
@@ -35,19 +33,19 @@ class Memcached implements StorageInterface
     }
 
     /**
-    * <code>
-    *  $connector = new MemcachedConnector()
-    *  $connection = $connector->create($servers);
-    *
-    *  Cache::make('memcached', function ($memcached) use($connection)
-    *  {
-    *      $memcached->setConnector($connection);
-    *
-    *      $memcached->store('foo', 'Foo Bar');
-    *  });
-    *
-    * </code>
-    */
+     * <code>
+     *  $connector = new MemcachedConnector()
+     *  $connection = $connector->create($servers);.
+     *
+     *  Cache::make('memcached', function ($memcached) use($connection)
+     *  {
+     *      $memcached->setConnector($connection);
+     *
+     *      $memcached->store('foo', 'Foo Bar');
+     *  });
+     *
+     * </code>
+     */
     public function setConnector($connector)
     {
         $this->memcached = $connector;
@@ -59,7 +57,7 @@ class Memcached implements StorageInterface
     }
 
     /**
-     * Store the value in the memcached memory (overwrite if key exists)
+     * Store the value in the memcached memory (overwrite if key exists).
      *
      * @false string $key
      * @false mix $value
@@ -69,13 +67,15 @@ class Memcached implements StorageInterface
      * @param     $key
      * @param     $value
      * @param int $minutes
+     *
      * @throws \InvalidArgumentException
+     *
      * @return bool
      */
     public function store($key, $value, $minutes = 10)
     {
         if (is_null($key)) {
-            throw new \InvalidArgumentException("Invalid key passed to Memcached::" . __FUNCTION__);
+            throw new \InvalidArgumentException('Invalid key passed to Memcached::'.__FUNCTION__);
         }
 
         return $this->memcached()->set($key, $value, $minutes * 60);
@@ -85,6 +85,7 @@ class Memcached implements StorageInterface
      * @param     $key
      * @param     $value
      * @param int $minutes
+     *
      * @return mixed
      */
     public function add($key, $value, $minutes = 10)
@@ -95,6 +96,7 @@ class Memcached implements StorageInterface
     /**
      * @param     $key
      * @param int $value
+     *
      * @return mixed
      */
     public function increment($key, $value = 1)
@@ -105,6 +107,7 @@ class Memcached implements StorageInterface
     /**
      * @param     $key
      * @param int $value
+     *
      * @return mixed
      */
     public function decrement($key, $value = 1)
@@ -113,10 +116,12 @@ class Memcached implements StorageInterface
     }
 
     /**
-     * Get data from memory based on its key
+     * Get data from memory based on its key.
      *
      * @false string $key
+     *
      * @param $key
+     *
      * @return bool
      */
     public function get($key)
@@ -128,17 +133,20 @@ class Memcached implements StorageInterface
     }
 
     /**
-     * Delete values from memory based on its key
+     * Delete values from memory based on its key.
      *
      * @false string $key
+     *
      * @param $key
+     *
      * @throws \Exception
+     *
      * @return bool
      */
     public function destroy($key)
     {
         if (is_null($key)) {
-            throw new \InvalidArgumentException("Empty key passed to Memcached::" . __FUNCTION__);
+            throw new \InvalidArgumentException('Empty key passed to Memcached::'.__FUNCTION__);
         }
 
         return $this->memcached()->delete($key);

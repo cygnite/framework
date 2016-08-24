@@ -1,6 +1,7 @@
 <?php
-use Cygnite\Common\Pagination;
+
 use Cygnite\Base\Router\Router;
+use Cygnite\Common\Pagination;
 use Cygnite\Common\UrlManager\Url;
 use Cygnite\Foundation\Application;
 
@@ -22,7 +23,7 @@ class PaginationTest extends PHPUnit_Framework_TestCase
 /*
         $app = Application::instance();
         $app['router'] = new Router;*/
-        Url::setBase("/cygnite/index.php/user");
+        Url::setBase('/cygnite/index.php/user');
     }
 
     public function testMakeMethod()

@@ -1,4 +1,5 @@
 <?php
+
 namespace Cygnite\Database\Exceptions;
 
 use Exception;

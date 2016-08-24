@@ -7,6 +7,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 namespace Cygnite\Cache\Storage;
 
 use Cygnite\Cache\StorageInterface;
@@ -16,12 +17,10 @@ if (!defined('CF_SYSTEM')) {
 }
 
 /**
- * Cygnite Redis Cache Wrapper Class
+ * Cygnite Redis Cache Wrapper Class.
  *
  * @author Sanjoy Dey <dey.sanjoy0@gmail.com>
- *
  */
-
 class Redis implements StorageInterface
 {
     public $redis;
@@ -48,6 +47,7 @@ class Redis implements StorageInterface
 
     /**
      * @param string $name
+     *
      * @return mixed
      */
     public function connection($name = 'default')
@@ -67,6 +67,7 @@ class Redis implements StorageInterface
      * @param     $key
      * @param     $data
      * @param int $minutes
+     *
      * @return mixed
      */
     public function store($key, $data, $minutes = 1)
@@ -77,10 +78,11 @@ class Redis implements StorageInterface
     }
 
     /**
-     * Store item with prefix
+     * Store item with prefix.
      *
      * @param $key
      * @param $value
+     *
      * @return mixed
      */
     public function set($key, $value)
@@ -91,9 +93,10 @@ class Redis implements StorageInterface
     }
 
     /**
-     * Get the item from redis memory
+     * Get the item from redis memory.
      *
      * @param $key
+     *
      * @return int|mixed|null|string
      */
     public function get($key)
@@ -103,13 +106,12 @@ class Redis implements StorageInterface
         if (!is_null($data)) {
             return (is_numeric($data)) ? $data : unserialize($data);
         }
-
-        return null;
     }
 
     /**
      * @param     $key
      * @param int $value
+     *
      * @return mixed
      */
     public function increment($key, $value = 1)
@@ -120,6 +122,7 @@ class Redis implements StorageInterface
     /**
      * @param     $key
      * @param int $value
+     *
      * @return mixed
      */
     public function decrement($key, $value = 1)
@@ -129,6 +132,7 @@ class Redis implements StorageInterface
 
     /**
      * @param $key
+     *
      * @return mixed
      */
     public function destroy($key)
@@ -137,7 +141,7 @@ class Redis implements StorageInterface
     }
 
     /**
-     * Flush all data from redis storage
+     * Flush all data from redis storage.
      */
     public function flush()
     {

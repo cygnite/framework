@@ -1,4 +1,5 @@
 <?php
+
 namespace Cygnite\Database;
 
 use Closure;
@@ -21,13 +22,14 @@ class Configure extends Singleton
     }
 
     /**
-     * @param  array           $config
+     * @param array $config
+     *
      * @throws ConfigException
      */
     public function set($config = [])
     {
         if (!is_array($config)) {
-            throw new ConfigException("Connection must be an array");
+            throw new ConfigException('Connection must be an array');
         }
 
         self::$config = $config;

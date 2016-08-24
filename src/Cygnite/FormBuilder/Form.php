@@ -26,7 +26,6 @@ if (!defined('CF_SYSTEM')) {
  *
  * @author Sanjoy Dey <dey.sanjoy0@gmail.com>
  */
-
 class Form extends Elements implements FormInterface
 {
     public static $formHolder = [];
@@ -52,35 +51,39 @@ class Form extends Elements implements FormInterface
     /**
      * @param       $method
      * @param array $arguments
-     * @return mixed
+     *
      * @throws \Exception
+     *
+     * @return mixed
      */
     public static function __callStatic($method, $arguments = [])
     {
-        if (!method_exists(new static, $method)) {
+        if (!method_exists(new static(), $method)) {
             throw new \Exception("Undefined $method method called.");
         }
     }
 
     /**
-     * Get the form builder instance to build form
+     * Get the form builder instance to build form.
      *
      * @param callable $callback
+     *
      * @return static
      */
     public static function make(Closure $callback = null)
     {
         if ($callback instanceof Closure) {
-            return $callback(new static);
+            return $callback(new static());
         }
 
-        return new static;
+        return new static();
     }
 
     /**
-     * Alias method of make
+     * Alias method of make.
      *
      * @param callable $callback
+     *
      * @return callable
      */
     public static function instance(Closure $callback = null)
@@ -89,10 +92,11 @@ class Form extends Elements implements FormInterface
     }
 
     /**
-     * Form open tag
+     * Form open tag.
      *
      * @param       $formName
      * @param array $attributes
+     *
      * @return $this
      */
     public function open($formName, $attributes = [])
@@ -133,6 +137,7 @@ class Form extends Elements implements FormInterface
 
     /**
      * @param array $elements
+     *
      * @return $this
      */
     public function addElements($elements = [])
@@ -213,7 +218,7 @@ class Form extends Elements implements FormInterface
         $type = strtolower(__FUNCTION__);
 
         $this->attributes[self::$formHolder[self::$formName]][$key] =
-            "<$type name='".self::$formName."' ".$this->attributes($val).">".PHP_EOL;
+            "<$type name='".self::$formName."' ".$this->attributes($val).'>'.PHP_EOL;
     }
 
     /**
@@ -227,6 +232,7 @@ class Form extends Elements implements FormInterface
 
     /**
      * @param $key
+     *
      * @return null
      */
     public function __get($key)
@@ -239,7 +245,7 @@ class Form extends Elements implements FormInterface
      */
     public function getForm()
     {
-        $elementString = "";
+        $elementString = '';
 
         if (isset($this->attributes[self::$formHolder[self::$formName]])) {
             $elementString .= $this->attributes[self::$formHolder[self::$formName]][self::$formName];
@@ -258,7 +264,7 @@ class Form extends Elements implements FormInterface
     }
 
     /**
-     * If you wish to get only html elements
+     * If you wish to get only html elements.
      */
     public function getHtmlElements()
     {
@@ -274,7 +280,7 @@ class Form extends Elements implements FormInterface
     }
 
     /**
-     * We will get csrf token
+     * We will get csrf token.
      *
      * @return string
      */
@@ -297,7 +303,7 @@ class Form extends Elements implements FormInterface
     {
         if (self::$formOpen) {
             $close = trim(self::$formHolder[self::$formName].'_close');
-            $this->{$close} = "</form>".PHP_EOL;
+            $this->{$close} = '</form>'.PHP_EOL;
         }
 
         return $this;

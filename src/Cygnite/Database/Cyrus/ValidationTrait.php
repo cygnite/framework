@@ -7,19 +7,16 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-
 namespace Cygnite\Database\Cyrus;
 
 use Cygnite\Validation\Validator;
 
 /**
- * trait ValidationTrait
- *
- * @package Cygnite\Database\Cyrus
+ * trait ValidationTrait.
  */
 trait ValidationTrait
 {
-    public $errors  = [];
+    public $errors = [];
 
     public $inputs = [];
 
@@ -36,7 +33,7 @@ trait ValidationTrait
     }
 
     /**
-     * Get the validator instance
+     * Get the validator instance.
      *
      * @return mixed
      */
@@ -67,11 +64,13 @@ trait ValidationTrait
 
     /**
      * We will validate for and return boolean
-     * value
+     * value.
      *
      * @param $inputs
-     * @return bool
+     *
      * @throws \RuntimeException
+     *
+     * @return bool
      */
     public function validate($inputs)
     {
@@ -80,7 +79,7 @@ trait ValidationTrait
         }
 
         if (empty($inputs)) {
-            throw new \RuntimeException("Empty array passed to validate method");
+            throw new \RuntimeException('Empty array passed to validate method');
         }
 
         $this->inputs = $inputs;
@@ -96,7 +95,7 @@ trait ValidationTrait
     }
 
     /**
-     * Set all validation errors into array
+     * Set all validation errors into array.
      *
      * @param $errors
      */
@@ -106,7 +105,7 @@ trait ValidationTrait
     }
 
     /**
-     * We will return validation errors if any
+     * We will return validation errors if any.
      *
      * @return array
      */

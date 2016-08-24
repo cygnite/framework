@@ -1,14 +1,14 @@
 <?php
+
 namespace Cygnite\Common;
 
 abstract class Singleton
 {
     /**
-     * Array of singleton objects.
-     *
-     * @instances array
-     */
-
+      * Array of singleton objects.
+      *
+      * @instances array
+      */
      private static $instances = [];
 
     /**
@@ -21,26 +21,26 @@ abstract class Singleton
         $class_name = get_called_class();
 
         if (!isset(self::$instances[$class_name])) {
-            self::$instances[$class_name] = new $class_name;
+            self::$instances[$class_name] = new $class_name();
         }
 
         return self::$instances[$class_name];
     }
 
     /**
-    * Singleton objects should not be cloned.
-    *
-    * @return void
-    */
+     * Singleton objects should not be cloned.
+     *
+     * @return void
+     */
     final private function __clone()
     {
     }
 
     /**
-    * Similar to a getCalledClass() for a child class to invoke.
-    *
-    * @return string
-    */
+     * Similar to a getCalledClass() for a child class to invoke.
+     *
+     * @return string
+     */
     final protected function getCalledClass()
     {
         $backtrace = debug_backtrace();

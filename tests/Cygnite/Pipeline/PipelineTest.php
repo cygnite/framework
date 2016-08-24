@@ -1,15 +1,15 @@
 <?php
 
-use Cygnite\Pipeline\Pipeline;
 use Cygnite\Foundation\Application;
-use Mockery as m;
+use Cygnite\Pipeline\Pipeline;
 
 class PipelineTest extends PHPUnit_Framework_TestCase
 {
     private $app;
     private $pipeline;
+
     /**
-     * Sets up the tests
+     * Sets up the tests.
      */
     public function setUp()
     {
@@ -21,8 +21,8 @@ class PipelineTest extends PHPUnit_Framework_TestCase
     {
         $pipes = [
             function ($request, $next) {
-                return $next($request + 1);// 2+1= 3
-            }
+                return $next($request + 1); // 2+1= 3
+            },
         ];
 
         $this->pipeline->send(2)
@@ -38,8 +38,8 @@ class PipelineTest extends PHPUnit_Framework_TestCase
     {
         $pipes = [
             function ($request, $next) {
-                return $next($request. 'Pipe');
-            }
+                return $next($request.'Pipe');
+            },
         ];
         $this->pipeline->send('request')
             ->through($pipes, 'filter');
@@ -51,10 +51,10 @@ class PipelineTest extends PHPUnit_Framework_TestCase
     {
         $pipes = [
             function ($request, $next) {
-                return $next($request + 1);// 2+1= 3
+                return $next($request + 1); // 2+1= 3
             },
             function ($request, $next) {
-                return $next($request + 3);// 3+3 =6
+                return $next($request + 3); // 3+3 =6
             },
         ];
 
@@ -71,43 +71,43 @@ class PipelineTest extends PHPUnit_Framework_TestCase
     {
         $pipes = [new PipelineTestA()];
 
-        $this->pipeline->send("Welcome")
+        $this->pipeline->send('Welcome')
              ->through($pipes);
 
-        $this->assertEquals(trim("Welcome PipelineTestA"), trim($this->pipeline->run()));
+        $this->assertEquals(trim('Welcome PipelineTestA'), trim($this->pipeline->run()));
     }
 
     public function testSingleMiddlewareObjectCallsGivenMethod()
     {
         $pipes = [new PipelineTestB()];
 
-        $this->pipeline->send("Hello")
+        $this->pipeline->send('Hello')
             ->through($pipes, 'process');
 
-        $this->assertEquals(trim("Hello Process"), trim($this->pipeline->run()));
+        $this->assertEquals(trim('Hello Process'), trim($this->pipeline->run()));
     }
 
     public function testMultipleMiddlewareObject()
     {
         $pipes = [new PipelineTestA(), new PipelineTestB()];
 
-        $this->pipeline->send("Hello")
+        $this->pipeline->send('Hello')
              ->through($pipes);
 
-        $this->assertEquals(trim("Hello PipelineTestA_PipelineTestB"), trim($this->pipeline->run()));
+        $this->assertEquals(trim('Hello PipelineTestA_PipelineTestB'), trim($this->pipeline->run()));
     }
 
     public function testThenClosureWithObjectPipes()
     {
         $pipes = [
             function ($request, $next) {
-                return $next($request . "3");
+                return $next($request.'3');
             },
-            new PipelineTestA()
+            new PipelineTestA(),
         ];
-        $this->pipeline->send("input")
+        $this->pipeline->send('input')
             ->through($pipes);
-        $this->assertEquals("input3 PipelineTestA", $this->pipeline->run());
+        $this->assertEquals('input3 PipelineTestA', $this->pipeline->run());
     }
 
     public function testResolvingPipesThroughContainer()
@@ -115,7 +115,7 @@ class PipelineTest extends PHPUnit_Framework_TestCase
         $app = $this->setValueToApplication();
         $this->pipeline->setContainer($app);
 
-        $this->pipeline->send("Foo")
+        $this->pipeline->send('Foo')
             ->through(['pipeline.request'], 'run');
 
         $this->assertSame('Foo Bar', $this->pipeline->run());
@@ -128,7 +128,7 @@ class PipelineTest extends PHPUnit_Framework_TestCase
 
         $parameters = ['first', 'second'];
 
-        $this->pipeline->send("Foo")
+        $this->pipeline->send('Foo')
             ->through(['PipelineRequest:'.implode(',', $parameters)], 'process');
 
         $this->assertSame('Foo-first-second', $this->pipeline->run());
@@ -141,7 +141,7 @@ class PipelineTest extends PHPUnit_Framework_TestCase
 
         $parameters = ['third', 'fourth'];
 
-        $this->pipeline->send("Foo")
+        $this->pipeline->send('Foo')
             ->through(['PipelineRequest:'.implode(',', $parameters), 'pipeline.resolver'], 'process');
 
         $this->assertEquals('Foo-third-fourth-Bar', $this->pipeline->run());

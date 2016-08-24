@@ -1,4 +1,5 @@
 <?php
+
 namespace Cygnite\Mvc\View;
 
 if (!defined('CF_SYSTEM')) {
@@ -6,9 +7,7 @@ if (!defined('CF_SYSTEM')) {
 }
 
 /**
- * interface ViewInterface
- *
- * @package Cygnite\Mvc\View
+ * interface ViewInterface.
  */
 interface ViewInterface
 {
@@ -16,6 +15,7 @@ interface ViewInterface
      * @param       $view
      * @param array $params
      * @param bool  $return
+     *
      * @return mixed
      */
     public function render($view, $params = [], $return = false);
@@ -23,27 +23,29 @@ interface ViewInterface
     /**
      * @param       $view
      * @param array $data
+     *
      * @return mixed
      */
     public static function create($view = null, array $data = []);
-
 
     /**
      * @param          $view
      * @param array    $data
      * @param callable $callback
+     *
      * @return mixed
      */
     public static function compose($view, array $data = [], \Closure $callback = null);
 
     /**
      * @param array $params
+     *
      * @return mixed
      */
     public function with(array $params = []);
 
     /**
-     * Return view content
+     * Return view content.
      *
      * @return mixed
      */
@@ -52,6 +54,7 @@ interface ViewInterface
     /**
      * @param $key
      * @param $value
+     *
      * @return mixed
      */
     public function setData($key, $value);
@@ -63,6 +66,7 @@ interface ViewInterface
 
     /**
      * @param $container
+     *
      * @return mixed
      */
     public function setContainer($container);

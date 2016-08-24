@@ -1,7 +1,7 @@
 <?php
+
 namespace Cygnite\Proxy;
 
-use Cygnite\Helpers\Inflector;
 use Cygnite\Foundation\Application;
 
 if (!defined('CF_SYSTEM')) {
@@ -9,11 +9,9 @@ if (!defined('CF_SYSTEM')) {
 }
 
 /**
- * Class Resolver
+ * Class Resolver.
  *
  * We will make use of Resolver to resolve all static calls.
- *
- * @package Cygnite\Proxy
  */
 abstract class StaticResolver
 {
@@ -23,11 +21,12 @@ abstract class StaticResolver
     {
         $parts = [];
         $parts = explode('\\', __CLASS__);
+
         return end($parts);
     }
 
     /**
-     * We will return proxy objects from container
+     * We will return proxy objects from container.
      *
      * @return Container
      */
@@ -48,7 +47,7 @@ abstract class StaticResolver
             return self::$cached[$class];
         }
 
-        /**
+        /*
          * Access all your protected method directly using facade
          * and return value
          */
@@ -65,7 +64,7 @@ abstract class StaticResolver
             case 4:
                 return (new $class())->$method($arguments[0], $arguments[1], $arguments[2], $arguments[3]);
             default:
-                return call_user_func_array(array(new $class(), $method), $arguments);
+                return call_user_func_array([new $class(), $method], $arguments);
         }
     }
 }

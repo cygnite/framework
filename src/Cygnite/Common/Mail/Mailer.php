@@ -1,23 +1,21 @@
 <?php
+
 namespace Cygnite\Common\Mail;
 
 use Closure;
-use Exception;
-use Swift_Image;
 use Cygnite\Helpers\Config;
-use Swift_Message as MailMessage;
-use Cygnite\Foundation\Application;
 use Swift_Attachment as MailAttachment;
-use Swift_SmtpTransport as SmtpTransport;
 use Swift_MailTransport as MailTransport;
+use Swift_Message as MailMessage;
 use Swift_SendmailTransport as SendmailTransport;
+use Swift_SmtpTransport as SmtpTransport;
 
-if (! defined('CF_SYSTEM')) {
+if (!defined('CF_SYSTEM')) {
     exit('External script access not allowed');
 }
 
 /**
- * Class Mailer
+ * Class Mailer.
  *
  * Mailer is an Swiftmailer wrapper class to send email messages
  * simple and cleaner way.
@@ -36,8 +34,6 @@ if (! defined('CF_SYSTEM')) {
  *
  *      $mailer->send($message);
  * });
- *
- * @package Cygnite\Common\Mail
  */
 class Mailer implements MailerInterface
 {
@@ -59,7 +55,7 @@ class Mailer implements MailerInterface
     protected $failedRecipients = [];
 
     /**
-     * Constructor of Mailer
+     * Constructor of Mailer.
      *
      * Configure Mailer to send email
      *
@@ -72,15 +68,16 @@ class Mailer implements MailerInterface
         }
 
         $this->emailConfig = Config::get('global.config', 'email.configurations');
-        
+
         //set transport type protocol
         $this->setTransportType($this->emailConfig['protocol']);
     }
 
     /**
-     * Get the instance of the Mailer
+     * Get the instance of the Mailer.
      *
      * @param null $callback
+     *
      * @return static
      */
     public static function compose($callback = null)
@@ -96,12 +93,11 @@ class Mailer implements MailerInterface
     }
 
     /**
-     * Set Transport Type Mail/Smtp/Sendmail
+     * Set Transport Type Mail/Smtp/Sendmail.
      *
-     * @access public
      * @param  $type
-     * @return void
      *
+     * @return void
      */
     protected function setTransportType($type)
     {
@@ -126,7 +122,6 @@ class Mailer implements MailerInterface
     }
 
     /**
-     *
      * @return mixed
      */
     public function getTransportInstance()
@@ -135,7 +130,7 @@ class Mailer implements MailerInterface
     }
 
     /**
-     * Set Email configurations dynamically to SwiftMailer
+     * Set Email configurations dynamically to SwiftMailer.
      *
      * @param $swiftSmtpTransport
      * @param $attributes
@@ -147,14 +142,13 @@ class Mailer implements MailerInterface
             $swiftSmtpTransport->{$method}($value);
         }
     }
-    
+
     /**
-     * Set SMTP transport
+     * Set SMTP transport.
      *
-     * @access public
      * @param  null
-     * @return void
      *
+     * @return void
      */
     protected function createSmtpTransport()
     {
@@ -164,7 +158,7 @@ class Mailer implements MailerInterface
     }
 
     /**
-     * Get Smtp transport instance
+     * Get Smtp transport instance.
      *
      * @return mixed
      */
@@ -172,14 +166,13 @@ class Mailer implements MailerInterface
     {
         return $this->smtpTransport;
     }
-    
-     /**
-     * Set SendMail transport
+
+    /**
+     * Set SendMail transport.
      *
-     * @access public
      * @param  null
-     * @return void
      *
+     * @return void
      */
     protected function createSendMailTransport()
     {
@@ -189,7 +182,7 @@ class Mailer implements MailerInterface
     }
 
     /**
-     * Get sendmail transport instance
+     * Get sendmail transport instance.
      *
      * @return mixed
      */
@@ -197,14 +190,13 @@ class Mailer implements MailerInterface
     {
         return $this->sendMailTransport;
     }
-    
+
     /**
-     * Set Mail transport
+     * Set Mail transport.
      *
-     * @access public
      * @param  null
-     * @return void
      *
+     * @return void
      */
     protected function createMailTransport()
     {
@@ -214,7 +206,7 @@ class Mailer implements MailerInterface
     }
 
     /**
-     * Get mail transport instance
+     * Get mail transport instance.
      *
      * @return mixed
      */
@@ -223,13 +215,12 @@ class Mailer implements MailerInterface
         return $this->mailTransport;
     }
 
-     /**
-     * Get Transport instance (object). By default it will return smtp instance
+    /**
+     * Get Transport instance (object). By default it will return smtp instance.
      *
-     * @access public
      * @param  $type string
-     * @return object
      *
+     * @return object
      */
     public function transport($type = 'smtp')
     {
@@ -242,13 +233,12 @@ class Mailer implements MailerInterface
         return $this->getMailTransport();
     }
 
-     /**
-     * Get Message Instance
+    /**
+     * Get Message Instance.
      *
-     * @access public
      * @param  null
-     * @return object of MailMessage
      *
+     * @return object of MailMessage
      */
     public function message()
     {
@@ -256,17 +246,19 @@ class Mailer implements MailerInterface
     }
 
     /**
-     * Send email with message
+     * Send email with message.
      *
      * @param your $message
-     * @return unknown
+     *
      * @throws \InvalidArgumentException
+     *
+     * @return unknown
      */
     public function send($message)
     {
         if (!$message instanceof MailMessage) {
             throw new \InvalidArgumentException(
-                sprintf("Mailer::%s expect instance of Swift_Message.", __FUNCTION__)
+                sprintf('Mailer::%s expect instance of Swift_Message.', __FUNCTION__)
             );
         }
 
@@ -274,7 +266,8 @@ class Mailer implements MailerInterface
     }
 
     /**
-     * Return failed recipients
+     * Return failed recipients.
+     *
      * @return array
      */
     public function failedRecipients()
@@ -283,12 +276,11 @@ class Mailer implements MailerInterface
     }
 
     /**
-     * Add attachment to your email
+     * Add attachment to your email.
      *
-     * @access public
      * @param  $path path of your email attachment
-     * @return unknown
      *
+     * @return unknown
      */
     public function attach($path)
     {
@@ -296,7 +288,7 @@ class Mailer implements MailerInterface
     }
 
     /**
-     * Set SwiftMailer instance
+     * Set SwiftMailer instance.
      *
      * @param $swift
      */
@@ -306,7 +298,7 @@ class Mailer implements MailerInterface
     }
 
     /**
-     * Return SwiftMailer Instance
+     * Return SwiftMailer Instance.
      *
      * @return object
      */

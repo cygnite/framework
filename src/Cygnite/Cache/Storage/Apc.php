@@ -7,23 +7,21 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 namespace Cygnite\Cache\Storage;
 
-use Exception;
 use Cygnite\Cache\StorageInterface;
-use Cygnite\Cache\Storage\ApcWarpper;
+use Exception;
 
 if (!defined('CF_SYSTEM')) {
     exit('External script access not allowed');
 }
 
 /**
- * Cygnite APC Cache Wrapper Class
+ * Cygnite APC Cache Wrapper Class.
  *
  * @author Sanjoy Dey <dey.sanjoy0@gmail.com>
- *
  */
-
 class Apc implements StorageInterface
 {
     protected $apc;
@@ -41,23 +39,25 @@ class Apc implements StorageInterface
 
     /**
      * @param callable $callback
+     *
      * @return static
      */
     public static function make(callable $callback = null)
     {
         if (is_callable($callback) && !is_null($callback)) {
-            return $callback(new static(new ApcWarpper));
+            return $callback(new static(new ApcWarpper()));
         }
 
-        return new static(new ApcWarpper);
+        return new static(new ApcWarpper());
     }
 
     /**
-     * Store item into apc memory
+     * Store item into apc memory.
      *
      * @param      $key
      * @param      $value
      * @param null $minute
+     *
      * @return mixed
      */
     public function store($key, $value, $minute = null)
@@ -66,31 +66,32 @@ class Apc implements StorageInterface
     }
 
     /**
-    * This function is used to set default life time
+     * This function is used to set default life time.
      *
      * @param null $lifeTime
+     *
      * @return mixed
-    */
+     */
     public function setLifeTime($lifeTime = null)
     {
         return $this->apc->setLifeTime($lifeTime);
     }
 
     /**
-     * This function is used to get life time of apc cache
+     * This function is used to get life time of apc cache.
      *
-     * @return  boolean
+     * @return bool
      */
-
     public function getLifeTime()
     {
         return $this->apc->getLifeTime();
     }
 
     /**
-     * Get data from memory based on its key
+     * Get data from memory based on its key.
      *
      * @param $key
+     *
      * @return mixed
      */
     public function get($key)
@@ -101,6 +102,7 @@ class Apc implements StorageInterface
     /**
      * @param $key
      * @param $value
+     *
      * @return mixed
      */
     public function increment($key, $value)
@@ -111,6 +113,7 @@ class Apc implements StorageInterface
     /**
      * @param $key
      * @param $value
+     *
      * @return mixed
      */
     public function decrement($key, $value)
@@ -119,9 +122,10 @@ class Apc implements StorageInterface
     }
 
     /**
-     * Delete values from memory based on its key
+     * Delete values from memory based on its key.
      *
      * @param $key
+     *
      * @return mixed
      */
     public function destroy($key)

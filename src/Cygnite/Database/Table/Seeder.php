@@ -7,21 +7,21 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-namespace Cygnite\Database\Table;
 
-use Cygnite\Database\Connection;
-use Illuminate\Database\Query\Builder;
+namespace Cygnite\Database\Table;
 
 abstract class Seeder
 {
     /**
-     * Seeder Command
+     * Seeder Command.
+     *
      * @var
      */
     public $command;
 
     /**
-     * Filter out other class and set only class to seed
+     * Filter out other class and set only class to seed.
+     *
      * @param $class
      */
     public function executeOnly($class)
@@ -43,9 +43,10 @@ abstract class Seeder
     }
 
     /**
-     * Filter the class name from seeder array
+     * Filter the class name from seeder array.
      *
      * @param array $class
+     *
      * @return array
      */
     private function filterClass(array $class = [])
@@ -53,9 +54,8 @@ abstract class Seeder
         return array_intersect($this->seeders, $class);
     }
 
-
     /**
-     * We will execute all seeder and populate database table
+     * We will execute all seeder and populate database table.
      */
     public function execute()
     {
@@ -74,13 +74,14 @@ abstract class Seeder
 
     /**
      * @param $class
+     *
      * @return mixed
      */
     private function resolve($class)
     {
         $class = APP_NS.'\\Resources\\Database\\Seeding\\'.$class;
 
-        $return = (new $class)->execute();
+        $return = (new $class())->execute();
 
         if (isset($this->command)) {
             $this->command->info("Seeded: $class OK!");
@@ -98,7 +99,8 @@ abstract class Seeder
     }
 
     /**
-     * Run method is abstract therefore it must be implemented
+     * Run method is abstract therefore it must be implemented.
+     *
      * @return mixed
      */
     abstract public function run();

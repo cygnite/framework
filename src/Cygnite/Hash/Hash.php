@@ -1,14 +1,11 @@
 <?php
+
 namespace Cygnite\Hash;
 
-use Cygnite\Hash\BCrypt;
-
 /**
- * Class Hash
+ * Class Hash.
  *
  * We will access all BCrypt methods and return value
- *
- * @package Cygnite\Hash
  */
 class Hash
 {
@@ -29,6 +26,7 @@ class Hash
     /**
      * @param       $string
      * @param array $arguments
+     *
      * @return mixed
      */
     public static function create($string, array $arguments = [])
@@ -40,6 +38,7 @@ class Hash
      * @param       $string
      * @param       $hash
      * @param array $arguments
+     *
      * @return mixed
      */
     public static function verify($string, $hash, array $arguments = [])
@@ -50,6 +49,7 @@ class Hash
     /**
      * @param       $hashedString
      * @param array $arguments
+     *
      * @return mixed
      */
     public static function needReHash($hashedString, array $arguments = [])

@@ -1,18 +1,15 @@
 <?php
+
 namespace Cygnite\Http\Responses;
 
-use Cygnite\Http\Responses\Response;
-use Cygnite\Http\Responses\ResponseHeader;
-
 /**
- * Class JsonResponse
- *
- * @package Cygnite\Http\Responses
+ * Class JsonResponse.
  */
 class JsonResponse extends Response
 {
     // 15 === JSON_HEX_TAG | JSON_HEX_APOS | JSON_HEX_AMP | JSON_HEX_QUOT
     protected $options = 15;
+
     /**
      * @param null  $content
      * @param array $headers
@@ -35,8 +32,10 @@ class JsonResponse extends Response
     /**
      * @param $data
      * @param $prettyPrint
+     *
      * @throws \InvalidArgumentException
      * @throws \Exception
+     *
      * @return string
      * @reference https://github.com/symfony/HttpFoundation/blob/master/JsonResponse.php
      */
@@ -62,9 +61,10 @@ class JsonResponse extends Response
     /**
      * @param null  $data
      * @param array $headers
+     *
      * @return static
      */
-    public static function sendJson($data = null, $headers = array())
+    public static function sendJson($data = null, $headers = [])
     {
         $response = new static($data, $headers);
         $response->send();

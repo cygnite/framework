@@ -13,8 +13,7 @@ use Closure;
 use Cygnite\Container\ContainerAwareInterface;
 
 /**
- * Class Pipeline
- * @package Cygnite\Pipeline
+ * Class Pipeline.
  */
 class Pipeline implements PipelineInterface
 {
@@ -31,7 +30,7 @@ class Pipeline implements PipelineInterface
     private $container;
 
     /**
-     * Constructor
+     * Constructor.
      *
      * @param null $container
      */
@@ -43,9 +42,10 @@ class Pipeline implements PipelineInterface
     }
 
     /**
-     * Set container into pipeline for resolving objects
+     * Set container into pipeline for resolving objects.
      *
      * @param ContainerAwareInterface $container
+     *
      * @return $this
      */
     public function setContainer(ContainerAwareInterface $container)
@@ -56,9 +56,10 @@ class Pipeline implements PipelineInterface
     }
 
     /**
-     * Send request through pipeline
+     * Send request through pipeline.
      *
      * @param $request
+     *
      * @return $this
      */
     public function send($request)
@@ -69,9 +70,10 @@ class Pipeline implements PipelineInterface
     }
 
     /**
-     * Apply filters over pipes before executing
+     * Apply filters over pipes before executing.
      *
      * @param callable $callback
+     *
      * @return $this
      */
     public function then(callable $callback)
@@ -82,10 +84,11 @@ class Pipeline implements PipelineInterface
     }
 
     /**
-     * Pass request through the pipeline
+     * Pass request through the pipeline.
      *
      * @param array $pipes
-     * @param null $method
+     * @param null  $method
+     *
      * @return $this
      */
     public function through(array $pipes, $method = null)
@@ -97,7 +100,7 @@ class Pipeline implements PipelineInterface
     }
 
     /**
-     * Return method name
+     * Return method name.
      *
      * @return mixed
      */
@@ -107,7 +110,7 @@ class Pipeline implements PipelineInterface
     }
 
     /**
-     * Run all pipeline requests
+     * Run all pipeline requests.
      *
      * @return mixed
      */
@@ -126,10 +129,11 @@ class Pipeline implements PipelineInterface
     }
 
     /**
-     * Create pipeline callback
+     * Create pipeline callback.
+     *
+     * @throws PipelineException thrown if method doesn't exists
      *
      * @return callable
-     * @throws PipelineException thrown if method doesn't exists
      */
     private function createPipelineCallback()
     {
@@ -137,7 +141,7 @@ class Pipeline implements PipelineInterface
             return function ($request) use ($stack, $pipe) {
                 if ($pipe instanceof Closure) {
                     return call_user_func($pipe, $request, $stack);
-                } elseif (! is_object($pipe)) {
+                } elseif (!is_object($pipe)) {
                     list($callback, $parameters) = $this->createParameters($pipe, $request, $stack, true);
                 } else {
                     if (!method_exists($pipe, $this->method)) {
@@ -153,13 +157,15 @@ class Pipeline implements PipelineInterface
     }
 
     /**
-     * Form a array of callback and parameters
+     * Form a array of callback and parameters.
      *
      * @param $pipe
      * @param $request
      * @param $stack
      * @param bool $isString
+     *
      * @throws PipelineException
+     *
      * @return array
      */
     private function createParameters($pipe, $request, $stack, $isString = false)
@@ -168,7 +174,7 @@ class Pipeline implements PipelineInterface
             list($name, $parameters) = $this->parsePipeString($pipe);
 
             if (!is_object($this->container)) {
-                throw new PipelineException(sprintf("%s expects container instance", get_class($this)));
+                throw new PipelineException(sprintf('%s expects container instance', get_class($this)));
             }
 
             $pipe = ($this->container->has($name)) ? $this->container->get($name) : $this->container->make($name);
@@ -183,6 +189,7 @@ class Pipeline implements PipelineInterface
     /**
      * @param $callback
      * @param array $parameters
+     *
      * @return mixed
      */
     private function call($callback, $parameters = [])
@@ -193,8 +200,10 @@ class Pipeline implements PipelineInterface
     /**
      * Parse full pipe string to get name and parameters.
      *
-     * @param  string $pipe
+     * @param string $pipe
+     *
      * @return array
+     *
      * @link https://github.com/laravel/framework/blob/5.2/src/Illuminate/Pipeline/Pipeline.php#L160
      */
     public function parsePipeString($pipe)

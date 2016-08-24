@@ -1,12 +1,12 @@
 <?php
-use Mockery as m;
+
 use Cygnite\Helpers\Inflector;
 
 class InflectorTest extends PHPUnit_Framework_TestCase
 {
     public function testInflectionInstance()
     {
-        $this->assertInstanceOf('Cygnite\Helpers\Inflector', new Cygnite\Helpers\Inflector);
+        $this->assertInstanceOf('Cygnite\Helpers\Inflector', new Cygnite\Helpers\Inflector());
     }
 
     public function testClassifyMethod()

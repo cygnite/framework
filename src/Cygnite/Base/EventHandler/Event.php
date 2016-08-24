@@ -7,19 +7,15 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-
 namespace Cygnite\Base\EventHandler;
 
 use Closure;
-use Cygnite\Base\EventHandler\EventRegistrarTrait;
 
 /**
- * Class Event
+ * Class Event.
  *
- * @package Cygnite\Base\EventHandler
  * @author  Sanjoy Dey
  */
-
 class Event implements EventInterface
 {
     use EventRegistrarTrait;
@@ -30,34 +26,36 @@ class Event implements EventInterface
 
     /**
      * @param Closure $callback
+     *
      * @return static
      */
     public static function create(Closure $callback = null)
     {
         // Check if $callback is instance of Closure we return callback
         if (!is_null($callback) && $callback instanceof Closure) {
-            return $callback(new static);
+            return $callback(new static());
         }
 
         // Return instance of the Event Handler
-        return new static;
+        return new static();
     }
 
     /**
-     * Attach the new event to event stack
+     * Attach the new event to event stack.
      *
      * @param $name
      * @param $callback
+     *
      * @return mixed|void
      */
     public function attach($name, $callback)
     {
         if (is_null($name)) {
-            throw new \RuntimeException(sprintf("Event name cannot be empty in %s", __FUNCTION__));
+            throw new \RuntimeException(sprintf('Event name cannot be empty in %s', __FUNCTION__));
         }
 
         if (is_null($callback)) {
-            throw new \RuntimeException(sprintf("Empty parameter passed as callback in %s function", __FUNCTION__));
+            throw new \RuntimeException(sprintf('Empty parameter passed as callback in %s function', __FUNCTION__));
         }
 
 
@@ -76,13 +74,15 @@ class Event implements EventInterface
      *
      * @param       $name
      * @param array $data
+     *
      * @throws \Exception
+     *
      * @return mixed
      */
     public function trigger($name, $data = [])
     {
         if (!isset($this->events[$name])) {
-            throw new \Exception("Event '$name' not found in ".__CLASS__." in stack!");
+            throw new \Exception("Event '$name' not found in ".__CLASS__.' in stack!');
         }
 
         foreach ($this->events[$name] as $callback) {
@@ -107,7 +107,7 @@ class Event implements EventInterface
     {
         $exp = explode('@', $callback);
 
-        if (method_exists($instance = new $exp[0], $exp[1])) {
+        if (method_exists($instance = new $exp[0](), $exp[1])) {
             return call_user_func_array([$instance, $exp[1]], [$data]);
         }
     }
@@ -120,14 +120,15 @@ class Event implements EventInterface
         $class = null;
         $expression = [];
         $expression = explode('::', $callback);
-        $class = '\\' . str_replace('_', '\\', $expression[0]);
-        call_user_func([new $class, $expression[1]]);
+        $class = '\\'.str_replace('_', '\\', $expression[0]);
+        call_user_func([new $class(), $expression[1]]);
     }
 
     /**
-     * Flush the event
+     * Flush the event.
      *
      * @param string $event
+     *
      * @return mixed|void
      */
     public function flush($event = null)

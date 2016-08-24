@@ -7,40 +7,36 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 namespace Cygnite\Console\Command;
 
-use Cygnite\Helpers\Inflector;
-use Cygnite\Database\Table\Table;
-use Cygnite\Console\Generator\View;
-use Cygnite\Foundation\Application;
-use Cygnite\Console\Command\Command;
-use Cygnite\Console\Generator\Model;
 use Cygnite\Console\Generator\Controller;
+use Cygnite\Console\Generator\Model;
+use Cygnite\Console\Generator\View;
+use Cygnite\Database\Table\Table;
+use Cygnite\Foundation\Application;
+use Cygnite\Helpers\Inflector;
 use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Formatter\OutputFormatterStyle;
-use Symfony\Component\Console\Command\Command as SymfonyCommand;
 
 class GeneratorCommand extends Command
 {
     /**
-     * Name of your console command
+     * Name of your console command.
      *
      * @var string
      */
     protected $name = 'generate:crud';
 
     /**
-     * Description of your console command
+     * Description of your console command.
      *
      * @var string
      */
     protected $description = 'Generate Sample Crud Application Using Cygnite CLI';
 
     /**
-     * Console command arguments
+     * Console command arguments.
      *
      * @var array
      */
@@ -54,7 +50,7 @@ class GeneratorCommand extends Command
      * @var array
      */
     protected $options = [
-        ['template', null, InputOption::VALUE_NONE, 'If set, will use twig template for view page.']
+        ['template', null, InputOption::VALUE_NONE, 'If set, will use twig template for view page.'],
     ];
 
     /**
@@ -94,6 +90,7 @@ class GeneratorCommand extends Command
 
     /**
      * @param Table $table
+     *
      * @throws \InvalidArgumentException
      */
     public function __construct(Table $table)
@@ -140,7 +137,7 @@ class GeneratorCommand extends Command
     }
 
     /**
-     * We will execute the crud command and generate files
+     * We will execute the crud command and generate files.
      *
      *
      * @return int|null|void
@@ -148,10 +145,10 @@ class GeneratorCommand extends Command
     public function process()
     {
         // Your controller name
-        $this->controller = Inflector::classify($this->argument('name')) . 'Controller';
+        $this->controller = Inflector::classify($this->argument('name')).'Controller';
         // Model name
         $this->model = Inflector::classify($this->argument('model'));
-        /**
+        /*
          | Check for argument database name if not given we will use default
          |  database connection
          */
@@ -167,7 +164,7 @@ class GeneratorCommand extends Command
             exit($this->error("Please provide valid table name. It seems doesn't exists in the database."));
         }
 
-        $this->applicationDir = CYGNITE_BASE . DS . APPPATH;
+        $this->applicationDir = CYGNITE_BASE.DS.APPPATH;
 
         $this->generateController();
         $this->generateModel();
@@ -179,11 +176,11 @@ class GeneratorCommand extends Command
         $this->routesController->controller("'.$controller.'"); inside the method '."\n".'
         \Apps\Routing\RouteCollection::executeStaticRoutes();'."\n");
 
-        $this->info("Crud Generated Successfully By Cygnite Cli.");
+        $this->info('Crud Generated Successfully By Cygnite Cli.');
     }
 
     /**
-     * We will get all column schema from database
+     * We will get all column schema from database.
      *
      * @return mixed
      */
@@ -195,7 +192,7 @@ class GeneratorCommand extends Command
     }
 
     /**
-     * We will generate Controller
+     * We will generate Controller.
      */
     private function generateController()
     {
@@ -203,7 +200,7 @@ class GeneratorCommand extends Command
         $controllerInstance = Controller::instance($this->columns, $this->viewType, $this);
 
         $controllerTemplateDir =
-            dirname(dirname(__FILE__)) . DS . 'src' . DS . 'Apps' . DS . 'Controllers' . DS;
+            dirname(dirname(__FILE__)).DS.'src'.DS.'Apps'.DS.'Controllers'.DS;
 
         $controllerInstance->setControllerTemplatePath($controllerTemplateDir);
         $controllerInstance->setApplicationDirectory($this->applicationDir);
@@ -219,13 +216,13 @@ class GeneratorCommand extends Command
     }
 
     /**
-     * We will generate model here
+     * We will generate model here.
      */
     private function generateModel()
     {
         $modelInstance = Model::instance($this);
         $modelTemplateDir =
-            dirname(dirname(__FILE__)) . DS . 'src' . DS . 'Apps' . DS . 'Models' . DS;
+            dirname(dirname(__FILE__)).DS.'src'.DS.'Apps'.DS.'Models'.DS;
 
         $modelInstance->setModelTemplatePath($modelTemplateDir);
         $modelInstance->updateTemplate();
@@ -234,13 +231,13 @@ class GeneratorCommand extends Command
     }
 
     /**
-     * We will generate the view pages into views directory
+     * We will generate the view pages into views directory.
      */
     private function generateViews()
     {
         $viewInstance = View::instance($this);
         $viewInstance->setLayoutType($this->viewType);
-        $viewTemplateDir = dirname(dirname(__FILE__)) . DS . 'src' . DS . 'Apps' . DS . 'Views' . DS;
+        $viewTemplateDir = dirname(dirname(__FILE__)).DS.'src'.DS.'Apps'.DS.'Views'.DS;
         $viewInstance->setTableColumns($this->columns);
         $viewInstance->setViewTemplatePath($viewTemplateDir);
 
@@ -255,7 +252,7 @@ class GeneratorCommand extends Command
         $viewInstance->generateViews();
 
         $this->info(
-            "Views Generated In " . str_replace("Controller", "", $this->controller) . " Directory.."
+            'Views Generated In '.str_replace('Controller', '', $this->controller).' Directory..'
         );
     }
 }

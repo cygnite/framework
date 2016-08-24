@@ -7,30 +7,29 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 namespace Cygnite\Http;
 
 use Cygnite\Foundation\Collection;
 
 /**
- * Class Header
- * @package Cygnite\Http
+ * Class Header.
  */
-
 class Header extends Collection
 {
     //The list of HTTP request headers are not starting with "HTTP_" prefix
     protected static $specialCaseHeaders = [
-        "AUTH_TYPE" => true,
-        "CONTENT_LENGTH" => true,
-        "CONTENT_TYPE" => true,
-        "PHP_AUTH_DIGEST" => true,
-        "PHP_AUTH_PW" => true,
-        "PHP_AUTH_TYPE" => true,
-        "PHP_AUTH_USER" => true
+        'AUTH_TYPE'       => true,
+        'CONTENT_LENGTH'  => true,
+        'CONTENT_TYPE'    => true,
+        'PHP_AUTH_DIGEST' => true,
+        'PHP_AUTH_PW'     => true,
+        'PHP_AUTH_TYPE'   => true,
+        'PHP_AUTH_USER'   => true,
     ];
 
     /**
-     * Constructor
+     * Constructor.
      *
      * @param array $values
      */
@@ -40,18 +39,19 @@ class Header extends Collection
         foreach ($values as $name => $value) {
             $name = strtoupper($name);
 
-            if (isset(self::$specialCaseHeaders[$name]) || strpos($name, "HTTP_") === 0) {
+            if (isset(self::$specialCaseHeaders[$name]) || strpos($name, 'HTTP_') === 0) {
                 $this->set($name, $value);
             }
         }
     }
 
     /**
-     * Set header values
+     * Set header values.
      *
      * @param $name
      * @param $values
      * @param bool $shouldReplace
+     *
      * @return $this|void
      */
     public function add($name, $values, $shouldReplace = true)
@@ -61,11 +61,12 @@ class Header extends Collection
 
     /**
      * Return only first header values if exists otherwise
-     * return all header information
+     * return all header information.
      *
      * @param mixed $name
-     * @param null $default
-     * @param bool $onlyReturnFirst
+     * @param null  $default
+     * @param bool  $onlyReturnFirst
+     *
      * @return mixed|null
      */
     public function get($name, $default = null, $onlyReturnFirst = true)
@@ -84,9 +85,10 @@ class Header extends Collection
     }
 
     /**
-     * Check if header key exists
+     * Check if header key exists.
      *
      * @param $name
+     *
      * @return bool
      */
     public function has($name)
@@ -95,9 +97,10 @@ class Header extends Collection
     }
 
     /**
-     * Remove header key from the collection
+     * Remove header key from the collection.
      *
      * @param $name
+     *
      * @return $this|void
      */
     public function remove($name)
@@ -106,7 +109,7 @@ class Header extends Collection
     }
 
     /**
-     * Set header information
+     * Set header information.
      *
      * @param $name
      * @param $value
@@ -115,7 +118,7 @@ class Header extends Collection
     public function set($name, $value, $shouldReplace = true)
     {
         $name = $this->normalizeName($name);
-        $value = (array)$value;
+        $value = (array) $value;
 
         if ($shouldReplace || !$this->has($name)) {
             parent::add($name, $value);
@@ -125,16 +128,17 @@ class Header extends Collection
     }
 
     /**
-     * Normalizes a key string
+     * Normalizes a key string.
      *
      * @param $name
+     *
      * @return string
      */
     protected function normalizeName($name)
     {
-        $name = strtr(strtolower($name), "_", "-");
+        $name = strtr(strtolower($name), '_', '-');
 
-        if (strpos($name, "http-") === 0) {
+        if (strpos($name, 'http-') === 0) {
             $name = substr($name, 5);
         }
 
