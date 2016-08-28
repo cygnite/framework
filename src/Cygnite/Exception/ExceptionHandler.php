@@ -1,12 +1,12 @@
 <?php
+
 namespace Cygnite\Exception;
 
 use Closure;
-use Exception;
-use Tracy\Helpers;
-use Tracy\Debugger;
-use Cygnite\Helpers\Config;
 use Cygnite\Foundation\Application;
+use Cygnite\Helpers\Config;
+use Exception;
+use Tracy\Debugger;
 
 if (!defined('CF_SYSTEM')) {
     exit('External script access not allowed');
@@ -14,23 +14,22 @@ if (!defined('CF_SYSTEM')) {
 /**
  * Class Handler
  * This file is used to define all necessary configurations for
- * Tracy debugger component to handle exceptions or to debug app
- * @package Cygnite\Exception
+ * Tracy debugger component to handle exceptions or to debug app.
  */
 class ExceptionHandler implements ExceptionInterface
 {
     const DEBUG = Debugger::DEBUG;
-    
+
     const INFO = Debugger::INFO;
-    
+
     const WARNING = Debugger::WARNING;
-    
+
     const ERROR = Debugger::ERROR;
-    
+
     const EXCEPTION = Debugger::EXCEPTION;
-    
+
     const CRITICAL = Debugger::CRITICAL;
-    
+
     protected $name = 'Cygnite Framework';
 
     private static $style = 'pretty';
@@ -48,6 +47,7 @@ class ExceptionHandler implements ExceptionInterface
     /**
      * @param $enableLogger
      * @param $loggerDir
+     *
      * @return $this
      */
     public function enable($enableLogger, $loggerDir)
@@ -66,6 +66,7 @@ class ExceptionHandler implements ExceptionInterface
 
     /**
      * @param $enableMode
+     *
      * @return $this
      */
     private function enableDebuggerWith($enableMode)
@@ -80,9 +81,10 @@ class ExceptionHandler implements ExceptionInterface
     }
 
     /**
-     * Set environment
+     * Set environment.
      *
      * @param $env
+     *
      * @return $this
      */
     public function setEnv($env)
@@ -94,6 +96,7 @@ class ExceptionHandler implements ExceptionInterface
 
     /**
      * @param $debugger
+     *
      * @return $this
      */
     public function setDebugger($debugger)
@@ -112,7 +115,7 @@ class ExceptionHandler implements ExceptionInterface
     }
 
     /**
-     * Log errors
+     * Log errors.
      *
      * @param $e
      */
@@ -124,6 +127,7 @@ class ExceptionHandler implements ExceptionInterface
     /**
      * @param $enableLogger
      * @param $logPath
+     *
      * @return $this
      */
     public function setLogConfig($enableLogger, $logPath)
@@ -147,11 +151,11 @@ class ExceptionHandler implements ExceptionInterface
      */
     public function getLogPath()
     {
-        return (isset($this->logPath) ? $this->logPath : null);
+        return isset($this->logPath) ? $this->logPath : null;
     }
 
     /**
-     * Set Title
+     * Set Title.
      *
      * @return $this
      */
@@ -163,10 +167,11 @@ class ExceptionHandler implements ExceptionInterface
     }
 
     /**
-     * Set email address for sending error report
+     * Set email address for sending error report.
      *
      * @param      $email
      * @param bool $errorEmailing
+     *
      * @return $this
      */
     public function setEmailAddress($email, $errorEmailing = false)
@@ -189,23 +194,22 @@ class ExceptionHandler implements ExceptionInterface
     }
 
     /**
-     * Get the self instance of handler
+     * Get the self instance of handler.
      *
      * @param callable $callback
+     *
      * @return mixed
      */
     public static function register(Closure $callback)
     {
         if ($callback instanceof Closure) {
-            return $callback(new HandlerException);
+            return $callback(new HandlerException());
         }
     }
 
     /**
      * Run the debugger to handle all exception and
-     * display stack trace
-     *
-     *
+     * display stack trace.
      */
     public function run()
     {
@@ -224,14 +228,14 @@ class ExceptionHandler implements ExceptionInterface
                 }
 
                 return [
-                    'tab' => $handler->name,
+                    'tab'   => $handler->name,
                     'panel' => '<h1>
                 <p class="heading-blue">
                     <a href="http://www.cygniteframework.com">'.$handler->name.' </a>
                 </p>
                     </h1>
                     <p> Version : '.Application::version().' </p>
-                    <style type="text/css" class="tracy-debug">'.$contents.'</style>'
+                    <style type="text/css" class="tracy-debug">'.$contents.'</style>',
                 ];
             }
         });
@@ -249,9 +253,10 @@ class ExceptionHandler implements ExceptionInterface
     }
 
     /**
-     * Add panel to debugger
+     * Add panel to debugger.
      *
      * @param $callback
+     *
      * @return $this
      */
     public function addPanel($callback)
@@ -262,7 +267,7 @@ class ExceptionHandler implements ExceptionInterface
     }
 
     /**
-     * Add Sql Panel to debugger
+     * Add Sql Panel to debugger.
      *
      * @param $callback
      */
@@ -272,7 +277,7 @@ class ExceptionHandler implements ExceptionInterface
     }
 
     /**
-     * Get Tracy Debugbar instance
+     * Get Tracy Debugbar instance.
      *
      * @return \Tracy\Bar
      */
@@ -283,8 +288,10 @@ class ExceptionHandler implements ExceptionInterface
 
     /**
      * @param $path
-     * @return string
+     *
      * @throws \Exception
+     *
+     * @return string
      */
     public function includeAssets($path)
     {
@@ -292,7 +299,7 @@ class ExceptionHandler implements ExceptionInterface
     }
 
     /**
-     * Get the asset path
+     * Get the asset path.
      *
      * @return string
      */
@@ -316,7 +323,7 @@ class ExceptionHandler implements ExceptionInterface
     /**
      * Enable and set configuration to Tracy Handler
      * Event will Trigger this method on runtime when any exception
-     * occurs
+     * occurs.
      */
     public function handleException()
     {
@@ -349,9 +356,10 @@ class ExceptionHandler implements ExceptionInterface
     }
 
     /**
-     * We will display custom error page in production mode
+     * We will display custom error page in production mode.
      *
      * @param null $e
+     *
      * @throws \Exception
      */
     public function importCustomErrorPage($e = null)
@@ -379,12 +387,13 @@ class ExceptionHandler implements ExceptionInterface
             extract($error);
             Debugger::$errorTemplate = include $path.$statusCode.'.view'.EXT;
         } else {
-            throw new \Exception("Error view file not exists ".$path.$e->getStatusCode().'.view'.EXT);
+            throw new \Exception('Error view file not exists '.$path.$e->getStatusCode().'.view'.EXT);
         }
     }
 
     /**
      * @param $e
+     *
      * @return mixed
      */
     public function renderErrorPage($e)

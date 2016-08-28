@@ -22,6 +22,7 @@ if (!defined('CF_SYSTEM')) {
  * provided in configuration.
  *
  * @note For better security use Cygnite/Hash/ByCrypt component
+ *
  * @author Sanjoy Dey <dey.sanjoy0@gmail.com>
  */
 class Encrypt
@@ -37,10 +38,10 @@ class Encrypt
     private $defaultKey = 'BXT#ERHD!DSD#ndUOAS9821LL';
 
     /**
-    * Constructor function
-    * @false string - encryption key
-    *
-    */
+     * Constructor function.
+     *
+     * @false string - encryption key
+     */
     public function __construct($encryptKey = null)
     {
         $this->checkMCryptExists();
@@ -64,15 +65,17 @@ class Encrypt
         | extensions loaded. If not we'll just exit from here.
         |
         */
-        if (! extension_loaded('mcrypt')) {
+        if (!extension_loaded('mcrypt')) {
             echo 'Encrypt library requires Mcrypt PHP extension.'.PHP_EOL;
             exit(1);
         }
     }
 
     /**
-     * We will set the Encryption key
+     * We will set the Encryption key.
+     *
      * @param $key
+     *
      * @throws \BadFunctionCallException
      */
     private function setSaltKey($key)
@@ -80,7 +83,7 @@ class Encrypt
         $this->setKey($key);
 
         if (!function_exists('mcrypt_create_iv')) {
-            throw new \BadFunctionCallException("Mcrypt extension library not loaded");
+            throw new \BadFunctionCallException('Mcrypt extension library not loaded');
         }
 
         $this->iv = mcrypt_create_iv(32);
@@ -95,7 +98,8 @@ class Encrypt
     }
 
     /**
-     * Get Encryption key
+     * Get Encryption key.
+     *
      * @return mixed
      */
     public function getKey()
@@ -104,10 +108,10 @@ class Encrypt
     }
 
     /**
-     * This function is to encrypt string
+     * This function is to encrypt string.
      *
-     * @access  public
      * @param string
+     *
      * @return encrypted hash
      */
     public function encode($input)
@@ -126,10 +130,10 @@ class Encrypt
     }
 
     /**
-     * This function is to decrypt the encoded string
+     * This function is to decrypt the encoded string.
      *
-     * @access  public
      * @param string
+     *
      * @return decrypted string
      */
     public function decode($input)

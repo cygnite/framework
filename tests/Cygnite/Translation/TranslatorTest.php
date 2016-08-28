@@ -1,6 +1,6 @@
 <?php
+
 use Cygnite\Translation\Translator;
-use Mockery as m;
 
 class TranslatorTest extends PHPUnit_Framework_TestCase
 {

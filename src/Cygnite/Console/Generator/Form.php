@@ -7,16 +7,17 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 namespace Cygnite\Console\Generator;
 
 use Cygnite\Helpers\Inflector;
 
 /**
- * Cygnite Model Generator
+ * Cygnite Model Generator.
  *
  * This class is used to generate your Form class using cygnite console
- * @author Sanjoy Dey <dey.sanjoy0@gmail.com>
  *
+ * @author Sanjoy Dey <dey.sanjoy0@gmail.com>
  */
 class Form
 {
@@ -39,7 +40,8 @@ class Form
     }
 
     /**
-     * Set form template path
+     * Set form template path.
+     *
      * @param $path
      */
     public function setFormTemplatePath($path)
@@ -48,7 +50,8 @@ class Form
     }
 
     /**
-     * Get form Template path
+     * Get form Template path.
+     *
      * @return null
      */
     public function getFormTemplatePath()
@@ -59,7 +62,8 @@ class Form
     }
 
     /**
-     * Form template name
+     * Form template name.
+     *
      * @return string
      */
     private function formTemplateName()
@@ -68,7 +72,7 @@ class Form
     }
 
     /**
-     * Generate Form
+     * Generate Form.
      */
     public function generate()
     {
@@ -79,7 +83,7 @@ class Form
             //We will generate Form Component
             $formContent = file_get_contents($this->getFormTemplatePath().'Form'.EXT);
         } else {
-            die("Form template doesn't exists in ".$this->getFormTemplatePath().'Form'.EXT." directory.");
+            die("Form template doesn't exists in ".$this->getFormTemplatePath().'Form'.EXT.' directory.');
         }
 
         $this->controllerInstance->isFormGenerator = true;

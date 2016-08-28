@@ -7,26 +7,23 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 namespace Cygnite\Base\Router\Controller;
 
-use Exception;
-use Reflection;
-use Cygnite\Helpers\Config;
-use Cygnite\Helpers\Inflector;
 use Cygnite\Base\Router\Router;
 use Cygnite\Exception\Http\HttpNotFoundException;
+use Cygnite\Helpers\Config;
+use Cygnite\Helpers\Inflector;
 
 if (!defined('CF_SYSTEM')) {
     exit('No External script access allowed');
 }
 
 /**
- * Trait RouteController
+ * Trait RouteController.
  *
- * @package Cygnite\Base\Router\Controller
  * @author Sanjoy Dey <dey.sanjoy0@gmail.com>
  */
-
 trait RouteControllerTrait
 {
     private $controllerWithNS;
@@ -46,11 +43,13 @@ trait RouteControllerTrait
     public function getUrlSegments()
     {
         $newUrl = str_replace('/'.Router::$indexPage, '', rtrim($this->getCurrentUri()));
+
         return array_filter(explode('/', $newUrl));
     }
 
     /**
      * @param $exp
+     *
      * @return array
      */
     private function setControllerDirectoryConfig($exp)
@@ -60,8 +59,10 @@ trait RouteControllerTrait
 
     /**
      * @param $arguments
-     * @return object
+     *
      * @throws \Exception
+     *
+     * @return object
      */
     public function callController($arguments)
     {
@@ -83,10 +84,10 @@ trait RouteControllerTrait
             $params = $arguments[1];
         }
 
-        $file = CYGNITE_BASE . str_replace('\\', DS, '\\src'.$this->controllerWithNS) . EXT;
+        $file = CYGNITE_BASE.str_replace('\\', DS, '\\src'.$this->controllerWithNS).EXT;
 
         if (!is_readable($file)) {
-            throw new \Exception("Route class " . $this->controllerWithNS . " not found. ");
+            throw new \Exception('Route class '.$this->controllerWithNS.' not found. ');
         }
 
         $args = [];
@@ -102,7 +103,7 @@ trait RouteControllerTrait
     }
 
     /**
-     * Set controller and method name here
+     * Set controller and method name here.
      *
      * @param $arguments
      */
@@ -124,6 +125,7 @@ trait RouteControllerTrait
 
     /**
      * @param $module
+     *
      * @return bool
      */
     public function bootstrapModule($module)
@@ -139,7 +141,8 @@ trait RouteControllerTrait
         }
 
         Config::set(strtolower($module).'.config', include $file);
-        return (new $class)->register($this->getApplication(), $file);
+
+        return (new $class())->register($this->getApplication(), $file);
     }
 
     /**
@@ -157,19 +160,20 @@ trait RouteControllerTrait
      */
     private function setControllerConfig($args, $param, $module = false)
     {
-        $this->controller = Inflector::classify($param[0]) . 'Controller';
+        $this->controller = Inflector::classify($param[0]).'Controller';
 
         if ($module) {
-            $this->namespace = '\\' . $this->getModuleDir() . '\\' . $args[0] . '\\Controllers\\';
+            $this->namespace = '\\'.$this->getModuleDir().'\\'.$args[0].'\\Controllers\\';
         }
-        $this->controllerWithNS = "\\" . str_replace('src/', '', APPPATH) . $this->namespace . $this->controller;
-        $this->method = Inflector::camelize($param[1]) . 'Action';
+        $this->controllerWithNS = '\\'.str_replace('src/', '', APPPATH).$this->namespace.$this->controller;
+        $this->method = Inflector::camelize($param[1]).'Action';
     }
 
     /**
-     * Set router instance
+     * Set router instance.
      *
      * @param $router
+     *
      * @return $this
      */
     public function setRoute($router)
@@ -180,7 +184,7 @@ trait RouteControllerTrait
     }
 
     /**
-     * Get the router instance
+     * Get the router instance.
      *
      * @return mixed
      */
@@ -193,6 +197,7 @@ trait RouteControllerTrait
      * @param        $controller
      * @param        $action
      * @param string $controllerDir
+     *
      * @return array
      */
     public function getControllerAndAction($controller, $action, $controllerDir = '')
@@ -204,38 +209,42 @@ trait RouteControllerTrait
     }
 
     /**
-     * @param      $class
-     * @param      $dir
+     * @param   $class
+     * @param   $dir
+     *
      * @return string
      */
     public function getControllerName($class, $dir = '')
     {
-        $dir = ($dir !== '') ? $dir . '\\' : '';
+        $dir = ($dir !== '') ? $dir.'\\' : '';
 
         return
-            "\\" . str_replace('src/', '', APPPATH) . $this->namespace . $dir .
+            '\\'.str_replace('src/', '', APPPATH).$this->namespace.$dir.
             Inflector::classify(
                 $class
-            ) . 'Controller';
+            ).'Controller';
     }
 
     /**
      * @param $actionName
+     *
      * @return string
      */
     public function getActionName($actionName)
     {
         return Inflector::camelize(
             (!isset($actionName)) ? 'index' : $actionName
-        ) . 'Action';
+        ).'Action';
     }
 
     /**
      * @param       $controller
      * @param       $action
      * @param array $params
-     * @return mixed
+     *
      * @throws \Cygnite\Exception\Http\HttpNotFoundException
+     *
+     * @return mixed
      */
     public function handleControllerDependencies($controller, $action, $params = [])
     {
@@ -259,7 +268,7 @@ trait RouteControllerTrait
     }
 
     /**
-     * Trigger controller action events
+     * Trigger controller action events.
      *
      * @param        $instance
      * @param        $action

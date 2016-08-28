@@ -24,18 +24,18 @@ $container['d'] = $container->extend('d', function ($tes, $c) {
 });
 var_dump($container['d']());
 
-echo "<pre>";
+echo '<pre>';
 var_dump($container['d']);
 //var_dump($container['e']);
 
 $obj['dynamicFields'] = function ($c) {
-    return new Users;
+    return new Users();
 };
 
 //var_dump($obj['dynamicFields']);
 
 $container['dynamicFields'] = $container->extend('dynamicFields', function ($user, $c) {
-    $user->form = "User Form";
+    $user->form = 'User Form';
     $user->setUser($c['a']);
 
     return $user;

@@ -7,48 +7,42 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 namespace Cygnite\Console\Command;
 
-use Cygnite\Database\Table\Table;
-use Cygnite\Foundation\Application;
-use Cygnite\Helpers\Inflector;
 use Cygnite\Console\Generator\Model;
-use Cygnite\Console\Command\Command;
 use Cygnite\Database\ConnectionManagerTrait;
-use Cygnite\Database\Exceptions\DatabaseException;
+use Cygnite\Database\Table\Table;
+use Cygnite\Helpers\Inflector;
 use Symfony\Component\Console\Input\InputArgument;
-use Symfony\Component\Console\Input\InputInterface;
-use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Formatter\OutputFormatterStyle;
 
 /**
- * Cygnite Model Generator
+ * Cygnite Model Generator.
  *
  * This class used to generate model skeleton
- * @author Sanjoy Dey <dey.sanjoy0@gmail.com>
  *
+ * @author Sanjoy Dey <dey.sanjoy0@gmail.com>
  */
 class ModelGeneratorCommand extends Command
 {
     use ConnectionManagerTrait;
 
     /**
-     * Name of your console command
+     * Name of your console command.
      *
      * @var string
      */
     protected $name = 'model:create';
 
     /**
-     * Description of your console command
+     * Description of your console command.
      *
      * @var string
      */
     protected $description = 'Generate Sample Model Class Using Cygnite CLI';
 
     /**
-     * Console command arguments
+     * Console command arguments.
      *
      * @var array
      */
@@ -81,6 +75,7 @@ class ModelGeneratorCommand extends Command
 
     /**
      * @param Table $table
+     *
      * @throws \InvalidArgumentException
      */
     public function __construct(Table $table)
@@ -111,7 +106,8 @@ class ModelGeneratorCommand extends Command
     }
 
     /**
-     * We will get all column schema from database
+     * We will get all column schema from database.
+     *
      * @return mixed
      */
     public function getColumns()
@@ -122,7 +118,7 @@ class ModelGeneratorCommand extends Command
     }
 
     /**
-     * We will execute the command and generate model class
+     * We will execute the command and generate model class.
      *
      * @return int|null|void
      */
@@ -151,7 +147,8 @@ class ModelGeneratorCommand extends Command
     }
 
     /**
-     * Get Database name
+     * Get Database name.
+     *
      * @return mixed
      */
     public function getDatabase()
@@ -162,7 +159,7 @@ class ModelGeneratorCommand extends Command
     }
 
     /**
-     * We will generate model here
+     * We will generate model here.
      */
     private function generateModel()
     {

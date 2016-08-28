@@ -15,6 +15,7 @@ interface CookieInterface
 {
     /**
      * @param $cookie
+     *
      * @return mixed
      */
     public function get($cookie);
@@ -26,12 +27,14 @@ interface CookieInterface
 
     /**
      * @param $cookie
+     *
      * @return mixed
      */
     public function destroy($cookie);
 
     /**
      * @param $cookie
+     *
      * @return mixed
      */
     public function has($cookie);

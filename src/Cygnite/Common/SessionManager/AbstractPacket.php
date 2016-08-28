@@ -1,4 +1,5 @@
 <?php
+
 namespace Cygnite\Common\SessionManager;
 
 abstract class AbstractPacket
@@ -6,7 +7,7 @@ abstract class AbstractPacket
     protected $storage = [];
 
     /**
-     * Removes all data and reset the storage to empty array
+     * Removes all data and reset the storage to empty array.
      *
      * @return $this
      */
@@ -18,10 +19,11 @@ abstract class AbstractPacket
     }
 
     /**
-     * Check if offset exists
+     * Check if offset exists.
      *
      * @param mixed $key
-     * @return boolean true or false
+     *
+     * @return bool true or false
      */
     public function offsetExists($key)
     {
@@ -29,9 +31,10 @@ abstract class AbstractPacket
     }
 
     /**
-     * Get value if exists from storage
+     * Get value if exists from storage.
      *
      * @param mixed $key
+     *
      * @return mixed Can return all value types.
      */
     public function &offsetGet($key)
@@ -39,29 +42,33 @@ abstract class AbstractPacket
         if (!isset($this->storage[$key])) {
             $this->storage[$key] = null;
         }
+
         return $this->storage[$key];
     }
 
     /**
-     * Setting or pushing data into storage
+     * Setting or pushing data into storage.
      *
      * @param mixed $key
      * @param mixed $value
+     *
      * @return void
      */
     public function offsetSet($key, $value)
     {
         if ($key === null) {
             array_push($this->storage, $value);
+
             return;
         }
         $this->storage[$key] = $value;
     }
 
     /**
-     * Key to unset
+     * Key to unset.
      *
      * @param mixed $key
+     *
      * @return void
      */
     public function offsetUnset($key)
@@ -70,7 +77,7 @@ abstract class AbstractPacket
     }
 
     /**
-     * Count elements of an object
+     * Count elements of an object.
      *
      * @return int
      */
@@ -80,7 +87,7 @@ abstract class AbstractPacket
     }
 
     /**
-     * Return the current element
+     * Return the current element.
      *
      * @return mixed
      */
@@ -90,7 +97,7 @@ abstract class AbstractPacket
     }
 
     /**
-     * Return the key of the current element
+     * Return the key of the current element.
      *
      * @return mixed
      */
@@ -100,7 +107,7 @@ abstract class AbstractPacket
     }
 
     /**
-     * Move forward to next element
+     * Move forward to next element.
      *
      * @return void
      */
@@ -110,7 +117,7 @@ abstract class AbstractPacket
     }
 
     /**
-     * Rewind the Iterator to the first element
+     * Rewind the Iterator to the first element.
      *
      * @return void
      */
@@ -120,7 +127,7 @@ abstract class AbstractPacket
     }
 
     /**
-     * Checks if current position is valid and return bool value
+     * Checks if current position is valid and return bool value.
      *
      * @return bool
      */
@@ -130,6 +137,7 @@ abstract class AbstractPacket
         if ($key === false || $key === null) {
             return false;
         }
+
         return isset($this->storage[$key]);
     }
 }

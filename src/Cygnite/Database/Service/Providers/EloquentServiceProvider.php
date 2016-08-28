@@ -1,17 +1,18 @@
 <?php
+
 namespace Cygnite\Database\Service\Providers;
 
-use Illuminate\Events\Dispatcher;
-use Illuminate\Container\Container;
-use Cygnite\Foundation\Application;
-use Cygnite\Database\Configure as Database;
 use Cygnite\Container\Service\ServiceProvider;
+use Cygnite\Database\Configure as Database;
+use Cygnite\Foundation\Application;
+use Illuminate\Container\Container;
 use Illuminate\Database\Capsule\Manager as EloquentCapsule;
+use Illuminate\Events\Dispatcher;
 
 /**
  * If you want to use Eloquent ORM register EloquentServiceProvider
  * as Service and extend \Cygnite\Database\Service\Eloquent in your
- * model class
+ * model class.
  *
  * <code>
  * class User extends \Cygnite\Database\Service\Eloquent
@@ -22,8 +23,6 @@ use Illuminate\Database\Capsule\Manager as EloquentCapsule;
  * </code>
  *
  * Class EloquentServiceProvider
- *
- * @package Cygnite\Database\Service\Providers
  */
 class EloquentServiceProvider extends ServiceProvider
 {
@@ -32,7 +31,7 @@ class EloquentServiceProvider extends ServiceProvider
     public $eloquent;
 
     /**
-     * Setup Eloquent ORM Service Provider
+     * Setup Eloquent ORM Service Provider.
      *
      * @param Application $app
      * @source https://github.com/illuminate/database
@@ -42,7 +41,7 @@ class EloquentServiceProvider extends ServiceProvider
         $this->eloquent = new EloquentCapsule();
         $config = Database::getDatabaseConfiguration();
 
-        /**
+        /*
          | We will loop over all connections
          | and set connection
          */
@@ -50,7 +49,7 @@ class EloquentServiceProvider extends ServiceProvider
             $this->setConnection($c);
         }
 
-        $this->eloquent->setEventDispatcher(new Dispatcher(new Container));
+        $this->eloquent->setEventDispatcher(new Dispatcher(new Container()));
         // Make this Capsule instance available globally via static methods... (optional)
         $this->eloquent->setAsGlobal();
         // Setup the Eloquent ORM... (optional; unless you've used setEventDispatcher())

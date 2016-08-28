@@ -8,10 +8,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-
 namespace Cygnite\Mvc\Controller;
-
-use Cygnite\Mvc\Controller\ServiceControllerInterface;
 
 /**
  * ServiceController.
@@ -23,10 +20,9 @@ use Cygnite\Mvc\Controller\ServiceControllerInterface;
 class ServiceController extends AbstractBaseController implements ServiceControllerInterface
 {
     /**
-     * The container's bind data
+     * The container's bind data.
      *
      * @var array
-     * @access private
      */
     private $service = [];
 
@@ -35,12 +31,13 @@ class ServiceController extends AbstractBaseController implements ServiceControl
     }
 
     /**
-     * Get a data by key
+     * Get a data by key.
      *
      * @param $key
+     *
      * @throws InvalidArgumentException
+     *
      * @return
-     * @access   public
      */
     public function &__get($key)
     {
@@ -56,11 +53,10 @@ class ServiceController extends AbstractBaseController implements ServiceControl
     }
 
     /**
-     * Assigns a value to the specified data
+     * Assigns a value to the specified data.
      *
      * @param string The data key to assign the value to
      * @param mixed  The value to set
-     * @access public
      */
     public function __set($key, $value)
     {

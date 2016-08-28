@@ -8,11 +8,9 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-
 namespace Cygnite\Common\File\Thumbnail;
 
 use Cygnite\Cygnite;
-use Cygnite\Inflector;
 
 /**
  * Image Thumbnail.
@@ -34,14 +32,13 @@ use Cygnite\Inflector;
  *    $thumb->resize();
  * </code>
  */
-
 class Image
 {
     //defined thumbs array to hold dynamic properties
     public $thumbs = [];
 
     //Set valid types of images to convert to thumb
-    public $imageTypes = ["jpg", "png", "jpeg", "gif"];
+    public $imageTypes = ['jpg', 'png', 'jpeg', 'gif'];
 
     //Set valid type of properties to avoid exceptions
     private $validProperties = ['directory', 'fixedWidth', 'fixedHeight', 'thumbPath', 'thumbName'];
@@ -51,7 +48,9 @@ class Image
     /**
      * @param $key   name of the property
      * @param $value value to set
+     *
      * @throws \Exception
+     *
      * @return void
      */
     public function __set($key, $value)
@@ -64,6 +63,7 @@ class Image
 
     /**
      * @param $key property name
+     *
      * @return string
      */
     public function __get($key)
@@ -83,10 +83,11 @@ class Image
     }
 
     /**
-     * Resize image as given configurations
+     * Resize image as given configurations.
      *
      * @throws \Exception
-     * @return boolean
+     *
+     * @return bool
      */
     public function resize()
     {
@@ -99,7 +100,7 @@ class Image
             $path = pathinfo($src);
 
             if (!in_array(strtolower($path['extension']), $this->imageTypes)) {
-                throw new \Exception("File type not supported!");
+                throw new \Exception('File type not supported!');
             }
 
             $thumbName = ($this->thumbName == null)
@@ -110,28 +111,28 @@ class Image
             switch (strtolower($path['extension'])) {
 
                 case 'jpg':
-                    $sourceImage =$this->imageCreateFrom('jpeg', $src);
+                    $sourceImage = $this->imageCreateFrom('jpeg', $src);
                     $thumbImg = $this->changeDimensions($sourceImage, $this->fixedWidth, $this->fixedHeight);
                     $this->image('jpeg', $thumbImg, $thumbName);
 
                     break;
                 case 'png':
 
-                    $sourceImage =$this->imageCreateFrom('png', $src);
-                    $thumbImg=$this->changeDimensions($sourceImage, $this->fixedWidth, $this->fixedHeight);
+                    $sourceImage = $this->imageCreateFrom('png', $src);
+                    $thumbImg = $this->changeDimensions($sourceImage, $this->fixedWidth, $this->fixedHeight);
                     $this->image('png', $thumbImg, $thumbName);
 
                     break;
                 case 'jpeg':
 
-                    $sourceImage =$this->imageCreateFrom('jpeg', $src);
-                    $thumbImg=$this->changeDimensions($sourceImage, $this->fixedWidth, $this->fixedHeight);
+                    $sourceImage = $this->imageCreateFrom('jpeg', $src);
+                    $thumbImg = $this->changeDimensions($sourceImage, $this->fixedWidth, $this->fixedHeight);
                     $this->image('jpeg', $thumbImg, $thumbName);
 
                     break;
                 case 'gif':
-                    $sourceImage =$this->imageCreateFrom('jpeg', $src);
-                    $thumbImg=$this->changeDimensions($sourceImage, $this->fixedWidth, $this->fixedHeight);
+                    $sourceImage = $this->imageCreateFrom('jpeg', $src);
+                    $thumbImg = $this->changeDimensions($sourceImage, $this->fixedWidth, $this->fixedHeight);
                     $this->image('gif', $thumbImg, $thumbName);
 
                     break;
@@ -139,15 +140,16 @@ class Image
 
             return true;
         } else {
-            throw new \Exception("404 File not found on given path");
+            throw new \Exception('404 File not found on given path');
         }
     }
 
     /**
      * @param      $type type of the image
      * @param      $src  image source
-     * $param null function name to build dynamically
+     *                   $param null function name to build dynamically
      * @param null $func
+     *
      * @return source image
      */
     private function imageCreateFrom($type, $src, $func = null)
@@ -160,13 +162,16 @@ class Image
     }
 
     /**
-     * @param      $type type of the image
+     * @param      $type  type of the image
      * @param      $thumb
      * @param      $name
      * @param null $func
+     *
      * @throws \Exception
+     *
      * @internal param \Apps\Components\Libraries\image $src source
      * $param null function name to build dynamically
+     *
      * @return sourceImage
      */
     private function image($type, $thumb, $name, $func = null)
@@ -186,12 +191,13 @@ class Image
             ) {
             chmod($this->rootDir.DS.str_replace(['/', '\\'], DS, $this->thumbPath).$name, 0777);
         } else {
-            throw new \Exception("Unknown Exception while generating thumb image");
+            throw new \Exception('Unknown Exception while generating thumb image');
         }
     }
 
     /**
-     * Change dimension of the image
+     * Change dimension of the image.
+     *
      * @param $sourceImage
      * @param $desiredWidth
      * @param $desiredHeight
@@ -200,28 +206,28 @@ class Image
      */
     public function changeDimensions($sourceImage, $desiredWidth, $desiredHeight)
     {
-        $temp = "";
+        $temp = '';
         // find the height and width of the image
         if (imagesx($sourceImage) >= imagesy($sourceImage)
             && imagesx($sourceImage) >= $this->fixedWidth
         ) {
             $temp = imagesx($sourceImage) / $this->fixedWidth;
-            $desiredWidth  = imagesx($sourceImage)/$temp;
-            $desiredHeight = imagesy($sourceImage)/$temp;
+            $desiredWidth = imagesx($sourceImage) / $temp;
+            $desiredHeight = imagesy($sourceImage) / $temp;
         } elseif (imagesx($sourceImage) <= imagesy($sourceImage)
-            && imagesy($sourceImage) >=$this->fixedHeight
+            && imagesy($sourceImage) >= $this->fixedHeight
         ) {
-            $temp = imagesy($sourceImage)/$this->fixedHeight;
-            $desiredWidth  = imagesx($sourceImage) /$temp;
-            $desiredHeight = imagesy($sourceImage)/$temp;
+            $temp = imagesy($sourceImage) / $this->fixedHeight;
+            $desiredWidth = imagesx($sourceImage) / $temp;
+            $desiredHeight = imagesy($sourceImage) / $temp;
         } else {
-            $desiredWidth  = imagesx($sourceImage);
+            $desiredWidth = imagesx($sourceImage);
             $desiredHeight = imagesy($sourceImage);
         }
 
         // create a new image
         $thumbImg = imagecreatetruecolor($desiredWidth, $desiredHeight);
-        $imgAllocate =imagecolorallocate($thumbImg, 255, 255, 255);
+        $imgAllocate = imagecolorallocate($thumbImg, 255, 255, 255);
         imagefill($thumbImg, 0, 0, $imgAllocate);
 
         //copy source image to resize

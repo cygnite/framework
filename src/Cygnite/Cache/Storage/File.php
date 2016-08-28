@@ -7,6 +7,7 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 namespace Cygnite\Cache\Storage;
 
 use Cygnite\Cache\Exceptions\InvalidCacheDirectoryException;
@@ -17,28 +18,26 @@ if (!defined('CF_SYSTEM')) {
     exit('External script access not allowed');
 }
 /**
- * Cygnite File Cache
+ * Cygnite File Cache.
  *
  * @author Sanjoy Dey <dey.sanjoy0@gmail.com>
- *
  */
-
 class File implements StorageInterface
 {
     /**
-     * The path to the cache file folder
+     * The path to the cache file folder.
      *
      * @var string
      */
     private $cachePath;
     /**
-     * The name of the default cache file
+     * The name of the default cache file.
      *
      * @var string
      */
     private $cacheName = 'default';
     /**
-     * The cache file extension
+     * The cache file extension.
      *
      * @var string
      */
@@ -47,18 +46,18 @@ class File implements StorageInterface
 
     /**
      * Constructor of File Cache
-     * We will initialize file cache
+     * We will initialize file cache.
      */
     public function __construct()
     {
         $config = Config::get('global.config', 'cache');
         $data = [
-            'name' => $config['file']['name'],
-            'path' => $config['file']['directory'],
-            'extension' => $config['file']['extension']
+            'name'      => $config['file']['name'],
+            'path'      => $config['file']['directory'],
+            'extension' => $config['file']['extension'],
         ];
 
-        if ($data['path'] == "") {
+        if ($data['path'] == '') {
             throw new InvalidCacheDirectoryException('You must define cache directory to use cache.');
         }
 
@@ -67,6 +66,7 @@ class File implements StorageInterface
 
     /**
      * @param array $config
+     *
      * @return $this
      */
     public function setup($config = [])
@@ -75,7 +75,7 @@ class File implements StorageInterface
 
         if (is_array($config)) {
             $this->setCache($config['name']);
-            $this->setPath(CYGNITE_BASE . DS . $path . DS);
+            $this->setPath(CYGNITE_BASE.DS.$path.DS);
             $this->setCacheExtension($config['extension']);
 
             return $this;
@@ -88,6 +88,7 @@ class File implements StorageInterface
 
     /**
      * @param $name
+     *
      * @return $this
      * @return $this
      */
@@ -100,6 +101,7 @@ class File implements StorageInterface
 
     /**
      * @param $pathUrl
+     *
      * @return $this
      */
     public function setPath($pathUrl)
@@ -111,6 +113,7 @@ class File implements StorageInterface
 
     /**
      * @param $ext
+     *
      * @return $this
      */
     public function setCacheExtension($ext)
@@ -122,12 +125,14 @@ class File implements StorageInterface
 
     /**
      * @param $key
+     *
      * @return bool
      */
     public function isCached($key)
     {
         if ($this->getCache() != false) {
             $cached = $this->getCache();
+
             return isset($cached[$key]['data']);
         }
     }
@@ -158,13 +163,14 @@ class File implements StorageInterface
             $fileName = $this->getCacheName();
             $fileName = preg_replace('/[^0-9a-z\.\_\-]/i', '', strtolower($fileName));
 
-            return $this->getPath() . md5($fileName) . $this->getCacheExtension();
+            return $this->getPath().md5($fileName).$this->getCacheExtension();
         }
     }
 
     /**
-     * @return bool
      * @throws \Exception
+     *
+     * @return bool
      */
     public function hasDirectory()
     {
@@ -176,10 +182,11 @@ class File implements StorageInterface
         ) {
             if (!chmod($this->getPath(), 0775)) {
                 throw new InvalidCacheDirectoryException(
-                    'Cache Path Error ' . $this->getPath() . ' directory must be writable'
+                    'Cache Path Error '.$this->getPath().' directory must be writable'
                 );
             }
         }
+
         return true;
     }
 
@@ -192,7 +199,7 @@ class File implements StorageInterface
     }
 
     /**
-     * get cache name
+     * get cache name.
      *
      * @return string
      */
@@ -202,7 +209,7 @@ class File implements StorageInterface
     }
 
     /**
-     * Cache file extension Getter
+     * Cache file extension Getter.
      *
      * @return string
      */
@@ -216,32 +223,34 @@ class File implements StorageInterface
      */
     public function getTimeout()
     {
-        return (int)ini_get('session.gc_maxlifetime');
+        return (int) ini_get('session.gc_maxlifetime');
     }
 
     /**
-     * Save data into cache
+     * Save data into cache.
      *
      * @false string
      * @false mixed
      * @false integer [optional]
+     *
      * @param     $key
      * @param     $value
      * @param int $expiration
+     *
      * @return object
      */
     public function store($key, $value, $expiration = 0)
     {
         // $this->getTimeout(); Do delete based on the session time out
-        $data = array(
-            'time' => time(),
+        $data = [
+            'time'   => time(),
             'expire' => $expiration,
-            'data' => $value
-        );
+            'data'   => $value,
+        ];
 
         if ($this->where == true) {
             $this->setCache($key)
-                 ->setPath(CYGNITE_BASE . DS . toPath('public.storage.cache') . DS);
+                 ->setPath(CYGNITE_BASE.DS.toPath('public.storage.cache').DS);
         }
 
         if (is_array($this->getCache())) {
@@ -261,35 +270,39 @@ class File implements StorageInterface
     }
 
     /**
-     * Checking cache existence
+     * Checking cache existence.
      *
      * @param $key
      * @param $key
+     *
      * @return bool
      */
     public function has($key)
     {
         if ($this->where == true) {
-            $this->setCache($key)->setPath(CYGNITE_BASE . DS . toPath('public.storage.cache') . DS);
+            $this->setCache($key)->setPath(CYGNITE_BASE.DS.toPath('public.storage.cache').DS);
         }
 
         $cached = $this->getCache();
+
         return !empty($cached[$key]) ? true : false;
     }
 
     /**
-     * Retrieve cache value from file by key
+     * Retrieve cache value from file by key.
      *
      * @false string
      * @false boolean [optional]
+     *
      * @param      $key
      * @param bool $timestamp
+     *
      * @return string
      */
     public function get($key, $timestamp = false)
     {
         if ($this->where == true) {
-            $this->setCache($key)->setPath(CYGNITE_BASE . DS . toPath('public.storage.cache') . DS);
+            $this->setCache($key)->setPath(CYGNITE_BASE.DS.toPath('public.storage.cache').DS);
         }
 
         $cached = [];
@@ -304,6 +317,7 @@ class File implements StorageInterface
 
     /**
      * @param $name
+     *
      * @return $this
      */
     public function where($name)
@@ -316,7 +330,9 @@ class File implements StorageInterface
     /**
      * @param $method
      * @param $arguments
+     *
      * @throws \BadMethodCallException
+     *
      * @return mixed
      */
     public function __call($method, $arguments)
@@ -329,7 +345,7 @@ class File implements StorageInterface
     }
 
     /**
-     * We will destroy expired cache from the directory
+     * We will destroy expired cache from the directory.
      *
      * @return int
      */
@@ -358,6 +374,7 @@ class File implements StorageInterface
     /**
      * @param $timestamp
      * @param $expiration
+     *
      * @return bool
      */
     private function isExpired($timestamp, $expiration)
@@ -376,7 +393,7 @@ class File implements StorageInterface
     }
 
     /**
-     * Erase all cached entries
+     * Erase all cached entries.
      *
      * @return object
      */

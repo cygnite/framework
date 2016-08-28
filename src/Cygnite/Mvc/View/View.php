@@ -7,11 +7,10 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 namespace Cygnite\Mvc\View;
 
-use Cygnite\Reflection;
 use Cygnite\Helpers\Inflector;
-use Cygnite\Mvc\View\ViewInterface;
 use Cygnite\Mvc\ControllerViewBridgeTrait;
 use Cygnite\Mvc\View\Exceptions\ViewNotFoundException;
 
@@ -68,7 +67,7 @@ class View implements ViewInterface,\ArrayAccess
     }
 
     /**
-     * We will set the view directory path
+     * We will set the view directory path.
      */
     private function setViewPath()
     {
@@ -76,11 +75,11 @@ class View implements ViewInterface,\ArrayAccess
             str_replace('.', DS, $this->viewsFilePath) :
             $this->viewsFilePath;
 
-        $this->twigTemplateLocation = CYGNITE_BASE . DS . APP . DS . $viewPath . DS;
+        $this->twigTemplateLocation = CYGNITE_BASE.DS.APP.DS.$viewPath.DS;
     }
 
     /**
-     * We will set Twig Template Environment
+     * We will set Twig Template Environment.
      *
      * @internal param $template
      */
@@ -111,32 +110,33 @@ class View implements ViewInterface,\ArrayAccess
     public function getControllerName()
     {
         $exp = explode('.', str_replace(APP_NS.'.Views.', '', $this->widgetName));
+
         return isset($exp[0]) ? $exp[0] : '';
     }
 
     /**
-    * Magic Method for handling dynamic data access.
+     * Magic Method for handling dynamic data access.
      *
-    * @param $key
-    */
+     * @param $key
+     */
     public function &__get($key)
     {
         return $this->data[$key];
     }
 
     /**
-    * Magic Method to save data into array.
+     * Magic Method to save data into array.
      *
-    * @param $key
-    * @param $value
-    */
+     * @param $key
+     * @param $value
+     */
     public function __set($key, $value)
     {
         $this->data[$key] = $value;
     }
 
     /**
-     * Create view and render it. This is alias of render method
+     * Create view and render it. This is alias of render method.
      *
      * <code>
      * View::create('view-name', $data);
@@ -146,6 +146,7 @@ class View implements ViewInterface,\ArrayAccess
      *
      * @param       $view
      * @param array $data
+     *
      * @return mixed
      */
     public static function create($view = null, array $data = [])
@@ -159,10 +160,9 @@ class View implements ViewInterface,\ArrayAccess
         return $v->render($view, $data, true)->content();
     }
 
-
     /**
      * This function is alias of create method
-     * If user want to access render function statically
+     * If user want to access render function statically.
      *
      * <code>
      * View::compose('view-name', $data);
@@ -176,6 +176,7 @@ class View implements ViewInterface,\ArrayAccess
      * @param          $view
      * @param array    $data
      * @param callable $callback
+     *
      * @return mixed
      */
     public static function compose($view, array $data = [], \Closure $callback = null)
@@ -192,7 +193,7 @@ class View implements ViewInterface,\ArrayAccess
     }
 
     /**
-     * This function is to load requested view file
+     * This function is to load requested view file.
      *
      * Render PHP View With Layout:
      * -------------------------------
@@ -208,10 +209,13 @@ class View implements ViewInterface,\ArrayAccess
      *
      * $content = $this->render('home.index', $data, true);
      * return Response::make($content);
+     *
      * @param       $view
      * @param array $params
      * @param bool  $return
+     *
      * @throws Exceptions\ViewNotFoundException
+     *
      * @return $this|mixed
      */
     public function render($view, $params = [], $return = false)
@@ -251,11 +255,12 @@ class View implements ViewInterface,\ArrayAccess
     }
 
     /**
-     * Render twig templates
+     * Render twig templates.
      *
      * @param       $view
      * @param array $param
      * @param bool  $return
+     *
      * @return $this
      */
     public function template($view, array $param = [], $return = false)
@@ -295,19 +300,21 @@ class View implements ViewInterface,\ArrayAccess
     /**
      * @param      $path
      * @param bool $twig
+     *
      * @return mixed|string
      */
     private function getPath($path, $twig = false)
     {
         if ($twig) {
-            return CYGNITE_BASE . DS .APP.DS.$this->viewsFilePath. DS.$path . $this->templateExtension;
+            return CYGNITE_BASE.DS.APP.DS.$this->viewsFilePath.DS.$path.$this->templateExtension;
         }
 
-        return str_replace(APP_NS, APP, CYGNITE_BASE . DS . $path . '.view' . EXT);
+        return str_replace(APP_NS, APP, CYGNITE_BASE.DS.$path.'.view'.EXT);
     }
 
     /**
      * @param $view
+     *
      * @return $this
      */
     private function setTwigTemplateInstance($view)
@@ -325,11 +332,12 @@ class View implements ViewInterface,\ArrayAccess
      * @param $view
      * @param $path
      * @param $params
+     *
      * @return $this
      */
     private function renderLayoutView($view, $path, $params)
     {
-        $layout = CYGNITE_BASE . DS . APP . DS .$path .$this->layout . '.view' . EXT;
+        $layout = CYGNITE_BASE.DS.APP.DS.$path.$this->layout.'.view'.EXT;
 
         $data['yield'] = $this->renderView($view, $params);
         $output = $this->renderView($layout, array_merge($data, $params));
@@ -340,25 +348,27 @@ class View implements ViewInterface,\ArrayAccess
 
     public function content()
     {
-        return ($this->offsetGet('__content__') ? $this->offsetGet('__content__') : null);
+        return $this->offsetGet('__content__') ? $this->offsetGet('__content__') : null;
     }
 
     /**
      * @param $params
+     *
      * @return mixed|string
      */
     public function with(array $params = [])
     {
         if (is_array($params)) {
-            $this->params = (array)$params;
+            $this->params = (array) $params;
         }
 
         return $this->load();
     }
 
     /**
-     * @return string
      * @throws ViewNotFoundException
+     *
+     * @return string
      */
     private function load()
     {
@@ -366,7 +376,7 @@ class View implements ViewInterface,\ArrayAccess
         $data = array_merge($this->params, $this->__get('parameters'));
 
         if (!file_exists($this->viewPath)) {
-            throw new ViewNotFoundException('The view path ' . $this->viewPath . ' is invalid.');
+            throw new ViewNotFoundException('The view path '.$this->viewPath.' is invalid.');
         }
 
         $output = $this->renderView($this->viewPath, $data);
@@ -378,6 +388,7 @@ class View implements ViewInterface,\ArrayAccess
     /**
      * @param $method
      * @param $params
+     *
      * @return mixed
      */
     public static function __callStatic($method, $params)
@@ -390,6 +401,7 @@ class View implements ViewInterface,\ArrayAccess
      *
      * @param $method
      * @param $arguments
+     *
      * @throws \RuntimeException
      */
     public function __call($method, $arguments)
@@ -402,9 +414,10 @@ class View implements ViewInterface,\ArrayAccess
     }
 
     /**
-     * ArrayAccess
+     * ArrayAccess.
      *
      * @param mixed $offset
+     *
      * @return bool
      */
     public function offsetExists($offset)
@@ -413,8 +426,10 @@ class View implements ViewInterface,\ArrayAccess
     }
 
     /**
-     * ArrayAccess
-     * @param  int|string $offset
+     * ArrayAccess.
+     *
+     * @param int|string $offset
+     *
      * @return mixed
      */
     public function offsetGet($offset)
@@ -423,10 +438,11 @@ class View implements ViewInterface,\ArrayAccess
     }
 
     /**
-     * \ArrayAccess
+     * \ArrayAccess.
      *
      * @param int|string $offset
      * @param mixed      $value
+     *
      * @return $this|void
      */
     public function offsetSet($offset, $value)
@@ -437,7 +453,8 @@ class View implements ViewInterface,\ArrayAccess
     }
 
     /**
-     * ArrayAccess
+     * ArrayAccess.
+     *
      * @param int|string $offset
      */
     public function offsetUnset($offset)
@@ -447,6 +464,7 @@ class View implements ViewInterface,\ArrayAccess
 
     /**
      * @param $template
+     *
      * @return $this
      */
     public function setTemplate($template)
@@ -457,7 +475,7 @@ class View implements ViewInterface,\ArrayAccess
     }
 
     /**
-     * Get Template instance
+     * Get Template instance.
      *
      * @return null
      */
@@ -468,6 +486,7 @@ class View implements ViewInterface,\ArrayAccess
 
     /**
      * @param $layout
+     *
      * @return $this
      */
     public function setLayout($layout)
@@ -482,11 +501,12 @@ class View implements ViewInterface,\ArrayAccess
      */
     public function getLayout()
     {
-        return (isset($this->layout) ? $this->layout : null);
+        return isset($this->layout) ? $this->layout : null;
     }
 
     /**
      * @param $templateEngine
+     *
      * @return $this
      */
     public function setTemplateEngine($templateEngine)
@@ -506,6 +526,7 @@ class View implements ViewInterface,\ArrayAccess
 
     /**
      * @param $templateExtension
+     *
      * @return $this
      */
     public function setTemplateExtension($templateExtension)
@@ -533,6 +554,7 @@ class View implements ViewInterface,\ArrayAccess
 
     /**
      * @param $autoReload
+     *
      * @return $this
      */
     public function setAutoReload($autoReload)
@@ -552,6 +574,7 @@ class View implements ViewInterface,\ArrayAccess
 
     /**
      * @param $debug
+     *
      * @return $this
      */
     public function setTwigDebug($debug)
@@ -570,7 +593,7 @@ class View implements ViewInterface,\ArrayAccess
     }
 
     /**
-     * We can set data into view page
+     * We can set data into view page.
      *
      * @param $key
      * @param $value

@@ -9,46 +9,49 @@
  */
 namespace Cygnite\Pipeline;
 
-use Closure;
 use Cygnite\Container\ContainerAwareInterface;
 
 interface PipelineInterface
 {
     /**
-     * Set container into pipeline for resolving objects
+     * Set container into pipeline for resolving objects.
      *
      * @param ContainerAwareInterface $container
+     *
      * @return $this
      */
     public function setContainer(ContainerAwareInterface $container);
 
     /**
-     * Send request through pipeline
+     * Send request through pipeline.
      *
      * @param $request
+     *
      * @return $this
      */
     public function send($request);
 
     /**
-     * Apply filters over pipes before executing
+     * Apply filters over pipes before executing.
      *
      * @param callable $callback
+     *
      * @return $this
      */
     public function then(callable $callback);
 
     /**
-     * Pass request through the pipeline
+     * Pass request through the pipeline.
      *
      * @param array $pipes
-     * @param null $method
+     * @param null  $method
+     *
      * @return $this
      */
     public function through(array $pipes, $method = null);
 
     /**
-     * Run all pipeline requests
+     * Run all pipeline requests.
      *
      * @return mixed
      */
