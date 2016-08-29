@@ -24,12 +24,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Cygnite\\Services\\Providers\\": ""
-        }
-    },
-     "extra": {
-        "branch-alias": {
-            "dev-master": "2.0-dev"
+            "Cygnite\\Services\\Providers\\Stripe\\": ""
         }
     }
 }
