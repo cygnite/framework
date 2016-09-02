@@ -1,4 +1,5 @@
 <?php
+
 namespace Cygnite\Mvc\View;
 
 if (!defined('CF_SYSTEM')) {
@@ -6,9 +7,7 @@ if (!defined('CF_SYSTEM')) {
 }
 
 /**
- * Class Widget
- *
- * @package Cygnite\Mvc\View
+ * Class Widget.
  */
 class Widget implements \ArrayAccess
 {
@@ -28,7 +27,7 @@ class Widget implements \ArrayAccess
      * @param       $name
      * @param array $data
      */
-    public function __construct($name, array $data= [])
+    public function __construct($name, array $data = [])
     {
         $this->setWidgetName($name);
         $this->data = $data;
@@ -48,6 +47,7 @@ class Widget implements \ArrayAccess
      * @param          $name
      * @param array    $data
      * @param callable $callback
+     *
      * @return mixed
      */
     public static function make($name, array $data = [], \Closure $callback = null)
@@ -57,12 +57,12 @@ class Widget implements \ArrayAccess
          | return callback
          */
         if (!is_null($callback) && $callback instanceof \Closure) {
-            return $callback(new Widget($name, $data));
+            return $callback(new self($name, $data));
         }
         /*
          | return object
          */
-        return (new Widget($name, $data))->render();
+        return (new self($name, $data))->render();
     }
 
     /**
@@ -79,7 +79,8 @@ class Widget implements \ArrayAccess
     }
 
     /**
-     * We will setup module view path
+     * We will setup module view path.
+     *
      * @return string
      */
     protected function setupModule()
@@ -98,7 +99,8 @@ class Widget implements \ArrayAccess
     }
 
     /**
-     * Set up widget view path
+     * Set up widget view path.
+     *
      * @return string
      */
     protected function setupWidget()
@@ -111,11 +113,12 @@ class Widget implements \ArrayAccess
         if (string_has($this->getWidgetName(), ':')) {
             $widget = null;
             $widget = str_replace(':', DS, $this->getWidgetName());
+
             return $this->getWidgetPath($widget, '', false);
         }
     }
 
-    private function getWidgetPath($widget, $moduleName = '',  $isModule = false)
+    private function getWidgetPath($widget, $moduleName = '', $isModule = false)
     {
         $modulePath = 'Views';
         if ($isModule) {
@@ -127,6 +130,7 @@ class Widget implements \ArrayAccess
 
     /**
      * @param bool $isModule
+     *
      * @return null
      */
     public function render($isModule = false)
@@ -177,6 +181,7 @@ class Widget implements \ArrayAccess
 
     /**
      * @param $name
+     *
      * @return null
      */
     public function getWidget($name)
@@ -186,16 +191,19 @@ class Widget implements \ArrayAccess
 
     /**
      * @param $key
+     *
      * @return bool
      */
     public function has($key)
     {
-        return isset($this->widget[$key]) ? true :false;
+        return isset($this->widget[$key]) ? true : false;
     }
 
     /**
-     * ArrayAccess
-     * @param  int|string $offset
+     * ArrayAccess.
+     *
+     * @param int|string $offset
+     *
      * @return bool
      */
     public function offsetExists($offset)
@@ -204,8 +212,10 @@ class Widget implements \ArrayAccess
     }
 
     /**
-     * ArrayAccess
-     * @param  int|string $offset
+     * ArrayAccess.
+     *
+     * @param int|string $offset
+     *
      * @return mixed
      */
     public function offsetGet($offset)
@@ -214,7 +224,8 @@ class Widget implements \ArrayAccess
     }
 
     /**
-     * ArrayAccess
+     * ArrayAccess.
+     *
      * @param int|string $offset
      * @param mixed      $value
      */
@@ -224,7 +235,8 @@ class Widget implements \ArrayAccess
     }
 
     /**
-     * ArrayAccess
+     * ArrayAccess.
+     *
      * @param int|string $offset
      */
     public function offsetUnset($offset)
@@ -233,7 +245,7 @@ class Widget implements \ArrayAccess
     }
 
     /**
-     * Get data set into Widget
+     * Get data set into Widget.
      *
      * @return array
      */

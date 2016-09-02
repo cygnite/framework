@@ -7,15 +7,14 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 namespace Cygnite\Console;
 
-use Cygnite\Foundation\Application;
 use Cygnite\Console\Foundation\Application as ConsoleApplication;
+use Cygnite\Foundation\Application;
 
 /**
- * Class CraftApplication
- *
- * @package Cygnite\Console
+ * Class CraftApplication.
  */
 class CraftApplication
 {
@@ -32,9 +31,10 @@ class CraftApplication
     }
 
     /**
-     * Register your console commands here
+     * Register your console commands here.
      *
      * @param $commands
+     *
      * @return $this
      */
     public function register($commands)
@@ -45,7 +45,7 @@ class CraftApplication
     }
 
     /**
-     * We will run Cygnite Console Application
+     * We will run Cygnite Console Application.
      */
     public function run()
     {

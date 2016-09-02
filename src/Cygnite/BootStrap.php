@@ -1,6 +1,7 @@
 <?php
-use Cygnite\Helpers\Config;
+
 use Cygnite\Common\UrlManager\Url;
+use Cygnite\Helpers\Config;
 
 define('APP', str_replace('src/', 'src'.DS, APPPATH));
 
@@ -25,6 +26,6 @@ if (!is_null(Config::get('global.config', 'encryption.key'))) {
  * has not been set in configuration
  * ----------------------------------------------------
  */
-if (is_null(Config::get('global.config', "default.controller"))) {
-    throw new \Exception("You must set default controller in ".APPPATH."/Configs/application.php");
+if (is_null(Config::get('global.config', 'default.controller'))) {
+    throw new \Exception('You must set default controller in '.APPPATH.'/Configs/application.php');
 }

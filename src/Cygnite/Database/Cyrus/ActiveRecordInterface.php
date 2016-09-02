@@ -7,7 +7,6 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-
 namespace Cygnite\Database\Cyrus;
 
 /**
@@ -15,11 +14,11 @@ namespace Cygnite\Database\Cyrus;
  *
  * @author Sanjoy Dey <dey.sanjoy0@gmail.com>
  */
-
 interface ActiveRecordInterface extends \ArrayAccess
 {
     /**
      * @param $argument
+     *
      * @return mixed
      */
     public static function find($argument);
@@ -31,6 +30,7 @@ interface ActiveRecordInterface extends \ArrayAccess
 
     /**
      * @param array $arguments
+     *
      * @return mixed
      */
     public static function all($arguments = []);
@@ -42,6 +42,7 @@ interface ActiveRecordInterface extends \ArrayAccess
 
     /**
      * @param $query
+     *
      * @return mixed
      */
     public static function sql($query);
@@ -67,7 +68,7 @@ interface ActiveRecordInterface extends \ArrayAccess
     public function getModelEvents();
 
     /**
-     * get table name
+     * get table name.
      *
      * @return null
      */
@@ -75,21 +76,23 @@ interface ActiveRecordInterface extends \ArrayAccess
 
     /**
      * @param array $attributes
+     *
      * @return mixed
      */
     public function setAttributes($attributes = []);
 
     /**
-     * Get attributes array
+     * Get attributes array.
      *
      * @return array|null
      */
     public function getAttributes();
 
     /**
-     * Save model attributes into database
+     * Save model attributes into database.
      *
      * @param array $attributes
+     *
      * @return mixed
      */
     public function save($attributes = []);
@@ -97,19 +100,20 @@ interface ActiveRecordInterface extends \ArrayAccess
     /**
      * @param      $arguments
      * @param bool $multiple
+     *
      * @return mixed
      */
     public function trash($arguments, $multiple = false);
 
     /** Check id is null or not.
-     *  If null return true else false
+     *  If null return true else false.
      *
      * @return bool
      */
     public function isNew();
 
     /**
-     * Get the primary key of table
+     * Get the primary key of table.
      *
      * @return null|string
      */
@@ -117,18 +121,20 @@ interface ActiveRecordInterface extends \ArrayAccess
 
     /**
      * @param $arguments
+     *
      * @return mixed
      */
     public function findByPK($arguments);
 
     /**
      * @param $key
+     *
      * @return mixed
      */
     public function getId($key);
 
     /**
-     * Set the pagination limit
+     * Set the pagination limit.
      *
      * @param null $number
      */
@@ -136,28 +142,32 @@ interface ActiveRecordInterface extends \ArrayAccess
 
     /**
      * @param $arguments
+     *
      * @return mixed
      */
     public function joinWith($arguments);
 
     /**
-     * We will get Fluent Query Object
+     * We will get Fluent Query Object.
+     *
      * @return Query
      */
     public function queryBuilder();
 
     /**
-     * Use Connection to build fluent queries against any table
+     * Use Connection to build fluent queries against any table.
      *
      * @param $database
+     *
      * @return mixed
      */
     public static function db($database);
 
     /**
-     * Get Database Connection
+     * Get Database Connection.
      *
      * @param $database
+     *
      * @return mixed
      */
     public static function connection($database);

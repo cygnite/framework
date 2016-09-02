@@ -1,18 +1,15 @@
 <?php
+
 namespace Cygnite\Common\SessionManager\Database;
 
-use Cygnite\Common\Encrypt;
-use Cygnite\Helpers\String;
+use Cygnite\Common\SessionManager\PacketInterface;
+use Cygnite\Database\Cyrus\ActiveRecord;
 use Cygnite\Database\Schema;
 use Cygnite\Helpers\Config;
-use Cygnite\Database\Cyrus\ActiveRecord;
-use Cygnite\Common\SessionManager\PacketInterface;
-use Cygnite\Common\SessionManager\Session as SessionManager;
+use Cygnite\Helpers\String;
 
 /**
- * Class Session
- *
- * @package Cygnite\Common\SessionManager\Database
+ * Class Session.
  */
 class Session extends ActiveRecord implements PacketInterface
 {
@@ -52,7 +49,7 @@ class Session extends ActiveRecord implements PacketInterface
             $this->start();
         }
 
-        $this->storage = & $_SESSION;
+        $this->storage = &$_SESSION;
 
         /*
          | Check csrf token already exists into session
@@ -65,7 +62,7 @@ class Session extends ActiveRecord implements PacketInterface
     }
 
     /**
-     * Set session save handler to override native handler
+     * Set session save handler to override native handler.
      */
     public function sessionSaveHandler()
     {
@@ -122,7 +119,7 @@ class Session extends ActiveRecord implements PacketInterface
     }
 
     /**
-     * Get the instance of session manager
+     * Get the instance of session manager.
      *
      * @return null
      */
@@ -132,9 +129,10 @@ class Session extends ActiveRecord implements PacketInterface
     }
 
     /**
-     * Set the name of session
+     * Set the name of session.
      *
      * @param null $name
+     *
      * @return string
      */
     public function name($name = null)
@@ -160,7 +158,7 @@ class Session extends ActiveRecord implements PacketInterface
     }
 
     /**
-     * Open an connection
+     * Open an connection.
      *
      * @return bool
      */
@@ -172,7 +170,7 @@ class Session extends ActiveRecord implements PacketInterface
     }
 
     /**
-     * We will create session schema if not exists
+     * We will create session schema if not exists.
      */
     public function createTableIfNotExists()
     {
@@ -181,7 +179,7 @@ class Session extends ActiveRecord implements PacketInterface
             function ($table) {
                 $table->tableName = $this->getTable();
 
-                /**
+                /*
                 | Check if table already exists
                 | if not we will create an table to store session info
                  */
@@ -189,11 +187,11 @@ class Session extends ActiveRecord implements PacketInterface
                     $table->create(
                         [
                             [
-                                'column' => 'id',
-                                'type' => 'int',
-                                'length' => 11,
+                                'column'    => 'id',
+                                'type'      => 'int',
+                                'length'    => 11,
                                 'increment' => true,
-                                'key' => 'primary'
+                                'key'       => 'primary',
                             ],
                             ['column' => 'access', 'type' => 'int', 'length' => 11],
                             ['column' => 'data', 'type' => 'text'],
@@ -218,12 +216,13 @@ class Session extends ActiveRecord implements PacketInterface
     /**
      * @param $id
      * @param $data
+     *
      * @return bool
      */
     public function write($id, $data)
     {
         $access = time();
-        $this->session_id = (string)$id;
+        $this->session_id = (string) $id;
         $this->access = $access;
         $this->data = $data;
         $this->save();
@@ -233,6 +232,7 @@ class Session extends ActiveRecord implements PacketInterface
 
     /**
      * @param $id
+     *
      * @return null
      */
     public function read($id)
@@ -247,6 +247,7 @@ class Session extends ActiveRecord implements PacketInterface
 
     /**
      * @param $id
+     *
      * @return bool
      */
     public function destroy($id)
@@ -258,6 +259,7 @@ class Session extends ActiveRecord implements PacketInterface
 
     /**
      * @param $max
+     *
      * @return bool
      */
     public function gc_session($max)
@@ -287,6 +289,7 @@ class Session extends ActiveRecord implements PacketInterface
 
     /**
      * @param $key
+     *
      * @return null
      */
     public function __get($key)
@@ -297,6 +300,7 @@ class Session extends ActiveRecord implements PacketInterface
     /**
      * @param $key
      * @param $value
+     *
      * @return void
      */
     public function set($key, $value = null)
@@ -311,6 +315,7 @@ class Session extends ActiveRecord implements PacketInterface
     /**
      * @param      $key
      * @param null $default
+     *
      * @return null
      */
     public function get($key = null, $default = null)
@@ -318,15 +323,17 @@ class Session extends ActiveRecord implements PacketInterface
         if (is_null($key)) {
             return $this->all();
         }
+
         return $this->offsetExists($key) ? $this->storage[$key] : $default;
     }
 
     /**
      * Returns all elements
      * If array passed, we will store into storage property
-     * as stack
+     * as stack.
      *
      * @param array $array overwrites values
+     *
      * @return array
      */
     public function all($array = [])
@@ -340,6 +347,7 @@ class Session extends ActiveRecord implements PacketInterface
 
     /**
      * @param $key
+     *
      * @return bool
      */
     public function has($key = null)
@@ -349,6 +357,7 @@ class Session extends ActiveRecord implements PacketInterface
 
     /**
      * @param $key
+     *
      * @return void
      * @return void
      */
@@ -374,7 +383,7 @@ class Session extends ActiveRecord implements PacketInterface
     }
 
     /**
-     * Delete all session and destroy the session
+     * Delete all session and destroy the session.
      */
     public function deleteAll()
     {
@@ -383,7 +392,7 @@ class Session extends ActiveRecord implements PacketInterface
     }
 
     /**
-     * Removes all data and reset the storage to empty array
+     * Removes all data and reset the storage to empty array.
      *
      * @return $this
      */
@@ -395,10 +404,11 @@ class Session extends ActiveRecord implements PacketInterface
     }
 
     /**
-     * Check if offset exists
+     * Check if offset exists.
      *
      * @param mixed $key
-     * @return boolean true or false
+     *
+     * @return bool true or false
      */
     public function offsetExists($key)
     {
@@ -406,9 +416,10 @@ class Session extends ActiveRecord implements PacketInterface
     }
 
     /**
-     * Get value if exists from storage
+     * Get value if exists from storage.
      *
      * @param mixed $key
+     *
      * @return mixed Can return all value types.
      */
     public function &offsetGet($key)
@@ -416,29 +427,33 @@ class Session extends ActiveRecord implements PacketInterface
         if (!isset($this->storage[$key])) {
             $this->storage[$key] = null;
         }
+
         return $this->storage[$key];
     }
 
     /**
-     * Setting or pushing data into storage
+     * Setting or pushing data into storage.
      *
      * @param mixed $key
      * @param mixed $value
+     *
      * @return void
      */
     public function offsetSet($key, $value)
     {
         if ($key === null) {
             array_push($this->storage, $value);
+
             return;
         }
         $this->storage[$key] = $value;
     }
 
     /**
-     * Key to unset
+     * Key to unset.
      *
      * @param mixed $key
+     *
      * @return void
      */
     public function offsetUnset($key)
@@ -447,7 +462,7 @@ class Session extends ActiveRecord implements PacketInterface
     }
 
     /**
-     * Count elements of an object
+     * Count elements of an object.
      *
      * @return int
      */
@@ -457,7 +472,7 @@ class Session extends ActiveRecord implements PacketInterface
     }
 
     /**
-     * Return the current element
+     * Return the current element.
      *
      * @return mixed
      */
@@ -467,7 +482,7 @@ class Session extends ActiveRecord implements PacketInterface
     }
 
     /**
-     * Return the key of the current element
+     * Return the key of the current element.
      *
      * @return mixed
      */
@@ -477,7 +492,7 @@ class Session extends ActiveRecord implements PacketInterface
     }
 
     /**
-     * Move forward to next element
+     * Move forward to next element.
      *
      * @return void
      */
@@ -487,7 +502,7 @@ class Session extends ActiveRecord implements PacketInterface
     }
 
     /**
-     * Rewind the Iterator to the first element
+     * Rewind the Iterator to the first element.
      *
      * @return void
      */
@@ -497,7 +512,7 @@ class Session extends ActiveRecord implements PacketInterface
     }
 
     /**
-     * Checks if current position is valid and return bool value
+     * Checks if current position is valid and return bool value.
      *
      * @return bool
      */
@@ -507,6 +522,7 @@ class Session extends ActiveRecord implements PacketInterface
         if ($key === false || $key === null) {
             return false;
         }
+
         return isset($this->storage[$key]);
     }
 
@@ -519,9 +535,9 @@ class Session extends ActiveRecord implements PacketInterface
          | We will check if token already exists in session
          | else we will regenerate token id
          */
-        if (! $this->has('_token')) {
+        if (!$this->has('_token')) {
             $this->regenerateToken();
-}
+        }
     }
 
     /**

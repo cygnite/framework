@@ -9,16 +9,13 @@
  */
 namespace Cygnite\Container\Dependency;
 
-use SplObjectStorage;
-use Cygnite\Reflection;
-use Cygnite\Helpers\Inflector;
-use Apps\Configs\Definitions\DefinitionManagerTrait;
 use Cygnite\Container\Exceptions\DependencyException;
+use Cygnite\Helpers\Inflector;
+use Cygnite\Reflection;
+use SplObjectStorage;
 
 /**
- * Class DependencyExtension
- *
- * @package Cygnite\DependencyInjection
+ * Class DependencyExtension.
  */
 abstract class Builder extends SplObjectStorage
 {
@@ -36,6 +33,7 @@ abstract class Builder extends SplObjectStorage
 
     /**
      * @param $namespace
+     *
      * @return $this
      */
     public function setAppNamespace($namespace)
@@ -51,20 +49,23 @@ abstract class Builder extends SplObjectStorage
     public function getAppNamespace()
     {
         $appNS = APP_NS.$this->controllersNs;
-        return (isset($this->appNamespace) ? $this->appNamespace : $appNS);
+
+        return isset($this->appNamespace) ? $this->appNamespace : $appNS;
     }
 
     /**
-     * Set all definitions into array
+     * Set all definitions into array.
      *
      * @param $propertyInjections
-     * @return $this
+     *
      * @throws \Cygnite\DependencyInjection\Exceptions\DependencyException
+     *
+     * @return $this
      */
     public function setPropertyInjection($propertyInjections)
     {
         if (!is_array($propertyInjections)) {
-            throw new DependencyException(__METHOD__." only accept parameter as array.");
+            throw new DependencyException(__METHOD__.' only accept parameter as array.');
         }
 
         $namespace = $this->getAppNamespace();
@@ -87,13 +88,15 @@ abstract class Builder extends SplObjectStorage
 
     /**
      * @param $services
-     * @return $this
+     *
      * @throws \Exception
+     *
+     * @return $this
      */
     public function setService($services)
     {
         if (!is_array($services)) {
-            throw new \Exception(__METHOD__." accept parameter as array.");
+            throw new \Exception(__METHOD__.' accept parameter as array.');
         }
 
         foreach ($services as $key => $alias) {
@@ -105,12 +108,13 @@ abstract class Builder extends SplObjectStorage
 
     /**
      * @param null $key
+     *
      * @return array|null
      */
     public function getDefinitions($key = null)
     {
         if (!is_null($key)) {
-            return isset($this->definitions[$key]) ? $this->definitions[$key] : null ;
+            return isset($this->definitions[$key]) ? $this->definitions[$key] : null;
         }
 
         return !empty($this->definitions) ? $this->definitions : [];
@@ -118,6 +122,7 @@ abstract class Builder extends SplObjectStorage
 
     /**
      * @param $definition
+     *
      * @return $this
      */
     public function setPropertyDefinition($definition)
@@ -137,6 +142,7 @@ abstract class Builder extends SplObjectStorage
 
     /**
      * @param $controller
+     *
      * @return null
      */
     private function getPropertyDefinitionConfig($controller)
@@ -148,11 +154,14 @@ abstract class Builder extends SplObjectStorage
     }
 
     /**
-     * Inject all your properties into controller at run time
+     * Inject all your properties into controller at run time.
+     *
      * @param $controllerInstance
      * @param $controller
-     * @return bool
+     *
      * @throws \Exception
+     *
+     * @return bool
      */
     public function propertyInjection($controllerInstance, $controller)
     {
@@ -203,8 +212,10 @@ abstract class Builder extends SplObjectStorage
      * @param $controller
      * @param $class
      * @param $reflectionArray
-     * @return array
+     *
      * @throws \Cygnite\DependencyInjection\Exceptions\DependencyException
+     *
+     * @return array
      */
     private function checkPropertyAndMakeObject($controller, $class, $reflectionArray)
     {
@@ -224,6 +235,7 @@ abstract class Builder extends SplObjectStorage
 
     /**
      * @param $controller
+     *
      * @return array
      */
     private function setReflectionClassAttributes($controller)

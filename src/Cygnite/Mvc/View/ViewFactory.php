@@ -1,4 +1,5 @@
 <?php
+
 namespace Cygnite\Mvc\View;
 
 if (!defined('CF_SYSTEM')) {
@@ -39,7 +40,7 @@ abstract class ViewFactory
     }
 
     /**
-     * Create view and render it. This is alias of render method
+     * Create view and render it. This is alias of render method.
      *
      * <code>
      * View::create('view-name', $data);
@@ -47,6 +48,7 @@ abstract class ViewFactory
      *
      * @param       $view
      * @param array $data
+     *
      * @return mixed
      */
     public static function create($view = null, array $data = [])
@@ -57,6 +59,4 @@ abstract class ViewFactory
 
         return static::make()->render($view, $data);
     }
-
-
 }

@@ -2,12 +2,12 @@
 
 namespace Cygnite\Foundation\Http;
 
-use Throwable;
-use Cygnite\Pipeline\Pipeline;
 use Cygnite\Base\Router\Router;
 use Cygnite\Foundation\Application;
 use Cygnite\Http\Responses\Response;
 use Cygnite\Http\Responses\ResponseInterface;
+use Cygnite\Pipeline\Pipeline;
+use Throwable;
 
 /**
  * Class Kernel.
@@ -58,9 +58,10 @@ class Kernel implements KernelInterface
      *
      * @param $request
      *
+     * @throws Exception|\Exception
+     *
      * @return array|ResponseInterface|mixed|static
      *
-     * @throws Exception|\Exception
      *
      * @note this function is incomplete, need to enhance
      * for better exception handling

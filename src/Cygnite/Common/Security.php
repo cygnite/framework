@@ -8,7 +8,6 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-
 namespace Cygnite\Common;
 
 use Closure;
@@ -22,16 +21,16 @@ use Closure;
  * This package provides necessary in built validation for users data.
  *
  * <code>
- *  $instance = Security::create(function ($instance)
+ *  $s = Security::create(function ($s)
  *  {
- *      return $instance;
+ *      return $s;
  *  });
- *  $instance->sanitize($string);
+ *
+ *  $s->sanitize($string);
+ *  $s->removeJavaScriptProtocols($string);
  * </code>
  * Inspired by TravianZ and Kohana security library http://kohanaphp.com/
- *
  */
-
 class Security
 {
     // Instance of the security class.
@@ -55,7 +54,7 @@ class Security
         '_COOKIE',
         '_SERVER',
         '_ENV',
-        '_SESSION'
+        '_SESSION',
     ];
     private $sqlReplace = [
         '/[\']/',
@@ -63,7 +62,7 @@ class Security
         '/\bdrop\b/i',
         '/\bdelete\b/i',
         '/\binsert\b/i',
-        '/\bupdate\b/i'
+        '/\bupdate\b/i',
     ];
 
     /**
@@ -73,6 +72,7 @@ class Security
      * access instance directly.
      *
      * @throws \Exception
+     *
      * @return \Cygnite\Common\Security
      */
     public function __construct()
@@ -105,7 +105,7 @@ class Security
     }
 
     /**
-     * Check magic quote and disable it
+     * Check magic quote and disable it.
      */
     private function checkMagicQuoteRuntime()
     {
@@ -117,7 +117,7 @@ class Security
     }
 
     /**
-     * disable all global variable
+     * disable all global variable.
      */
     private function disableGlobals()
     {
@@ -132,6 +132,8 @@ class Security
     }
 
     /**
+     * Clean $_POST array values.
+     *
      * @return array
      */
     private function cleanPost()
@@ -153,17 +155,19 @@ class Security
      * Enforces W3C specifications to prevent malicious exploitation.
      *
      * @param  string Key to clean
+     *
      * @throws \Exception
+     *
      * @return string
      */
-    protected function cleanKeys($data)
+    public function cleanKeys($data)
     {
-        $pregMatches = (bool)preg_match(self::PREG_PROPERTIES, '?');
+        $pregMatches = (bool) preg_match(self::PREG_PROPERTIES, '?');
         $chars = '';
         $chars = $pregMatches ? '\pL' : 'a-zA-Z';
 
 
-        if (!preg_match('#^[' . $chars . '0-9:_.-]++$#uD', $data)) {
+        if (!preg_match('#^['.$chars.'0-9:_.-]++$#uD', $data)) {
             throw new \Exception('Illegal key characters in global data');
         }
 
@@ -171,20 +175,21 @@ class Security
     }
 
     /**
-     * Escapes data.
+     * Escapes/ Sanitize the given value.
      *
      * @param  mixed Data to clean
+     *
      * @return mixed
      */
     public function sanitize($data)
     {
         if (is_array($data)) {
-            $new_array = [];
+            $newArray = [];
             foreach ($data as $key => $value) {
-                $new_array[$this->cleanKeys($key)] = $this->sanitize($value);
+                $newArray[$this->cleanKeys($key)] = $this->sanitize($value);
             }
 
-            return $new_array;
+            return $newArray;
         }
 
         if ($this->magicQuotesGpc === true) {
@@ -192,15 +197,14 @@ class Security
             $data = stripslashes($data);
         }
 
-        $data = $this->xssClean($data);
-
-        return $data;
+        return $this->xssClean($data);
     }
 
     /**
      * Cross site filtering (XSS). Recursive.
      *
      * @param  string Data to be cleaned
+     *
      * @return mixed
      */
     public function xssClean($data)
@@ -273,7 +277,14 @@ class Security
         return $data;
     }
 
-    private function removeJavaScriptProtocols($data)
+    /**
+     * Remove only javascript protocol from the given string.
+     *
+     * @param $data
+     *
+     * @return mixed
+     */
+    public function removeJavaScriptProtocols($data)
     {
         return preg_replace(
             '#([a-z]*)[\x00-\x20]*=[\x00-\x20]*([`\'"]*)[\x00-\x20]*j[\x00-\x20]*a[\x00-\x20]*v[\x00-\x20]*a[\x00-\x20]*s[\x00-\x20]*c[\x00-\x20]*r[\x00-\x20]*i[\x00-\x20]*p[\x00-\x20]*t[\x00-\x20]*:#iu',
@@ -282,7 +293,14 @@ class Security
         );
     }
 
-    private function removeVbScriptProtocols($data)
+    /**
+     * Remove VB script protocols from the given string.
+     *
+     * @param $data
+     *
+     * @return mixed
+     */
+    public function removeVbScriptProtocols($data)
     {
         return preg_replace(
             '#([a-z]*)[\x00-\x20]*=([\'"]*)[\x00-\x20]*v[\x00-\x20]*b[\x00-\x20]*s
@@ -292,6 +310,14 @@ class Security
         );
     }
 
+    /**
+     * Fix IE entity
+     * Only works in IE: <span style="width: expression(alert('Ping!'));"></span>.
+     *
+     * @param $data
+     *
+     * @return mixed
+     */
     private function fixIe($data)
     {
         $data = preg_replace(
@@ -314,6 +340,13 @@ class Security
         return $data;
     }
 
+    /**
+     * Remove namespace elements from string.
+     *
+     * @param $data
+     *
+     * @return mixed
+     */
     private function removeNameSpaceElements($data)
     {
         return preg_replace(
@@ -357,14 +390,14 @@ class Security
 
     public static function decode($matches)
     {
-        if (!is_int($matches[1]{0})) {
-            $val = '0' . $matches[1] + 0;
+        if (!is_int($matches[1][0])) {
+            $val = '0'.$matches[1] + 0;
         } else {
-            $val = (int)$matches[1];
+            $val = (int) $matches[1];
         }
 
         if ($val > 255) {
-            return '&#' . $val . ';';
+            return '&#'.$val.';';
         }
 
         if ($val >= 65 && $val <= 90 //A-Z
@@ -378,6 +411,12 @@ class Security
         return $matches[0];
     }
 
+    /**
+     * XSS clean.
+     *
+     * @param $item
+     * @param $key
+     */
     public static function clean($item, $key)
     {
         self::_xssClean($item, $key);
@@ -419,7 +458,7 @@ class Security
             '/[\x00-\x08]/',
             '/\x0b/',
             '/\x0c/',
-            '/[\x0e-\x1f]/'
+            '/[\x0e-\x1f]/',
         ];
 
         foreach ($nonDisplayable as $regex) {
@@ -430,6 +469,14 @@ class Security
         return $data;
     }
 
+    /**
+     * Validate the given input and value.
+     *
+     * @param $key
+     * @param $value
+     *
+     * @return null
+     */
     public function validate($key, $value)
     {
         return $this->doValidation($key, $value);
@@ -450,6 +497,7 @@ class Security
      * Gets the instance of the Security class.
      *
      * @param callable| Closure $callback
+     *
      * @return object Instance of Security
      */
     public static function create(Closure $callback = null)

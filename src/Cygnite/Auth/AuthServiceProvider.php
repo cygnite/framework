@@ -7,10 +7,11 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 namespace Cygnite\AuthManager;
 
-use Cygnite\Foundation\Application;
 use Cygnite\DependencyInjection\ServiceProvider;
+use Cygnite\Foundation\Application;
 
 class AuthServiceProvider extends ServiceProvider
 {

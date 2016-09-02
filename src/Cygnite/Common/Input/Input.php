@@ -8,19 +8,17 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-
 namespace Cygnite\Common\Input;
 
 use Closure;
+use Cygnite\Common\ArrayManipulator\ArrayAccessor;
+use Cygnite\Common\Input\CookieManager\Cookie;
 use Cygnite\Common\Security;
 use InvalidArgumentException;
-use Cygnite\Common\Input\CookieManager\Cookie;
-use Cygnite\Common\ArrayManipulator\ArrayAccessor;
 
 /**
- * Class Input
+ * Class Input.
  *
- * @package Cygnite\Common\Input
  * @author Sanjoy Dey <dey.sanjoy0@gmail.com>
  */
 class Input
@@ -32,7 +30,6 @@ class Input
     public $request = [];
 
     /**
-     *
      * @param Security $security
      */
     public function __construct(Security $security)
@@ -43,6 +40,7 @@ class Input
 
     /**
      * @param callable $callback
+     *
      * @return object
      */
     public static function make(Closure $callback = null)
@@ -56,6 +54,7 @@ class Input
 
     /**
      * @param $input
+     *
      * @return bool
      */
     public function hasPost($input)
@@ -67,6 +66,7 @@ class Input
 
     /**
      * @param $key
+     *
      * @return $this
      */
     public function except($key)
@@ -79,8 +79,10 @@ class Input
     /**
      * @param null $key
      * @param null $value
-     * @return bool|null
+     *
      * @throws \InvalidArgumentException
+     *
+     * @return bool|null
      */
     public function post($key = null, $value = null)
     {
@@ -89,8 +91,7 @@ class Input
         }
 
         if (!is_null($key) && !string_has($key, '.') && is_null($value)) {
-
-        $postValue = '';
+            $postValue = '';
             $key = $this->security->sanitize($key);
             $postValue = $this->security->sanitize($this->request['post'][$key]);
             $this->request['post'][$key] = $postValue;
@@ -110,11 +111,10 @@ class Input
          | $input->post('user.name'); // output: foo
          */
         if (!is_null($key) && string_has($key, '.') && is_null($value)) {
-
             $arr = ArrayAccessor::make($this->request['post']);
 
             return $arr->toString($this->security->sanitize($key));
-            }
+        }
 
         $this->setPostValue($key, $value);
 
@@ -153,6 +153,7 @@ class Input
 
     /**
      * @param $string
+     *
      * @return string
      */
     public function htmlDecode($string)
@@ -188,7 +189,7 @@ class Input
      */
     public function getRequest()
     {
-        return [ 'get' => $_GET, 'post' => $_POST, 'cookie' => $_COOKIE ];
+        return ['get' => $_GET, 'post' => $_POST, 'cookie' => $_COOKIE];
     }
 
     /**
@@ -196,12 +197,14 @@ class Input
      */
     public function json()
     {
-        $data = file_get_contents("php://input");
+        $data = file_get_contents('php://input');
+
         return json_decode($data);
     }
 
     /**
-     * Check if ajax request
+     * Check if ajax request.
+     *
      * @return bool
      */
     public function isAjax()
@@ -219,7 +222,6 @@ class Input
 
     /**
      * Sets or returns the cookie variable value.
-     *
      */
     public function cookie(Closure $callback = null)
     {

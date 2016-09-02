@@ -7,10 +7,9 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 namespace Cygnite\Console\Generator;
 
-use Cygnite\Database\Configurations;
-use Cygnite\Database\Connection;
 use Cygnite\Helpers\Inflector;
 
 /*
@@ -53,11 +52,21 @@ class Migrator
         return new self($arguments);
     }
 
+    /**
+     * Set template directory.
+     *
+     * @param type $path
+     */
     public function setTemplateDir($path)
     {
         $this->templatePath = $path;
     }
 
+    /**
+     * Get the template path.
+     *
+     * @return type
+     */
     public function getTemplatePath()
     {
         return (isset($this->templatePath)) ?
@@ -65,6 +74,13 @@ class Migrator
             null;
     }
 
+    /**
+     * Check has direectory.
+     *
+     * @param type $directory
+     *
+     * @return type
+     */
     private function hasDirectory($directory)
     {
         return is_dir($directory) || mkdir($directory);
@@ -75,9 +91,9 @@ class Migrator
      */
     public function replaceTemplateByInput($template = 'Migration')
     {
-        #replace with table name - {%className%}
+        //replace with table name - {%className%}
 
-        $file =  $this->getTemplatePath().$template.EXT;
+        $file = $this->getTemplatePath().$template.EXT;
 
         file_exists($file) or die("Base template doesn't exists");
 
@@ -114,6 +130,7 @@ class Migrator
 
     /**
      * @param \DateTime $date
+     *
      * @return string
      */
     public function generate(\DateTime $date)
@@ -128,12 +145,12 @@ class Migrator
                     $date->format('YmdHis').'_'.$this->command->argumentName.EXT
                 ));
 
-        $filePath =  $appMigrationPath.$file;
+        $filePath = $appMigrationPath.$file;
 
         /*write operation ->*/
-        $writeTmp =fopen(
+        $writeTmp = fopen(
             $filePath,
-            "w"
+            'w'
         ) or die("Unable to generate migration on $filePath");
 
         try {
@@ -149,15 +166,16 @@ class Migrator
     }
 
     /**
-     * @return $this
      * @throws \Exception
+     *
+     * @return $this
      */
     public function getLatestMigration()
     {
         try {
             $files = $this->files($this->getAppMigrationDirPath());
         } catch (\Exception $e) {
-            throw new \Exception(sprintf("Invalid migration directory %s.", $this->getAppMigrationDirPath()));
+            throw new \Exception(sprintf('Invalid migration directory %s.', $this->getAppMigrationDirPath()));
         }
 
         $this->latestFile = reset($files);
@@ -166,9 +184,10 @@ class Migrator
     }
 
     /**
-     * We will scan directory and return only files with .php extension
+     * We will scan directory and return only files with .php extension.
      *
      * @param $directory
+     *
      * @return array
      */
     public function files($directory)
@@ -177,9 +196,10 @@ class Migrator
     }
 
     /**
-     * Return file extension
+     * Return file extension.
      *
      * @param $file
+     *
      * @return string
      */
     private function getFileExt($file)
@@ -192,54 +212,64 @@ class Migrator
         if (is_array($string)) {
             $parts = [];
             foreach ($string as $key => $str) {
-               $parts[$key] = preg_split('((\d+|\D+))', $str, -1, PREG_SPLIT_DELIM_CAPTURE|PREG_SPLIT_NO_EMPTY);
+                $parts[$key] = preg_split('((\d+|\D+))', $str, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
             }
 
             return $parts;
         }
 
-        return preg_split('((\d+|\D+))', $string, -1, PREG_SPLIT_DELIM_CAPTURE|PREG_SPLIT_NO_EMPTY);
+        return preg_split('((\d+|\D+))', $string, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
     }
 
     /**
      * @param string $fileName
+     *
      * @throws \Exception
      */
     public function setMigrationClassName($fileName = null)
     {
         if ($this->getFileExt($this->latestFile) !== 'php') {
-            throw new \Exception(APP_NS."/Resources/Database/Migrations/ must have {xxxx_table_name.php} file types");
+            throw new \Exception(APP_NS.'/Resources/Database/Migrations/ must have {xxxx_table_name.php} file types');
         }
 
         $fileName = (is_null($fileName)) ? $this->latestFile : $fileName;
 
         $file = str_replace(EXT, '', $fileName);
         $exp = '';
-        $exp =  preg_split('((\d+|\D+))', $file, -1, PREG_SPLIT_DELIM_CAPTURE|PREG_SPLIT_NO_EMPTY);
+        $exp = preg_split('((\d+|\D+))', $file, -1, PREG_SPLIT_DELIM_CAPTURE | PREG_SPLIT_NO_EMPTY);
 
         $this->migrationVersion = $exp[0];
         $this->migrationClass = $exp[1];
     }
 
+    /**
+     * Get the migration version.
+     *
+     * @return type
+     */
     public function getVersion()
     {
         return $this->migrationVersion;
     }
 
+    /**
+     * Get the migration class name.
+     *
+     * @return type
+     */
     public function getMigrationClass()
     {
         return $this->migrationClass;
     }
 
     /**
-     * Call migration and do update
+     * Call migration and do update.
      *
      * @param string $type
      */
     public function updateMigration($type = 'up')
     {
         $file = $class = null;
-
         $file = $this->getAppMigrationDirPath().$this->getVersion().$this->getMigrationClass();
 
         if (is_readable($file.EXT)) {
@@ -251,13 +281,19 @@ class Migrator
             $type = 'up';
         }
 
-        call_user_func_array([new $class, $type], []);
+        //Create migrations table schema if not exists
+        $this->command->table()->makeMigration();
+
+        call_user_func_array([new $class(), $type], []);
 
         $this->updateMigrationTable();
 
-        $this->command->info("Migrated: $file OK!");
+        $this->command->info('Migrated: '.$file.EXT.' OK!');
     }
-    
+
+    /**
+     * Update the entry to migrations table.
+     */
     public function updateMigrationTable()
     {
         $this->command->table()->updateMigrationVersion($this);

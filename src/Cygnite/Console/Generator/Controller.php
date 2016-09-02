@@ -7,16 +7,17 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
+
 namespace Cygnite\Console\Generator;
 
 use Cygnite\Helpers\Inflector;
 
 /**
- * Cygnite Controller Generator
+ * Cygnite Controller Generator.
  *
  * This class used to generate controller code
- * @author Sanjoy Dey <dey.sanjoy0@gmail.com>
  *
+ * @author Sanjoy Dey <dey.sanjoy0@gmail.com>
  */
 class Controller
 {
@@ -65,7 +66,8 @@ class Controller
     }
 
     /**
-     * Set controller template path
+     * Set controller template path.
+     *
      * @param $path
      */
     public function setControllerTemplatePath($path)
@@ -74,7 +76,8 @@ class Controller
     }
 
     /**
-     * Get controller template path
+     * Get controller template path.
+     *
      * @return null
      */
     public function getControllerTemplatePath()
@@ -86,11 +89,12 @@ class Controller
 
     /**
      * @param $name
+     *
      * @return void
      */
     public function setControllerName($name)
     {
-        $this->controller = str_replace("Controller", "", trim($name));
+        $this->controller = str_replace('Controller', '', trim($name));
     }
 
     /**
@@ -102,7 +106,8 @@ class Controller
     }
 
     /**
-     * Generate form open tag
+     * Generate form open tag.
+     *
      * @return string
      */
     private function buildFormOpen()
@@ -116,9 +121,10 @@ class Controller
     }
 
     /**
-     * Generate Form Elements
+     * Generate Form Elements.
      *
      * @param $value
+     *
      * @return string
      */
     private function generateFormElements($value)
@@ -128,11 +134,13 @@ class Controller
         $form .= "\t\t".'->addElement("label", "'.$label.'", ["class" => "col-sm-2 control-label","style" => "width:100%;"])'.PHP_EOL;
 
         $form .= "\t\t".'->addElement("text", "'.$value['COLUMN_NAME'].'", ["value" => (isset($this->model->'.$value['COLUMN_NAME'].')) ? $this->model->'.$value['COLUMN_NAME'].' : "", "class" => "form-control"])'.PHP_EOL;
+
         return $form;
     }
 
     /**
-     * Build Form closing tags
+     * Build Form closing tags.
+     *
      * @return string
      */
     private function buildFormCloseTags()
@@ -147,8 +155,10 @@ class Controller
     }
 
     /**
-     * Generate database code
+     * Generate database code.
+     *
      * @param $value
+     *
      * @return string
      */
     private function generateDbCode($value)
@@ -161,8 +171,7 @@ class Controller
     }
 
     /**
-     * Update the template code
-     *
+     * Update the template code.
      */
     public function updateTemplate()
     {
@@ -170,10 +179,8 @@ class Controller
 
         $form = $this->buildFormOpen();
 
-        foreach ($this->columns as $key=> $value) {
-
+        foreach ($this->columns as $key => $value) {
             if ($value['COLUMN_NAME'] !== 'id') {
-
                 if ($this->isFormGenerator == false) {
                     $codeDb .= $this->generateDbCode($value);
                 }
@@ -194,7 +201,8 @@ class Controller
     }
 
     /**
-     * Get the form
+     * Get the form.
+     *
      * @return null|string
      */
     public function getForm()
@@ -217,8 +225,10 @@ class Controller
     }
 
     /**
-     * Replace the controller name with original name
+     * Replace the controller name with original name.
+     *
      * @param $content
+     *
      * @return mixed
      */
     private function replaceControllerName($content)
@@ -231,9 +241,10 @@ class Controller
     }
 
     /**
-     * Replace the model name with original model name
+     * Replace the model name with original model name.
      *
      * @param $content
+     *
      * @return mixed
      */
     private function replaceModelName($content)
@@ -247,15 +258,13 @@ class Controller
         return $newContent;
     }
 
-
     private function controllerTemplateName()
     {
         return basename(__FILE__);
     }
 
     /**
-     * Generate Controller template with original content
-     *
+     * Generate Controller template with original content.
      */
     public function generateControllerTemplate()
     {
@@ -266,12 +275,12 @@ class Controller
 
         $this->formPath = str_replace('Controllers\\', '', $this->getControllerTemplatePath()).DS.'Form'.DS;
 
-        file_exists($file) or die("Controller Template not Exists");
+        file_exists($file) or die('Controller Template not Exists');
         //file_exists($modelFl ) or die("No Model Exists");
 
         /*read operation ->*/
-        $this->filePointer = fopen($file, "r");
-        $content=fread($this->filePointer, filesize($file));
+        $this->filePointer = fopen($file, 'r');
+        $content = fread($this->filePointer, filesize($file));
         //fclose($tmp);
 
         $content = $this->replaceControllerName($content);
@@ -290,7 +299,7 @@ class Controller
             //We will generate Form Component
             $formContent = file_get_contents($formTemplatePath.'Form'.EXT, true);
         } else {
-            die("Form template doesn't exists in ".$formTemplatePath.'Form'.EXT." directory.");
+            die("Form template doesn't exists in ".$formTemplatePath.'Form'.EXT.' directory.');
         }
 
         $formContent = str_replace('%controllerName%', $this->controller, $formContent);
@@ -304,27 +313,30 @@ class Controller
     }
 
     /**
-     * Generate form component
+     * Generate form component.
+     *
      * @param $formContent
+     *
      * @return bool
      */
     public function generateFormComponent($formContent)
     {
         /*write operation ->*/
-        $writeTmp =fopen($this->applicationDir.DS.'Form'.DS.$this->controller.'Form'.EXT, "w")
+        $writeTmp = fopen($this->applicationDir.DS.'Form'.DS.$this->controller.'Form'.EXT, 'w')
         or die('Unable to generate controller');
 
         $contentAppendWith = '';
         $contentAppendWith = '<?php '.PHP_EOL;
         $formContent = str_replace('{%Apps%}', APP_NS, $formContent);
-        fwrite($writeTmp, $contentAppendWith .$formContent);
+        fwrite($writeTmp, $contentAppendWith.$formContent);
         fclose($writeTmp);
 
         return true;
     }
 
     /**
-     * Set application directory
+     * Set application directory.
+     *
      * @param $dir
      */
     public function setApplicationDirectory($dir)
@@ -333,19 +345,19 @@ class Controller
     }
 
     /**
-     * Generate the controller with updated template
+     * Generate the controller with updated template.
      */
     public function generate()
     {
         /*write operation ->*/
-        $writeTmp =fopen(
+        $writeTmp = fopen(
             $this->applicationDir.DS.'Controllers'.DS.$this->controller.'Controller'.EXT,
-            "w"
+            'w'
         ) or die('Unable to generate controller');
 
         $contentAppendWith = '<?php '.PHP_EOL;
 
-        fwrite($writeTmp, $contentAppendWith .$this->replacedContent);
+        fwrite($writeTmp, $contentAppendWith.$this->replacedContent);
         fclose($writeTmp);
         fclose($this->filePointer);
     }
@@ -353,6 +365,7 @@ class Controller
     /**
      * @param       $method
      * @param array $arguments
+     *
      * @return Controller
      */
     public static function __callStatic($method, $arguments = [])
@@ -378,8 +391,9 @@ class Controller
     }
 
     /**
-     * @return bool
      * @throws \Exception
+     *
+     * @return bool
      */
     private function generateBasicController()
     {
@@ -390,23 +404,26 @@ class Controller
         }
 
         /*write operation ->*/
-        $filePointer = fopen($controllerClass, "w") or die('Unable to generate controller');
+        $filePointer = fopen($controllerClass, 'w') or die('Unable to generate controller');
 
         $controllerContent = $this->getControllerTemplate();
         $content = $this->getIndexStub();
         $content = $this->replaceTemplate('{%methods%}', $content, $controllerContent);
+
         return $this->writeContentToClass($filePointer, $content);
     }
 
     /**
      * @param $filePointer
      * @param $content
+     *
      * @return bool
      */
     private function writeContentToClass($filePointer, $content)
     {
         fwrite($filePointer, $content);
         fclose($filePointer);
+
         return true;
     }
 
@@ -418,6 +435,7 @@ class Controller
         $this->getControllerTemplatePath();
         $content = file_get_contents($this->getControllerTemplatePath().'controller.tpl.stub', true);
         $content = $this->replaceTemplate('{%Apps%}', APP_NS, $content);
+
         return $this->replaceTemplate('{%ControllerClassName%}', $this->controller, $content);
     }
 
@@ -433,6 +451,7 @@ class Controller
      * @param $key
      * @param $replace
      * @param $content
+     *
      * @return mixed
      */
     private function replaceTemplate($key, $replace, $content)
@@ -441,12 +460,13 @@ class Controller
     }
 
     /**
-     * @return bool
      * @throws \Exception
+     *
+     * @return bool
      */
     private function makeResourceController()
     {
-        $stubs = array('index', 'new', 'create', 'show', 'edit', 'update', 'delete');
+        $stubs = ['index', 'new', 'create', 'show', 'edit', 'update', 'delete'];
         $controllerClass = $this->applicationDir.DS.'Controllers'.DS.$this->controller.'Controller'.EXT;
 
         if (file_exists($controllerClass)) {
@@ -454,15 +474,16 @@ class Controller
         }
 
         /*write operation ->*/
-        $filePointer = fopen($controllerClass, "w") or die('Unable to generate controller');
+        $filePointer = fopen($controllerClass, 'w') or die('Unable to generate controller');
         $controllerContent = $this->getControllerTemplate();
 
-        $resourceContent = "";
+        $resourceContent = '';
         foreach ($stubs as $key => $template) {
             $resourceContent .= file_get_contents($this->getControllerTemplatePath().$template.'.tpl.stub', true).PHP_EOL;
         }
 
         $content = $this->replaceTemplate('{%methods%}', $resourceContent, $controllerContent);
+
         return $this->writeContentToClass($filePointer, $content);
     }
 }

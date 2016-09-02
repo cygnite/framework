@@ -1,8 +1,6 @@
 <?php
-namespace Cygnite\Common\SessionManager\Memory;
 
-use Cygnite\Helpers\Config;
-use Cygnite\Common\SessionManager\Session as SessionManager;
+namespace Cygnite\Common\SessionManager\Memory;
 
 class Redis
 {

@@ -1,15 +1,12 @@
 <?php
+
 namespace Cygnite\Database\Query;
 
 use Cygnite\Helpers\Inflector;
 
 /**
- * Class Joins
- *
- * @package Cygnite\Database\Query
- *
+ * Class Joins.
  */
-
 class Joins
 {
     /**
@@ -23,81 +20,87 @@ class Joins
     protected $hasJoin = false;
 
     /**
-     * Add a simple JOIN string to the query
+     * Add a simple JOIN string to the query.
      *
      * @param      $table
      * @param      $constraint
      * @param null $tableAlias
+     *
      * @return $this
      */
     public function join($table, $constraint, $tableAlias = null)
     {
-        return $this->addJoinSource("", $table, $constraint, $tableAlias);
+        return $this->addJoinSource('', $table, $constraint, $tableAlias);
     }
 
     /**
-     * Add an INNER JOIN string to the query
+     * Add an INNER JOIN string to the query.
      *
      * @param      $table
      * @param      $constraint
      * @param null $tableAlias
+     *
      * @return $this
      */
     public function leftJoin($table, $constraint, $tableAlias = null)
     {
-        return $this->addJoinSource("LEFT", $table, $constraint, $tableAlias);
+        return $this->addJoinSource('LEFT', $table, $constraint, $tableAlias);
     }
 
     /**
-     * Add an INNER JOIN string to the query
+     * Add an INNER JOIN string to the query.
      *
      * @param      $table
      * @param      $constraint
      * @param null $tableAlias
+     *
      * @return $this
      */
     public function innerJoin($table, $constraint, $tableAlias = null)
     {
-        return $this->addJoinSource("INNER", $table, $constraint, $tableAlias);
+        return $this->addJoinSource('INNER', $table, $constraint, $tableAlias);
     }
 
     /**
-     * Add a LEFT OUTER JOIN string to the query
+     * Add a LEFT OUTER JOIN string to the query.
      *
      * @param      $table
      * @param      $constraint
      * @param null $tableAlias
+     *
      * @return $this
      */
     public function leftOuterJoin($table, $constraint, $tableAlias = null)
     {
-        return $this->addJoinSource("LEFT OUTER", $table, $constraint, $tableAlias);
+        return $this->addJoinSource('LEFT OUTER', $table, $constraint, $tableAlias);
     }
 
     /**
-     * Add an RIGHT OUTER JOIN string to the query
+     * Add an RIGHT OUTER JOIN string to the query.
      *
      * @param      $table
      * @param      $constraint
      * @param null $tableAlias
+     *
      * @return $this
      */
     public function rightOuterJoin($table, $constraint, $tableAlias = null)
     {
-        return $this->addJoinSource("RIGHT OUTER", $table, $constraint, $tableAlias);
+        return $this->addJoinSource('RIGHT OUTER', $table, $constraint, $tableAlias);
     }
 
     /**
-     * Add an FULL OUTER JOIN string to the query
+     * Add an FULL OUTER JOIN string to the query.
      *
      * @param      $table
      * @param      $constraint
      * @param null $tableAlias
+     *
      * @return $this
      */
     public function fullOuterJoin($table, $constraint, $tableAlias = null)
     {
-        return $this->addJoinSource("FULL OUTER", $table, $constraint, $tableAlias);
+        return $this->addJoinSource('FULL OUTER', $table, $constraint, $tableAlias);
     }
 
     /**
@@ -120,6 +123,7 @@ class Joins
      * @param      $table
      * @param      $constraint
      * @param null $tableAlias
+     *
      * @return $this
      */
     protected function addJoinSource($joinOperator, $table, $constraint, $tableAlias = null)
@@ -146,11 +150,12 @@ class Joins
     }
 
     /**
-     * Add a RAW JOIN string to the query
+     * Add a RAW JOIN string to the query.
      *
      * @param $query
      * @param $constraint
      * @param $tableAlias
+     *
      * @return $this
      */
     public function rawJoin($query, $constraint, $tableAlias)
@@ -182,6 +187,7 @@ class Joins
      * multiple identifiers.
      *
      * @param $identifier
+     *
      * @return string
      */
     protected function quoteIdentifier($identifier)
@@ -189,18 +195,18 @@ class Joins
         if (is_array($identifier)) {
             $result = array_map([$this, 'quoteOneIdentifier'], $identifier);
 
-            return join(', ', $result);
+            return implode(', ', $result);
         }
 
         return Inflector::tabilize($this->quoteOneIdentifier(lcfirst($identifier)));
     }
-
 
     /**
      * Quote a string that is used as an identifier
      * (table names, column names Or table.column types etc).
      *
      * @param $identifier
+     *
      * @return string
      */
     protected function quoteOneIdentifier($identifier)
@@ -208,7 +214,7 @@ class Joins
         $parts = explode('.', $identifier);
         $parts = array_map([$this, 'quoteIdentifierSection'], $parts);
 
-        return join('.', $parts);
+        return implode('.', $parts);
     }
 
     /**
@@ -216,6 +222,7 @@ class Joins
      * part of an identifier.
      *
      * @param $part
+     *
      * @return string
      */
     protected function quoteIdentifierSection($part)
@@ -226,11 +233,11 @@ class Joins
 
         $quoteCharacter = '`';
         // double up any identifier quotes to escape them
-        return $quoteCharacter .
+        return $quoteCharacter.
         str_replace(
             $quoteCharacter,
-            $quoteCharacter . $quoteCharacter,
+            $quoteCharacter.$quoteCharacter,
             $part
-        ) . $quoteCharacter;
+        ).$quoteCharacter;
     }
 }

@@ -1,15 +1,15 @@
 <?php
-use Mockery as m;
-use Cygnite\Http\Responses\Response;
+
 use Cygnite\Http\Responses\JsonResponse;
+use Cygnite\Http\Responses\Response;
 
 class ResponseTest extends PHPUnit_Framework_TestCase
 {
     public function testResponseInstance()
     {
-        $response = Response::make("Hello World");
+        $response = Response::make('Hello World');
         $r = new Response();
-        $r->setContent("Hello World");
+        $r->setContent('Hello World');
 
         $this->assertEquals($r, $response);
         $this->assertInstanceOf('\Cygnite\Http\Responses\Response', $response);
@@ -43,10 +43,10 @@ class ResponseTest extends PHPUnit_Framework_TestCase
 
     public function testSetAndReturnsHeadersCorrectly()
     {
-        $r = Response::make("hello http")->setHeader('Content-Type', 'application/json');
+        $r = Response::make('hello http')->setHeader('Content-Type', 'application/json');
         $this->assertSame(true, $r->getHeaders()->has('Content-Type'));
 
-        $r = Response::make("hello http");
+        $r = Response::make('hello http');
         $r->setHeader('Content-Type', 'text/xml');
 
         $this->assertSame(true, $r->getHeaders()->has('Content-Type'));

@@ -33,6 +33,7 @@ class Table
     /**
      * @param $database
      * @param $model
+     *
      * @return $this
      */
     public function connect($database, $model)
@@ -58,7 +59,7 @@ class Table
     public function getColumns()
     {
         list($instance, $schema) = Schema::make($this, function ($table) {
-                $table->tableName = $this->tableName;
+            $table->tableName = $this->tableName;
 
             return [$table, $table->setTableSchema()->schema];
         });
@@ -71,7 +72,8 @@ class Table
     }
 
     /**
-     * Set Schema Instance
+     * Set Schema Instance.
+     *
      * @param $instance
      */
     public function setSchemaInstance($instance)
@@ -81,6 +83,7 @@ class Table
 
     /**
      * @throws DatabaseException
+     *
      * @return null
      */
     public function getPrimaryKey()
@@ -88,7 +91,7 @@ class Table
         $columns = $this->getColumns();
 
         if (!isset($columns)) {
-            throw new DatabaseException("Column schema not found!");
+            throw new DatabaseException('Column schema not found!');
         }
 
         if (count($columns) > 0) {
@@ -105,7 +108,7 @@ class Table
     }
 
     /**
-     * Get schema instance
+     * Get schema instance.
      *
      * @return null
      */
@@ -114,9 +117,9 @@ class Table
         return !is_null($this->schemaInstance) ? $this->schemaInstance : null;
     }
 
-
     /**
      * @param null $queryString
+     *
      * @return $this
      */
     private function query($queryString = null)
@@ -145,32 +148,29 @@ class Table
         );
 
         //Create migration table in order to save migrations information
-        Schema::make($this,
-            function ($table) use ($tableName) {
-                $table->tableName = $tableName;
-                $table->database = trim($this->getDefaultDatabaseConnection());
-                $table->create(
-                    array(
-                        array('column'=> 'id', 'type' => 'int', 'length' => 11,
-                            'increment' => true, 'key' => 'primary'),
-                        array('column'=> 'migration', 'type' => 'string', 'length' =>255),
-                        array('column'=> 'version', 'type' => 'int', 'null'=> true),
-                        array('column'=> 'created_at',  'type' => 'datetime')
-                    ),
-                    'InnoDB',
-                    'latin1'
-                )->run();
-            }
-        );
+        Schema::make($tableName, function ($table) {
+            //$table->tableName = $tableName;
+            $table->on(trim($this->getDefaultDatabaseConnection()));
+            $table->create(
+                [
+                    ['column'       => 'id', 'type' => 'int', 'length' => 11,
+                        'increment' => true, 'key' => 'primary', ],
+                    ['column' => 'migration', 'type' => 'string', 'length' => 255],
+                    ['column' => 'version', 'type' => 'int', 'null' => true],
+                    ['column' => 'created_at',  'type' => 'datetime'],
+                ], 'InnoDB', 'latin1'
+            );
+        });
     }
 
     /**
      * @param $migration
+     *
      * @return mixed
      */
     public function updateMigrationVersion($migration)
     {
-        $date = new \DateTime("now");
+        $date = new \DateTime('now');
 
         $date->setTimezone(new \DateTimeZone(SET_TIME_ZONE));
 

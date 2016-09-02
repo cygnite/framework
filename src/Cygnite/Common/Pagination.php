@@ -8,12 +8,9 @@
  * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
-
 namespace Cygnite\Common;
 
 use Closure;
-use Cygnite\Proxy\StaticResolver;
-use Cygnite\Helpers\Inflector;
 use Cygnite\Common\UrlManager\Url;
 
 if (!defined('CF_SYSTEM')) {
@@ -21,16 +18,14 @@ if (!defined('CF_SYSTEM')) {
 }
 
 /**
- * Class Pagination
+ * Class Pagination.
  *
  * <code>
  * $paginator = new \Cygnite\Common\Pagination;
- * $paginator->setTotalNumberOfPage();
+ * $paginator->setTotalNumberOfPage(15);
  * $paginator->setPerPage(5);
- * $paginator->createLinks();
+ * echo $paginator->createLinks();
  * </code>
- *
- * @package Cygnite\Common
  */
 class Pagination
 {
@@ -61,7 +56,7 @@ class Pagination
     protected $totalNumOfPage;
 
     /**
-     * Pagination constructor
+     * Pagination constructor.
      *
      * @param $model
      */
@@ -75,23 +70,36 @@ class Pagination
     }
 
     /**
-     * @param array    $args
-     * @param callable $callback
-     * @return Pagination
+     * Set Model object.
+     *
+     * @param $model
+     *
+     * @return $this
      */
-    public static function make($args = null, Closure $callback = null)
+    public function setModel($model)
     {
-        if ($callback instanceof Closure) {
-            return $callback(new static($args));
-        }
+        $this->model = $model;
 
-        return new static($args);
+        return $this;
     }
 
     /**
-     * Set per page record
+     * Create Pagination instance.
+     *
+     * @param callable $callback
+     *
+     * @return static
+     */
+    public static function make(Closure $callback)
+    {
+        return $callback(new static());
+    }
+
+    /**
+     * Set per page record.
      *
      * @param null $number
+     *
      * @return $this
      */
     public function setPerPage($number = null)
@@ -99,6 +107,7 @@ class Pagination
         if (is_null($number)) {
             if (property_exists($this->model, 'perPage')) {
                 $this->perPage = $this->model->perPage;
+
                 return $this;
             }
         }
@@ -109,15 +118,16 @@ class Pagination
     }
 
     /**
-     * Set total number of pages
+     * Set total number of pages.
      *
      * @param null $number
+     *
      * @return $this
      */
     public function setTotalNumberOfPage($number = null)
     {
         if (is_null($number)) {
-            $numRecords = $this->model->select($this->count()." AS ".$this->numCount)->findOne();
+            $numRecords = $this->model->select($this->count().' AS '.$this->numCount)->findOne();
             $this->totalNumOfPage = $numRecords[0]->{$this->numCount};
 
             return $this;
@@ -137,9 +147,10 @@ class Pagination
     }
 
     /**
-     * Make the count row
+     * Make the count row.
      *
      * @param string $count
+     *
      * @return string
      */
     private function count($count = '*')
@@ -150,7 +161,7 @@ class Pagination
     }
 
     /**
-     * Render the pagination links
+     * Render the pagination links.
      *
      * @return string
      */
@@ -160,8 +171,7 @@ class Pagination
     }
 
     /**
-     * Calculate the pagination links
-     *
+     * Calculate the pagination links.
      */
     public function calculate()
     {
@@ -172,25 +182,25 @@ class Pagination
 
         /* Setup page vars for display. */
         if ($pageNumber == 0) {
-            $pageNumber = 1;//if no page var is given, default to 1.
+            $pageNumber = 1; //if no page var is given, default to 1.
         }
         $this->previous = $pageNumber - 1;
         $this->next = $pageNumber + 1;
         //last page is = total pages / items per page, rounded up.
-        $this->lastPage = ceil($this->getTotalNumberOfPages()/$this->perPage);
+        $this->lastPage = ceil($this->getTotalNumberOfPages() / $this->perPage);
 
         $this->lastPageMinusOne = $this->lastPage - 1;  //last page minus 1
         $this->create();
     }
 
     /**
-     * Calculate page limit and offset
+     * Calculate page limit and offset.
      */
     private function calculatePageLimitAndOffset()
     {
         $pageUri = '';
         $pageUri = Url::segment(3);
-        $pageNumber =  ($pageUri !== '') ? $pageUri : 0;
+        $pageNumber = ($pageUri !== '') ? $pageUri : 0;
 
         if ($pageNumber) {
             //calculate starting point of pagination
@@ -204,7 +214,7 @@ class Pagination
     }
 
     /**
-     * Set current page url
+     * Set current page url.
      */
     private function setCurrentPageUrl()
     {
@@ -216,7 +226,7 @@ class Pagination
     }
 
     /**
-     * Set page number
+     * Set page number.
      *
      * @param $number
      */
@@ -226,7 +236,7 @@ class Pagination
     }
 
     /**
-     * Get page number
+     * Get page number.
      *
      * @return null
      */
@@ -236,7 +246,7 @@ class Pagination
     }
 
     /**
-     * Set pagination offset
+     * Set pagination offset.
      *
      * @param $offset
      */
@@ -246,7 +256,7 @@ class Pagination
     }
 
     /**
-     * Get Pagination offset
+     * Get Pagination offset.
      *
      * @return null
      */
@@ -256,7 +266,7 @@ class Pagination
     }
 
     /**
-     * Create pagination links
+     * Create pagination links.
      *
      * @return $this
      */
@@ -269,12 +279,11 @@ class Pagination
     }
 
     /**
-     * Create pagination links
-     *
+     * Create pagination links.
      */
     public function create()
     {
-        $content = "";
+        $content = '';
         $pageNumber = $this->getPageNumber();
 
         if ($pageNumber === 0) {
@@ -289,51 +298,51 @@ class Pagination
             //not enough pages to bother breaking it up
             if ($this->lastPage < 7 + ($this->adjacent * 2)) {
                 for ($counter = 1; $counter <= $this->lastPage; $counter++) {
-                    $content.= $this->createCurrentActiveLink($pageNumber, $counter);
+                    $content .= $this->createCurrentActiveLink($pageNumber, $counter);
                 }
             } elseif ($this->lastPage > 5 + ($this->adjacent * 2)) {
                 //close to beginning; only hide later pages
                 if ($pageNumber < 1 + ($this->adjacent * 2)) {
                     for ($counter = 1; $counter < 4 + ($this->adjacent * 2); $counter++) {
-                        $content.= $this->createCurrentActiveLink($pageNumber, $counter);
+                        $content .= $this->createCurrentActiveLink($pageNumber, $counter);
                     }
-                    $content.= "...";
-                    $content.= $this->createSecondLink();
+                    $content .= '...';
+                    $content .= $this->createSecondLink();
                 } elseif (
                     $this->lastPage - ($this->adjacent * 2) > $pageNumber
                     && $pageNumber > ($this->adjacent * 2)
                 ) {
-                    $content.= $this->createPrimaryLink();
-                    $content.= "...";
+                    $content .= $this->createPrimaryLink();
+                    $content .= '...';
 
                     for (
                         $counter = $pageNumber - $this->adjacent;
                         $counter <= $pageNumber + $this->adjacent;
                         $counter++
                     ) {
-                        $content.= $this->createCurrentActiveLink($pageNumber, $counter);
+                        $content .= $this->createCurrentActiveLink($pageNumber, $counter);
                     }
 
-                    $content.= "...";
-                    $content.= $this->createPrimaryLink();
-                    $content.= $this->createSecondLink();
+                    $content .= '...';
+                    $content .= $this->createPrimaryLink();
+                    $content .= $this->createSecondLink();
                 } else {
                     //close to end; only hide early pages
 
-                    $content.= $this->createPrimaryLink();
+                    $content .= $this->createPrimaryLink();
 
-                    $content.= "...";
+                    $content .= '...';
                     for (
                         $counter = $this->lastPage - (2 + ($this->adjacent * 2));
                         $counter <= $this->lastPage;
                         $counter++
                     ) {
-                        $content.= $this->createCurrentActiveLink($pageNumber, $counter);
+                        $content .= $this->createCurrentActiveLink($pageNumber, $counter);
                     }
                 }
             }
 
-            $content.= $this->renderNextLink($counter, $pageNumber);
+            $content .= $this->renderNextLink($counter, $pageNumber);
         }
 
         $this->paginationLinks = $content;
@@ -343,14 +352,15 @@ class Pagination
      * @param        $pageNumber
      * @param        $counter
      * @param string $content
+     *
      * @return string
      */
     private function createCurrentActiveLink($pageNumber, $counter, $content = '')
     {
         if ($counter == $pageNumber) {
-            $content.= "<span class='current'>$counter</span>";
+            $content .= "<span class='current'>$counter</span>";
         } else {
-            $content.= "<a href='".$this->currentPageUrl."/".$counter."'>$counter</a>";
+            $content .= "<a href='".$this->currentPageUrl.'/'.$counter."'>$counter</a>";
         }
 
         return $content;
@@ -359,24 +369,24 @@ class Pagination
     private function createPrimaryLink()
     {
         $content = '';
-        $content.= "<a href='".$this->currentPageUrl."/1'>1</a>";
-        $content.= "<a href='".$this->currentPageUrl."/2'>2</a>";
+        $content .= "<a href='".$this->currentPageUrl."/1'>1</a>";
+        $content .= "<a href='".$this->currentPageUrl."/2'>2</a>";
 
         return $content;
     }
 
     /**
-     * Create Second link
+     * Create Second link.
      *
      * @return string
      */
     private function createSecondLink()
     {
         $content = '';
-        $content.=
-            "<a href='".$this->currentPageUrl."/".$this->lastPageMinusOne."'>$this->lastPageMinusOne</a>";
-        $content.=
-            "<a href='".$this->currentPageUrl."/".$this->lastPage."'>$this->lastPage</a>";
+        $content .=
+            "<a href='".$this->currentPageUrl.'/'.$this->lastPageMinusOne."'>$this->lastPageMinusOne</a>";
+        $content .=
+            "<a href='".$this->currentPageUrl.'/'.$this->lastPage."'>$this->lastPage</a>";
 
         return $content;
     }
@@ -384,15 +394,16 @@ class Pagination
     /**
      * @param        $pageNumber
      * @param string $content
+     *
      * @return string
      */
     public function renderPreviousLink($pageNumber, $content = '')
     {
         //generate previous link
         if ($pageNumber > 1) {
-            $content.= "<a href='".$this->currentPageUrl."/".$this->previous."'> previous</a>";
+            $content .= "<a href='".$this->currentPageUrl.'/'.$this->previous."'> previous</a>";
         } else {
-            $content.= "<span class='disabled'> previous</span>";
+            $content .= "<span class='disabled'> previous</span>";
         }
 
         return $content;
@@ -402,23 +413,24 @@ class Pagination
      * @param        $counter
      * @param        $pageNumber
      * @param string $content
+     *
      * @return string
      */
     public function renderNextLink($counter, $pageNumber, $content = '')
     {
         //create next link
         if ($pageNumber < $counter - 1) {
-            $content.= "<a href='".$this->currentPageUrl.'/'.$this->next."'>next </a>";
+            $content .= "<a href='".$this->currentPageUrl.'/'.$this->next."'>next </a>";
         } else {
-            $content.= "<span class=\"disabled\">next </span>";
+            $content .= '<span class="disabled">next </span>';
         }
-        $content.= "</div>\n";
+        $content .= "</div>\n";
 
         return $content;
     }
 
     /**
-     * Render pagination links
+     * Render pagination links.
      *
      * @return mixed
      */

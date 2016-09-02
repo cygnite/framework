@@ -1,15 +1,15 @@
 <?php
-use Mockery as m;
+
+use Cygnite\Http\Responses\Response;
+use Cygnite\Mvc\View\Template;
 use Cygnite\Mvc\View\View;
 use Cygnite\Mvc\View\ViewFactory;
-use Cygnite\Mvc\View\Template;
-use Cygnite\Http\Responses\Response;
 
 class ViewTest extends PHPUnit_Framework_TestCase
 {
     private function view()
     {
-        return new View(new Template);
+        return new View(new Template());
     }
 
     public function testSetDataOnView()
@@ -25,18 +25,17 @@ class ViewTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('Hello Foo', $content);
     }
 
-
     public function testViewCreateMethod()
     {
         $app = new \Cygnite\Foundation\Application();
         ViewFactory::setApplication($app);
 
         $data = ['foo' => 'Cygnite!'];
-        $content = View::create("fixtures.hello", $data);        
+        $content = View::create('fixtures.hello', $data);
         $this->assertEquals('Hello Cygnite!', Response::make($content)->getContent());
 
         $data = ['foo' => 'Foo Bar!'];
-        $composeContent = View::compose("fixtures.hello", $data);        
+        $composeContent = View::compose('fixtures.hello', $data);
         $this->assertEquals('Hello Foo Bar!', Response::make($composeContent)->getContent());
     }
 
@@ -49,13 +48,11 @@ class ViewTest extends PHPUnit_Framework_TestCase
              ->setTwigDebug(true);
 
         $content = $view->render('fixtures.template', ['bar' => 'FooBar'], true);
-        
-        $this->assertEquals('FooBar', $content);
 
+        $this->assertEquals('FooBar', $content);
     }
 
     public function tearDown()
     {
-
     }
 }

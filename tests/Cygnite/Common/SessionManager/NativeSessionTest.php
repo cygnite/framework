@@ -1,6 +1,7 @@
 <?php
-use Cygnite\Helpers\Config;
+
 use Cygnite\Common\SessionManager\Native\Session;
+use Cygnite\Helpers\Config;
 
 class NativeSessionTest extends PHPUnit_Framework_TestCase
 {
@@ -15,24 +16,24 @@ class NativeSessionTest extends PHPUnit_Framework_TestCase
 
         $configuration = [
             'config.session' => [
-                'session_name'  => 'cf_secure_session',
+                'session_name'       => 'cf_secure_session',
                 'use_session_cookie' => false,
-                'httponly' => true,
-                'secure' => false,
-            ]
+                'httponly'           => true,
+                'secure'             => false,
+            ],
         ];
 
         Config::$config = $configuration;
 
         $this->session = new Session('Cygnite', null, new Cygnite\Common\SessionManager\Session());
     }
+
     /**
      * @outputBuffering enabled
      */
     public function testSetItemIntoSession()
     {
-
-        $this->session->set('name', "John Doe");
+        $this->session->set('name', 'John Doe');
 
         $this->assertEquals('John Doe', $this->session->get('name'));
 
@@ -42,7 +43,7 @@ class NativeSessionTest extends PHPUnit_Framework_TestCase
 
     public function testGetItemFromSession()
     {
-        $this->session->set('greet', "Welcome John!");
+        $this->session->set('greet', 'Welcome John!');
 
         $this->assertEquals('Welcome John!', $this->session->get('greet'));
         $this->assertEquals('Welcome John!', $this->session->greet);
@@ -50,7 +51,7 @@ class NativeSessionTest extends PHPUnit_Framework_TestCase
 
     public function testHasItemStoredOnSession()
     {
-        $this->session->set('greet', "Welcome John!");
+        $this->session->set('greet', 'Welcome John!');
 
         $this->assertTrue($this->session->has('greet'));
     }

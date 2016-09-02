@@ -1,6 +1,7 @@
 <?php
-use Mockery as m;
+
 use Cygnite\Mvc\View\Widget;
+use Mockery as m;
 
 class WidgetTest extends PHPUnit_Framework_TestCase
 {
@@ -10,29 +11,26 @@ class WidgetTest extends PHPUnit_Framework_TestCase
         $widget->setModule(false);
 
         $widgetInstance = Widget::make('foo_bar', [], function ($w) {
-        	return $w;
+            return $w;
         });
-        
+
         $this->assertEquals($widget, $widgetInstance);
     }
 
     public function testDataSetOnWidgetView()
     {
-    	$widget = Widget::make('foo_bar', ['foo' => 'bar', 'bar' => 'baz'], function ($w) {
-
-        	return $w;
-
-        });    	
+        $widget = Widget::make('foo_bar', ['foo' => 'bar', 'bar' => 'baz'], function ($w) {
+            return $w;
+        });
 
         $this->assertEquals('bar', $widget['foo']);
         $this->assertEquals('baz', $widget['bar']);
         $this->assertEquals(['foo' => 'bar', 'bar' => 'baz'], $widget->getData());
 
         $widget = Widget::make('foo_bar', [], function ($w) {
-    		
-    		$w['var'] = 'user';
+            $w['var'] = 'user';
 
-        	return $w;
+            return $w;
         });
 
         $widget['foobaz'] = 'Foo Baz';
@@ -42,14 +40,16 @@ class WidgetTest extends PHPUnit_Framework_TestCase
 
     public function testRenderWidget()
     {
-    	$widget = m::mock('Cygnite\Mvc\View\Widget');
+        $widget = m::mock('Cygnite\Mvc\View\Widget');
 
-    	$widget->shouldReceive('make')
-    		   ->with('mywidget', [], m::type('Closure'))
-    		   ->once()->andReturn($params = ['foo' => 'bar']);
+        $widget->shouldReceive('make')
+               ->with('mywidget', [], m::type('Closure'))
+               ->once()->andReturn($params = ['foo' => 'bar']);
 
-    	$contents = $widget->make('mywidget', [], function () use($params) { return $params; });
-    	$this->assertEquals($params, $contents);
+        $contents = $widget->make('mywidget', [], function () use ($params) {
+            return $params;
+        });
+        $this->assertEquals($params, $contents);
     }
 
     public function tearDown()

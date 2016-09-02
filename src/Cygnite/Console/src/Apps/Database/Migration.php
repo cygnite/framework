@@ -9,8 +9,6 @@ use Cygnite\Database\Table\Schema;
 
 class {%className%} extends Migration
 {
-    protected $database = '{%database%}';
-
     /**
      * Run the migrations.
      *
@@ -19,10 +17,13 @@ class {%className%} extends Migration
     public function up()
     {
         //Your schema to migrate
-        Schema::make($this, function ($table)
+        Schema::make('{%table_name%}', function ($schema)
         {
-            $table->tableName = '{%table_name%}';
-            $table->create([
+            //$schema->setTableName('{%table_name%}');
+            // If you don't specify the connection name, system will use default connection
+            //$schema->on('{%database%}');
+
+            $schema->create([
                     ['column'=> 'id', 'type' => 'int', 'length' => 11,
                      'increment' => true, 'key' => 'primary'],
 		
@@ -31,7 +32,7 @@ class {%className%} extends Migration
                     ['column'=> 'created_at', 'type' => 'datetime'],
                     ['column'=> 'updated_at', 'type' => 'datetime'],
 
-            ], 'InnoDB', 'latin1')->run();
+            ], 'InnoDB', 'latin1');
         });
 		
     }
@@ -44,11 +45,9 @@ class {%className%} extends Migration
     public function down()
     {
         //Roll back your changes done by up method.
-        Schema::make($this, function ($table)
+        Schema::make('{%table_name%}', function ($schema)
         {
-            $table->tableName = '{%table_name%}';
-            $table->drop()->run();
+            $schema->drop();
         });
-		 
     }
 }// End of the Migration

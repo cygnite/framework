@@ -11,8 +11,8 @@
 namespace Cygnite\Database\Table;
 
 use Closure;
-use Cygnite\Helpers\Inflector;
 use Cygnite\Database\ConnectionManagerTrait;
+use Cygnite\Helpers\Inflector;
 
 /*
  * Database Schema Builder
@@ -39,54 +39,46 @@ class Schema
 
     protected $checkSchemaExistence = false;
 
-
     /**
      * You cannot create an instance of Schema class
-     * directly
+     * directly.
      *
      * @param $model
+     * @param null $database
+     *
+     * @throws \ErrorException
      */
-    protected function __construct($model)
+    protected function __construct($model = null, $database = null)
     {
-        $this->klass = $model;
+        if (!is_null($model) && is_object($model)) {
+            $this->klass = $model;
 
-        if (class_exists(get_class($this->klass))) {
+            if (!class_exists(get_class($this->klass))) {
+                throw new \ErrorException(sprintf("Class %s doesn't exists", get_class($this->klass)));
+            }
+
             $reflectionClass = new \ReflectionClass(get_class($this->klass));
-
             /*
              | We will set the database connection name here
              */
             if (property_exists($this->klass, 'database')) {
                 $reflectionProperty = $reflectionClass->getProperty('database');
                 $reflectionProperty->setAccessible(true);
-                $this->database = $reflectionProperty->getValue($this->klass);
-            } else {
-                $this->database = $this->getDefaultConnection();
+                $database = $reflectionProperty->getValue($this->klass);
             }
 
-            /*
-            | We will set the primary key of the table schema
-            */
-            if (property_exists($this->klass, 'primaryKey')) {
-                $reflectionPropertyKey = $reflectionClass->getProperty('primaryKey');
-                $reflectionPropertyKey->setAccessible(true);
-                $this->primaryKey = $reflectionPropertyKey->getValue($this->klass);
-            }
-
-            /*
-             | Set database connection name
-             */
-            $this->setDatabaseConnection($this->database);
-
+            // If table name not provided we will format and consider class name as table
             if (!property_exists($this->klass, 'tableName')) {
-                $this->tableName = Inflector::tabilize(get_class($this->klass));
+                $model = Inflector::tabilize(get_class($this->klass));
             }
-
         }
+
+        $this->setDatabase((!is_null($database)) ? $database : $this->getDefaultConnection());
+        $this->setTableName($model);
     }
 
     /**
-     * Set the database connection
+     * Set the database connection.
      *
      * @param $database
      */
@@ -98,46 +90,103 @@ class Schema
     /**
      * @param       $method
      * @param array $arguments
-     * @return callable|void
+     *
      * @throws \Exception
+     *
+     * @return callable|void
      */
     public static function __callStatic($method, $arguments = [])
     {
-        if ($method == 'make' && !empty($arguments)) {
-            $schema = new self($arguments[0]);
-
-            if (is_callable([$schema, 'init'])) {
-                if (isset($arguments[1]) && $arguments[1] instanceof Closure) {
-                    return $schema->init($arguments[1], $schema);
-                }
-
-                return $schema->init($schema);
-            }
-        }
-
-        throw new \Exception(
-            sprintf('Oops, Undefined method called %s', 'Schema::' . $method)
-        );
+        throw new \Exception(sprintf(
+            'Oops, Undefined method called %s', 'Schema::'.$method
+        ));
     }
 
     /**
-     * Get Schema instance to generate table schema
-     * @access public
-     * @param $klass get the model pointer
-     * @param Closure instance to hold schema object
+     * Set the connection object.
      *
+     * @param $connection
+     *
+     * @return $this
      */
-    public function init(Closure $callback = null, $schema = null)
+    public function on($connection)
     {
-        if ($callback instanceof Closure) {
-            return $callback($schema);
+        $this->setDatabase($connection);
+        $this->_connection = null;
+
+        $this->setDatabaseConnection($this->getDatabase());
+
+        return $this;
+    }
+
+    /**
+     * Set the database connection name.
+     *
+     * @param $database
+     *
+     * @return $this
+     */
+    private function setDatabase($database)
+    {
+        $this->database = $database;
+
+        return $this;
+    }
+
+    /**
+     * Get the table name.
+     *
+     * @return mixed
+     */
+    public function getDatabase()
+    {
+        return $this->database;
+    }
+
+    /**
+     * Set table name.
+     *
+     * @param $table
+     *
+     * @return $this
+     */
+    public function setTableName($table)
+    {
+        $this->tableName = $table;
+
+        return $this;
+    }
+
+    /**
+     * Create database schema and return the schema instance.
+     *
+     * @param $table
+     * @param callable $closure
+     *
+     * @return mixed
+     */
+    public static function make($table, Closure $closure)
+    {
+        if (is_array($table)) {
+            $table = isset($table['table']) ? $table['table'] : $table;
+            $database = isset($table['database']) ? $table['database'] : null;
+            $schema = new static($table, $database);
+        } else {
+            $schema = new static($table);
         }
+
+        $callback = $closure($schema);
+        /*
+        | Set database connection name
+        */
+        $schema->on($schema->getDatabase());
+        $schema->run();
 
         return $callback;
     }
 
     /**
-     * Return the connection
+     * Return the connection.
      *
      * @return null
      */
@@ -147,26 +196,27 @@ class Schema
     }
 
     /**
-     * We will create table schema here
+     * We will create table schema here.
      *
      * @param        $columns
      * @param string $engine
      * @param string $charset
+     *
      * @return $this
      */
     public function create($columns, $engine = 'MyISAM', $charset = 'utf8')
     {
-        $schema = $comma = $isNull = $tableKey = $type = "";
+        $schema = $comma = $isNull = $tableKey = $type = '';
 
-        $schema .= strtoupper(__FUNCTION__) . ' TABLE IF NOT EXISTS
-        `' . $this->database . '`.`' . $this->tableName . '` (';
+        $schema .= strtoupper(__FUNCTION__).' TABLE IF NOT EXISTS
+        `'.$this->database.'`.`'.$this->tableName.'` (';
         $arrCount = count($columns);
         $i = 0;
 
         foreach ($columns as $key => $value) {
             $increment = (isset($value['increment'])) ? 'AUTO_INCREMENT' : '';
             if (isset($value['key'])) {
-                $tableKey = strtoupper($value['key']) . ' ';
+                $tableKey = strtoupper($value['key']).' ';
 
                 if ($value['key'] == 'primary') {
                     $tableKey = 'PRIMARY KEY';
@@ -211,28 +261,29 @@ class Schema
                     $type = 'date';
                     break;
                 case 'datetime':
-                    $len = (isset($value['length'])) ? $value['length'] : "NOT NULL DEFAULT NOW()";
-                    $type = strtoupper($value['type']) . ' ' . $len;
+                    $len = (isset($value['length'])) ? $value['length'] : "NOT NULL DEFAULT '0000:00:00 00:00:00'";
+                    $type = strtoupper($value['type']).' '.$len;
+                    $isNull = '';
                     break;
                 case 'time':
                     $type = 'time';
                     break;
                 case 'timestamp':
                     $len = (isset($value['length'])) ? $value['length'] : '';
-                    $type = strtoupper($value['type']) . ' ' . $len;
+                    $type = strtoupper($value['type']).' '.$len;
                     break;
             }
 
             $comma = ($i < $arrCount - 1) ? ',' : '';
 
-            $schema .= '`' . $value['column'] . "` " . strtoupper($type) . " "
-                . $increment . " " . $tableKey . PHP_EOL . $isNull . PHP_EOL;
+            $schema .= '`'.$value['column'].'` '.strtoupper($type).' '
+                .$increment.' '.$tableKey.PHP_EOL.$isNull.PHP_EOL;
             $schema .= $comma;
 
             $i++;
         }
 
-        $schema .= ') ENGINE=' . $engine . ' DEFAULT  CHARSET=' . $charset . ';' . PHP_EOL;
+        $schema .= ') ENGINE='.$engine.' DEFAULT  CHARSET='.$charset.';'.PHP_EOL;
 
         $this->schema = $schema;
 
@@ -243,20 +294,22 @@ class Schema
      * @param      $type
      * @param      $length
      * @param null $default
+     *
      * @return array
      */
     public function columnType($type, $length, $default = null)
     {
         $length = (isset($length) && $length !== '') ? $length : $default;
-        $type = strtoupper($type) . '(' . $length . ')';
+        $type = strtoupper($type).'('.$length.')';
 
         return [$type, $length];
     }
 
     /**
-     * Drop table if exists
+     * Drop table if exists.
      *
      * @param string $table
+     *
      * @return $this
      */
     public function drop($table = '')
@@ -266,8 +319,8 @@ class Schema
         $tableName = ($table !== '') ?
             $table : $this->tableName;
 
-        $this->schema = strtoupper(__FUNCTION__) . ' TABLE IF EXISTS
-        `' . $this->database . '`.`' . $tableName . '`' . PHP_EOL;
+        $this->schema = strtoupper(__FUNCTION__).' TABLE IF EXISTS
+        `'.$this->database.'`.`'.$tableName.'`'.PHP_EOL;
 
         return $this;
     }
@@ -275,15 +328,15 @@ class Schema
     /**
      * Rename the database table.
      *
-     * @param  array|string $tableNames
-     * @return this pointer
+     * @param array|string $tableNames
      *
+     * @return this pointer
      */
     public function rename($tableNames = [])
     {
         $schema = '';
 
-        $schema .= strtoupper(__FUNCTION__) . ' TABLE ' . PHP_EOL;
+        $schema .= strtoupper(__FUNCTION__).' TABLE '.PHP_EOL;
 
         if (is_array($tableNames)) {
             $i = 0;
@@ -291,14 +344,14 @@ class Schema
             $arrCount = count($tableNames);
 
             foreach ($tableNames as $key => $value) {
-                $schema .= '`' . $key . '` TO `' . $value . '`';
+                $schema .= '`'.$key.'` TO `'.$value.'`';
 
                 $comma = ($i < $arrCount - 1) ? ',' : '';
-                $schema .= $comma . PHP_EOL;
+                $schema .= $comma.PHP_EOL;
                 $i++;
             }
         } else {
-            $schema .= '`' . $this->database . '.`' . $this->tableName . '` TO `' . $tableNames . '`' . PHP_EOL;
+            $schema .= '`'.$this->database.'.`'.$this->tableName.'` TO `'.$tableNames.'`'.PHP_EOL;
         }
 
         $this->schema = $schema;
@@ -307,9 +360,10 @@ class Schema
     }
 
     /**
-     * Check table Existence
+     * Check table Existence.
      *
      * @param string $table
+     *
      * @return $this
      */
     public function hasTable($table = '')
@@ -319,7 +373,7 @@ class Schema
         $tableName = ($table !== '') ?
             $table : $this->tableName;
 
-        $this->schema = "SHOW TABLES LIKE '" . $tableName . "'";
+        $this->schema = "SHOW TABLES LIKE '".$tableName."'";
         $this->checkSchemaExistence = true;
 
         return $this;
@@ -332,8 +386,10 @@ class Schema
     /**
      * @param $name
      * @param $arguments
-     * @return mixed
+     *
      * @throws \BadMethodCallException
+     *
+     * @return mixed
      */
     public function __call($name, $arguments)
     {
@@ -363,20 +419,24 @@ class Schema
             }
         }
 
-        throw new \BadMethodCallException("Invalid method $name called ");
+        throw new \BadMethodCallException(sprintf(
+            'Oops, Undefined method called %s', 'Schema::'.$name
+        ));
     }
 
     /**
      * @param      $columns
      * @param null $definition
      * @param      $type
-     * @return $this
+     *
      * @throws \BadMethodCallException
+     *
+     * @return $this
      */
-    public function column($columns, $definition = null, $type)
+    public function column($columns, $definition, $type)
     {
         if (is_null($columns)) {
-            throw new \BadMethodCallException("Column cannot be empty.");
+            throw new \BadMethodCallException('Column cannot be empty.');
         }
 
         if (is_array($columns)) {
@@ -388,13 +448,13 @@ class Schema
                 if (trim($type) == 'drop') {
                     $columnKey = '';
                     $columnValue = "`$value`";
-                    $column .= strtoupper(trim($type)) . ' ' . $columnKey . ' ' . $columnValue;
+                    $column .= strtoupper(trim($type)).' '.$columnKey.' '.$columnValue;
                 }
 
                 if (trim($type) == 'add') {
                     $columnKey = $key;
                     $columnValue = strtoupper($value);
-                    $column .= strtoupper($type) . ' (' . $columnKey . ' ' . $columnValue . ')';
+                    $column .= strtoupper($type).' ('.$columnKey.' '.$columnValue.')';
                 }
 
                 $comma = ($i < $arrCount - 1) ? ',' : '';
@@ -404,8 +464,8 @@ class Schema
                 $i++;
             }
 
-            $this->schema = self::ALTER_TABLE . '`' . $this->database . '`.`' . $this->tableName . '`
-            ' . $column . ';';
+            $this->schema = self::ALTER_TABLE.'`'.$this->database.'`.`'.$this->tableName.'`
+            '.$column.';';
         }
 
         if (is_string($columns)
@@ -414,8 +474,8 @@ class Schema
             /** @var $definition TYPE_NAME */
             $definition = (trim($type) == 'drop') ? '' : strtoupper($definition);
 
-            $this->schema = self::ALTER_TABLE . '`' . $this->database . '`.`' . $this->tableName . '`
-            ' . strtoupper($type) . ' `' . $columns . '` ' . $definition . ';';
+            $this->schema = self::ALTER_TABLE.'`'.$this->database.'`.`'.$this->tableName.'`
+            '.strtoupper($type).' `'.$columns.'` '.$definition.';';
         }
 
         return $this;
@@ -427,19 +487,19 @@ class Schema
 
     public function after($column)
     {
-        $this->schema = str_replace(';', ' ', $this->schema) . '' . strtoupper(__FUNCTION__) . ' ' . $column . ';';
+        $this->schema = str_replace(';', ' ', $this->schema).''.strtoupper(__FUNCTION__).' '.$column.';';
 
         return $this;
     }
 
     /**
-     * get Columns of table schema
+     * get Columns of table schema.
      *
      * @return $this
      */
     public function getColumns()
     {
-        $this->schema = self::SELECT . " COLUMN_NAME FROM " . $this->getSchemaQuery();
+        $this->schema = self::SELECT.' COLUMN_NAME FROM '.$this->getSchemaQuery();
 
         return $this;
     }
@@ -449,22 +509,23 @@ class Schema
      */
     private function getSchemaQuery()
     {
-        return "" . $this->_informationSchema . ".COLUMNS
-                        WHERE TABLE_SCHEMA = '" . $this->database . "'
-                        AND TABLE_NAME = '" . $this->tableName . "'";
+        return ''.$this->_informationSchema.".COLUMNS
+                        WHERE TABLE_SCHEMA = '".$this->database."'
+                        AND TABLE_NAME = '".$this->tableName."'";
     }
 
     /**
-     * Check if column exists
+     * Check if column exists.
      *
      * @param $column
+     *
      * @return $this
      */
     public function hasColumn($column)
     {
-        $this->schema = self::SELECT . " COUNT(COLUMN_NAME) FROM
-                        " . $this->getSchemaQuery() . "
-                        AND COLUMN_NAME = '" . $column . "' ";
+        $this->schema = self::SELECT.' COUNT(COLUMN_NAME) FROM
+                        '.$this->getSchemaQuery()."
+                        AND COLUMN_NAME = '".$column."' ";
 
         $this->checkSchemaExistence = true;
 
@@ -472,18 +533,19 @@ class Schema
     }
 
     /**
-     * String for single column and array for multiple column
+     * String for single column and array for multiple column.
      *
      * @param $columns
+     *
      * @return $this
      */
     public function addPrimaryKey($columns)
     {
-        $schema = self::SELECT . " EXISTS
+        $schema = self::SELECT.' EXISTS
                    (
-                       " . self::SELECT . " * FROM " . $this->_informationSchema . ".COLUMNS
-                       WHERE " . $this->_tableSchema . "= '" . $this->database . "' AND
-                       TABLE_NAME ='" . $this->tableName . "' AND
+                       '.self::SELECT.' * FROM '.$this->_informationSchema.'.COLUMNS
+                       WHERE '.$this->_tableSchema."= '".$this->database."' AND
+                       TABLE_NAME ='".$this->tableName."' AND
                        COLUMN_KEY = 'PRI'
 
                    ) AS has_primary_key;";
@@ -492,19 +554,19 @@ class Schema
 
         if ($hasPrimaryKey === true) {
             $query = '';
-            $query = self::ALTER_TABLE . "`" . $this->tableName . "` CHANGE
-             `" . $this->primaryKey . "` `" . $this->primaryKey . "` INT( 11 ) NOT NULL";
+            $query = self::ALTER_TABLE.'`'.$this->tableName.'` CHANGE
+             `'.$this->primaryKey.'` `'.$this->primaryKey.'` INT( 11 ) NOT NULL';
             $primaryKey = $this->_connection->prepare($query)->execute();
 
             $schemaString = '';
             $schemaString = $this->commands($columns);
 
-            $this->schema = static::ALTER_TABLE . ' `' . $this->database . '`.`' . $this->tableName . '` DROP PRIMARY KEY,
-                ADD CONSTRAINT PK_' . strtoupper($this->tableName) . '_ID
-                PRIMARY KEY (' . $schemaString . ')';
+            $this->schema = static::ALTER_TABLE.' `'.$this->database.'`.`'.$this->tableName.'` DROP PRIMARY KEY,
+                ADD CONSTRAINT PK_'.strtoupper($this->tableName).'_ID
+                PRIMARY KEY ('.$schemaString.')';
         } else {
-            $this->schema = static::ALTER_TABLE . ' `' . $this->database . '`.`' . $this->tableName . '` ADD
-            ' . 'PRIMARY KEY (' . $columns . ')';
+            $this->schema = static::ALTER_TABLE.' `'.$this->database.'`.`'.$this->tableName.'` ADD
+            '.'PRIMARY KEY ('.$columns.')';
         }
 
         return $this;
@@ -512,6 +574,7 @@ class Schema
 
     /**
      * @param $params
+     *
      * @return string
      */
     private function commands($params)
@@ -540,85 +603,89 @@ class Schema
     }
 
     /**
-     * Drop Primary key if exists
+     * Drop Primary key if exists.
      */
     public function dropPrimary()
     {
-        $this->schema = static::ALTER_TABLE . '
-        `' . $this->database . '`.`' . $this->tableName . '` DROP PRIMARY KEY';
+        $this->schema = static::ALTER_TABLE.'
+        `'.$this->database.'`.`'.$this->tableName.'` DROP PRIMARY KEY';
     }
 
     /**
-     * Create unique key index
+     * Create unique key index.
      *
      * @param        $column
      * @param string $keyConstraint
+     *
      * @return $this
      */
     public function unique($column, $keyConstraint = '')
     {
         $alter = '';
-        $alter = static::ALTER_TABLE . ' `' . $this->tableName . '` ADD ';
+        $alter = static::ALTER_TABLE.' `'.$this->tableName.'` ADD ';
 
         if (is_array($column)) {
             // build query unique key for multiple columns
             $columns = $this->commands($column);
 
-            $this->schema = $alter . ' CONSTRAINT
-            UC_' . strtoupper($this->tableName) . '_' . strtoupper($keyConstraint) . '_ID
-            ' . strtoupper(__FUNCTION__) . ' (' . $columns . ')';
+            $this->schema = $alter.' CONSTRAINT
+            UC_'.strtoupper($this->tableName).'_'.strtoupper($keyConstraint).'_ID
+            '.strtoupper(__FUNCTION__).' ('.$columns.')';
         }
 
         if (is_string($column)) {
-            $this->schema = $alter . ' ' . strtoupper(__FUNCTION__) . ' (' . $column . ');';
+            $this->schema = $alter.' '.strtoupper(__FUNCTION__).' ('.$column.');';
         }
 
         return $this;
     }
 
     /**
-     * Drop unique key index
+     * Drop unique key index.
      *
      * @param string $keyConstraint
+     *
      * @return $this
      */
     public function dropUnique($keyConstraint = '')
     {
         // ALTER TABLE Persons DROP CONSTRAINT uc_PersonID
         // MYSQL QUERY
-        $this->schema = static::ALTER_TABLE . ' `' . $this->tableName . '`
+        $this->schema = static::ALTER_TABLE.' `'.$this->tableName.'`
             DROP INDEX
-            UC_' . strtoupper($this->tableName) . '_' . strtoupper($keyConstraint) . '_ID';
+            UC_'.strtoupper($this->tableName).'_'.strtoupper($keyConstraint).'_ID';
 
         return $this;
     }
 
     /**
-     * Create index for the column
+     * Create index for the column.
      *
      * @param        $columnName
      * @param string $indexName
+     *
      * @return $this
      */
     public function index($columnName, $indexName = '')
     {
         $indexName = ($indexName !== '') ? $indexName : $columnName;
-        $this->schema = 'CREATE INDEX ' . strtoupper($indexName) . '_INDEX
-        ON `' . $this->tableName . '` (' . $columnName . ')';
+        $this->schema = 'CREATE INDEX '.strtoupper($indexName).'_INDEX
+        ON `'.$this->tableName.'` ('.$columnName.')';
 
         return $this;
     }
 
     /**
-     * Drop index from the column
+     * Drop index from the column.
      *
      * @param $indexName
+     *
      * @return $this
      */
     public function dropIndex($indexName)
     {
-        $this->schema = static::ALTER_TABLE . ' `' . $this->tableName . '`
-            DROP INDEX ' . strtoupper($indexName) . '_INDEX';
+        $this->schema = static::ALTER_TABLE.' `'.$this->tableName.'`
+            DROP INDEX '.strtoupper($indexName).'_INDEX';
 
         return $this;
     }
@@ -646,7 +713,7 @@ class Schema
 
     public function createDatabase($database)
     {
-        $this->schema = 'CREATE DATABASE ' . $database;
+        $this->schema = 'CREATE DATABASE '.$database;
 
         return $this;
     }
@@ -663,31 +730,43 @@ class Schema
 
     public function setTableSchema()
     {
-        /** @var $this TYPE_NAME */
-        $this->schema = self::SELECT . ' ' . strtoupper($this->_tableSchema) . ",
+        /* @var $this TYPE_NAME */
+        $this->schema = self::SELECT.' '.strtoupper($this->_tableSchema).',
                         TABLE_NAME,COLUMN_NAME,DATA_TYPE,
                         `COLUMN_KEY`,`Extra`,COLUMN_TYPE
-                        FROM " . strtoupper($this->_informationSchema) . ".COLUMNS
-                        WHERE " . strtoupper($this->_tableSchema) . " = '" . $this->database . "' AND
-                        TABLE_NAME = '" . $this->tableName . "'";
+                        FROM '.strtoupper($this->_informationSchema).'.COLUMNS
+                        WHERE '.strtoupper($this->_tableSchema)." = '".$this->database."' AND
+                        TABLE_NAME = '".$this->tableName."'";
 
         return $this;
     }
 
     /**
-     * Build schema and return result set
+     * Get the schema prepared query.
+     *
+     * @return array
+     */
+    public function getSchemaPreparedQuery()
+    {
+        return $this->schema;
+    }
+
+    /**
+     * Build schema and return result set.
+     *
+     * @throws \Exception
+     *
      * @return bool
      */
     public function run()
     {
         if (is_object($this->connection())) {
-
             try {
                 $stmt = $this->connection()->prepare($this->schema);
 
-                    if ($this->checkSchemaExistence) {
-                        return $stmt->rowCount();
-                    } else if ($return = $stmt->execute()) {
+                if ($this->checkSchemaExistence) {
+                    return $stmt->rowCount();
+                } elseif ($return = $stmt->execute()) {
                     return $return;
                 } else {
                     return false;
