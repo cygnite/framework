@@ -25,10 +25,10 @@ class ConnectionTest extends PHPUnit_Framework_TestCase
 
     public function testMySqlPdoConnection()
     {
-        $connector = $this->getMock('Cygnite\Database\Connections\Mysql', ['create'], [Configure::$config['db']]);
+        $connector = $this->getMock('Cygnite\Database\Connections\MySql', ['create'], [Configure::$config['db']]);
         $connector->expects($this->once())->method('create')->will($this->returnValue('PDO'));
 
-        $this->assertInstanceOf('Cygnite\Database\Connections\Mysql', $connector);
+        $this->assertInstanceOf('Cygnite\Database\Connections\MySql', $connector);
         $this->assertEquals('PDO', $connector->create());
     }
 }
