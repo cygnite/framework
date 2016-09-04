@@ -12,6 +12,17 @@ Cygnite Framework is under active development, also we are continuously upgradin
 
 You will find several eye catching features into Cygnite Framework.
 
+##Requirements
+-----------------------
+
+The following versions of PHP are supported by this version.
+
+PHP 5.4
+PHP 5.5
+PHP 5.6
+PHP 7.0
+HHVM
+
 ###Core features -
 -----------------------
 
