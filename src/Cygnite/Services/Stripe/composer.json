@@ -24,7 +24,7 @@
     },
     "autoload": {
         "psr-4": {
-            "Cygnite\\Services\\Providers\\Stripe\\": ""
+            "Cygnite\\Services\\Stripe\\": ""
         }
     }
 }
