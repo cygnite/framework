@@ -39,8 +39,7 @@ class OmnipayServiceProvider extends ServiceProvider
      */
     protected function registerOmnipay()
     {
-        $this->app->singleton('omnipay', function ($c)
-        {
+        $this->app->singleton('omnipay', function ($c) {
             $omnipay = new GatewayManager($this->app, new GatewayFactory(), $this->config);
             $omnipay->gateway();
 

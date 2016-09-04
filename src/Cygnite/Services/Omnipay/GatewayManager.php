@@ -136,7 +136,7 @@ class GatewayManager
      */
     public function __call($method, $parameters)
     {
-        if(method_exists($this->gateway(), $method)) {
+        if (method_exists($this->gateway(), $method)) {
             return call_user_func_array([$this->gateway(), $method], $parameters);
         }
 
