@@ -17,7 +17,7 @@
     ],
     "require": {
         "php": ">=5.4",
-	    "cartalyst/ominipay": "~1.0",
+	    "omnipay/omnipay": "~2.0",
 	    "cygnite/framework": "dev-master",
     },
     "require-dev": {
