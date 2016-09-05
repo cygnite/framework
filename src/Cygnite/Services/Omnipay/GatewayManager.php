@@ -9,15 +9,13 @@
  */
 namespace Cygnite\Services\Omnipay;
 
+use Cygnite\Foundation\Application;
 use Cygnite\Helpers\Config;
 use Omnipay\Common\CreditCard;
 use Omnipay\Common\GatewayFactory;
-use Cygnite\Foundation\Application;
 
 /**
- * Class Omnipay
- *
- * @package Cygnite\Services\Omnipay
+ * Class Omnipay.
  */
 class GatewayManager
 {
@@ -40,9 +38,10 @@ class GatewayManager
     }
 
     /**
-     * Gateway factory return the gateway instance
+     * Gateway factory return the gateway instance.
      *
      * @param null $class
+     *
      * @return mixed
      */
     public function gateway($class = null)
@@ -59,7 +58,7 @@ class GatewayManager
     }
 
     /**
-     * Returns Gateways
+     * Returns Gateways.
      *
      * @return array
      */
@@ -69,20 +68,22 @@ class GatewayManager
     }
 
     /**
-     * Get the config item
+     * Get the config item.
      *
      * @param $name
+     *
      * @return mixed
      */
     protected function getConfig($name)
     {
-        return $this->config["gateways"][$name];
+        return $this->config['gateways'][$name];
     }
 
     /**
-     * Return Omnipay\Common\CreditCard instance
+     * Return Omnipay\Common\CreditCard instance.
      *
      * @param $input
+     *
      * @return CreditCard
      */
     public function creditCard($input)
@@ -91,9 +92,10 @@ class GatewayManager
     }
 
     /**
-     * Set the payment gateway
+     * Set the payment gateway.
      *
      * @param $name
+     *
      * @return $this
      */
     public function setGateway($name)
@@ -104,7 +106,7 @@ class GatewayManager
     }
 
     /**
-     * Get the Gateway
+     * Get the Gateway.
      *
      * @return string
      */
@@ -116,7 +118,7 @@ class GatewayManager
     }
 
     /**
-     * Get the default gateway
+     * Get the default gateway.
      *
      * @return string
      */
@@ -127,12 +129,14 @@ class GatewayManager
 
     /**
      * Try Calling gateway method if user tries to access method
-     * which is not available in the class GatewayManager
+     * which is not available in the class GatewayManager.
      *
      * @param $method
      * @param $parameters
-     * @return mixed
+     *
      * @throws \BadMethodCallException
+     *
+     * @return mixed
      */
     public function __call($method, $parameters)
     {
