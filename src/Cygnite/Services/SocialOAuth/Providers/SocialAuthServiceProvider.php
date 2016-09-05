@@ -48,7 +48,7 @@ class SocialAuthServiceProvider extends ServiceProvider
         $factory = new \OAuth\ServiceFactory();
 
         foreach ($this->config['active'] as $key => $social) {
-
+        
             $this->app->singleton($social, function ($c) use ($social, $factory, $storage) {
                 // Setup the credentials for the requests
                 $credentials = new Credentials(
@@ -63,7 +63,7 @@ class SocialAuthServiceProvider extends ServiceProvider
     }
 
     /**
-     * Set Stripe Configuration
+     * Set Social OAuth Configuration.
      *
      * @return void
      */
