@@ -9,16 +9,14 @@
  */
 namespace Cygnite\Services\SocialOAuth\Providers;
 
-use Cygnite\Helpers\Config;
-use OAuth\Common\Storage\Session;
-use Cygnite\Foundation\Application;
-use OAuth\Common\Consumer\Credentials;
 use Cygnite\Container\Service\ServiceProvider;
+use Cygnite\Foundation\Application;
+use Cygnite\Helpers\Config;
+use OAuth\Common\Consumer\Credentials;
+use OAuth\Common\Storage\Session;
 
 /**
- * Class SocialAuthServiceProvider
- *
- * @package Cygnite\Services\SocialOAuth\Providers
+ * Class SocialAuthServiceProvider.
  */
 class SocialAuthServiceProvider extends ServiceProvider
 {
@@ -48,7 +46,6 @@ class SocialAuthServiceProvider extends ServiceProvider
         $factory = new \OAuth\ServiceFactory();
 
         foreach ($this->config['active'] as $key => $social) {
-        
             $this->app->singleton($social, function ($c) use ($social, $factory, $storage) {
                 // Setup the credentials for the requests
                 $credentials = new Credentials(
