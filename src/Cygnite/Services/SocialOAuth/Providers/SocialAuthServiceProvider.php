@@ -49,7 +49,7 @@ class SocialAuthServiceProvider extends ServiceProvider
 
         foreach ($this->config['active'] as $key => $social) {
 
-            $this->app->singleton($social, function ($c) use($social, $factory, $storage) {
+            $this->app->singleton($social, function ($c) use ($social, $factory, $storage) {
                 // Setup the credentials for the requests
                 $credentials = new Credentials(
                     $this->config[$social]['key'],
