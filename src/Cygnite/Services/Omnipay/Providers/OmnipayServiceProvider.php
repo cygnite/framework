@@ -9,16 +9,14 @@
  */
 namespace Cygnite\Services\Omnipay\Providers;
 
-use Cygnite\Helpers\Config;
-use Omnipay\Common\GatewayFactory;
-use Cygnite\Foundation\Application;
-use Cygnite\Services\Omnipay\GatewayManager;
 use Cygnite\Container\Service\ServiceProvider;
+use Cygnite\Foundation\Application;
+use Cygnite\Helpers\Config;
+use Cygnite\Services\Omnipay\GatewayManager;
+use Omnipay\Common\GatewayFactory;
 
 /**
- * Class OmnipayServiceProvider
- *
- * @package Cygnite\Services\Omnipay\Providers
+ * Class OmnipayServiceProvider.
  */
 class OmnipayServiceProvider extends ServiceProvider
 {
@@ -48,7 +46,7 @@ class OmnipayServiceProvider extends ServiceProvider
     }
 
     /**
-     * Set Stripe Configuration
+     * Set Stripe Configuration.
      *
      * @return void
      */
