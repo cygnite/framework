@@ -9,22 +9,20 @@
  */
 namespace Cygnite\Services\Stripe\Providers;
 
-use Cygnite\Helpers\Config;
 use Cartalyst\Stripe\Stripe;
-use Cygnite\Foundation\Application;
 use Cygnite\Container\Service\ServiceProvider;
+use Cygnite\Foundation\Application;
+use Cygnite\Helpers\Config;
 
 /**
- * Class StripeServiceProvider
- *
- * @package Cygnite\Services\Stripe\Providers
+ * Class StripeServiceProvider.
  */
 class StripeServiceProvider extends ServiceProvider
 {
     protected $app;
 
     private $config;
-    
+
     public function register(Application $app)
     {
         $this->configureStripe();
@@ -44,7 +42,7 @@ class StripeServiceProvider extends ServiceProvider
     }
 
     /**
-     * Set Stripe Configuration
+     * Set Stripe Configuration.
      *
      * @return void
      */
