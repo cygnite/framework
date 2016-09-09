@@ -1,5 +1,13 @@
 <?php
-
+/**
+ * This file is part of the Cygnite package.
+ *
+ * (c) Sanjoy Dey <dey.sanjoy0@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
+ 
 namespace Cygnite\Foundation;
 
 use ArrayAccess;
@@ -16,6 +24,8 @@ class Collection implements Countable, IteratorAggregate, ArrayAccess, Serializa
      * @var array
      */
     protected $data = [];
+    
+    protected $serialize;
 
     /**
      * Optionally set the contents of the result set by passing in array.
@@ -213,18 +223,22 @@ class Collection implements Countable, IteratorAggregate, ArrayAccess, Serializa
      */
     public function serialize()
     {
-        return serialize($this->data);
+        return $this->serialize = serialize($this->data);
     }
 
     /**
-     * Serializable.
+     * Un serialize the data.
      *
      * @param string $serialized
      *
      * @return array
      */
-    public function unserialize($serialized)
+    public function unserialize($serialized = null)
     {
+        if (is_null($serialized)) {
+            return unserialize($this->serialize);
+        }
+
         return unserialize($serialized);
     }
 
