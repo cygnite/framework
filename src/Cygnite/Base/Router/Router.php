@@ -90,11 +90,6 @@ class Router implements RouterInterface
         $this->request = $request;
     }
 
-    public static function call($pattern, array $arguments = [])
-    {
-        return (new static())->callController([$pattern, $arguments]);
-    }
-
     /**
      * Set RouteCollection.
      *
@@ -107,7 +102,7 @@ class Router implements RouterInterface
     public function collection($namespace)
     {
         if (!class_exists($namespace)) {
-            throw new InvalidRouterCollectionException('');
+            throw new InvalidRouterCollectionException('Route Collection Class $namespace doesn\'t exists');
         }
 
         $routeCollection = $this->getApplication()->make($namespace);
