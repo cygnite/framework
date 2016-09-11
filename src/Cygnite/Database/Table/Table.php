@@ -54,21 +54,20 @@ class Table
     }
 
     /**
-     * @return mixed
+     * Return Column array
+     *
+     * @return array
      */
     public function getColumns()
     {
-        list($instance, $schema) = Schema::make($this, function ($table) {
-            $table->tableName = $this->tableName;
+        $query = Schema::make(trim($this->tableName), function ($table) {
+            $table->on($this->database);
+            $this->setSchemaInstance($table);
 
-            return [$table, $table->setTableSchema()->schema];
+            return $table->setTableSchema()->getSchemaPreparedQuery();
         });
 
-        $columns = $this->query($schema)->getAll();
-
-        $this->setSchemaInstance($instance);
-
-        return $columns;
+        return $this->query($query)->getAll();
     }
 
     /**
