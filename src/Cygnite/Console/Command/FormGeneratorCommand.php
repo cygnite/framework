@@ -133,9 +133,9 @@ class FormGeneratorCommand extends Command
      */
     private function getColumns()
     {
-        $table = $this->table()->connect($this->database, Inflector::tabilize($this->tableName));
+        $table = $this->table->connect($this->database, Inflector::tabilize($this->tableName));
 
-        return $table->{__FUNCTION__}();
+        return $table->getColumns();
     }
 
     /**
