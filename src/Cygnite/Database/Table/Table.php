@@ -54,7 +54,7 @@ class Table
     }
 
     /**
-     * Return Column array
+     * Return Column array.
      *
      * @return array
      */
