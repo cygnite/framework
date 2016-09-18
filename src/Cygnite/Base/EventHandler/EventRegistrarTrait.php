@@ -9,8 +9,6 @@ use Cygnite\Helpers\Inflector;
  */
 trait EventRegistrarTrait
 {
-    protected $listen = [];
-
     protected static $class;
 
     /**
