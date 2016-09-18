@@ -53,7 +53,6 @@ class Application extends Container implements ApplicationInterface
 
     public $bootStrappers = [
         'debugger'   => 'Cygnite\Exception\ExceptionHandler',
-        'event'      => 'Cygnite\Base\EventHandler\Event',
         'url'        => 'Cygnite\Common\UrlManager\Url',
     ];
 
@@ -412,12 +411,12 @@ class Application extends Container implements ApplicationInterface
      */
     public function activateEventMiddleWare()
     {
-        $eventMiddleware = Config::get('global.config', 'activate.event.middleware');
+        $isEventActive = Config::get('global.config', 'activate.event.middleware');
+        $eventClass = Config::get('global.config', 'app.event.class');
 
-        if ($eventMiddleware) {
-            $class = '\\'.APP_NS.'\\Middleware\\Events\\Event';
-
-            return (new $class())->register($this);
+        if ($isEventActive && !$this->has('event')) {
+            $this->set('event', $this->make($eventClass));
+            return $this->get('event')->register($this);
         }
     }
 
@@ -444,13 +443,15 @@ class Application extends Container implements ApplicationInterface
      */
     public function beforeBootingApplication()
     {
-        if ($this['event']->getAppEvents() == false) {
+        $this->activateEventMiddleWare();
+        
+        if ($this['event']->isAppEventEnabled() == false) {
             return true;
         }
 
         $this->attachEvents();
 
-        return $this['event']->trigger(__FUNCTION__, $this);
+        return $this['event']->trigger('beforeBootingApplication', $this);
     }
 
     /**
@@ -461,7 +462,7 @@ class Application extends Container implements ApplicationInterface
      */
     public function afterBootingApplication()
     {
-        if ($this['event']->getAppEvents() == false) {
+        if ($this['event']->isAppEventEnabled() == false) {
             return true;
         }
 
