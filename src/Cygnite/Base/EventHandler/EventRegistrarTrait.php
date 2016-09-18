@@ -46,8 +46,8 @@ trait EventRegistrarTrait
         }
 
         if (static::$class->isAppEventEnabled() == false && !method_exists($class, 'registerAppEvents')) {
-        return false;
-    }
+            return false;
+        }
 
         return static::$class->registerAppEvents();
     }
