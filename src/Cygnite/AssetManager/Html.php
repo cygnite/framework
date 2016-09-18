@@ -74,7 +74,7 @@ class Html
      *
      * @false mixed $data
      */
-    public function santize($value, $type = '')
+    public function sanitize($value, $type = '')
     {
         switch ($type) {
             default:

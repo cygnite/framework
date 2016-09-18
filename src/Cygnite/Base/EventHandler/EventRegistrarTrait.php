@@ -9,30 +9,47 @@ use Cygnite\Helpers\Inflector;
  */
 trait EventRegistrarTrait
 {
+    protected static $class;
+
     /**
+     * @param $class
      * @return $this
      */
-    public function boot()
+    public function boot($class)
     {
+        static::$class = $class;
         $this->registerEvents($this->listen);
 
         return $this;
     }
 
     /**
+     * Override the
+     * @return mixed
+     */
+    public function isAppEventEnabled()
+    {
+        return static::$class->isAppEventEnabled();
+    }
+
+    /**
      * Get user defined application events from event middle wares.
      *
+     * @throws \RuntimeException
      * @return array|bool
      */
     public function getAppEvents()
     {
-        $class = APP_NS.'\Middlewares\Events\Event';
-
-        if (property_exists($class, 'appEvents') && $class::$activateAppEvent == true) {
-            return \Apps\Middlewares\Events\Event::$appEvents;
+        $class = static::$class;
+        if (!method_exists(static::$class, 'isAppEventEnabled')) {
+            throw new \RuntimeException('Undefined method '.\get_class($class).'::isAppEventEnabled(). And It should return boolean value.');
         }
 
-        return false;
+        if (static::$class->isAppEventEnabled() == false && !method_exists($class, 'registerAppEvents')) {
+            return false;
+        }
+
+        return static::$class->registerAppEvents();
     }
 
     /**
