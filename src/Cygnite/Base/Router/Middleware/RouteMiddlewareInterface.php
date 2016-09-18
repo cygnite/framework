@@ -1,13 +1,25 @@
 <?php
-
 namespace Cygnite\Base\Router\Middleware;
 
+use Closure;
 use Cygnite\Http\Requests\Request;
 
-interface RouteMiddlewareInterface
+/**
+ * Defines the interface for route middleware to implement
+ *
+ * @package Cygnite\Base\Router\Middleware
+ */
+interface MiddlewareInterface
 {
     /**
-     This function is called before handling the route request
+     * This function is called before handling the request
      */
-    public function handle(Request $request, \Closure $next);
+    /**
+     * Handles a request
+     *
+     * @param Request $request The request to handle
+     * @param callable|Closure $next The next middleware item
+     * @return Response The response after the middleware was run
+     */
+    public function handle(Request $request, Closure $next);
 }

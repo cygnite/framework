@@ -142,7 +142,7 @@ trait RouteControllerTrait
 
         Config::set(strtolower($module).'.config', include $file);
 
-        return (new $class())->register($this->getApplication(), $file);
+        return (new $class())->register($this->getContainer(), $file);
     }
 
     /**
@@ -249,15 +249,15 @@ trait RouteControllerTrait
     public function handleControllerDependencies($controller, $action, $params = [])
     {
         // make and return instance of controller
-        $instance = $this->getApplication()->make($controller);
-        $instance->setApplication($this->getApplication());
+        $instance = $this->getContainer()->make($controller);
+        $instance->setApplication($this->getContainer());
 
         if (!method_exists($instance, $action)) {
             throw new HttpNotFoundException("Action $action Not Found In Controller $controller");
         }
 
         // inject all properties of controller defined in definition
-        $this->getApplication()->propertyInjection($instance, $controller);
+        $this->getContainer()->propertyInjection($instance, $controller);
         // Trigger Before Action Events
         $this->triggerActionEvent($instance, $action);
         $response = call_user_func_array([$instance, $action], $params);

@@ -227,7 +227,7 @@ class Controller implements RouteControllerInterface
     {
         $reflection = (new \Cygnite\Reflection())->setClass($controller);
         $methods = $reflection->getMethods('public', false, null);
-        $app = $this->getApplication();
+        $app = $this->getContainer();
 
         foreach ($methods as $key => $method) {
             if ($method !== '__construct') {
@@ -290,9 +290,9 @@ class Controller implements RouteControllerInterface
         return [$uri, $verb, $method, $plain];
     }
 
-    public function getApplication()
+    public function getContainer()
     {
-        return $this->router->getApplication();
+        return $this->router->getContainer();
     }
 
     /**

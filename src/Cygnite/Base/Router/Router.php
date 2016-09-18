@@ -59,7 +59,7 @@ class Router implements RouterInterface
         '{:day}'       => '\d{2}(/[a-z0-9_-]+)',
     ];
     public $response;
-    public $application;
+    public $container;
     public $request;
     /**
      * @var array The route patterns and their handling functions
@@ -85,7 +85,7 @@ class Router implements RouterInterface
 
     protected $middleware;
 
-    public function __construct($request)
+    public function __construct(Request $request)
     {
         $this->request = $request;
     }
@@ -105,7 +105,7 @@ class Router implements RouterInterface
             throw new InvalidRouterCollectionException('Route Collection Class $namespace doesn\'t exists');
         }
 
-        $routeCollection = $this->getApplication()->make($namespace);
+        $routeCollection = $this->getContainer()->make($namespace);
 
         return $routeCollection->setRouter($this);
     }
@@ -113,13 +113,13 @@ class Router implements RouterInterface
     /**
      * Set application instance.
      *
-     * @param $app
+     * @param $container
      *
      * @return $this
      */
-    public function setApplication($app)
+    public function setContainer($container)
     {
-        $this->application = $app;
+        $this->container = $container;
 
         return $this;
     }
@@ -129,9 +129,9 @@ class Router implements RouterInterface
      *
      * @return App
      */
-    public function getApplication()
+    public function getContainer()
     {
-        return $this->application;
+        return $this->container;
     }
 
     /**
@@ -608,7 +608,7 @@ class Router implements RouterInterface
 
                 // call the handling function with the URL
                 $this->handledRoute = call_user_func_array($route['fn'], $params);
-                $this->application->set('response', $this->handledRoute);
+                $this->container->set('response', $this->handledRoute);
 
                 $handledRequest++;
 
@@ -775,6 +775,7 @@ class Router implements RouterInterface
                 return $this->handleControllerDependencies($controller, $action);
             }
         }
+
         try {
             $routeRequests = $this->getAppRoutes();
 
@@ -802,7 +803,10 @@ class Router implements RouterInterface
     public function getAppRoutes()
     {
         $routes = function () {
-            extract(['app' => $this->getApplication()]);
+            extract([
+                'app' => $this->container->get('app'),
+                'router' => $this
+            ]);
             require APPPATH.DS.'Routing'.DS.'Routes'.EXT;
         };
 
@@ -828,9 +832,9 @@ class Router implements RouterInterface
      */
     public function getResponse()
     {
-        $app = $this->getApplication();
+        $container = $this->getContainer();
 
-        return $app['response'];
+        return $container['response'];
     }
 
     /**
@@ -858,7 +862,7 @@ class Router implements RouterInterface
      */
     public function runRouteWithinStack(Request $request)
     {
-        return (new Pipeline($this->application))
+        return (new Pipeline($this->container->getContainer()))
             ->send($request)
             ->through([$this->middleware])
             ->run();
@@ -870,11 +874,11 @@ class Router implements RouterInterface
         $hasPattern = $this->hasNamedPattern($pattern);
         $pattern = ($hasPattern == false) ? $pattern : $hasPattern;
         if (preg_match_all(
-                '#^'.$pattern.'$#',
-                $uri,
-                $matches,
-                PREG_SET_ORDER
-            )) {
+            '#^'.$pattern.'$#',
+            $uri,
+            $matches,
+            PREG_SET_ORDER
+        )) {
             return $matches;
         }
     }
