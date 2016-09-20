@@ -11,7 +11,7 @@ before_script:
 
 install: travis_retry composer install --no-interaction --prefer-source
 
-#script: vendor/bin/phpunit
+script: vendor/bin/phpunit
 
 notifications:
   email: false
