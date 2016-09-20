@@ -1,5 +1,4 @@
 <?php
-
 use Cygnite\Common\UrlManager\Url;
 use Cygnite\Helpers\Config;
 
@@ -12,7 +11,8 @@ Url::setBase(
         Config::get('global.config', 'base_path')
 );
 
-/* --------------------------------------------------
+/* 
+ * --------------------------------------------------
  *  Set application encryption key
  * ---------------------------------------------------
  */
