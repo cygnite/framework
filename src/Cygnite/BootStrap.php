@@ -11,7 +11,7 @@ Url::setBase(
         Config::get('global.config', 'base_path')
 );
 
-/* 
+/*
  * --------------------------------------------------
  *  Set application encryption key
  * ---------------------------------------------------
