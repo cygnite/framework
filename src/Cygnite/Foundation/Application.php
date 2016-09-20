@@ -408,7 +408,7 @@ class Application extends Container implements ApplicationInterface
     */
     public function isEventMiddlewareEnabled()
     {
-    	return Config::get('global.config', 'activate.event.middleware');
+        return Config::get('global.config', 'activate.event.middleware');
     }
 
     /**
