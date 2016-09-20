@@ -402,6 +402,14 @@ class Application extends Container implements ApplicationInterface
     {
         return $this->booted;
     }
+    
+    /**
+    * Check if Event middleware activated
+    */
+    public function isEventMiddlewareEnabled()
+    {
+        return Config::get('global.config', 'activate.event.middleware');
+    }
 
     /**
      * We will activate middle ware events if set as true in
@@ -411,11 +419,10 @@ class Application extends Container implements ApplicationInterface
      */
     public function activateEventMiddleWare()
     {
-        $isEventActive = Config::get('global.config', 'activate.event.middleware');
         $eventClass = Config::get('global.config', 'app.event.class');
+        $this->set('event', $this->make($eventClass));
 
-        if ($isEventActive && !$this->has('event')) {
-            $this->set('event', $this->make($eventClass));
+        if ($this->isEventMiddlewareEnabled()) {
             return $this->get('event')->register($this);
         }
     }
