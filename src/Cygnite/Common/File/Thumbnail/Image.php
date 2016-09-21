@@ -266,7 +266,6 @@ class Image
         }
 
         chmod($rootPath, 0777);
-
     }
 
     /**
