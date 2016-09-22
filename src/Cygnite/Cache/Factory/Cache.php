@@ -83,7 +83,7 @@ class Cache
         $memcached = null;
         if ($config['memcached']['autoconnnect']) {
             $uniqueId = $config['memcached']['uniqueId'];
-            $memCachedInstance = (!is_null($uniqueId)) ? new Memcached($uniqueId) : new Memcached();
+            $memCachedInstance = (!is_null($uniqueId)) ? new \Memcached($uniqueId) : new \Memcached();
 
             $memcached = (new MemcachedConnector($memCachedInstance))->create($config['memcached']['servers']);
         }

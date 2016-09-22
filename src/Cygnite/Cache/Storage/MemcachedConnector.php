@@ -52,8 +52,6 @@ class MemcachedConnector
      */
     public function create(array $servers)
     {
-        $this->memcached = $this->getMemcachedInstance();
-
         if (empty($servers)) {
             throw new \RuntimeException(sprintf('Empty configuration passed to %s::create() method.', __CLASS__));
         }
