@@ -27,7 +27,7 @@ if (!defined('CF_SYSTEM')) {
 /**
  * @require StorageInterface to implement APC Cache
  */
-class ApcWarpper
+class ApcWrapper
 {
     // life time
     protected $lifeTime;
