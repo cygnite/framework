@@ -10,8 +10,6 @@
  */
 namespace Cygnite\Common\File\Thumbnail;
 
-use Cygnite\Cygnite;
-
 /**
  * Image Thumbnail.
  *
@@ -20,66 +18,183 @@ use Cygnite\Cygnite;
  * @example
  * <code>
  *    Example:
- *    $thumb = new \Cygnite\Common\File\Thumbnail\Image();
- *    $thumb->setRootDir(CYGNITE_BASE);
- *    $thumb->directory = 'Set your directory path';
- *    $thumb->fixedWidth  = 100;
- *    $thumb->fixedHeight = 100;
- *    $thumb->thumbPath = 'your thumb path';
- *    $thumb->thumbName = 'Your thumb image name';
- *    // Optional. If you doen't want to have custom name then it will generate
- *    thumb as same name of original image.
- *    $thumb->resize();
+ *    $image = new \Cygnite\Common\File\Thumbnail\Image(CYGNITE_BASE, [
+ *          'imagePath' => 'public/upload/image-name.png',
+ *          'fixedHeight' => 160,
+ *          'fixedWidth' => 130,
+ *          'thumbPath' => 'public/upload/thumbnails/',
+ *          'thumbName' => 'new-thumb-name',
+ *    ]);
+ *    $image->resize();
  * </code>
  */
 class Image
 {
-    //defined thumbs array to hold dynamic properties
-    public $thumbs = [];
-
-    //Set valid types of images to convert to thumb
-    public $imageTypes = ['jpg', 'png', 'jpeg', 'gif'];
-
-    //Set valid type of properties to avoid exceptions
-    private $validProperties = ['directory', 'fixedWidth', 'fixedHeight', 'thumbPath', 'thumbName'];
-
     public $rootDir;
+    //Set valid types of images to convert to thumb
+    protected $imageTypes = ['jpg', 'png', 'jpeg', 'gif'];
+
+    protected $imagePath;
+    protected $fixedWidth;
+    protected $fixedHeight;
+    protected $thumbPath;
+    protected $thumbName;
+    //Set valid type of properties to avoid exceptions
+    protected $validProperties = ['imagePath', 'fixedWidth', 'fixedHeight', 'thumbPath', 'thumbName'];
 
     /**
-     * @param $key   name of the property
-     * @param $value value to set
+     * Image constructor.
      *
-     * @throws \Exception
-     *
-     * @return void
+     * @param null $rootDir Set Root directory of the image.
+     * @param array $properties Array of property value to be set.
      */
-    public function __set($key, $value)
+    public function __construct($rootDir = null, $properties = [])
     {
-        if (in_array($key, $this->validProperties) == false) {
-            throw new \Exception('You are not allowed to set invalid properties. Please check guide.');
+        if (!is_null($rootDir)) {
+            $this->setRootDir($rootDir);
         }
-        $this->thumbs[$key] = $value;
+
+        if (is_array($properties) && !empty($properties)) {
+            $this->setProperties($properties);
+        }
     }
 
     /**
-     * @param $key property name
+     * Set all the properties from given array values.
+     *
+     * @param array $properties
+     * @throws \RuntimeException
+     * @throws \Exception
+     */
+    public function setProperties(array $properties = [])
+    {
+        foreach ($properties as $property => $value) {
+            $method = 'set'.ucfirst($property);
+            if (!method_exists($this, $method)) {
+                throw new \RuntimeException("Undefined method $method.");
+            }
+
+            if (!in_array($property, $this->validProperties)) {
+                throw new \Exception('You are trying to set invalid properties. Please check valid properties.');
+            }
+
+            $this->{$method}($value);
+        }
+    }
+
+    /**
+     * Set Image path, will be used to create thumbnail from.
+     *
+     * @param $path
+     */
+    public function setImagePath($path)
+    {
+        $this->imagePath = $path;
+    }
+
+    /**
+     * Get the image path.
      *
      * @return string
      */
-    public function __get($key)
+    public function getImagePath()
     {
-        if (isset($this->thumbs[$key])) {
-            return $this->thumbs[$key];
-        }
+        return $this->imagePath;
     }
 
+    /**
+     * Set fixed width for thumbnail image.
+     *
+     * @param $width
+     */
+    public function setFixedWidth($width)
+    {
+        $this->fixedWidth = $width;
+    }
+
+    /**
+     * Get the thumbnail image width.
+     *
+     * @return string
+     */
+    public function getFixedWidth()
+    {
+        return $this->fixedWidth;
+    }
+
+    /**
+     * Set the fixed height for thumbnail.
+     *
+     * @param $height
+     */
+    public function setFixedHeight($height)
+    {
+        $this->fixedHeight = $height;
+    }
+
+    /**
+     * Get the height of thumbnail.
+     *
+     * @return string
+     */
+    public function getFixedHeight()
+    {
+        return $this->fixedHeight;
+    }
+
+    /**
+     * Set the new thumbnail image path.
+     * @param $thumbPath
+     */
+    public function setThumbPath($thumbPath)
+    {
+        $this->thumbPath = $thumbPath;
+    }
+
+    /**
+     * Get the thumb path.
+     *
+     * @return string
+     */
+    public function getThumbPath()
+    {
+        return $this->thumbPath;
+    }
+
+    /**
+     * Set the thumbnail name.
+     *
+     * @param $thumbName
+     */
+    public function setThumbName($thumbName)
+    {
+        $this->thumbName = $thumbName;
+    }
+
+    /**
+     * Get the thumbnail name;
+     * @return string
+     */
+    public function getThumbName()
+    {
+        return $this->thumbName;
+    }
+
+    /**
+     * Set the root directory of image.
+     *
+     * @param bool $rootPath
+     * @return $this
+     */
     public function setRootDir($rootPath = false)
     {
-        if ($rootPath) {
-            $this->rootDir = $rootPath.DS;
-        } else {
+        if (!$rootPath) {
             $this->rootDir = getcwd().DS;
         }
+
+        $this->rootDir = $rootPath.DS;
+
+        return $this;
     }
 
     /**
@@ -91,57 +206,29 @@ class Image
      */
     public function resize()
     {
-        $path = [];
-        $src = $this->rootDir.DS.str_replace(['/', '\\'], DS, $this->directory);   /* read the source image */
+        $src = $this->rootDir.DS.str_replace(['/', '\\'], DS, $this->imagePath);   /* read the source image */
 
-
-        if (file_exists($src)) {
-            $info = getimagesize($src); // get the image size
-            $path = pathinfo($src);
-
-            if (!in_array(strtolower($path['extension']), $this->imageTypes)) {
-                throw new \Exception('File type not supported!');
-            }
-
-            $thumbName = ($this->thumbName == null)
-                         ? $path['basename']
-                         : $this->thumbName.'.'.$path['extension'];
-
-
-            switch (strtolower($path['extension'])) {
-
-                case 'jpg':
-                    $sourceImage = $this->imageCreateFrom('jpeg', $src);
-                    $thumbImg = $this->changeDimensions($sourceImage, $this->fixedWidth, $this->fixedHeight);
-                    $this->image('jpeg', $thumbImg, $thumbName);
-
-                    break;
-                case 'png':
-
-                    $sourceImage = $this->imageCreateFrom('png', $src);
-                    $thumbImg = $this->changeDimensions($sourceImage, $this->fixedWidth, $this->fixedHeight);
-                    $this->image('png', $thumbImg, $thumbName);
-
-                    break;
-                case 'jpeg':
-
-                    $sourceImage = $this->imageCreateFrom('jpeg', $src);
-                    $thumbImg = $this->changeDimensions($sourceImage, $this->fixedWidth, $this->fixedHeight);
-                    $this->image('jpeg', $thumbImg, $thumbName);
-
-                    break;
-                case 'gif':
-                    $sourceImage = $this->imageCreateFrom('jpeg', $src);
-                    $thumbImg = $this->changeDimensions($sourceImage, $this->fixedWidth, $this->fixedHeight);
-                    $this->image('gif', $thumbImg, $thumbName);
-
-                    break;
-            }
-
-            return true;
-        } else {
-            throw new \Exception('404 File not found on given path');
+        if (!file_exists($src)) {
+            throw new \Exception("File not found in given path $src.");
         }
+
+        $info = getimagesize($src); // get the image size
+        $path = pathinfo($src);
+        $extension = strtolower($path['extension']);
+
+        if (!in_array($extension, $this->imageTypes)) {
+            throw new \Exception('File type not supported!');
+        }
+
+        $thumbName = is_null($this->thumbName)
+            ? $path['basename']
+            : $this->thumbName.'.'.$path['extension'];
+
+        $sourceImage = $this->imageCreateFrom(($extension == 'gif') ? 'jpeg' : $extension, $src);
+        $thumbImg = $this->changeDimensions($sourceImage, $this->fixedWidth, $this->fixedHeight);
+        $this->image($extension, $thumbImg, $thumbName);
+
+        return true;
     }
 
     /**
@@ -152,47 +239,33 @@ class Image
      *
      * @return source image
      */
-    private function imageCreateFrom($type, $src, $func = null)
+    protected function imageCreateFrom($type, $src, $func = null)
     {
-        $func = strtolower(__FUNCTION__.$type);
+        $func = strtolower('imageCreateFrom'.$type);
 
-        return (is_callable($func))
-            ? $func($src)
-            : null;
+        return (is_callable($func)) ? $func($src) : null;
     }
 
     /**
-     * @param      $type  type of the image
-     * @param      $thumb
-     * @param      $name
+     * Create/Resize image.
+     *
+     * @param $type
+     * @param $thumb
+     * @param $name
      * @param null $func
-     *
      * @throws \Exception
-     *
-     * @internal param \Apps\Components\Libraries\image $src source
-     * $param null function name to build dynamically
-     *
-     * @return sourceImage
      */
-    private function image($type, $thumb, $name, $func = null)
+    protected function image($type, $thumb, $name, $func = null)
     {
         $func = strtolower(__FUNCTION__.$type);
-
+        $rootPath = $this->rootDir.DS.str_replace(['/', '\\'], DS, $this->thumbPath).$name;
         /** @var $func TYPE_NAME */
         //if (is_callable($func)) {
-        if ($func(
-                $thumb,
-                $this->rootDir.DS.str_replace(
-                    ['/', '\\'],
-                    DS,
-                    $this->thumbPath
-                ).$name
-             )
-            ) {
-            chmod($this->rootDir.DS.str_replace(['/', '\\'], DS, $this->thumbPath).$name, 0777);
-        } else {
+        if (!$func($thumb, $rootPath)) {
             throw new \Exception('Unknown Exception while generating thumb image');
         }
+
+        chmod($rootPath, 0777);
     }
 
     /**
@@ -245,10 +318,5 @@ class Image
         );
 
         return $thumbImg;
-    }
-
-    public function __destruct()
-    {
-        unset($this->thumbs);
     }
 }

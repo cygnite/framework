@@ -27,7 +27,7 @@ if (!defined('CF_SYSTEM')) {
 /**
  * @require StorageInterface to implement APC Cache
  */
-class ApcWarpper
+class ApcWrapper
 {
     // life time
     protected $lifeTime;
@@ -43,9 +43,10 @@ class ApcWarpper
 
     public function __construct()
     {
+        /*
         if (!extension_loaded('apc')) {
             throw new ApcExtensionNotFoundException('Apc extension not loaded !');
-        }
+        }*/
 
         $this->isApcUEnabled = (function_exists('apcu_fetch')) ? true : false;
     }
