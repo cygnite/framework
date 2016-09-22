@@ -135,7 +135,7 @@ class Url
      *
      * @return string
      */
-    public function referredFrom()
+    public static function referredFrom()
     {
         return isset(static::$request->server['HTTP_REFERER']) ? static::$request->server['HTTP_REFERER'] : null;
     }
