@@ -97,7 +97,7 @@ class Manager
     {
         $expression = array_filter(explode('/', $this->request->server['REQUEST_URI']));
         $index = (false !== array_search(Router::$indexPage, $expression)) ? Router::$indexPage.'/' : '';
-
+        
         return $this->getBase().$index.$uri;
     }
 
