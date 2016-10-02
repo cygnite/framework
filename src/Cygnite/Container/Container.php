@@ -9,45 +9,188 @@
  */
 namespace Cygnite\Container;
 
-use ArrayAccess;
 use Closure;
-use Cygnite\Container\Dependency\Builder as DependencyBuilder;
-use Cygnite\Container\Dependency\DependencyInjectorTrait;
-use Cygnite\Container\Exceptions\ContainerException;
+use ArrayAccess;
+use InvalidArgumentException;
 use Cygnite\Helpers\Inflector;
-use Cygnite\Reflection;
+use Cygnite\Container\Exceptions\ContainerException;
+use Cygnite\Container\Dependency\Builder as DependencyBuilder;
 
 /**
  * Class Container.
  *
- * @author  Sanjoy Dey
+ * @author Sanjoy Dey
  */
 class Container extends DependencyBuilder implements ContainerAwareInterface, ArrayAccess
 {
-    use DependencyInjectorTrait;
+    /** @var Reflection */
+    protected $reflection;
+
+    /** @var Injector */
+    protected $injector;
+
+    /** @var array The container's bind data. */
+    protected $stack = [];
 
     /**
-     * The container's bind data.
+     * Constructor to set the container dependencies.
      *
-     * @var array
+     * @param Injector $injector
+     * @param array $definitions
+     * @param string $namespace
+     * @internal param string $namespace
      */
-    private $stack = [];
+    public function __construct(
+        Injector $injector,
+        array $definitions = [],
+        string $namespace = null
+    ) {
+        $this->reflection = new Reflection();
+        $this->setInjector($injector);
+
+        if (!empty($definitions)) {
+            $this->set('definition.config', $definitions);
+            $this->setPropertyDefinition($definitions['property.definition']);
+        }
+
+        if (!is_null($namespace)) {
+            $this->setAppNamespace($namespace);
+        }
+    }
+
+    /**
+     * Set Injector Instance.
+     *
+     * @param $injector
+     * @return ContainerAwareInterface
+     */
+    public function setInjector(Injector $injector) : ContainerAwareInterface
+    {
+        $this->injector = $injector;
+
+        return $this;
+    }
+
+    /**
+     * Returns injector instance.
+     */
+    public function getInjector() : Injector
+    {
+        return $this->injector;
+    }
+
+    /**
+     * Set definitions for property and interface injection.
+     *
+     * @param array $definitions
+     * @return ContainerAwareInterface
+     */
+    public function setDefinitions(array $definitions) : ContainerAwareInterface
+    {
+        $this->set('definition.config', $definitions);
+        parent::setPropertyDefinition($definitions['property.definition']);
+
+        return $this;
+    }
+
+    /**
+     * Set application namespace.
+     *
+     * @param $namespace
+     * @return $this
+     */
+    public function setApplicationNamespace($namespace)
+    {
+        return parent::setAppNamespace($namespace);
+    }
+
+    /**
+     * Returns Reflection instance.
+     *
+     * @return Reflection
+     */
+    public function getReflection() : Reflection
+    {
+        return $this->reflection;
+    }
+
+    /**
+     * Set value to container.
+     *
+     * @param $key
+     * @param $instance
+     * @return ContainerAwareInterface
+     */
+    public function set($key, $instance) : ContainerAwareInterface
+    {
+        $this[$key] = $instance;
+
+        return $this;
+    }
+
+    /**
+     * Returns value if stored in container.
+     *
+     * @param string $id
+     * @return mixed
+     */
+    public function get($id)
+    {
+        return $this->offsetGet($id);
+    }
+
+    /**
+     * Check if value exists in container.
+     *
+     * @param string $key
+     * @return bool
+     */
+    public function has($key)
+    {
+        return $this->offsetExists($key);
+    }
+    
+    /**
+     * Returns all defined value names.
+     *
+     * @return array An array of value names
+     */
+    public function keys()
+    {
+        return array_keys($this->stack);
+    }
+
+    /**
+     * Returns all stored items from container's stack
+     *
+     * @return array
+     */
+    public function all()
+    {
+        return $this->stack;
+    }
+
+    /**
+     * Assigns a value to the specified data.
+     *
+     * @param string The data key to assign the value to.
+     * @param mixed  The value to set.
+     */
+    public function __set($key, $value)
+    {
+        $this->stack[$key] = $value;
+    }
 
     /**
      * Get a data by key.
      *
      * @param $key
-     *
-     * @throws \InvalidArgumentException
-     *
-     * @return
-     *
-     * @internal param \Cygnite\Container\The $string key data to retrieve
+     * @return mixed
      */
     public function &__get($key)
     {
         if (!isset($this->stack[$key])) {
-            throw new \InvalidArgumentException(sprintf('Value "%s" is not defined.', $key));
+            throw new InvalidArgumentException(sprintf('Value "%s" is not defined.', $key));
         }
 
         $set = isset($this->stack[$key]);
@@ -62,45 +205,30 @@ class Container extends DependencyBuilder implements ContainerAwareInterface, Ar
     }
 
     /**
-     * Assigns a value to the specified data.
+     * Whether or not an data exists by key.
      *
-     * @param string The data key to assign the value to
-     * @param mixed  The value to set
+     * @param string An data key to check for.
+     * @return bool
      */
-    public function __set($key, $value)
+    public function __isset($key)
     {
-        $this->stack[$key] = $value;
+        return isset($this->stack[$key]);
     }
 
     /**
-     * Reference
-     * http://fabien.potencier.org/article/17/on-php-5-3-lambda-functions-and-closures.
+     * Unset an data by key.
      *
-     * @param Closure $callable
-     *
-     * @internal param $callable
-     *
-     * @return type
+     * @param string The key to unset.
      */
-    public function share(Closure $callable)
+    public function __unset($key)
     {
-        return function () use ($callable) {
-            static $object;
-            $c = $this;
-
-            if (is_null($object) && $callable instanceof Closure) {
-                $object = $callable($c);
-            }
-
-            return $object;
-        };
+        unset($this->stack[$key]);
     }
 
     /**
      * Adds an object to the shared pool.
      *
      * @param mixed $key
-     *
      * @return bool
      */
     public function isShared($key)
@@ -112,7 +240,6 @@ class Container extends DependencyBuilder implements ContainerAwareInterface, Ar
      * Removes an object from the shared pool.
      *
      * @param mixed $class
-     *
      * @return void
      */
     public function unShare($class)
@@ -120,28 +247,6 @@ class Container extends DependencyBuilder implements ContainerAwareInterface, Ar
         if (array_key_exists($class, $this->stack)) {
             $this->__unset($class);
         }
-    }
-
-    /**
-     * Whether or not an data exists by key.
-     *
-     * @param string An data key to check for
-     *
-     * @return bool
-     */
-    public function __isset($key)
-    {
-        return isset($this->stack[$key]);
-    }
-
-    /**
-     * Unset an data by key.
-     *
-     * @param string The key to unset
-     */
-    public function __unset($key)
-    {
-        unset($this->stack[$key]);
     }
 
     /**
@@ -154,18 +259,26 @@ class Container extends DependencyBuilder implements ContainerAwareInterface, Ar
     {
         if (is_null($offset)) {
             $this->stack[] = $value;
-        } else {
-            $this->stack[$offset] = $value;
         }
+
+        $this->stack[$offset] = $value;
+    }
+
+    /**
+     * Returns the value at specified offset.
+     *
+     * @param mixed|object $offset
+     * @return mixed|null
+     */
+    public function offsetGet($offset)
+    {
+        return $this->offsetExists($offset) ? $this->stack[$offset] : null;
     }
 
     /**
      * Whether or not an offset exists.
      *
-     * @param mixed $offset
-     *
-     * @internal param $string offset to check for
-     *
+     * @param mixed|object $offset
      * @return bool
      */
     public function offsetExists($offset)
@@ -188,35 +301,42 @@ class Container extends DependencyBuilder implements ContainerAwareInterface, Ar
     }
 
     /**
-     * Returns the value at specified offset.
+     * Reference
+     * http://fabien.potencier.org/article/17/on-php-5-3-lambda-functions-and-closures.
      *
-     * @param mixed $offset
-     *
-     * @internal param \Cygnite\Container\The $string offset to retrieve
-     *
-     * @return mixed
+     * @param Closure $callable
+     * @internal param $callable
+     * @return Closure
      */
-    public function offsetGet($offset)
+    public function share(Closure $callable) : Closure
     {
-        return $this->offsetExists($offset) ? $this->stack[$offset] : null;
+        return function () use ($callable) {
+            static $object;
+            $c = $this;
+
+            if (is_null($object) && $callable instanceof Closure) {
+                $object = $callable($c);
+            }
+
+            return $object;
+        };
     }
 
     /**
-     * @param          $key
-     * @param callable $callable
+     * Extends the existing object.
      *
-     * @throws \InvalidArgumentException
-     *
+     * @param string $key
+     * @param callable|Closure $callable $callable
      * @return callable
      */
-    public function extend($key, Closure $callable)
+    public function extend(string $key, Closure $callable)
     {
         if (!isset($this->stack[$key])) {
-            throw new \InvalidArgumentException(sprintf('Identifier "%s" is not defined.', $key));
+            throw new InvalidArgumentException(sprintf('Identifier "%s" is not defined.', $key));
         }
 
         if (!$callable instanceof Closure) {
-            throw new \InvalidArgumentException(
+            throw new InvalidArgumentException(
                 sprintf('Identifier "%s" is not Closure Object.', $callable)
             );
         }
@@ -234,41 +354,15 @@ class Container extends DependencyBuilder implements ContainerAwareInterface, Ar
         return $this[$key] = $extended;
     }
 
-    /**
-     * Returns all defined value names.
-     *
-     * @return array An array of value names
-     */
-    public function keys()
-    {
-        return array_keys($this->stack);
-    }
-
-    /**
-     * @param $key
-     * @param $instance
-     */
-    public function set($key, $instance)
-    {
-        $this[$key] = $instance;
-
-        return $this;
-    }
-
-    public function getRegisteredInstance()
-    {
-        return $this->stack;
-    }
 
     /**
      * Get singleton instance of your class.
      *
      * @param      $name
      * @param null $callback
-     *
      * @return mixed
      */
-    public function singleton($name, $callback = null)
+    public function singleton(string $name, callable $callback = null)
     {
         static $instance = [];
 
@@ -299,13 +393,11 @@ class Container extends DependencyBuilder implements ContainerAwareInterface, Ar
      *
      * @param       $class
      * @param array $arguments
-     *
      * @return object
      */
     public function resolve($class, $arguments = [])
     {
         $class = Inflector::toNamespace($class);
-
         return $this->make($class, $arguments);
     }
 
@@ -314,83 +406,142 @@ class Container extends DependencyBuilder implements ContainerAwareInterface, Ar
      * your class.
      *
      * @param $class
-     *
      * @throws \Cygnite\Container\Exceptions\ContainerException
-     *
      * @return mixed
      */
-    public function make($class, $arguments = [])
+    public function make(string $namespace, array $arguments = [])
     {
+        $class = $this->getClassNameFromNamespace($namespace);
         /*
          * If instance of the class already created and stored into
          * stack then simply return from here
          */
-        if (isset($this[$class])) {
-            return $this[$class];
+        if ($this->has($class)) {
+            return $this->get($class);
         }
-
-        $reflection = new Reflection();
-        $reflectionClass = $reflection->setClass($class)->getReflectionClass();
-
-        /*
-         * Check if reflection class is not instantiable then throw ContainerException
-         */
-        if (!$reflectionClass->isInstantiable()) {
-            $type = ($reflection->reflectionClass->isInterface() ? 'interface' : 'class');
-            throw new ContainerException("Cannot instantiate $type $class");
-        }
+        $reflectionClass = $this->reflection->setClass($namespace)->getReflectionClass();
+        $this->throwExceptionIfNotInstantiable($namespace, $reflectionClass);
 
         $constructor = null;
         $constructorArgsCount = 0;
-        if ($reflectionClass->hasMethod('__construct')) {
-            $constructor = $reflectionClass->getConstructor();
-            $constructor->setAccessible(true);
-            $constructorArgsCount = $constructor->getNumberOfParameters();
-        }
+        list($constructor, $constructorArgsCount) = $this->getConstructorArgs($reflectionClass, $constructorArgsCount);
 
-        // if class does not have explicitly defined constructor or constructor does not have parameters
-        // get the new instance
+        // if class does not have explicitly defined constructor or constructor
+        // does not have parameters get the new instance
         if (!isset($constructor) && is_null($constructor) || $constructorArgsCount < 1) {
             return $this[$class] = $reflectionClass->newInstance();
         }
 
         $dependencies = $constructor->getParameters();
-        $constructorArgs = [];
-
-        foreach ($dependencies as $dependency) {
-            if (!is_null($dependency->getClass())) {
-                $constructorArgs[] = $this->resolverClass($dependency, $arguments);
-            } else {
-                /*
-                 | Check if construct has default value
-                 | if exists we will simply assign it into array and continue
-                 | for next argument
-                 */
-                if ($dependency->isDefaultValueAvailable()) {
-                    $constructorArgs[] = $this->checkIfConstructorHasDefaultArgs($dependency, $arguments);
-                    continue;
-                }
-
-                /*
-                 | Check parameters are optional or not
-                 | if it is optional we will set the default value
-                 */
-                $constructorArgs[] = $this->isOptionalArgs($dependency);
-            }
-        }
+        $constructorArgs = $this->createMethodArgument($dependencies, $arguments);
 
         return $this[$class] = $reflectionClass->newInstanceArgs($constructorArgs);
     }
 
     /**
+     * This method is used to find out the arguments required for
+     * the constructor or any method and returns array of arguments.
+     *
+     * @param array $dependencies
+     * @param array $arguments
+     * @return array
+     */
+    protected function createMethodArgument(array $dependencies, array $arguments = []) : array
+    {
+        $args = [];
+        foreach ($dependencies as $dependency) {
+            if (!is_null($dependency->getClass())) {
+                $args[] = $this->resolverClass($dependency, $arguments);
+            } else {
+                // Check if construct has default value then we will simply assign it into array
+                // and continue for next argument
+                if ($dependency->isDefaultValueAvailable()) {
+                    $args[] = $this->injector->checkIfConstructorHasDefaultArgs($dependency, $arguments);
+                    continue;
+                }
+                //Check if parameters are optional then we will set the default value
+                $args[] = $this->injector->isOptionalArgs($dependency);
+            }
+        }
+
+        return $args;
+    }
+
+    /**
+     * This method is used to resolve all dependencies of
+     * your method and returns method arguments.
+     *
+     * @param string $namespace
+     * @param string $method
+     * @return array
+     */
+    public function resolveMethod(string $namespace, string $method) : array
+    {
+        $class = $this->reflection->setClass($namespace)->getReflectionClass();
+        $arguments = $class->getMethod($method)->getParameters();
+        $methodArgs = $this->createMethodArgument($arguments);
+
+        return array_filter($methodArgs);
+    }
+
+    /**
+     * Returns class name from the namespace.
+     * @return string
+     */
+    protected function getClassNameFromNamespace($namespace) : string
+    {
+        $namespaceArr = explode('\\', $namespace);
+
+        return strtolower(end($namespaceArr));
+    }
+
+    /**
+     * Get Class Constructor Arguments.
+     *
+     * @param $reflectionClass
+     * @param int $constructorArgsCount
+     * @return array
+     */
+    private function getConstructorArgs($reflectionClass, int $constructorArgsCount = 0)
+    {
+        if ($reflectionClass->hasMethod('__construct')) {
+            $constructor = $reflectionClass->getConstructor();
+            $constructor->setAccessible(true);
+            $constructorArgsCount = $constructor->getNumberOfParameters();
+
+            return [$constructor, $constructorArgsCount];
+        }
+    }
+
+    /**
+     * Throws exception if given input is not instantiable.
+     *
+     * @param $class
+     * @param $reflectionClass
+     * @throws Exceptions\ContainerException
+     */
+    private function throwExceptionIfNotInstantiable($class, $reflectionClass)
+    {
+        /*
+         * Check if reflection class is not instantiable then throw ContainerException
+         */
+        if (!$reflectionClass->isInstantiable()) {
+            $type = ($this->reflection->getReflectionClass()->isInterface() ? 'interface' : 'class');
+            throw new ContainerException("Cannot instantiate $type $class");
+        }
+    }
+
+    /**
+     * Resolves class and returns object if instantiable,
+     * otherwise checks for interface injection can be done.
+     *
      * @param $dependency
      * @param $arguments
-     *
      * @return array|mixed
      */
     private function resolverClass($dependency, $arguments)
     {
-        list($resolveClass, $reflectionParam) = $this->getReflectionParam($dependency);
+        list($resolveClass, $reflectionParam) = $this->injector->getReflectionParam($dependency);
 
         // Application and Container cannot be injected into controller currently
         // since Application constructor is protected
@@ -398,66 +549,38 @@ class Container extends DependencyBuilder implements ContainerAwareInterface, Ar
             return $this->makeInstance($resolveClass, $arguments);
         }
 
-        return $this->interfaceInjection($reflectionParam);
-    }
-
-    /**
-     * @param $dependency
-     * @param $arguments
-     *
-     * @return mixed
-     */
-    private function checkIfConstructorHasDefaultArgs($dependency, $arguments)
-    {
-        $parameters = $dependency->getDefaultValue();
-
-        if (empty($parameters) && !empty($arguments)) {
-            $parameters = $arguments;
-        }
-
-        return $parameters;
+        return $this->injector->interfaceInjection($reflectionParam);
     }
 
     /**
      * Create new instance.
      *
-     * @param       $class
+     * @param       $namespace
      * @param array $arguments
      *
      * @throws Exceptions\ContainerException
      *
      * @return mixed
      */
-    public function makeInstance($class, $arguments = [])
+    public function makeInstance(string $namespace, $arguments = [])
     {
-        if (!class_exists($class)) {
-            throw new ContainerException(sprintf('Class "%s" not exists.', $class));
+        if (!class_exists($namespace)) {
+            throw new ContainerException(sprintf('Class "%s" not exists.', $namespace));
+        }
+        $class = $this->getClassNameFromNamespace($namespace);
+
+        if ($this->has($class)) {
+            return $this->get($class);
         }
 
-        if ($this->offsetExists($class)) {
-            return $this[$class];
-        }
-
-        return $this[$class] = new $class($arguments);
+        return $this[$class] = new $namespace($arguments);
     }
 
     /**
-     * @param string $key
-     *
-     * @return bool
+     * @param $namespace
      */
-    public function has($key)
+    public function createProxy($namespace)
     {
-        return $this->offsetExists($key);
-    }
 
-    /**
-     * @param string $id
-     *
-     * @return mixed
-     */
-    public function get($id)
-    {
-        return $this->offsetGet($id);
     }
 }

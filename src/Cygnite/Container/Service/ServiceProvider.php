@@ -1,8 +1,7 @@
 <?php
-
 namespace Cygnite\Container\Service;
 
-use Cygnite\Foundation\Application;
+use Cygnite\Container\ContainerAwareInterface;
 
 /**
  * Class Container.
@@ -11,24 +10,24 @@ use Cygnite\Foundation\Application;
  */
 abstract class ServiceProvider
 {
-    protected $app;
+    protected $container;
 
     /**
      * Create a new service provider instance.
      *
-     * @param $app
+     * @param \Cygnite\Container\ContainerAwareInterface $container
      */
-    public function __construct($app)
+    public function __construct(ContainerAwareInterface $container)
     {
-        $this->app = $app;
+        $this->container = $container;
     }
 
     /**
      * Register the service provider.
      *
-     * @param \Cygnite\Foundation\Application $app
+     * @param \Cygnite\Container\ContainerAwareInterface $container
      *
      * @return void
      */
-    abstract public function register(Application $app);
+    abstract public function register(ContainerAwareInterface $container);
 }

@@ -11,29 +11,31 @@ namespace Cygnite\Container\Dependency;
 
 use Cygnite\Container\Exceptions\DependencyException;
 use Cygnite\Helpers\Inflector;
-use Cygnite\Reflection;
 use SplObjectStorage;
 
 /**
- * Class DependencyExtension.
+ * Class Builder.
+ *
+ * @package Cygnite\Container\Dependency
  */
 abstract class Builder extends SplObjectStorage
 {
-    public $definitions = [];
+    protected $definitions = [];
 
     public $controller = false;
 
-    public $controllersNs = '\\Controllers\\';
+    protected $controllersNs;
 
-    public $appNamespace;
+    protected $appNamespace;
 
     public $cache = [];
 
-    public $propertyDefinition;
+    protected $propertyDefinition;
 
     /**
-     * @param $namespace
+     * Set application namespace for property and interface injection.
      *
+     * @param $namespace
      * @return $this
      */
     public function setAppNamespace($namespace)
@@ -46,20 +48,16 @@ abstract class Builder extends SplObjectStorage
     /**
      * @return string
      */
-    public function getAppNamespace()
+    public function getAppNamespace() : string
     {
-        $appNS = APP_NS.$this->controllersNs;
-
-        return isset($this->appNamespace) ? $this->appNamespace : $appNS;
+        return $this->appNamespace;
     }
 
     /**
      * Set all definitions into array.
      *
      * @param $propertyInjections
-     *
-     * @throws \Cygnite\DependencyInjection\Exceptions\DependencyException
-     *
+     * @throws \Cygnite\Container\Exceptions\DependencyException
      * @return $this
      */
     public function setPropertyInjection($propertyInjections)
@@ -77,8 +75,7 @@ abstract class Builder extends SplObjectStorage
                  | it is not already exists
                  */
                 if (!isset($this->cache[$namespace.$controller][$key])) {
-                    $classNs = Inflector::toNamespace($value);
-                    $this->definitions['\\'.$namespace.$controller][$key] = $classNs;
+                    $this->definitions['\\'.$namespace.$controller][$key] = $value;
                 }
             }
         }
@@ -87,10 +84,10 @@ abstract class Builder extends SplObjectStorage
     }
 
     /**
+     * Set the service into container.
+     *
      * @param $services
-     *
      * @throws \Exception
-     *
      * @return $this
      */
     public function setService($services)
@@ -107,8 +104,9 @@ abstract class Builder extends SplObjectStorage
     }
 
     /**
-     * @param null $key
+     * Returns definitions by given key.
      *
+     * @param null $key
      * @return array|null
      */
     public function getDefinitions($key = null)
@@ -121,8 +119,9 @@ abstract class Builder extends SplObjectStorage
     }
 
     /**
-     * @param $definition
+     * Set property definitions.
      *
+     * @param $definition
      * @return $this
      */
     public function setPropertyDefinition($definition)
@@ -156,14 +155,12 @@ abstract class Builder extends SplObjectStorage
     /**
      * Inject all your properties into controller at run time.
      *
-     * @param $controllerInstance
+     * @param $classInstance
      * @param $controller
-     *
      * @throws \Exception
-     *
      * @return bool
      */
-    public function propertyInjection($controllerInstance, $controller)
+    public function propertyInjection($classInstance, $controller)
     {
         $dependencies = $this->getPropertyDefinitionConfig($controller);
 
@@ -176,13 +173,11 @@ abstract class Builder extends SplObjectStorage
                 /*
                  | We will check is set{PropertyName}() method exists in class.
                  | If exists we will call the method to set object into it
-                 |
                  */
-                if (method_exists($controllerInstance, 'set'.$controllerProp)) {
-                    $controllerInstance->{'set'.$controllerProp}($object);
+                if (method_exists($classInstance, 'set'.$controllerProp)) {
+                    $classInstance->{'set'.$controllerProp}($object);
                 } else {
                     $prop = $reflectionClass->getProperty($classProperty);
-
                     /*
                      | Check if property defined as static.
                      | we will throw exception is property defined as static
@@ -193,12 +188,7 @@ abstract class Builder extends SplObjectStorage
                         );
                     }
 
-                    /*
-                     | We will make property accessible and set the value into it
-                     */
-                    $reflection->makePropertyAccessible($classProperty);
-                    $reflectionProperty = $reflection->getReflectionProperty();
-                    $reflectionProperty->setValue($controllerInstance, $object);
+                    $this->setPropertyValue($reflection, $classInstance, $classProperty, $object);
                 }
             }
 
@@ -209,12 +199,29 @@ abstract class Builder extends SplObjectStorage
     }
 
     /**
+     * Set property value.
+     *
+     * @param $reflection
+     * @param $classInstance
+     * @param $classProperty
+     * @param $object
+     */
+    protected function setPropertyValue($reflection, $classInstance, $classProperty, $object)
+    {
+        /*
+         | We will make property accessible and set the value into it
+         */
+        $reflection->makePropertyAccessible($classProperty);
+        $reflectionProperty = $reflection->getReflectionProperty();
+        $reflectionProperty->setValue($classInstance, $object);
+    }
+
+    /**
      * @param $controller
      * @param $class
      * @param $reflectionArray
      *
-     * @throws \Cygnite\DependencyInjection\Exceptions\DependencyException
-     *
+     * @throws \Cygnite\Container\Exceptions\DependencyException
      * @return array
      */
     private function checkPropertyAndMakeObject($controller, $class, $reflectionArray)
@@ -234,15 +241,13 @@ abstract class Builder extends SplObjectStorage
     }
 
     /**
-     * @param $controller
-     *
+     * @param $class
      * @return array
      */
-    private function setReflectionClassAttributes($controller)
+    private function setReflectionClassAttributes($class) : array
     {
-        $reflection = new Reflection();
-        $reflection->setClass($controller);
+        $this->reflection->setClass($class);
 
-        return [$reflection, $reflection->getReflectionClass()];
+        return [$this->reflection, $this->reflection->getReflectionClass()];
     }
 }

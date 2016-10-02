@@ -1,13 +1,9 @@
 <?php
-
-namespace Cygnite\Container\Dependency;
+namespace Cygnite\Container;
 
 use Cygnite\Helpers\Inflector;
 
-/**
- * Trait DependencyInjectorTrait.
- */
-trait DependencyInjectorTrait
+class Injector
 {
     /**
      * @param $dependency
@@ -64,5 +60,22 @@ trait DependencyInjectorTrait
         }
 
         return $constructorArgs;
+    }
+
+    /**
+     * @param $dependency
+     * @param $arguments
+     *
+     * @return mixed
+     */
+    public function checkIfConstructorHasDefaultArgs($dependency, $arguments)
+    {
+        $parameters = $dependency->getDefaultValue();
+
+        if (empty($parameters) && !empty($arguments)) {
+            $parameters = $arguments;
+        }
+
+        return $parameters;
     }
 }
