@@ -10,6 +10,7 @@
 namespace Cygnite\Foundation;
 
 use Closure;
+use Cygnite\Reflection;
 use Cygnite\Http\Requests\Request;
 use Tracy\Helpers;
 use Cygnite\Helpers\Config;
@@ -55,11 +56,7 @@ class Application implements ApplicationInterface
      */
     public $namespace = '\\Controllers\\';
 
-    public $bootStrappers = [
-        //'debugger'   => \Cygnite\Exception\ExceptionHandler::class,
-        //'event'      => \Cygnite\Base\EventHandler\Event::class,
-        //'url'        => \Cygnite\Common\UrlManager\Url::class,
-    ];
+    public $bootStrappers = [];
 
     protected $container;
 
@@ -82,7 +79,6 @@ class Application implements ApplicationInterface
         $this->container = $container;
         $this->bootstrappers = $bootstrapper;
         $this->setPaths();
-        //show($this->bootstrappers);
     }
 
     /**
@@ -91,6 +87,7 @@ class Application implements ApplicationInterface
      *
      * @param Closure $callback
      *
+     * @param array $argument
      * @return Application
      */
     public static function instance(Closure $callback = null, $argument = [])
@@ -189,20 +186,6 @@ class Application implements ApplicationInterface
     }
 
     /**
-     * We will register all class definition for
-     * dependency injections.
-     */
-    public function registerClassDefinition()
-    {
-        $definitions = include $this->container->get('app.config')
-                                .DS.'definitions'.DS.'configuration'.EXT;
-
-        $this->container->set('definition.config', $definitions);
-
-        return $this->container;
-    }
-
-    /**
      * Return the translator instance
      *
      * @return static
@@ -242,7 +225,7 @@ class Application implements ApplicationInterface
         $serviceProvider = function () {
             $path = $this->container->get('app.config');
             extract(['app' => $this]);
-            return include $path.DS.'services'.EXT;
+            return include $path.DS.'services.php';
         };
 
         return $serviceProvider();
@@ -348,7 +331,6 @@ class Application implements ApplicationInterface
      */
     public function bootApplication(Request $request) : Application
     {
-        //$this->setServices();
         /*
         | -------------------------------------------------------------------
         | Check if script is running via cli and return false
@@ -388,7 +370,6 @@ class Application implements ApplicationInterface
         }
 
         $this->registerCoreBootstrappers();
-        //$this->setEnvironment();
         $this->beforeBootingApplication();
         $this->executeServices();
         $this->afterBootingApplication();
@@ -408,10 +389,6 @@ class Application implements ApplicationInterface
         }
 
         $this->bootstrappers->execute();
-        //$this->container->get('url')->setContainer($this->container);
-
-        $this->registerClassDefinition()
-            ->setPropertyDefinition($this->container['definition.config']['property.definition']);
 
         return $this;
     }
@@ -429,8 +406,12 @@ class Application implements ApplicationInterface
 
         if ($isEventActive && !$this->container->has('event')) {
             $this->container->set('event', $this->container->make($eventClass));
-            return $this->container->get('event')->register($this->container);
+            $this->container->get('event')->register($this->container);
+
+            return true;
         }
+
+        return false;
     }
 
     /**
@@ -456,7 +437,10 @@ class Application implements ApplicationInterface
      */
     public function beforeBootingApplication()
     {
-        $this->activateEventMiddleWare();
+        if (!$this->activateEventMiddleWare() ) {
+            return false;
+        }
+
         if ($this->container->get('event')->isAppEventEnabled() == false) {
             return true;
         }
@@ -474,6 +458,10 @@ class Application implements ApplicationInterface
      */
     public function afterBootingApplication()
     {
+        if (!$this->activateEventMiddleWare() ) {
+            return false;
+        }
+
         if ($this->container->get('event')->isAppEventEnabled() == false) {
             return true;
         }
