@@ -31,10 +31,13 @@ class Controller implements RouteControllerInterface
 
     private $routes = [];
 
-    private $router;
+    protected $router;
 
     /**
+     * Set Router instance.
+     *
      * @param $router
+     * @return $this
      */
     public function setRouter($router)
     {
@@ -202,9 +205,9 @@ class Controller implements RouteControllerInterface
     /**
      * @param type $pattern
      * @param type $func
-     * @param type $method
-     *
-     * @return \Cygnite\Base\Router\Controller\Controller
+     * @param type|string $method     *
+     * @throws \Exception
+     * @return Controller
      */
     private function mapStaticRoutes($pattern, $func, $method = 'get')
     {
@@ -225,9 +228,9 @@ class Controller implements RouteControllerInterface
      */
     public function implicitController($controller)
     {
-        $reflection = (new \Cygnite\Reflection())->setClass($controller);
+        $container = $this->getContainer();
+        $reflection = $container->getReflection()->setClass($controller);
         $methods = $reflection->getMethods('public', false, null);
-        $app = $this->getContainer();
 
         foreach ($methods as $key => $method) {
             if ($method !== '__construct') {
@@ -240,7 +243,7 @@ class Controller implements RouteControllerInterface
 
                 $classParam = ['controller' => $controller, 'method' => $method, 'args' => $args];
 
-                $this->handleRoute($app, $classParam, $verb, $uri);
+                $this->handleRoute($container, $classParam, $verb, $uri);
             }
         }
     }
@@ -248,18 +251,18 @@ class Controller implements RouteControllerInterface
     /**
      * Route to controller action.
      *
-     * @param $app
+     * @param $container
      * @param $classParam
      * @param $verb
      * @param $uri
      */
-    public function handleRoute($app, $classParam, $verb, $uri)
+    public function handleRoute($container, $classParam, $verb, $uri)
     {
-        $app->router->{$verb}($uri, function () use ($app, $classParam) {
+        $container->router->{$verb}($uri, function () use ($container, $classParam) {
             extract($classParam);
-            $app['response'] = $app->router->handleControllerDependencies($controller, $method, $args);
+            $container['response'] = $container->router->handleControllerDependencies($controller, $method, $args);
 
-            return $app['response'];
+            return $container['response'];
         });
     }
 
@@ -346,8 +349,7 @@ class Controller implements RouteControllerInterface
     /**
      * Add wildcards to the given URI.
      *
-     * @param string $uri
-     *
+     * @param string $uri     *
      * @return string
      */
     public function addUriWildcards($uri, $reflection, $method)
@@ -366,7 +368,6 @@ class Controller implements RouteControllerInterface
                 }
             }
         }
-
 
         return $uri.'/'.$parameter;
     }

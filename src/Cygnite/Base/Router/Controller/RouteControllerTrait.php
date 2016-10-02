@@ -84,7 +84,7 @@ trait RouteControllerTrait
             $params = $arguments[1];
         }
 
-        $file = CYGNITE_BASE.str_replace('\\', DS, '\\src'.$this->controllerWithNS).EXT;
+        $file = $this->container->get('root').str_replace('\\', DS, '\\src'.$this->controllerWithNS).'.php';
 
         if (!is_readable($file)) {
             throw new \Exception('Route class '.$this->controllerWithNS.' not found. ');
@@ -133,9 +133,10 @@ trait RouteControllerTrait
         $config = Config::get('module');
         $modulePath = $config['module.path'].DS;
         $moduleConfigDir = $config['module.config'].DS;
-        $class = '\\'.APP_NS.'\\'.$this->getModuleDir().'\\'.ucfirst($module).'\\BootStrap';
+        $class = '\\'.$this->getContainer()->get('app.namespace')
+            .'\\'.$this->getModuleDir().'\\'.ucfirst($module).'\\BootStrap';
 
-        $file = $modulePath.ucfirst($module).DS.$moduleConfigDir.strtolower($module).EXT;
+        $file = $modulePath.ucfirst($module).DS.$moduleConfigDir.strtolower($module).'.php';
         if (!file_exists($file)) {
             return false;
         }
@@ -165,7 +166,8 @@ trait RouteControllerTrait
         if ($module) {
             $this->namespace = '\\'.$this->getModuleDir().'\\'.$args[0].'\\Controllers\\';
         }
-        $this->controllerWithNS = '\\'.str_replace('src/', '', APPPATH).$this->namespace.$this->controller;
+        $this->controllerWithNS = '\\'.$this->getContainer()->get('app.namespace')
+            .$this->namespace.$this->controller;
         $this->method = Inflector::camelize($param[1]).'Action';
     }
 
@@ -218,16 +220,12 @@ trait RouteControllerTrait
     {
         $dir = ($dir !== '') ? $dir.'\\' : '';
 
-        return
-            '\\'.str_replace('src/', '', APPPATH).$this->namespace.$dir.
-            Inflector::classify(
-                $class
-            ).'Controller';
+        return '\\'.$this->getContainer()->get('app.namespace')
+        .$this->namespace.$dir.Inflector::classify($class).'Controller';
     }
 
     /**
      * @param $actionName
-     *
      * @return string
      */
     public function getActionName($actionName)
@@ -243,24 +241,23 @@ trait RouteControllerTrait
      * @param array $params
      *
      * @throws \Cygnite\Exception\Http\HttpNotFoundException
-     *
      * @return mixed
      */
     public function handleControllerDependencies($controller, $action, $params = [])
     {
         // make and return instance of controller
         $instance = $this->getContainer()->make($controller);
-        $instance->setApplication($this->getContainer());
+        $instance->initialize($this->getContainer());
+        $methodArgs = $this->getContainer()->resolveMethod($controller, $action);
 
         if (!method_exists($instance, $action)) {
-            throw new HttpNotFoundException("Action $action Not Found In Controller $controller");
+            throw new HttpNotFoundException("Undefined Action $action In Controller $controller");
         }
-
         // inject all properties of controller defined in definition
         $this->getContainer()->propertyInjection($instance, $controller);
         // Trigger Before Action Events
         $this->triggerActionEvent($instance, $action);
-        $response = call_user_func_array([$instance, $action], $params);
+        $response = call_user_func_array([$instance, $action], array_merge($methodArgs, $params));
         // Trigger After Action Events
         $this->triggerActionEvent($instance, $action, 'after');
 

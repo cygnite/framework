@@ -807,7 +807,8 @@ class Router implements RouterInterface
                 'app' => $this->container->get('app'),
                 'router' => $this
             ]);
-            require APPPATH.DS.'Routing'.DS.'Routes'.EXT;
+
+            require $this->container->get('routes.dir').DS.'Routes'.'.php';
         };
 
         return $routes();
