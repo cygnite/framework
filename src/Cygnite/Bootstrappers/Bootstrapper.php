@@ -3,11 +3,17 @@ namespace Cygnite\Bootstrappers;
 
 use Cygnite\Bootstrappers\Paths;
 
+/**
+ * Class Bootstrapper
+ * @package Cygnite\Bootstrappers
+ */
 class Bootstrapper
 {
     protected $paths;
 
-    private $bootstrappers = [];
+    protected $bootstrappers = [
+        \Cygnite\Foundation\Bootstrappers\ApplicationBootstraper::class,
+    ];
 
 
     /**
@@ -39,7 +45,7 @@ class Bootstrapper
      * Return all bootstrappers
      * @return mixed
      */
-    public function all()
+    public function all() : array
     {
         return $this->bootstrappers;
     }
