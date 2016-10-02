@@ -407,6 +407,16 @@ class View extends Composer implements ViewInterface,\ArrayAccess
     {
         return $this->twigTemplateLocation;
     }
+    
+    /**
+     * Returns Output instance.
+     * 
+     * @return Output
+     */
+    public function getOutput() : Output
+    {
+        return $this->output;
+    }
 
     /**
      * Handle undefined method errors.
