@@ -9,6 +9,8 @@
  */
 namespace Cygnite\Mvc;
 
+use Cygnite\Container\Exceptions\ContainerException;
+
 /**
  * trait ControllerViewBridgeTrait.
  */
@@ -36,13 +38,19 @@ trait ControllerViewBridgeTrait
     }
 
     /**
-     * @param $class
+     * Returns registered item from container.
      *
-     * @return object
+     * @param $class
+     * @return mixed
+     * @throws ContainerException
      */
     public function get($class)
     {
-        return $this->getContainer()->resolve($class);
+        if (!$this->container()->has($class)) {
+            throw new ContainerException("Given class $class is not registered in container.");
+        }
+
+        return $this->container()->resolve($class);
     }
 
     /**

@@ -7,11 +7,14 @@ use Cygnite\Common\UrlManager\Url;
 use Cygnite\Container\ContainerAwareInterface;
 use Cygnite\Bootstrappers\BootstrapperInterface;
 use Cygnite\Mvc\View\ViewFactory;
+use Cygnite\Mvc\View\Widget;
 
 /**
  * Class ViewBootstraper.
+ *
  * @package Cygnite\Foundation\Bootstrappers
  */
+
 class ViewBootstraper implements BootstrapperInterface
 {
     private $container;
@@ -19,7 +22,7 @@ class ViewBootstraper implements BootstrapperInterface
     protected $paths;
 
     /**
-     * View bootstrapper constructor
+     * View bootstrapper constructor.
      *
      * @param ContainerAwareInterface $container
      * @param Paths $paths
@@ -36,8 +39,13 @@ class ViewBootstraper implements BootstrapperInterface
      */
     public function run()
     {
+        // Configure view & widget class.
         ViewFactory::make(\Cygnite\Mvc\View\View::class, $this->container, function ($v) {
             $v->setContainer($this->container);
+
+            // Configure widget and register into container.
+            $widget = new \Cygnite\Mvc\View\Widget($this->paths, $v->getOutput());
+            $this->container->set('widget', $widget);
         });
     }
 }

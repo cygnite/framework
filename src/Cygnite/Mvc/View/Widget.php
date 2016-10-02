@@ -2,6 +2,8 @@
 
 namespace Cygnite\Mvc\View;
 
+use Cygnite\Bootstrappers\Paths;
+
 if (!defined('CF_SYSTEM')) {
     exit('External script access not allowed');
 }
@@ -9,69 +11,116 @@ if (!defined('CF_SYSTEM')) {
 /**
  * Class Widget.
  */
-class Widget extends Output implements \ArrayAccess
+class Widget implements \ArrayAccess
 {
+    /** @var array */
     public $widget = [];
 
+    /** @var array */
     public $data = [];
 
+    /** @var bool */
     protected $module = false;
 
+    /** @var */
     protected $widgetName;
 
+    /** @var string */
     protected $moduleDir = 'Modules';
 
+    /** @var Paths */
+    public $paths;
+
     /**
-     * @param       $name
-     * @param array $data
+     * Widget constructor.
+     *
+     * @param Paths  $paths  Paths instance.
+     * @param Output $output Output instance.
      */
-    public function __construct($name, array $data = [])
+    public function __construct(Paths $paths, Output $output)
     {
-        $this->setWidgetName($name);
-        $this->data = $data;
+        $this->paths = $paths;
+        $this->output = $output;
     }
 
+    /**
+     * Returns Output instance.
+     *
+     * @return Output
+     */
+    public function getOutput() : Output
+    {
+        return $this->output;
+    }
+
+    /**
+     * Returns Paths instance.
+     *
+     * @return Paths
+     */
+    public function getPaths() : Paths
+    {
+        return $this->paths;
+    }
+
+    /**
+     * Set widget name.
+     *
+     * @param $name
+     */
     private function setWidgetName($name)
     {
         $this->widgetName = $name;
     }
 
+    /**
+     * Get widget name.
+     *
+     * @return null
+     */
     private function getWidgetName()
     {
         return (isset($this->widgetName)) ? $this->widgetName : null;
     }
 
     /**
-     * @param          $name
-     * @param array    $data
-     * @param callable $callback
+     * Create widget view and returns content.
      *
-     * @return mixed
+     * @param string $name The name of the widget.
+     * @param array $data Data to be passed in widget.
+     * @param \Closure|null $callback
+     * @return string
      */
-    public static function make($name, array $data = [], \Closure $callback = null)
+    public function make(string $name, array $data = [], \Closure $callback = null) : string
     {
+        $this->setWidgetName($name);
+        $this->data = $data;
         /*
          | If second param given as closure then we will
          | return callback
          */
         if (!is_null($callback) && $callback instanceof \Closure) {
-            return $callback(new self($name, $data));
+            return $callback($this);
         }
+
         /*
          | return object
          */
-        return (new self($name, $data))->render();
+        return $this->render();
     }
 
     /**
-     * @param $bool
+     * @param $bool set
      */
-    public function setModule($bool)
+    public function setModule($module)
     {
-        $this->module = $bool;
+        $this->module = $module;
     }
 
-    public function module()
+    /**
+     * @return bool
+     */
+    public function module() : bool
     {
         return ($this->module) ? true : false;
     }
@@ -86,8 +135,7 @@ class Widget extends Output implements \ArrayAccess
         if (string_has($this->getWidgetName(), ':')) {
             $exp = [];
             $exp = explode(':', $this->getWidgetName());
-            $moduleName = $exp[0];
-            $view = $exp[1];
+            $moduleName = $exp[0]; $view = $exp[1];
             $path = $this->getWidgetPath($view, $moduleName, true);
             $this->setWidgetName(null);
             $this->setModule(false);
@@ -116,6 +164,15 @@ class Widget extends Output implements \ArrayAccess
         }
     }
 
+    /**
+     * Check if isModule parameter passed true, then system will Module widget view
+     * otherwise normal mvc view path;
+     *
+     * @param $widget
+     * @param string $moduleName
+     * @param bool $isModule
+     * @return string
+     */
     private function getWidgetPath($widget, $moduleName = '', $isModule = false)
     {
         $modulePath = 'Views';
@@ -123,7 +180,7 @@ class Widget extends Output implements \ArrayAccess
             $modulePath = $this->moduleDir.DS.$moduleName.DS.'Views';
         }
 
-        return CYGNITE_BASE.DS.APP.DS.$modulePath.DS.$widget.'.view.php';
+        return $this->paths['app.path'].DS.$modulePath.DS.$widget.'.view.php';
     }
 
     /**
@@ -162,7 +219,7 @@ class Widget extends Output implements \ArrayAccess
             $path = $this->setupWidget();
         }
 
-        $output = $this->renderView($path, $this->data);
+        $output = $this->output->renderView($path, $this->data);
         $this->setWidget($this->getWidgetName(), $output);
 
         return $output;
