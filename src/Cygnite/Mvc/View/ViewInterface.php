@@ -2,6 +2,8 @@
 
 namespace Cygnite\Mvc\View;
 
+use Cygnite\Container\Container;
+
 if (!defined('CF_SYSTEM')) {
     exit('External script access not allowed');
 }
@@ -18,7 +20,7 @@ interface ViewInterface
      *
      * @return mixed
      */
-    public function render($view, $params = [], $return = false);
+    public function render(string $view, array $params = [], $return = false);
 
     /**
      * @param       $view
@@ -26,7 +28,7 @@ interface ViewInterface
      *
      * @return mixed
      */
-    public static function create($view = null, array $data = []);
+    public function create($view = null, array $data = []);
 
     /**
      * @param          $view
@@ -35,7 +37,7 @@ interface ViewInterface
      *
      * @return mixed
      */
-    public static function compose($view, array $data = [], \Closure $callback = null);
+    public function compose(string $view, array $data = [], \Closure $callback = null);
 
     /**
      * @param array $params
@@ -57,22 +59,22 @@ interface ViewInterface
      *
      * @return mixed
      */
-    public function setData($key, $value);
+    public function set(string $key, $value);
 
     /**
      * @return mixed
      */
-    public function getData();
+    public function all() : array;
 
     /**
      * @param $container
      *
      * @return mixed
      */
-    public function setContainer($container);
+    public function setContainer(Container $container);
 
     /**
      * @return mixed
      */
-    public function getContainer();
+    public function getContainer() : Container;
 }

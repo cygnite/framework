@@ -1,5 +1,4 @@
 <?php
-
 namespace Cygnite\Mvc\View;
 
 if (!defined('CF_SYSTEM')) {
@@ -9,15 +8,35 @@ if (!defined('CF_SYSTEM')) {
 /**
  * trait Output.
  */
-trait Output
+class Output
 {
+    protected $view;
+
+    /**
+     * Set view instance
+     *
+     * @param View $view
+     */
+    public function setView(View $view)
+    {
+        $this->view = $view;
+    }
+
+    /**
+     * Get View instance
+     */
+    public function getView() : View
+    {
+        return $this->view;
+    }
+
     /**
      * @param $path
      * @param $data
      *
      * @return string
      */
-    protected function renderView($path, $data)
+    public function renderView($path, $data)
     {
         $obLevel = ob_get_level();
         ob_start();
@@ -42,7 +61,7 @@ trait Output
      *
      * @throws
      */
-    protected function handleViewException($e, $obLevel)
+    public function handleViewException($e, $obLevel)
     {
         while (ob_get_level() > $obLevel) {
             ob_end_clean();

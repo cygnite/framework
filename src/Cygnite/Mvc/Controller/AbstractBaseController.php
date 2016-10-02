@@ -33,21 +33,20 @@ abstract class AbstractBaseController
 
     private $class;
 
-    protected $app;
+    protected $container;
 
-    /**
-     * Constructor function.
-     *
-     * Configure parameters for View
-     */
-    public function __construct()
-    {
-        $this->configure();
-    }
+    protected $view;
 
     //prevent clone.
     private function __clone()
     {
+    }
+
+    public function initialize($container)
+    {
+        $this->setContainer($container);
+        $this->view = $container->get('view');
+        $this->configure();
     }
 
     /**
@@ -114,9 +113,9 @@ abstract class AbstractBaseController
      *
      * @return $this
      */
-    public function setApplication($app)
+    public function setContainer($container)
     {
-        $this->app = $app;
+        $this->container = $container;
 
         return $this;
     }
@@ -126,9 +125,9 @@ abstract class AbstractBaseController
      *
      * @return mixed
      */
-    public function app()
+    public function container()
     {
-        return $this->app;
+        return $this->container;
     }
 
     /**
@@ -149,11 +148,12 @@ abstract class AbstractBaseController
 
     public function configure()
     {
+        //$this->view();
         foreach ($this->validProperties as $key => $property) {
             $method = 'set'.ucfirst($property);
-
             if ($this->property($this, $property)) {
-                $this->view()->{$method}($this->{$property});
+
+                $this->view->{$method}($this->{$property});
             }
         }
     }
@@ -178,7 +178,7 @@ abstract class AbstractBaseController
      */
     public function render($view, $params = [], $return = false)
     {
-        return $this->view()->render($view, $params, $return);
+        return $this->view->render($view, $params, $return);
     }
 
     /**
@@ -190,7 +190,7 @@ abstract class AbstractBaseController
      */
     public function template($view, $params = [], $return = false)
     {
-        return $this->view()->template($view, $params, $return);
+        return $this->view->template($view, $params, $return);
     }
 
     /**
@@ -198,9 +198,9 @@ abstract class AbstractBaseController
      */
     public function view()
     {
-        ViewFactory::setApplication(Application::instance());
-
-        return ViewFactory::make();
+        //ViewFactory::setApplication($this->container);
+        //$this->view = ViewFactory::make();
+        return $this->view;
     }
 
     /**
@@ -213,9 +213,9 @@ abstract class AbstractBaseController
         if ($this->templateEngine == false) {
             return false;
         }
-        $view = $this->view();
-        $view->setTwigEnvironment();
+        //$view = $this->view();
+        $this->view->setTwigEnvironment();
 
-        return $view->getTemplate();
+        return $this->view->getTemplate();
     }
 }

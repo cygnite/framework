@@ -9,10 +9,8 @@ if (!defined('CF_SYSTEM')) {
 /**
  * Class Widget.
  */
-class Widget implements \ArrayAccess
+class Widget extends Output implements \ArrayAccess
 {
-    use Output;
-
     public $widget = [];
 
     public $data = [];
@@ -125,7 +123,7 @@ class Widget implements \ArrayAccess
             $modulePath = $this->moduleDir.DS.$moduleName.DS.'Views';
         }
 
-        return CYGNITE_BASE.DS.APP.DS.$modulePath.DS.$widget.'.view'.EXT;
+        return CYGNITE_BASE.DS.APP.DS.$modulePath.DS.$widget.'.view.php';
     }
 
     /**
