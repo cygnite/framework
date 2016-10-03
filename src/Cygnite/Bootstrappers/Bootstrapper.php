@@ -13,6 +13,7 @@ class Bootstrapper
 
     protected $bootstrappers = [
         \Cygnite\Foundation\Bootstrappers\ApplicationBootstraper::class,
+        \Cygnite\Foundation\Bootstrappers\LogBootstraper::class,
     ];
 
 
