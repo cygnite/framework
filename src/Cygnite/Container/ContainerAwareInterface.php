@@ -18,6 +18,15 @@ namespace Cygnite\Container;
  */
 interface ContainerAwareInterface
 {
+	/**
+     * Set value to container.
+     *
+     * @param $key
+     * @param $instance
+     * @return ContainerAwareInterface
+     */
+    public function set($key, $instance) : ContainerAwareInterface;
+    
     /**
      * Returns an entry of the container by its name.
      *
