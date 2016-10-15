@@ -9,9 +9,10 @@
  */
 namespace Cygnite\Container\Dependency;
 
-use Cygnite\Container\Exceptions\DependencyException;
-use Cygnite\Helpers\Inflector;
 use SplObjectStorage;
+use Cygnite\Helpers\Inflector;
+use Cygnite\Container\Reflection;
+use Cygnite\Container\Exceptions\DependencyException;
 
 /**
  * Class Builder.
@@ -246,8 +247,9 @@ abstract class Builder extends SplObjectStorage
      */
     private function setReflectionClassAttributes($class) : array
     {
-        $this->reflection->setClass($class);
+        $reflection = new Reflection();
+        $reflection->setClass($class);
 
-        return [$this->reflection, $this->reflection->getReflectionClass()];
+        return [$reflection, $reflection->getReflectionClass()];
     }
 }
