@@ -44,11 +44,11 @@ interface PipelineInterface
      * Pass request through the pipeline.
      *
      * @param array $pipes
-     * @param null  $method
+     * @param string|null  $method
      *
      * @return $this
      */
-    public function through(array $pipes, $method = null);
+    public function through(array $pipes, string $method = null);
 
     /**
      * Run all pipeline requests.
