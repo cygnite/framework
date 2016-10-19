@@ -22,7 +22,7 @@ class Files extends Collection
      *
      * @return $this|void
      */
-    public function add($name, $value)
+    public function add(string $name, $value)
     {
         parent::add($name, $value);
     }
@@ -33,7 +33,7 @@ class Files extends Collection
      *
      * @return mixed
      */
-    public function get($name, $default = null)
+    public function get(string $name, $default = null)
     {
         return parent::get($name, $default);
     }
@@ -41,7 +41,7 @@ class Files extends Collection
     /**
      * @return array
      */
-    public function all()
+    public function all() : array
     {
         return parent::all();
     }
