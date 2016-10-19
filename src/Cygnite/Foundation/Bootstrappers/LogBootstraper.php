@@ -1,9 +1,7 @@
 <?php
 namespace Cygnite\Foundation\Bootstrappers;
 
-use Cygnite\Helpers\Config;
 use Cygnite\Bootstrappers\Paths;
-use Cygnite\Common\UrlManager\Url;
 use Cygnite\Container\ContainerAwareInterface;
 use Cygnite\Bootstrappers\BootstrapperInterface;
 
