@@ -863,7 +863,7 @@ class Router implements RouterInterface
      */
     public function runRouteWithinStack(Request $request)
     {
-        return (new Pipeline($this->container->getContainer()))
+        return (new Pipeline($this->container))
             ->send($request)
             ->through([$this->middleware])
             ->run();
