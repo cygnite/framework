@@ -248,12 +248,14 @@ trait RouteControllerTrait
         // make and return instance of controller
         $instance = $this->getContainer()->make($controller);
         $instance->initialize($this->getContainer());
-        $methodArgs = $this->getContainer()->resolveMethod($controller, $action);
 
         if (!method_exists($instance, $action)) {
-            throw new HttpNotFoundException("Undefined Action $action In Controller $controller");
+            throw new HttpNotFoundException("Method $action() doesn't exists in $controller class.");
         }
-        // inject all properties of controller defined in definition
+
+        /** Auto resolve all method dependencies */
+        $methodArgs = $this->getContainer()->resolveMethod($controller, $action);
+        // Inject all properties of controller defined in definition file
         $this->getContainer()->propertyInjection($instance, $controller);
         // Trigger Before Action Events
         $this->triggerActionEvent($instance, $action);

@@ -478,6 +478,10 @@ class Container extends DependencyBuilder implements ContainerAwareInterface, Ar
     public function resolveMethod(string $namespace, string $method) : array
     {
         $class = $this->reflection->setClass($namespace)->getReflectionClass();
+
+        if (!method_exists($namespace, $method)) {
+            throw new \RuntimeException("Method $method doesn't exists in $namespace class");
+        }
         $arguments = $class->getMethod($method)->getParameters();
         $methodArgs = $this->createMethodArgument($arguments);
 
