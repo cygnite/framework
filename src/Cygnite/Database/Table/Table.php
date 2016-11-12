@@ -156,7 +156,7 @@ class Table
                         'increment' => true, 'key' => 'primary', ],
                     ['column' => 'migration', 'type' => 'string', 'length' => 255],
                     ['column' => 'version', 'type' => 'int', 'null' => true],
-                    ['column' => 'created_at',  'type' => 'datetime'],
+                    //['column' => 'created_at',  'type' => 'datetime'],
                 ], 'InnoDB', 'latin1'
             );
         });
