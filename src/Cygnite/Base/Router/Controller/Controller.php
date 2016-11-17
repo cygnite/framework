@@ -144,6 +144,10 @@ class Controller implements RouteControllerInterface
         $this->routes['post'] = array_merge($this->routes['post'], [
             "/$controller/$action/" => $callTo,
         ]);
+        
+        $this->routes['post'] = array_merge($this->routes['post'], [
+            "/$controller/$action/{:id}/" => $callTo,
+        ]);
 
         return $this;
     }
