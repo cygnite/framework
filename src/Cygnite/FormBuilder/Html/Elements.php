@@ -10,11 +10,10 @@
 
 namespace Cygnite\FormBuilder\Html;
 
-use Cygnite\Common\Input;
-
 if (!defined('CF_SYSTEM')) {
     exit('No External script access allowed');
 }
+use Cygnite\Helpers\Inflector;
 /**
  * Class Elements.
  */
@@ -25,6 +24,8 @@ class Elements
     protected $openTagHolder;
 
     /**
+     * Create html input element.
+     *
      * @param $key
      * @param $val
      *
@@ -40,6 +41,23 @@ class Elements
     }
 
     /**
+     * Create a button.
+     *
+     * @param $key
+     * @param $val
+     * @return Elements
+     */
+    protected function button($key, $val)
+    {
+        $extra = [
+            'type' => strtolower(__FUNCTION__),
+        ];
+
+        return $this->composeElement($key, $val, $extra);
+    }
+
+    /**
+     * Create a custom element.
      * <code>
      * ->addElement('custom', 'dl', ['name' => '<span style="color:red;">Custom Tag</span>',)
      * </code>.
@@ -129,8 +147,24 @@ class Elements
         $type = (isset($extra['type'])) ? $extra['type'] : $key;
 
         if ($hasCloseTag) {
+            $val = '';
+            if (is_object($this->entity)) {
+
+                if (method_exists($this->entity, 'get'.Inflector::camelize($key))) {
+                    $val = $this->entity->{'get'.Inflector::camelize($key)}();
+                } else if (property_exists($this->entity, $key)) {
+                    $property = (new \ReflectionClass($this->entity))->getProperty($key);
+                    if ($property->isPublic()) {
+                        $val = $property->getValue();
+                    }
+                } else {
+                    $val = $this->entity->{$key};
+                }
+            }
+
+            $val = (!isset($attributes['value'])) ? "value='".$val."'" : '';
             $this->elements[static::$formHolder[static::$formName]][$key] =
-                "<$type name='".$key."' ".$this->attributes($attributes).' />'.PHP_EOL;
+                "<$type name='".$key."' $val ".$this->attributes($attributes).' />'.PHP_EOL;
 
             return $this;
         }
@@ -150,7 +184,7 @@ class Elements
     protected function textarea($key, $val)
     {
         $value = null;
-        $value = $val['value'];
+        $value = isset($val['value']) ? $val['value'] : '' ;
         unset($val['value']);
 
         $extra = [
@@ -196,7 +230,6 @@ class Elements
     /**
      * @param $options
      * @param $selected
-     *
      * @return string
      */
     private function getSelectOptions($options, $selected)
@@ -212,8 +245,21 @@ class Elements
     }
 
     /**
+     * @param $key
      * @param $attributes
-     *
+     * @return Elements
+     */
+    protected function dateTimeLocal($key, $attributes)
+    {
+        if (isset($attributes['value']) && $attributes['value'] instanceof \DateTime) {
+            $attributes['value'] = $attributes['value']->format('Y-m-d H:m:s');
+        }
+
+        return $this->composeElement($key, $attributes, ['type' => 'input'], true);
+    }
+
+    /**
+     * @param $attributes
      * @return string
      */
     protected function attributes($attributes)
@@ -221,7 +267,9 @@ class Elements
         $elementStr = '';
 
         foreach ($attributes as $key => $value) {
-            $elementStr .= "{$key}='{$value}' ";
+
+             $elementStr .= ($key !== 0) ? "{$key}='{$value}' " : $value;
+
         }
 
         return $elementStr;

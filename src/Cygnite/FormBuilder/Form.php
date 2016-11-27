@@ -48,12 +48,24 @@ class Form extends Elements implements FormInterface
 
     public static $elNum = 1;
 
+    protected $entity;
+
+    /**
+     * Bind a model or entity object to Form.
+     *
+     * @param $entity
+     */
+    public function bind($entity)
+    {
+        $this->entity = $entity;
+
+        return $this;
+    }
+
     /**
      * @param       $method
      * @param array $arguments
-     *
      * @throws \Exception
-     *
      * @return mixed
      */
     public static function __callStatic($method, $arguments = [])
@@ -67,7 +79,6 @@ class Form extends Elements implements FormInterface
      * Get the form builder instance to build form.
      *
      * @param callable $callback
-     *
      * @return static
      */
     public static function make(Closure $callback = null)
@@ -83,7 +94,6 @@ class Form extends Elements implements FormInterface
      * Alias method of make.
      *
      * @param callable $callback
-     *
      * @return callable
      */
     public static function instance(Closure $callback = null)
@@ -96,14 +106,12 @@ class Form extends Elements implements FormInterface
      *
      * @param       $formName
      * @param array $attributes
-     *
      * @return $this
      */
     public function open($formName, $attributes = [])
     {
         self::$formName = $formName;
         self::$formHolder[$formName] = $formName;
-
         self::$formOpen = true;
         $this->form($formName, $attributes);
 
@@ -116,7 +124,6 @@ class Form extends Elements implements FormInterface
     * @param  $key
     * @param  $rule set up your validation rule
     * @return $this
-    *
     */
     public function addElement($type, $key, $array = [])
     {
@@ -124,9 +131,7 @@ class Form extends Elements implements FormInterface
 
         if ($type == 'openTag') {
             $key = $key.'_'.mt_rand(1, 2000);
-        }
-
-        if ($type == 'closeTag') {
+        } else if ($type == 'closeTag') {
             $key = $key.'_'.mt_rand(2000, 4000);
         }
 
@@ -181,6 +186,10 @@ class Form extends Elements implements FormInterface
                 case 'closeTag':
                     unset($val['type']);
                     $this->closeTag($key);
+                    break;
+                case 'dateTimeLocal':
+                    unset($val['type']);
+                    $this->dateTimeLocal($key, $val);
                     break;
                 default:
                     $this->input($key, $val);
