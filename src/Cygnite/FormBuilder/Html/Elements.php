@@ -24,7 +24,9 @@ class Elements
 
     protected $openTagHolder;
 
-    /**
+       /**
+     * Create html input element.
+     *
      * @param $key
      * @param $val
      *
@@ -40,6 +42,23 @@ class Elements
     }
 
     /**
+     * Create a button.
+     *
+     * @param $key
+     * @param $val
+     * @return Elements
+     */
+    protected function button($key, $val)
+    {
+        $extra = [
+            'type' => strtolower(__FUNCTION__),
+        ];
+
+        return $this->composeElement($key, $val, $extra);
+    }
+
+    /**
+     * Create a custom html element.
      * <code>
      * ->addElement('custom', 'dl', ['name' => '<span style="color:red;">Custom Tag</span>',)
      * </code>.
