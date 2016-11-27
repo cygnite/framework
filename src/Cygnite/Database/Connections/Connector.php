@@ -39,10 +39,43 @@ class Connector
         $this->config = $config;
     }
 
-    /**
+     /**
+     * Return PDO connection object. If connection lost will try again to connect.
+     *
      * @return PDO
      */
     public function create()
+    {
+        $pdo = null;
+        try {
+            $pdo = $this->connect();
+        } catch (\Exception $e) {
+            $pdo = null;
+            if ($this->isLostConnection($e)) {
+                $pdo = $this->reconnect();
+            }
+
+            throw new \LogicException('Connection lost and no reconnector available.');
+        }
+
+        return $pdo;
+    }
+
+    /**
+     * Recreate connection object.
+     *
+     * @return PDO
+     */
+    public function reconnect()
+    {
+        return $this->connect();
+    }
+
+    /**
+     * Create connection
+     * @return PDO
+     */
+    public function connect()
     {
         return new PDO($this->getDsn(), $this->config['username'], $this->config['password'], $this->getOptions());
     }
