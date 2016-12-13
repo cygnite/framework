@@ -11,6 +11,7 @@ namespace Cygnite\Mvc\View;
 
 use Cygnite\Container\Container;
 use Cygnite\Mvc\View\Twig\Template;
+use Cygnite\AssetManager\AssetCollection;
 use Cygnite\Mvc\ControllerViewBridgeTrait;
 use Cygnite\Mvc\View\Exceptions\ViewNotFoundException;
 
@@ -416,6 +417,17 @@ class View extends Composer implements ViewInterface,\ArrayAccess
     public function getOutput() : Output
     {
         return $this->output;
+    }
+
+    /**
+     * Create Asset collection.
+     *
+     * @param $class
+     * @return mixed
+     */
+    public function createAssetCollection($class)
+    {
+        return AssetCollection::create($class);
     }
 
     /**

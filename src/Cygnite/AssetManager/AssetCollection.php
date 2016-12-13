@@ -14,8 +14,29 @@ if (!defined('CF_SYSTEM')) {
  */
 class AssetCollection
 {
+    /**
+     * Make Asset collection.
+     *
+     * @param Closure $callback
+     * @return mixed
+     */
     public static function make(Closure $callback)
     {
         return $callback(new Asset());
+    }
+
+    /**
+     * Register Asset  into Asset object and returns
+     * Asset object.
+     *
+     * @param $class
+     * @param Closure $callback
+     * @return mixed
+     */
+    public static function create($class)
+    {
+        (new $class($a = new Asset()))->register();
+
+        return $a;
     }
 }
