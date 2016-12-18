@@ -458,7 +458,7 @@ class Response implements ResponseInterface
             fastcgi_finish_request();
         } elseif (strtolower(PHP_SAPI) != 'cli') {
             if (ob_get_length()) {
-			    ob_end_flush();
+                ob_end_flush();
         	}
         }
 
