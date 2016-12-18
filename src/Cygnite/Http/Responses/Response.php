@@ -459,7 +459,7 @@ class Response implements ResponseInterface
         } elseif (strtolower(PHP_SAPI) != 'cli') {
             if (ob_get_length()) {
                 ob_end_flush();
-        	}
+            }
         }
 
         return $this;

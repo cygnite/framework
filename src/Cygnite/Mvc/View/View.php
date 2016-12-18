@@ -24,7 +24,7 @@ if (!defined('CF_SYSTEM')) {
  *
  * @author Sanjoy Dey <dey.sanjoy0@gmail.com>
  */
-class View implements ViewInterface,\ArrayAccess
+class View implements ViewInterface, \ArrayAccess
 {
     use ControllerViewBridgeTrait, Output;
 
