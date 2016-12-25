@@ -111,4 +111,27 @@ class Connector
     {
         return $this->options;
     }
+
+    /**
+     * Find if exception caused by lost connection.
+     *
+     * @param \Exception $e
+     * @return bool
+     */
+    protected function isLostConnection(\Exception $e)
+    {
+        return string_has(strtolower($e->getMessage()), [
+            'server has gone away',
+            'Lost connection',
+            'is dead or not enabled',
+            'Resource deadlock avoided',
+            'Error while sending',
+            'no connection to the server',
+            'decryption failed or bad record mac',
+            'Error writing data to the connection',
+            'Deadlock found when trying to get lock',
+            'server closed the connection unexpectedly',
+            'SSL connection has been closed unexpectedly',
+        ]);
+    }
 }
