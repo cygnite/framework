@@ -59,11 +59,12 @@ class Kernel implements KernelInterface
      * @param $router
      * @param $request
      */
-    public function setRouter($router, $request)
+    public function setRouter($request)
     {
-        $this->router = $router;
-        $this->container->set('router', $router);
         $this->container->set('request', $request);
+        $this->container->make(\Cygnite\Router\Router::class);
+        $this->container->get('router')->setRequest($request);
+        $this->router = $this->container->get('router');        
     }
 
     /**
@@ -75,7 +76,7 @@ class Kernel implements KernelInterface
      */
     public function handle($request) : ResponseInterface
     {
-        $this->setRouter($this->container->makeInstance(\Cygnite\Base\Router\Router::class, $request), $request);
+        $this->setRouter($request);
 
         try {
             $response = $this->sendRequestThroughRouter($request);
@@ -126,8 +127,9 @@ class Kernel implements KernelInterface
     }
 
     /**
-     * @param \Exception $e
+     * Render exception.
      *
+     * @param \Exception $e
      * @return mixed
      */
     protected function renderException(\Exception $e)
@@ -139,7 +141,6 @@ class Kernel implements KernelInterface
      * Prepare pipeline requests and send through router.
      *
      * @param $request
-     *
      * @return mixed
      */
     protected function sendRequestThroughRouter($request)
@@ -210,7 +211,6 @@ class Kernel implements KernelInterface
      * Add middlewares to HTTP application.
      *
      * @param $middleware
-     *
      * @return $this
      */
     public function addMiddleware($middleware) : KernelInterface
@@ -229,7 +229,7 @@ class Kernel implements KernelInterface
      *
      * @return Application
      */
-    public function getApplication() : ContainerAwareInterface
+    public function getContainer() : ContainerAwareInterface
     {
         return $this->container;
     }
@@ -242,9 +242,9 @@ class Kernel implements KernelInterface
      */
     public function shutdown($request, $response)
     {
-        $routeMiddlewares = $this->router->getRouteMiddlewares();
+        $routeMiddlewares = $this->router->getMiddlewares();
 
-        $middlewares = array_merge(array_filter([$routeMiddlewares]), $this->middleware);
+        $middlewares = array_merge(array_filter([$routeMiddlewares]), $this->getMiddleware());
 
         foreach ($middlewares as $middleware) {
             list($name, $parameters) = $this->pipeline->parsePipeString($middleware);

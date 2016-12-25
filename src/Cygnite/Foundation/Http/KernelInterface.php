@@ -31,11 +31,11 @@ interface KernelInterface
     public function getMiddleware();
 
     /**
-     * Get the application instance.
+     * Get the container instance.
      *
-     * @return Application
+     * @return Container
      */
-    public function getApplication();
+    public function getContainer();
 
     /**
      * Fire shutdown method of middleware class.
