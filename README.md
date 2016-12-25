@@ -23,7 +23,7 @@ PHP 5.6
 PHP 7.0
 HHVM
 
-###Core features -
+### Key Features -
 -----------------------
 
 1. Cygnite Framework redesigned and powered by Composer.
