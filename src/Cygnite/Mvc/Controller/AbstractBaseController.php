@@ -198,9 +198,18 @@ abstract class AbstractBaseController
      */
     public function view()
     {
-        //ViewFactory::setApplication($this->container);
-        //$this->view = ViewFactory::make();
         return $this->view;
+    }
+
+    /**
+     * Create Asset collection and return asset instance.
+     *
+     * @param $class
+     * @return mixed
+     */
+    public function createAssetCollection($class)
+    {
+        return $this->view->createAssetCollection($class);
     }
 
     /**
@@ -213,7 +222,7 @@ abstract class AbstractBaseController
         if ($this->templateEngine == false) {
             return false;
         }
-        //$view = $this->view();
+        
         $this->view->setTwigEnvironment();
 
         return $this->view->getTemplate();
