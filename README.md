@@ -7,7 +7,7 @@
 
 
 Cygnite Framework it's just a small footprint to give you the creative experience of developing a web application.
-Cygnite is beautifully crafted to make your job simple and better without beign worried about performance.
+Cygnite is beautifully crafted to make your job simple and better without being worried about performance.
 
 You will find several eye catching features into Cygnite Framework.
 
