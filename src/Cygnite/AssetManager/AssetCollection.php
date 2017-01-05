@@ -3,6 +3,7 @@
 namespace Cygnite\AssetManager;
 
 use Closure;
+use Cygnite\Container\ContainerAwareInterface;
 
 if (!defined('CF_SYSTEM')) {
     exit('External script access not allowed');
@@ -14,15 +15,44 @@ if (!defined('CF_SYSTEM')) {
  */
 class AssetCollection
 {
+    protected $asset;
+
+    protected static $inatance;
+
     /**
-     * Make Asset collection.
-     *
-     * @param Closure $callback
+     * AssetCollection constructor.
+     * @param Asset $asset
+     */
+    protected function __construct(Asset $asset)
+    {
+        static::$inatance = $asset;
+    }
+
+    /**
      * @return mixed
      */
-    public static function make(Closure $callback)
+    public function asset()
     {
-        return $callback(new Asset());
+        return static::$inatance;
+    }
+
+
+    /**
+     * Create a Asset collection object return callback.
+     *
+     * @param ContainerAwareInterface $container
+     * @param callable|null $callback
+     * @return Closure
+     */
+    public static function make(ContainerAwareInterface $container, Closure $callback = null)
+    {
+        $collection = new AssetCollection(new Asset($container));
+
+        if (is_null($callback)) {
+            return $collection->asset();
+        }
+
+        return $callback($collection);
     }
 
     /**
@@ -33,10 +63,10 @@ class AssetCollection
      * @param Closure $callback
      * @return mixed
      */
-    public static function create($class)
+    public static function create($class, ContainerAwareInterface $container) : Asset
     {
-        (new $class($a = new Asset()))->register();
+        (new $class($a = new Asset($container)))->register();
 
-        return $a;
+        return static::$asset = $a;
     }
 }

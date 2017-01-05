@@ -11,6 +11,7 @@
 namespace Cygnite\AssetManager;
 
 use Cygnite\Common\UrlManager\Url;
+use Cygnite\Container\ContainerAwareInterface;
 use Cygnite\Proxy\StaticResolver;
 use InvalidArgumentException;
 
@@ -23,8 +24,9 @@ if (!defined('CF_SYSTEM')) {
  *
  * @author Sanjoy Dey <dey.sanjoy0@gmail.com>
  * <code>
- *  $asset = AssetCollection::make(function($asset)
+ *  $asset = AssetCollection::make($this->getContainer(), function ($collection)
  *  {
+ *      $asset = $collection->asset();
  *      $asset->add('style', array('path' => 'css.cygnite.css', 'media' => '', 'title' => ''))
  *            ->add('style', array('path' => 'css.*', 'media' => '', 'title' => ''))
  *            ->add('script', array('path' => 'js.*', 'attributes' => ''))
@@ -38,21 +40,39 @@ if (!defined('CF_SYSTEM')) {
  *  $asset->dump('link');
  * </code>
  */
-//extends StaticResolver
+
 class Asset implements \ArrayAccess
 {
     public static $directoryName = 'assets';
     private static $stylesheet = '<link rel="stylesheet" type="text/css"';
     private static $script = '<script type="text/javascript"';
-    protected $assets = [];
-    protected $combinedAssets = [];
-    protected $tag = [];
     private $where = 'default';
     private $baseUrl;
     private $assetDirectory;
     private $external = false;
     private $combine = false;
     private $paths = [];
+    protected $assets = [];
+    protected $combinedAssets = [];
+    protected $tag = [];
+    protected $container;
+
+    /**
+     * Asset constructor.
+     * @param ContainerAwareInterface $container
+     */
+    public function __construct(ContainerAwareInterface $container)
+    {
+        $this->container = $container;
+    }
+
+    /**
+     * @return ContainerAwareInterface
+     */
+    public function getContainer()
+    {
+        return $this->container;
+    }
 
     /**
      * We will check if external true,
@@ -189,15 +209,15 @@ class Asset implements \ArrayAccess
     {
         $this->combine = true;
 
-        if (file_exists(CYGNITE_BASE.DS.$path.$file)) {
-            $cssAsset = file_get_contents(CYGNITE_BASE.DS.$path.$file);
+        if (file_exists($this->container->get('root').DS.$path.$file)) {
+            $cssAsset = file_get_contents($this->container->get('root').DS.$path.$file);
             if (string_has($cssAsset, '@generator')) {
                 return $this;
             }
         }
 
-        $filePointer = fopen(CYGNITE_BASE.DS.$path.$file, 'w')
-        or die('Please set folder '.CYGNITE_BASE.DS.$path.$file.' permission to 777.');
+        $filePointer = fopen($this->container->get('root').DS.$path.$file, 'w')
+        or die('Please set folder '.$this->container->get('root').DS.$path.$file.' permission to 777.');
 
         $content = "
         /**\n
@@ -252,7 +272,7 @@ class Asset implements \ArrayAccess
     private function compressSource($src, $compress)
     {
         $content = $assetContent = '';
-        $assetContent = @file_get_contents(CYGNITE_BASE.DS.$src);
+        $assetContent = @file_get_contents($this->container->get('root').DS.$src);
         $content .= ($compress) ?
             compress($assetContent).PHP_EOL :
             $assetContent.PHP_EOL;
@@ -411,7 +431,7 @@ class Asset implements \ArrayAccess
      *
      * @return mixed
      */
-    public static function anchor()
+    public function anchor()
     {
         $args = [];
         $args = func_get_args();
@@ -422,7 +442,7 @@ class Asset implements \ArrayAccess
             $args[2] = ['type' => 'static'];
         }
 
-        return call_user_func_array([new static(), 'link'], $args);
+        return call_user_func_array([new static($this->container), 'link'], $args);
     }
 
     /**
@@ -433,7 +453,7 @@ class Asset implements \ArrayAccess
      *
      * @return mixed
      */
-    public static function js()
+    public function js()
     {
         $args = [];
         $args = func_get_args();
@@ -444,7 +464,7 @@ class Asset implements \ArrayAccess
             $args[1] = ['type' => 'static'];
         }
 
-        return call_user_func_array([new static(), 'script'], $args);
+        return call_user_func_array([new static($this->container), 'script'], $args);
     }
 
     /**
@@ -467,7 +487,7 @@ class Asset implements \ArrayAccess
      *
      * @return string
      */
-    protected function style($href, $media = '', $title = '')
+    public function style($href, $media = '', $title = '')
     {
         $media = (is_null($media)) ? 'media=all' : $media;
         $title = (!is_null($title)) ? 'title= "'.$title.'"' : '';
@@ -635,7 +655,7 @@ class Asset implements \ArrayAccess
      *
      * @return string
      */
-    protected function script($url, $attributes = [])
+    public function script($url, $attributes = [])
     {
         $this->setLocation($url, strtolower(__FUNCTION__));
 
@@ -677,7 +697,7 @@ class Asset implements \ArrayAccess
      *
      * @return string
      */
-    protected function link($url, $name = null, $attributes = [])
+    public function link($url, $name = null, $attributes = [])
     {
         $name = (is_null($name)) ? $url : $name;
         $this->setLocation($url, strtolower(__FUNCTION__));
