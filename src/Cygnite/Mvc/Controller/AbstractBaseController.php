@@ -54,9 +54,7 @@ abstract class AbstractBaseController
      *
      * @param $method
      * @param $arguments
-     *
      * @throws \Exception
-     *
      * @return AbstractBaseController|mixed|void
      */
     public function __call($method, $arguments)
@@ -71,20 +69,26 @@ abstract class AbstractBaseController
     }
 
     /**
+     * Redirect to given url.
+     *
      * @param string $uri
      * @param string $type
      * @param int    $httpResponseCode
-     *
      * @return $this
      */
-    protected function redirectTo($uri = '', $type = 'location', $httpResponseCode = 302)
+    protected function redirectTo($uri = '', $type = 'location', $httpResponseCode = 302) : AbstractBaseController
     {
-        Url::redirectTo($uri, $type, $httpResponseCode);
+        $container = $this->container();
+        if ($container->has('url')) {
+            $container->get('url')->redirectTo($uri, $type, $httpResponseCode);
+        }
 
         return $this;
     }
 
     /**
+     * Call HMVC modules dynamically.
+     *
      * <code>
      * // Call the "index" method on the "user" controller
      *  $response = $this->call('admin::user@index');.
@@ -110,7 +114,6 @@ abstract class AbstractBaseController
      * Set Application instance.
      *
      * @param $app
-     *
      * @return $this
      */
     public function setContainer($container)
@@ -148,11 +151,9 @@ abstract class AbstractBaseController
 
     public function configure()
     {
-        //$this->view();
         foreach ($this->validProperties as $key => $property) {
             $method = 'set'.ucfirst($property);
             if ($this->property($this, $property)) {
-
                 $this->view->{$method}($this->{$property});
             }
         }

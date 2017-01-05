@@ -28,7 +28,10 @@ class ServiceController extends AbstractBaseController implements ServiceControl
 
     public function __construct()
     {
+
     }
+
+
 
     /**
      * Get a data by key.
