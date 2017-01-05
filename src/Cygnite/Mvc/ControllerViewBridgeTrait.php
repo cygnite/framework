@@ -19,22 +19,23 @@ trait ControllerViewBridgeTrait
     public $validFlashMessage = ['setFlash', 'hasFlash', 'getFlash', 'hasError'];
 
     /**
+     * Call Flash methods.
+     *
      * @param $method
      * @param $arguments
-     *
      * @return AbstractBaseController|mixed
      */
     public function setFlashMessage($method, $arguments)
     {
-        $flashSession = $this->get('cygnite.common.session-manager.flash.flash-message');
+        $flashSession = $this->resolve('cygnite.common.session-manager.flash.flash-message');
 
         if ($method == 'setFlash') {
             $this->_call($flashSession, $method, $arguments);
 
             return $this;
-        } else {
-            return $this->_call($flashSession, $method, $arguments);
         }
+
+        return $this->_call($flashSession, $method, $arguments);
     }
 
     /**
@@ -44,16 +45,14 @@ trait ControllerViewBridgeTrait
      * @return mixed
      * @throws ContainerException
      */
-    public function get($class)
+    public function resolve($class)
     {
-        if (!$this->container()->has($class)) {
-            throw new ContainerException("Given class $class is not registered in container.");
-        }
-
         return $this->container()->resolve($class);
     }
 
     /**
+     * Call class methods dynamically.
+     *
      * @param       $instance
      * @param       $method
      * @param array $arguments
@@ -62,6 +61,8 @@ trait ControllerViewBridgeTrait
      */
     public function _call($instance, $method, $arguments = [])
     {
-        return call_user_func_array([$instance, $method], $arguments);
+        if (method_exists($instance, $method)) {
+            return call_user_func_array([$instance, $method], $arguments);
+        }
     }
 }
