@@ -37,6 +37,8 @@ class Composer
 
     protected $controllerView;
 
+    protected $viewShared;
+
     /**
      * Create view and render it. This is alias of render method.
      *
@@ -118,6 +120,7 @@ class Composer
      */
     public function render(string $view, array $params = [], $return = false)
     {
+        $params = array_merge($params, ['view' => $this]);
         /*
          * Check if template engine is set as true
          * then call template and return from here
@@ -138,6 +141,7 @@ class Composer
             throw new ViewNotFoundException("Requested view doesn't exists in path $path");
         }
 
+        $this->registerViewEvent($view);
         $this->layout = Inflector::toDirectorySeparator($this->getLayout());
 
         if ($this->layout !== '') { // render view page into the layout
@@ -150,6 +154,30 @@ class Composer
         $this->load()->displayContent();
 
         return $this;
+    }
+
+    /**
+     * Firing events for the view.
+     *
+     * @param $view
+     * @throws ViewNotFoundException
+     */
+    protected function registerViewEvent(string $view)
+    {
+        if ($this->has($view)) {
+            $class = $this->get($view);
+
+            if (is_callable($class)) {
+                return $class($this);
+            }
+
+            $this->viewShared = $this->container()->make($class);
+
+            if (!method_exists($this->viewShared, 'creating')) {
+                throw new ViewEventNotFoundException("Event not resgistered for the view $view.");
+            }
+            $this->viewShared->creating($this);
+        }
     }
 
     /**
@@ -224,6 +252,10 @@ class Composer
         $data['yield'] = $this->output->renderView($view, $params);
         $output = $this->output->renderView($layout, array_merge($data, $params));
         $this['__content__'] = $output;
+
+        if (method_exists($this->viewShared, 'rendered')) {
+            $this->viewShared->rendered($this);
+        }
 
         return $this;
     }

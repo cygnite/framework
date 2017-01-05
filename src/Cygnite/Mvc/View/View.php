@@ -9,9 +9,11 @@
  */
 namespace Cygnite\Mvc\View;
 
-use Cygnite\Container\Container;
-use Cygnite\Mvc\View\Twig\Template;
+use Cygnite\AssetManager\Asset;
 use Cygnite\AssetManager\AssetCollection;
+use Cygnite\Container\Container;
+use Cygnite\Container\ContainerAwareInterface;
+use Cygnite\Mvc\View\Twig\Template;
 use Cygnite\Mvc\ControllerViewBridgeTrait;
 use Cygnite\Mvc\View\Exceptions\ViewNotFoundException;
 
@@ -361,6 +363,15 @@ class View extends Composer implements ViewInterface,\ArrayAccess
     }
 
     /**
+     * @param string $name
+     * @return bool
+     */
+    public function has(string $name)
+    {
+        return $this->offsetExists($name);
+    }
+
+    /**
      * Returns all stored view data
      *
      * @return array
@@ -408,15 +419,20 @@ class View extends Composer implements ViewInterface,\ArrayAccess
     {
         return $this->twigTemplateLocation;
     }
-    
+
     /**
      * Returns Output instance.
-     * 
+     *
      * @return Output
      */
     public function getOutput() : Output
     {
         return $this->output;
+    }
+
+    public function widget() : Widget
+    {
+        return $this->getContainer()->widget;
     }
 
     /**
@@ -425,9 +441,35 @@ class View extends Composer implements ViewInterface,\ArrayAccess
      * @param $class
      * @return mixed
      */
-    public function createAssetCollection($class)
+    public function createAssetCollection($class) : Asset
     {
-        return AssetCollection::create($class);
+        $a = AssetCollection::make($this->getContainer(), function ($collection) use ($class) {
+
+            (new $class($collection->asset()))->register();
+
+            return $collection->asset();
+        });
+
+        return $a;
+    }
+
+    /**
+     * @return \Closure
+     */
+    public function asset()
+    {
+        return AssetCollection::make($this->getContainer());
+    }
+
+    /**
+     * Returns container object. This method calls from
+     * View page for flash messages.
+     *
+     * @return ContainerAwareInterface
+     */
+    public function container() : ContainerAwareInterface
+    {
+        return $this->data['container'];
     }
 
     /**
@@ -445,5 +487,23 @@ class View extends Composer implements ViewInterface,\ArrayAccess
         }
 
         throw new \RuntimeException("Method View::$method() doesn't exists");
+    }
+
+    /**
+     * Bind the event to the view. All the binded
+     * events will get triggered before rendering
+     * and after rendering view page.
+     *
+     * @param string $view
+     * @param $mapper
+     * @return View|mixed
+     */
+    public function bind(string $view, $mapper)
+    {
+        if ($mapper instanceof \Closure) {
+            return $this->set($view, $mapper($this, $view));
+        }
+
+        return $this->set($view, $mapper);
     }
 }
