@@ -12,7 +12,7 @@ interface ValidatorInterface
      *
      * @return mixed
      */
-    public static function create($var, Closure $callback);
+    public static function create(array $var, Closure $callback);
 
     /**
      * @param $key

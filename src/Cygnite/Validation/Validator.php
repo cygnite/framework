@@ -15,8 +15,8 @@ use Cygnite\Validation\Exception\ValidatorException;
 class Validator implements ValidatorInterface
 {
     const ERROR = '.error';
-    public $errors = [];
-    public $columns = [];
+    protected $errors = [];
+    protected $columns = [];
     public $glue = PHP_EOL;
     protected $errorElementStart = '<span class="error">';
     protected $errorElementEnd = '</span>';
@@ -41,7 +41,7 @@ class Validator implements ValidatorInterface
      * @param  $var post values
      *
      */
-    protected function __construct($input)
+    protected function __construct(array $input)
     {
         if (!is_array($input)) {
             throw new ValidatorException(sprintf('Constructor expect array of input, %s given.', \gettype($input)));
@@ -69,7 +69,7 @@ class Validator implements ValidatorInterface
      * @param  Closure callback
      * @return object
      */
-    public static function create($var, Closure $callback = null)
+    public static function create(array $var, Closure $callback = null) : ValidatorInterface
     {
         if ($callback instanceof Closure) {
             return $callback(new static($var));
@@ -86,7 +86,7 @@ class Validator implements ValidatorInterface
     * @return $this
     *
     */
-    public function addRule($key, $rule)
+    public function addRule($key, $rule) : ValidatorInterface
     {
         $this->rules[$key] = $rule;
 
@@ -94,14 +94,14 @@ class Validator implements ValidatorInterface
     }
 
     /*
-    * Add validation rule
+    * Add array of validation rule.
     *
     * @param  $key
     * @param  $rule set up your validation rule
     * @return $this
     *
     */
-    public function addRules(array $rules)
+    public function addRules(array $rules) : ValidatorInterface
     {
         if (!is_array($rules) || empty($rules)) {
             throw new ValidatorException(sprintf('Validator::addRules() expect array of rules, %s given.', \gettype($rules)));
@@ -122,9 +122,11 @@ class Validator implements ValidatorInterface
      * @param $key
      * @param $value
      */
-    public function setCustomError($key, $value)
+    public function setCustomError($key, $value) : ValidatorInterface
     {
         $this->errors[$key] = $value;
+
+        return $this;
     }
 
     /**
@@ -152,6 +154,17 @@ class Validator implements ValidatorInterface
     }
 
     /**
+     * Check if validation error exists for particular input element.
+     *
+     * @param $key
+     * @return bool
+     */
+    public function hasError($key) : bool
+    {
+        return isset($this->errors[$key.self::ERROR]) ? true : false;
+    }
+
+    /**
      * Get error string.
      *
      * <code>
@@ -166,7 +179,7 @@ class Validator implements ValidatorInterface
      *
      * @return $this Clouser Instance
      */
-    public function after(\Closure $callback)
+    public function after(\Closure $callback) : ValidatorInterface
     {
         $this->after[] = function () use ($callback) {
             return call_user_func_array($callback, [$this]);
@@ -287,7 +300,7 @@ class Validator implements ValidatorInterface
     * @return boolean true or false
     *
     */
-    protected function required($key)
+    protected function required($key) : bool
     {
         $val = trim($this->param[$key]);
 
@@ -316,7 +329,7 @@ class Validator implements ValidatorInterface
      *
      * @return bool
      */
-    protected function validEmail($key)
+    protected function validEmail($key) : bool
     {
         $sanitize_email = filter_var($this->param[$key], FILTER_SANITIZE_EMAIL);
 
@@ -330,11 +343,12 @@ class Validator implements ValidatorInterface
     }
 
     /**
-     * @param $key
+     * Check if given input is IP address.
      *
+     * @param $key
      * @return bool
      */
-    protected function isIp($key)
+    protected function isIp($key) : bool
     {
         if (filter_var($this->param[$key], FILTER_VALIDATE_IP) === false) {
             $this->errors[$key.self::ERROR] =
@@ -349,11 +363,12 @@ class Validator implements ValidatorInterface
     }
 
     /**
-     * @param $key
+     * Check if given input is integer.
      *
+     * @param $key
      * @return bool
      */
-    protected function isInt($key)
+    protected function isInt($key) : bool
     {
         $conCate = '';
         $columnName = ucfirst($this->convertToFieldName($key)).' should be ';
@@ -373,11 +388,12 @@ class Validator implements ValidatorInterface
     }
 
     /**
-     * @param $key
+     * Check if given input is string.
      *
+     * @param $key
      * @return bool
      */
-    protected function isString($key)
+    protected function isString($key) : bool
     {
         $conCate = '';
         $columnName = ucfirst($this->convertToFieldName($key)).' should be ';
@@ -396,7 +412,13 @@ class Validator implements ValidatorInterface
         return true;
     }
 
-    protected function isAlphaNumeric($key)
+    /**
+     * Check if given input alpha numeric.
+     *
+     * @param $key
+     * @return bool
+     */
+    protected function isAlphaNumeric($key) : bool
     {
         $conCate = ' ';
         $columnName = ucfirst($this->convertToFieldName($key)).' should be ';
@@ -412,6 +434,10 @@ class Validator implements ValidatorInterface
         return true;
     }
 
+    /**
+     * @param $key
+     * @return array
+     */
     private function setErrorConcat($key)
     {
         $conCate = str_replace('.', '', $this->errors[$key.self::ERROR]).' and must be valid';
@@ -420,6 +446,13 @@ class Validator implements ValidatorInterface
         return [$conCate, $columnName];
     }
 
+    /**
+     * @param $key
+     * @param $conCate
+     * @param $columnName
+     * @param $func
+     * @return bool
+     */
     private function setAlphaNumError($key, $conCate, $columnName, $func)
     {
         $this->errors[$key.self::ERROR] = trim($conCate.$columnName.$func);
@@ -427,6 +460,12 @@ class Validator implements ValidatorInterface
         return false;
     }
 
+    /**
+     * Check if given input is alphanumeric with underscore.
+     *
+     * @param $key
+     * @return bool
+     */
     protected function isAlphaNumWithUnderScore($key)
     {
         $allowed = ['.', '-', '_'];
@@ -447,6 +486,8 @@ class Validator implements ValidatorInterface
     }
 
     /**
+     * Validate for minimum character.
+     *
      * @param $key
      * @param $length
      *
@@ -472,6 +513,8 @@ class Validator implements ValidatorInterface
     }
 
     /**
+     * Validate given input for maximum character.
+     *
      * @param $key
      * @param $length
      *
@@ -497,8 +540,9 @@ class Validator implements ValidatorInterface
     }
 
     /**
-     * @param $key
+     * Validate given input is matching url type.
      *
+     * @param $key
      * @return bool
      */
     protected function validUrl($key)
@@ -525,10 +569,9 @@ class Validator implements ValidatorInterface
      * Validate phone number.
      *
      * @param $key
-     *
      * @return bool
      */
-    protected function phone($key)
+    protected function phone($key) : bool
     {
         $num = preg_replace('/d+/', '', (int) $this->param[$key]);
 
@@ -552,10 +595,9 @@ class Validator implements ValidatorInterface
      * Validate date string.
      *
      * @param $key
-     *
      * @return bool
      */
-    public function validDate($key)
+    public function validDate($key) : bool
     {
         if ($this->param[$key] instanceof \DateTime) {
             return true;
