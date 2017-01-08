@@ -12,8 +12,9 @@
 namespace Cygnite\FormBuilder;
 
 use Closure;
-use Cygnite\Common\Input;
+use Cygnite\Http\Requests\Request;
 use Cygnite\FormBuilder\Html\Elements;
+use Cygnite\Validation\ValidatorInterface;
 
 if (!defined('CF_SYSTEM')) {
     exit('No External script access allowed');
@@ -40,22 +41,45 @@ class Form extends Elements implements FormInterface
 
     protected $element = [];
 
-    private $validArray = ['text', 'button', 'select', 'textarea'];
-
-    public $validator;
+    protected $validator;
 
     protected $errorClass = 'error';
+
+    protected $errorInputClass = 'error-input';
 
     public static $elNum = 1;
 
     protected $entity;
 
+    protected $validArray = [
+        'text', 'select', 'textarea', 'custom', 'dateTimeLocal', 'select', 'radio', 'checkbox'
+    ];
+
+    protected $validMethods = [
+        'textarea', 'select', 'label', 'button', 'custom', 'openTag', 'closeTag', 'dateTimeLocal'
+    ];
+
+    protected $request;
+
+    /**
+     * Set Http Request object.
+     *
+     * @param $request
+     */
+    public function setRequest(Request $request) : FormInterface
+    {
+        $this->request = $request;
+
+        return $this;
+    }
+
     /**
      * Bind a model or entity object to Form.
      *
      * @param $entity
+     * @return FormInterface
      */
-    public function bind($entity)
+    public function bind($entity) : FormInterface
     {
         $this->entity = $entity;
 
@@ -81,7 +105,7 @@ class Form extends Elements implements FormInterface
      * @param callable $callback
      * @return static
      */
-    public static function make(Closure $callback = null)
+    public static function make(Closure $callback = null) : FormInterface
     {
         if ($callback instanceof Closure) {
             return $callback(new static());
@@ -91,24 +115,13 @@ class Form extends Elements implements FormInterface
     }
 
     /**
-     * Alias method of make.
-     *
-     * @param callable $callback
-     * @return callable
-     */
-    public static function instance(Closure $callback = null)
-    {
-        return static::make($callback);
-    }
-
-    /**
      * Form open tag.
      *
      * @param       $formName
      * @param array $attributes
      * @return $this
      */
-    public function open($formName, $attributes = [])
+    public function open(string $formName, array $attributes = []) : FormInterface
     {
         self::$formName = $formName;
         self::$formHolder[$formName] = $formName;
@@ -125,7 +138,7 @@ class Form extends Elements implements FormInterface
     * @param  $rule set up your validation rule
     * @return $this
     */
-    public function addElement($type, $key, $array = [])
+    public function addElement(string $type, string $key, array $array = []) : FormInterface
     {
         $array['type'] = $type;
 
@@ -141,11 +154,12 @@ class Form extends Elements implements FormInterface
     }
 
     /**
-     * @param array $elements
+     * Add array of elements.
      *
+     * @param array $elements
      * @return $this
      */
-    public function addElements($elements = [])
+    public function addElements(array $elements = []) : FormInterface
     {
         $this->value = array_shift($elements);
 
@@ -153,56 +167,26 @@ class Form extends Elements implements FormInterface
     }
 
     /**
+     * Create form elements.
+     *
      * @return $this
      */
-    public function createForm()
+    public function createForm() : FormInterface
     {
         foreach ($this->value as $key => $val) {
-            switch ($val['type']) {
-                case 'textarea':
-                    unset($val['type']);
-                    $this->textarea($key, $val);
-                    break;
-                case 'select':
-                    unset($val['type']);
-                    $this->select($key, $val);
-                    break;
-                case 'label':
-                    unset($val['type']);
-                    $this->label($key, $val);
-                    break;
-                case 'button':
-                    unset($val['type']);
-                    $this->button($key, $val);
-                    break;
-                case 'custom':
-                    unset($val['type']);
-                    $this->custom($key, $val);
-                    break;
-                case 'openTag':
-                    unset($val['type']);
-                    $this->openTag($key, $val);
-                    break;
-                case 'closeTag':
-                    unset($val['type']);
-                    $this->closeTag($key);
-                    break;
-                case 'dateTimeLocal':
-                    unset($val['type']);
-                    $this->dateTimeLocal($key, $val);
-                    break;
-                default:
-                    $this->input($key, $val);
-                    break;
+
+            if (in_array($val['type'], $this->validMethods)) {
+                $method = $val['type'];
+                unset($val['type']);
+                (!method_exists($this, $method)) ?: $this->{$method}($key, $val);
+            } else {
+                  $this->input($key, $val);
             }
 
             if (isset($val['type']) && in_array($val['type'], $this->validArray)) {
-                if (!in_array('submit', $val)) {
-                    if (is_object($this->validator) && isset($this->validator->errors[$key.'.error'])) {
-                        $this->elements[self::$formHolder[self::$formName]][$key.'.error'] =
-                            '<span class="'.$this->errorClass.'">'.$this->validator->errors[$key.'.error'].'</span>'.PHP_EOL;
-                    }
-                }
+                $this->setValidationError($key, $val);
+            } else if (!isset($val['type']) && in_array($method, $this->validArray)) {
+                $this->setValidationError($key, $val);
             }
         }
 
@@ -210,14 +194,46 @@ class Form extends Elements implements FormInterface
     }
 
     /**
-     * @return bool
+     * Create validation error element in the form itself.
+     *
+     * @param $key
+     * @param $val
      */
-    public function isValidRequest()
+    protected function setValidationError($key, $val)
     {
-        return ($this->getMethod() == 'post') ? true : false;
+        if (!in_array('submit', $val)) {
+            // Is $validator is instance of ValidatorInterface and given key has error associated
+            // then add a span tag below the input element and display error.
+            if ($this->validator instanceof ValidatorInterface && $this->validator->hasError($key)) {
+                $this->elements[self::$formHolder[self::$formName]][$key.'.error'] =
+                    '<span class="'.$this->errorClass.'">'.$this->validator->getErrors($key).'</span>'.PHP_EOL;
+            }
+        }
     }
 
     /**
+     * Check if it is valid post.
+     *
+     * @return bool
+     */
+    public function isValidRequest() : bool
+    {
+        return (strtolower($this->request->getMethod()) == strtolower('POST')) ? true : false;
+    }
+
+    /**
+     * Check if field posted, and post array contain field as key.
+     *
+     * @param $input
+     */
+    public function isSubmitted($input)
+    {
+        return $this->request->postArrayHas($input);
+    }
+
+    /**
+     * Create form open tag.
+     *
      * @param $key
      * @param $val
      */
@@ -231,6 +247,8 @@ class Form extends Elements implements FormInterface
     }
 
     /**
+     * Dynamically set values for form.
+     *
      * @param $key
      * @param $value
      */
@@ -240,9 +258,10 @@ class Form extends Elements implements FormInterface
     }
 
     /**
-     * @param $key
+     * Get values.
      *
-     * @return null
+     * @param $key
+     * @return mixed|null
      */
     public function __get($key)
     {
@@ -250,6 +269,8 @@ class Form extends Elements implements FormInterface
     }
 
     /**
+     * Returns form elements.
+     *
      * @return mixed
      */
     public function getForm()
@@ -275,7 +296,7 @@ class Form extends Elements implements FormInterface
     /**
      * If you wish to get only html elements.
      */
-    public function getHtmlElements()
+    public function getHtmlElements() : string
     {
         $elementString = '';
         /*
@@ -289,7 +310,7 @@ class Form extends Elements implements FormInterface
     }
 
     /**
-     * We will get csrf token.
+     * Returns csrf token.
      *
      * @return string
      */
