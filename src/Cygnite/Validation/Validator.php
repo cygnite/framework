@@ -3,7 +3,6 @@
 namespace Cygnite\Validation;
 
 use Closure;
-use Cygnite\Common\Input\Input;
 use Cygnite\Helpers\Inflector;
 use Cygnite\Validation\Exception\ValidatorException;
 
@@ -29,14 +28,15 @@ class Validator implements ValidatorInterface
     protected $rules = [];
     public static $files = [];
     protected $validPhoneNumbers = [7, 10, 11];
+    protected $rulesPassed = [];
 
     protected $after = [];
 
     /*
      * Constructor to set as protected.
-     * You cannot create instance of validator directly
+     * You cannot create instance of validator directly.
      *
-     * set post array into param
+     * set post array into param.
      *
      * @param  $var post values
      *
@@ -190,6 +190,8 @@ class Validator implements ValidatorInterface
             return true;
         }
 
+        $this->rulesPassed = [];
+
         foreach ($this->rules as $key => $val) {
             $rules = explode('|', $val);
 
@@ -201,6 +203,7 @@ class Validator implements ValidatorInterface
                 } else {
                     $isValid = $this->doValidateMinMax($rule, $key, $isValid);
                 }
+                $this->rulesPassed[] = $isValid;
             }
         }
 
@@ -213,7 +216,12 @@ class Validator implements ValidatorInterface
             call_user_func($event);
         }
 
-        return $isValid;
+        // We will return false if any one of the validation rules failed.
+        if (in_array(false, $this->rulesPassed)) {
+            return false;
+        }
+
+        return true;
     }
 
     /**
