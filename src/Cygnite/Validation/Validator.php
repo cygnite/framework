@@ -59,8 +59,8 @@ class Validator implements ValidatorInterface
     /*
      * Create validator to set rules
      * <code>
-     *  $input = Input::make();
-     *  $validator = Validator::create($input->post(), function ($validator)
+     *  $input = $request->post->all();
+     *  $validator = Validator::create($input, function ($validator)
      *  {
      *       $validator->addRule('username', 'required|min:3|max:5')
      *                 ->addRule('password', 'required|is_int|valid_date')
@@ -121,7 +121,9 @@ class Validator implements ValidatorInterface
     }
 
     /**
-     * Get error string.
+     * Executes after the validation completed. 
+     * You can override validation error messages using
+     * after method.
      *
      * <code>
      *   $validator->after(function($v)
