@@ -31,14 +31,14 @@ class Validator implements ValidatorInterface
     private $param;
     protected $rules = [];
     public static $files = [];
-    protected $rulesPassed = [];
+    protected $rulesExecuted = [];
     protected $validPhoneNumbers = [7, 10, 11];
     protected $errorElementEnd = '</span>';
     protected $errorElementStart = '<span class="error">';
 
     protected $after = [];
 
-    /*
+    /**
      * Constructor to set as protected.
      * You cannot create instance of validator directly
      *
@@ -56,7 +56,7 @@ class Validator implements ValidatorInterface
         $this->param = $input;
     }
 
-    /*
+    /**
      * Create validator to set rules
      * <code>
      *  $input = $request->post->all();
@@ -84,7 +84,7 @@ class Validator implements ValidatorInterface
         return new static($var);
     }
 
-    /*
+    /**
     * Add validation rule.
     *
     * @param  $key
@@ -99,7 +99,7 @@ class Validator implements ValidatorInterface
         return $this;
     }
 
-    /*
+    /**
     * Add array of validation rule.
     *
     * @param  $key
@@ -121,9 +121,7 @@ class Validator implements ValidatorInterface
     }
 
     /**
-     * Executes after the validation completed. 
-     * You can override validation error messages using
-     * after method.
+     * Get error string.
      *
      * <code>
      *   $validator->after(function($v)
@@ -159,21 +157,25 @@ class Validator implements ValidatorInterface
             return true;
         }
 
-        $this->rulesPassed = [];
+        $this->rulesExecuted = [];
 
         foreach ($this->rules as $key => $val) {
             $rules = explode('|', $val);
 
             foreach ($rules as $rule) {
-                if (strstr($rule, 'max') && strstr($rule, 'min')) {
+
+                // Executes rule for min and max validation.
+                if (string_has($rule, ':') && strstr($rule, 'max') || strstr($rule, 'min')) {
                     $isValid = $this->doValidateMinMax($rule, $key, $isValid);
-                } else if (string_has($rule, ':')) {
+                } else if (string_has($rule, ':') && (!strstr($rule, 'max') && !strstr($rule, 'min'))) {
+                    // Executes rule for other than min, max validation with ":" keyword in rule.
                     $isValid = $this->validateRulesHasPlaceHolder($key, $rule, $isValid);
                 } else {
+                    // Executes all other rules.
                     $isValid = $this->doValidateData($rule, $key, $isValid);
                 }
 
-                $this->rulesPassed[] = $isValid;
+                $this->rulesExecuted[] = $isValid;
             }
         }
 
@@ -187,7 +189,7 @@ class Validator implements ValidatorInterface
         }
 
         // We will return false if any one of the validation rules failed.
-        if (in_array(false, $this->rulesPassed)) {
+        if (in_array(false, $this->rulesExecuted)) {
             return false;
         }
 
@@ -207,12 +209,10 @@ class Validator implements ValidatorInterface
         $string = string_split($rule, ':');
 
         if (!string_has($string[1], ',')) {
-            $isValid = $this->doValidateData($string[0], $string[1], $isValid, $key);
+            return $this->doValidateData($string[0], $string[1], $isValid, $key);
         }
 
-        $isValid = $this->doValidateData($string[0], $key, $isValid, $string[1]);
-
-        return $isValid;
+        return $this->doValidateData($string[0], $key, $isValid, $string[1]);
     }
 
     /**
@@ -653,7 +653,7 @@ class Validator implements ValidatorInterface
      */
     protected function isPresent(string $key) : bool
     {
-        if (!in_array($key, $this->param)) {
+        if (!array_key_exists($key, $this->param)) {
             $this->errors[$key.self::ERROR] = $this->convertToFieldName($key).' not exists in given inputs.';
             return false;
         }
@@ -875,11 +875,11 @@ class Validator implements ValidatorInterface
     }
 
     /**
-     * Get error string.
+     * Get error strings.
      *
      * <code>
      *   if ($validator->run()) {
-     *       echo 'valid';
+     *       //Valid request
      *   } else {
      *       show($validator->getErrors());
      *   }
