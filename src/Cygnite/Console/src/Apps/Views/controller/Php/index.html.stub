@@ -1,18 +1,17 @@
 <?php
-use Cygnite\AssetManager\Asset;
 use Cygnite\Common\UrlManager\Url;
 
-if ($this->hasFlash('success')) {
-    echo $this->getFlash('success');
-} elseif ($this->hasError()) {
-    echo $this->getFlash('error');
+if ($view->hasFlash('success')) {
+    echo $view->getFlash('success');
+} elseif ($view->hasError()) {
+    echo $view->getFlash('error');
 }
 ?>
 <div class="page-header">
 	<h3>CRUD Application
         <div class="pull-right">
         <!--<span class="glyphicon glyphicon-plus-sign">-->
-        <?php echo Asset::anchor('#controllerName#/add', 'Add #ControllerName#', ['class' => 'btn btn-small btn-info cboxElement']); ?>
+        <?php echo $view->asset()->anchor('#controllerName#/add', 'Add #ControllerName#', ['class' => 'btn btn-small btn-info cboxElement']); ?>
         </div>
 	</h3>
 </div>
@@ -45,9 +44,9 @@ if ($this->hasFlash('success')) {
             {#tdColumns#}
             <td>
                 <?php
-                echo Asset::anchor('#controllerName#/show/' . $row->{%primaryKey%}, 'View', ['class' => 'btn btn btn-info btn-xs']);
-                echo Asset::anchor('#controllerName#/edit/' . $row->{%primaryKey%}, 'Edit', ['class' => 'btn btn-default btn-xs']);
-                echo Asset::anchor('#controllerName#/delete/' . $row->{%primaryKey%}, 'Delete', ['class' => 'btn btn-danger btn-xs' ]);
+                echo $view->asset()->anchor('#controllerName#/show/' . $row->{%primaryKey%}, 'View', ['class' => 'btn btn btn-info btn-xs']);
+                echo $view->asset()->anchor('#controllerName#/edit/' . $row->{%primaryKey%}, 'Edit', ['class' => 'btn btn-default btn-xs']);
+                echo $view->asset()->anchor('#controllerName#/delete/' . $row->{%primaryKey%}, 'Delete', ['class' => 'btn btn-danger btn-xs' ]);
                 ?>
 
             </td>
