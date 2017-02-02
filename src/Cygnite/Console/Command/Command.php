@@ -10,11 +10,12 @@
 
 namespace Cygnite\Console\Command;
 
-use Symfony\Component\Console\Command\Command as SymfonyCommand;
+use Cygnite\Console\Foundation\Application;
+use Symfony\Component\Console\Question\Question;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Question\ConfirmationQuestion;
-use Symfony\Component\Console\Question\Question;
+use Symfony\Component\Console\Command\Command as SymfonyCommand;
 
 class Command extends SymfonyCommand
 {
@@ -51,6 +52,8 @@ class Command extends SymfonyCommand
      * @var \Symfony\Component\Console\Output\OutputInterface
      */
     protected $output;
+
+    protected $cygnite;
 
     public function __construct()
     {
@@ -258,6 +261,16 @@ class Command extends SymfonyCommand
     }
 
     /**
+     * Returns Cygnit Console Application Object.
+     *
+     * @return mixed
+     */
+    public function getConsoleApplication()
+    {
+        return $this->cygnite;
+    }
+
+    /**
      * Run the console command.
      *
      * @param \Symfony\Component\Console\Input\InputInterface   $input
@@ -274,6 +287,8 @@ class Command extends SymfonyCommand
     }
 
     /**
+     * Execute the command.
+     *
      * @param InputInterface  $input
      * @param OutputInterface $output
      *
@@ -284,6 +299,22 @@ class Command extends SymfonyCommand
         $method = method_exists($this, 'process') ? 'process' : 'handle';
 
         return $this->{$method}();
+    }
+
+    /**
+     * Call any console command.
+     *
+     * @param string $command
+     * @param array $arguments
+     * @return int
+     */
+    public function callCommand(string $command, array $arguments = [])
+    {
+        $newCommand = $this->getApplication()->find($command);
+
+        $arguments['command'] = $command;
+
+        return $newCommand->run(new ArrayInput($arguments), $this->getOutput());
     }
 
     /**
