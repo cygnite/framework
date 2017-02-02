@@ -15,11 +15,11 @@
         }
     ],
     "require": {
-         "php": ">=5.4",
-         "twig/twig": "1.*",
-         "symfony/console": "3.1.*",
+         "php": ">=7.0",
+         "twig/twig": "2.1.*",
+         "symfony/console": "3.2.*",
          "tracy/tracy": "2.4.*",
-         "ircmaxell/password-compat": "~1.0",
+         "ircmaxell/password-compat": "~1.0.*",
          "swiftmailer/swiftmailer": "5.4.*",
          "monolog/monolog": "1.*"
    },
@@ -27,9 +27,9 @@
         "cygnite/stripe": "self.version" 
 	},
    "require-dev": {
-       "mockery/mockery": "~0.9.1",
-       "phpunit/phpunit": "~4.0",
-       "predis/predis": "~1.0"
+       "mockery/mockery": "~0.9.7",
+       "phpunit/phpunit": "~5.7.*",
+       "predis/predis": "~1.1.*"
     },
      "autoload": {
      	"files": [
