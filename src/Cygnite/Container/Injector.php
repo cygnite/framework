@@ -5,6 +5,8 @@ use Cygnite\Helpers\Inflector;
 
 class Injector
 {
+    private $definition = [];
+
     /**
      * @param $dependency
      *
@@ -51,7 +53,7 @@ class Injector
          | and inject into controller constructor
          */
         if (!$reflectionParam->IsInstantiable() && $reflectionParam->isInterface()) {
-            $aliases = $this['definition.config']['register.alias'];
+            $aliases = $this->definition['definition.config']['register.alias'];
             $interface = Inflector::getClassName($reflectionParam->getName());
 
             if (array_key_exists($interface, $aliases)) {
@@ -77,5 +79,28 @@ class Injector
         }
 
         return $parameters;
+    }
+    
+    /**
+     * Set definition configuration.
+     * 
+     * @param array $definition
+     */
+    public function setDefinitionConfig(array $definition = [])
+    {
+        $this->definition = ['definition.config' => $definition];
+    }
+
+    /**
+     * Set Container instance.
+     *
+     * @param $container
+     * @return $this
+     */
+    public function setContainer($container)
+    {
+        $this->container = $container;
+
+        return $this;
     }
 }

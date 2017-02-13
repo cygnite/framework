@@ -32,6 +32,8 @@ class Container extends DependencyBuilder implements ContainerAwareInterface, Ar
     /** @var array The container's bind data. */
     protected $stack = [];
 
+    protected $instance;
+
     /**
      * Constructor to set the container dependencies.
      *
@@ -50,6 +52,7 @@ class Container extends DependencyBuilder implements ContainerAwareInterface, Ar
 
         if (!empty($definitions)) {
             $this->set('definition.config', $definitions);
+            $injector->setContainer($this)->setDefinitionConfig($definitions);
             $this->setPropertyDefinition($definitions['property.definition']);
         }
 
