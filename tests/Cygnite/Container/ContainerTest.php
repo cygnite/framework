@@ -1,33 +1,55 @@
 <?php
-
 use Cygnite\Container\Container;
-use Cygnite\Foundation\Application;
+use PHPUnit\Framework\TestCase;
+use Cygnite\Tests\Container\ContainerDependency;
 
-class ContainerTest extends PHPUnit_Framework_TestCase
+class ContainerTest extends TestCase
 {
     private $container;
 
-    protected $app;
-
     public function setUp()
     {
-        $this->container = new Container();
+        $containerDependency = new ContainerDependency();
+        $this->container = new Container(
+            $containerDependency->getInjector(),
+            $containerDependency->getDefinitiions(),
+            $containerDependency->getControllerNamespace()
+        );
     }
 
     // need to create a test class
-    public function testMakeClass()
+    public function testMakeClassTest()
     {
-        $this->app = Application::instance();
-        $this->app['url'] = new \Cygnite\Common\UrlManager\Url();
-        $this->app['request'] = \Cygnite\Http\Requests\Request::createFromGlobals();
-        $this->app['router'] = new \Cygnite\Base\Router\Router($this->app['request']);
-        $this->app['router']->setApplication($this->app);
-        $this->app['url']->setApplication($this->app);
+        $dependencies = $this->container->make('TestClassDependencies');
+        $this->assertEquals(new TestClassDependencies(new TestA), $this->container->make('TestClassDependencies'));
+        $this->assertEquals(new TestA, $dependencies->getAInstance());
+        $this->assertEquals('Hello A', $dependencies->getAInstance()->getA());
+    }
 
-        $madeUrl = $this->container->make('\Cygnite\Common\UrlManager\Url');
-        $madeUrl->setApplication($this->app);
+    public function testMethodAutoResolvesDependencies()
+    {
+        $methodArgs = $this->container->resolveMethod('TestClassDependencies', 'indexAction');
+        $this->assertInstanceOf('TestMethodResolve', $methodArgs[0]);
+        $this->assertEquals('Hello Container', $methodArgs[0]->greet('Container'));
+    }
 
-        $this->assertEquals($this->app['url'], $madeUrl);
+    public function testInterfaceInjection()
+    {
+        $dependencies = $this->container->make('TestInterfaceInjection');
+        $this->assertInstanceOf('\\TestClassDependenciesImplement', $dependencies->getImplementationObject());
+        $this->assertEquals('Container', $dependencies->getImplementationContainer());
+    }
+
+    public function testPropertyInjection()
+    {
+        /*
+        $instance = $this->container->make('TestClassDependencies');
+        $dependencies = new ContainerDependency();
+        $this->container->setPropertyInjection($dependencies->getDefinitiions()['property.definition']);
+        $this->container->propertyInjection($instance, "TestClassDependencies");
+        show(call_user_func_array([$instance, 'indexAction'], [new TestMethodResolve]));
+        show($instance->getApi());exit;
+        $this->assertInstanceOf('TestMethodResolve', $instance->getApi());*/
     }
 
     public function testClouserResolutionAsObject()
@@ -38,6 +60,7 @@ class ContainerTest extends PHPUnit_Framework_TestCase
 
         $this->assertEquals('Cygnite', $this->container->name);
     }
+
 
     public function testArrayAccess()
     {
@@ -107,5 +130,79 @@ class ContainerTest extends PHPUnit_Framework_TestCase
         $stdClass = $this->container->makeInstance('\stdClass');
 
         $this->assertEquals(new stdClass(), $stdClass);
+    }
+}
+
+class TestClassDependencies
+{
+    private $api;
+
+    public function __construct(TestA $a)
+    {
+        $this->a = $a;
+    }
+
+    public function getAInstance()
+    {
+        return $this->a;
+    }
+
+    public function indexAction(TestMethodResolve $methodResolve, $name = 'Container')
+    {
+        return $methodResolve->greet($name);
+    }
+
+    public function getApi()
+    {
+        return $this->api;
+    }
+}
+
+interface TestImplementInterface
+{
+    public function container();
+}
+
+class TestClassDependenciesImplement implements TestImplementInterface
+{
+    public function container()
+    {
+        return 'Container';
+    }
+}
+
+class TestInterfaceInjection
+{
+    private $interface;
+
+    public function __construct(TestImplementInterface $testImplement)
+    {
+        $this->interface = $testImplement;
+    }
+
+    public function getImplementationObject()
+    {
+        return $this->interface;
+    }
+
+    public function getImplementationContainer()
+    {
+        return $this->interface->container();
+    }
+}
+
+class TestA
+{
+    public function getA()
+    {
+        return 'Hello A';
+    }
+}
+
+class TestMethodResolve
+{
+    public function greet($name)
+    {
+        return "Hello $name";
     }
 }
