@@ -167,7 +167,7 @@ class Pipeline implements PipelineInterface
      *
      * @return array
      */
-    private function createParameters(string $pipe, $request, $stack, $isString = false)
+    private function createParameters($pipe, $request, $stack, $isString = false)
     {
         if ($isString) {
             list($name, $parameters) = $this->parsePipeString($pipe);
