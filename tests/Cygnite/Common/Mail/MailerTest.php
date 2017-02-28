@@ -1,10 +1,10 @@
 <?php
-
+use PHPUnit\Framework\TestCase;
 use Cygnite\Common\Mail\Mailer;
 use Cygnite\Helpers\Config;
 use Mockery as m;
 
-class MailerTest extends PHPUnit_Framework_TestCase
+class MailerTest extends TestCase
 {
     public function setUp()
     {
@@ -60,7 +60,7 @@ class MailerTest extends PHPUnit_Framework_TestCase
     {
         $transport = m::mock('Swift_Transport');
         $message = m::mock('Swift_Message[getBody]');
-        $mailer = $this->getMock('Cygnite\Common\Mail\Mailer', ['message'], [$message]);
+        $mailer = $this->getMockBuilder('Cygnite\Common\Mail\Mailer')->setMethods(['message'])->setConstructorArgs([$message])->getMock();
         $mailer->getSwiftMailer()->shouldReceive('getTransport')->andReturn($transport);
         $transport->shouldReceive('stop');
         //$mailer->expects($this->once())->method('message')->will($this->returnValue($message));
