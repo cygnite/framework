@@ -91,7 +91,7 @@ class Widget implements \ArrayAccess
      * @param \Closure|null $callback
      * @return string
      */
-    public function make(string $name, array $data = [], \Closure $callback = null) : string
+    public function make(string $name, array $data = [], \Closure $callback = null)
     {
         $this->setWidgetName($name);
         $this->data = $data;
