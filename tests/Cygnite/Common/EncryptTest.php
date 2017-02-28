@@ -1,9 +1,9 @@
 <?php
-
+use PHPUnit\Framework\TestCase;
 use Cygnite\Common\Encrypt;
 use Cygnite\Helpers\Config;
 
-class EncryptTest extends PHPUnit_Framework_TestCase
+class EncryptTest extends TestCase
 {
     protected $crypt;
 
