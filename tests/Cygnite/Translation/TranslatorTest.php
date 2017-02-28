@@ -1,8 +1,8 @@
 <?php
-
+use PHPUnit\Framework\TestCase;
 use Cygnite\Translation\Translator;
 
-class TranslatorTest extends PHPUnit_Framework_TestCase
+class TranslatorTest extends TestCase
 {
     public function testTranslatorInstance()
     {
