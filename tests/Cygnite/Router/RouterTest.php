@@ -1,22 +1,43 @@
 <?php
+use Cygnite\Container\Container;
+use PHPUnit\Framework\TestCase;
+use Cygnite\Tests\Container\ContainerDependency;
 
-use Cygnite\Base\Router\Router;
-use Cygnite\Foundation\Application;
-
-class RouterTest extends PHPUnit_Framework_TestCase
+class RouterTest extends TestCase
 {
     private $router;
 
-    private $app;
+    private $request;
+
+    private $container;
+
+    public function setUp()
+    {
+        $containerDependency = new ContainerDependency();
+        $this->container = new Container(
+            $containerDependency->getInjector(),
+            $containerDependency->getDefinitiions(),
+            $containerDependency->getControllerNamespace()
+        );
+
+        $this->container->make(\Cygnite\Router\Router::class);
+        $this->router = $this->container->get('router');
+        $this->router->setRequest($this->request = \Cygnite\Http\Requests\Request::createFromGlobals());
+        $this->request->server->add('SCRIPT_NAME', '/index.php');
+        $this->request->server->add('REQUEST_METHOD', 'GET');
+        $this->request->server->add('SERVER_PROTOCOL', 'HTTP/1.1');
+        $this->router->setContainer($this->container);
+
+    }
 
     private function requestUri($uri)
     {
-        $this->app['request']->server->add('REQUEST_URI', $uri);
+        $this->request->server->add('REQUEST_URI', $uri);
     }
 
     private function requestMethod($method)
     {
-        $this->app['request']->server->add('REQUEST_METHOD', $method);
+        $this->request->server->add('REQUEST_METHOD', $method);
     }
 
     private function obStart()
@@ -32,36 +53,7 @@ class RouterTest extends PHPUnit_Framework_TestCase
         ob_end_clean();
     }
 
-    public function setUp()
-    {
-        $this->app = Application::instance();
-        $this->app['request'] = \Cygnite\Http\Requests\Request::createFromGlobals();
-        $this->app['router'] = new \Cygnite\Base\Router\Router($this->app['request']);
-        $this->app['router']->setApplication($this->app);
-
-        $this->app['request']->server->add('SCRIPT_NAME', '/index.php');
-        $this->app['request']->server->add('REQUEST_METHOD', 'GET');
-        $this->app['request']->server->add('SERVER_PROTOCOL', 'HTTP/1.1');
-        $this->router = $this->app['router'];
-    }
-
-    public function testRouterInstance()
-    {
-        $this->assertInstanceOf('\Cygnite\Base\Router\Router', $this->router);
-    }
-
-    public function testAllRequest()
-    {
-        $this->getRequest('Hello World!!');
-        $this->postRequest('post');
-        $this->putRequest('put');
-        $this->patchRequest('patch');
-        $this->deleteRequest('delete');
-        $this->headRequest();
-        $this->optionsRequest('options');
-    }
-
-    private function getRequest($output = '')
+    public function testGetRequest()
     {
         $this->router->get('/', function () {
             echo 'Hello World!!';
@@ -71,11 +63,11 @@ class RouterTest extends PHPUnit_Framework_TestCase
         $this->obStart();
         $this->requestUri('/');
         $this->router->run();
-        $this->assertEquals($output, ob_get_contents());
+        $this->assertEquals('Hello World!!', ob_get_contents());
         $this->obBufferClean();
     }
 
-    private function postRequest($output = '')
+    public function testPostRequest()
     {
         $this->router->post('/', function () {
             echo 'post';
@@ -86,11 +78,11 @@ class RouterTest extends PHPUnit_Framework_TestCase
         $this->requestMethod('POST');
 
         $this->router->run();
-        $this->assertEquals($output, ob_get_contents());
+        $this->assertEquals('post', ob_get_contents());
         $this->obBufferClean();
     }
 
-    private function putRequest($output = '')
+    public function testPutRequest()
     {
         $this->router->put('/', function () {
             echo 'put';
@@ -101,11 +93,11 @@ class RouterTest extends PHPUnit_Framework_TestCase
         $this->requestMethod('PUT');
 
         $this->router->run();
-        $this->assertEquals($output, ob_get_contents());
+        $this->assertEquals('put', ob_get_contents());
         $this->obBufferClean();
     }
 
-    private function patchRequest($output = '')
+    public function testPatchRequest()
     {
         $this->router->patch('/', function () {
             echo 'patch';
@@ -116,11 +108,11 @@ class RouterTest extends PHPUnit_Framework_TestCase
         $this->requestMethod('PATCH');
 
         $this->router->run();
-        $this->assertEquals($output, ob_get_contents());
+        $this->assertEquals('patch', ob_get_contents());
         $this->obBufferClean();
     }
 
-    private function deleteRequest($output = '')
+    public function testDeleteRequest()
     {
         $this->router->delete('/', function () {
             echo 'delete';
@@ -131,22 +123,22 @@ class RouterTest extends PHPUnit_Framework_TestCase
         $this->requestMethod('DELETE');
 
         $this->router->run();
-        $this->assertEquals($output, ob_get_contents());
+        $this->assertEquals('delete', ob_get_contents());
         $this->obBufferClean();
     }
 
-    private function headRequest($output = '')
+    public function headRequest()
     {
         // Test POST REQUEST with Param
         $this->obStart();
         $this->requestMethod('HEAD');
 
         $this->router->run();
-        $this->assertEquals($output, ob_get_contents());
+        $this->assertEquals('', ob_get_contents());
         $this->obBufferClean();
     }
 
-    private function optionsRequest($output = '')
+    public function optionsRequest()
     {
         $this->router->options('/', function () {
             echo 'options';
@@ -157,9 +149,10 @@ class RouterTest extends PHPUnit_Framework_TestCase
         $this->requestMethod('OPTIONS');
 
         $this->router->run();
-        $this->assertEquals($output, ob_get_contents());
+        $this->assertEquals('options', ob_get_contents());
         $this->obBufferClean();
     }
+
 
     public function testGetRequestDynamicRouteWithParameter()
     {
@@ -270,7 +263,7 @@ class RouterTest extends PHPUnit_Framework_TestCase
     public function testResourceControllerRoutes()
     {
         $this->router->resource('photos', 'photo');
-        $this->assertCount(7, $this->router->getResourceRoutes());
+        $this->assertCount(7, $this->router->getRouteResourceController()->getResourceRoutes());
     }
 
     public function testBeforeRoutingFilter()
@@ -317,6 +310,17 @@ class RouterTest extends PHPUnit_Framework_TestCase
         $this->requestUri('/hello/');
         $this->router->run();
         $this->assertEquals('Abort 404 Page Not Found!', ob_get_contents());
+        $this->obBufferClean();
+    }
+
+    public function testResourceController()
+    {
+        $this->router->getRouteControllerObject()->setControllerNamespace("Cygnite\\Tests\\Router\\");
+        $this->router->resource('person', 'user');
+        $this->obStart();
+        $this->requestUri('/person');
+        $this->router->run();
+        $this->assertEquals('Hello User', ob_get_contents());
         $this->obBufferClean();
     }
 }
