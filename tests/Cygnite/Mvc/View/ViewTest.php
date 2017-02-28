@@ -1,15 +1,24 @@
 <?php
-
-use Cygnite\Http\Responses\Response;
-use Cygnite\Mvc\View\Template;
 use Cygnite\Mvc\View\View;
+use Cygnite\Mvc\View\Twig\Template;
+use Cygnite\Mvc\View\Output;
 use Cygnite\Mvc\View\ViewFactory;
+use PHPUnit\Framework\TestCase;
+use Cygnite\Container\Container;
+use Cygnite\Http\Responses\Response;
+use Cygnite\Tests\Container\ContainerDependency;
 
-class ViewTest extends PHPUnit_Framework_TestCase
+class ViewTest extends TestCase
 {
-    private function view()
+    private $view;
+
+    private $container;
+
+    public function setUp()
     {
-        return new View(new Template());
+        $this->setContainer();
+        $this->setPaths();
+        $this->makeView();
     }
 
     public function testSetDataOnView()
@@ -17,32 +26,34 @@ class ViewTest extends PHPUnit_Framework_TestCase
         define('CYGNITE_BASE', __DIR__);
         define('APP', '');
         define('APP_NS', 'APP_NS');
-
-        $view = $this->view();
         $data = ['foo' => 'Foo'];
 
-        $content = $view->render('fixtures.hello', $data, true)->content();
+        $content = $this->view->render('fixtures.hello', $data, true)->content();
         $this->assertEquals('Hello Foo', $content);
     }
 
     public function testViewCreateMethod()
     {
-        $app = new \Cygnite\Foundation\Application();
-        ViewFactory::setApplication($app);
+        ViewFactory::make(\Cygnite\Mvc\View\View::class, $this->container, function ($v) {
+            $v->setContainer($this->container);
+        });
 
         $data = ['foo' => 'Cygnite!'];
-        $content = View::create('fixtures.hello', $data);
+        $content = $this->view->create('fixtures.hello', $data);
         $this->assertEquals('Hello Cygnite!', Response::make($content)->getContent());
 
         $data = ['foo' => 'Foo Bar!'];
-        $composeContent = View::compose('fixtures.hello', $data);
+        $composeContent = $this->view->compose('fixtures.hello', $data);
         $this->assertEquals('Hello Foo Bar!', Response::make($composeContent)->getContent());
     }
 
     public function testRenderWithTwigTemplate()
     {
-        $view = $this->view();
-        $view->setTemplateEngine(true)
+        $view = new View(new Template(), new Output());
+        $view/*->setTwigViewPath('Apps.Fistures')*//*
+             ->setTemplateLocation()*/
+             ->setTemplateEngine(true)
+             ->setContainer($this->container)
              ->setTwigViewPath('')
              ->setAutoReload(true)
              ->setTwigDebug(true);
@@ -52,7 +63,43 @@ class ViewTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('FooBar', $content);
     }
 
-    public function tearDown()
+    private function setContainer()
     {
+        $containerDependency = new ContainerDependency();
+        $this->container = new Container(
+            $containerDependency->getInjector(),
+            $containerDependency->getDefinitiions(),
+            $containerDependency->getControllerNamespace()
+        );
+    }
+
+    private function setPaths()
+    {
+        foreach ((new Paths)->getConfig() as $key => $path) {
+            $this->container->set($key, $path);
+        }
+    }
+
+    private function makeView()
+    {
+        $this->view = new View(new Template(), new Output());
+        $this->view->setContainer($this->container);
+    }
+}
+
+class Paths
+{
+    public function getConfig()
+    {
+        return [
+            "root" => realpath(__DIR__),
+            "src" => realpath(__DIR__),
+            "vendor" => realpath(__DIR__ . "/../vendor"),
+            "public" => realpath(__DIR__ . "/../public/"),
+            "app.namespace" => "Apps",
+            'app.path' => realpath(__DIR__),
+            'app.config' => realpath(__DIR__.'/../src/Apps/Configs/'),
+            'routes.dir' => realpath(__DIR__.'/../src/Apps/Routing/')
+        ];
     }
 }
