@@ -1,10 +1,8 @@
 <?php
+use Cygnite\EventHandler\Event;
+use PHPUnit\Framework\TestCase;
 
-use Cygnite\Base\EventHandler\Event;
-use Cygnite\Foundation\Application;
-use Mockery as m;
-
-class EventTest extends PHPUnit_Framework_TestCase
+class EventTest extends TestCase
 {
     private function obStart()
     {
@@ -21,45 +19,38 @@ class EventTest extends PHPUnit_Framework_TestCase
     public function testCreateEventInstance()
     {
         $eventInstance = Event::create();
-        $event = m::mock("\Cygnite\Base\EventHandler\Event");
-
-        $loader = m::mock("Cygnite\Foundation\Autoloader");
-        $app = Application::getInstance($loader);
-        $this->assertInstanceOf('Cygnite\Foundation\Application', $app);
-        $app->event = $event;
-        $this->assertEquals($event, $app->event);
-        $this->assertInstanceOf('\Cygnite\Base\EventHandler\Event', $eventInstance);
+        $this->assertInstanceOf('\Cygnite\EventHandler\Event', $eventInstance);
     }
 
     public function testEventClouserInstance()
     {
         $event = Event::create(function ($event) {
-            $event->attach('some', 'Some');
+            $event->register('some', 'Some');
 
-            $event->attach('something', function () {
+            $event->register('something', function () {
                 echo 'Hello_Something';
             });
 
-            $event->attach('somethingelse', 'Custom@somethingElse');
+            $event->register('somethingelse', 'Custom@somethingElse');
 
             return $event;
         });
 
         //Testing some function event
         $this->obStart();
-        $event->trigger('some');
+        $event->dispatch('some');
         $this->assertEquals('hello world', ob_get_contents());
         $this->obBufferClean();
 
         //Testing something anynomous function event
         $this->obStart();
-        $event->trigger('something');
+        $event->dispatch('something');
         $this->assertEquals('Hello_Something', ob_get_contents());
         $this->obBufferClean();
 
         //Testing something else class function event
         $this->obStart();
-        $event->trigger('somethingelse');
+        $event->dispatch('somethingelse');
         $this->assertEquals('Hello_SomeThing_Else', ob_get_contents());
         $this->obBufferClean();
     }
@@ -71,12 +62,12 @@ class EventTest extends PHPUnit_Framework_TestCase
     {
         $event = Event::create();
 
-        $event->attach('order', function () {
+        $event->register('order', function () {
             echo 'Order Iphone6';
         });
 
-        $event->flush('order');
-        $event->trigger('order');
+        $event->remove('order');
+        $event->dispatch('order');
     }
 }
 
