@@ -1,11 +1,12 @@
 <?php
-
-use Cygnite\Foundation\Application;
+use PHPUnit\Framework\TestCase;
 use Cygnite\Pipeline\Pipeline;
+use Cygnite\Container\Container;
+use Cygnite\Tests\Container\ContainerDependency;
 
-class PipelineTest extends PHPUnit_Framework_TestCase
+class PipelineTest extends TestCase
 {
-    private $app;
+    private $container;
     private $pipeline;
 
     /**
@@ -13,8 +14,14 @@ class PipelineTest extends PHPUnit_Framework_TestCase
      */
     public function setUp()
     {
-        $this->app = Application::instance();
-        $this->pipeline = new Pipeline($this->app);
+        $containerDependency = new ContainerDependency();
+        $this->container = new Container(
+            $containerDependency->getInjector(),
+            $containerDependency->getDefinitiions(),
+            $containerDependency->getControllerNamespace()
+        );
+        
+        $this->pipeline = new Pipeline($this->container);
     }
 
     public function testBasicUsage()
@@ -151,12 +158,12 @@ class PipelineTest extends PHPUnit_Framework_TestCase
     private function setValueToApplication($key = 'pipeline.request')
     {
         if ($key == 'pipeline.resolver') {
-            $this->app[$key] = new PipelineResponse();
+            $this->container[$key] = new PipelineResponse();
         } else {
-            $this->app[$key] = new PipelineRequest();
+            $this->container[$key] = new PipelineRequest();
         }
 
-        return $this->app;
+        return $this->container;
     }
 }
 
