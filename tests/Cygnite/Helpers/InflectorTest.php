@@ -1,8 +1,8 @@
 <?php
-
+use PHPUnit\Framework\TestCase;
 use Cygnite\Helpers\Inflector;
 
-class InflectorTest extends PHPUnit_Framework_TestCase
+class InflectorTest extends TestCase
 {
     public function testInflectionInstance()
     {
