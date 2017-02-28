@@ -252,9 +252,10 @@ class View extends Composer implements ViewInterface,\ArrayAccess
     }
 
     /**
-     * @param $templateEngine
+     * Set Template Engine.
      *
-     * @return $this
+     * @param $templateEngine
+     * @return View
      */
     public function setTemplateEngine($templateEngine) : View
     {
@@ -264,6 +265,8 @@ class View extends Composer implements ViewInterface,\ArrayAccess
     }
 
     /**
+     * Get Template engine.
+     *
      * @return string
      */
     public function getTemplateEngine()
@@ -406,6 +409,26 @@ class View extends Composer implements ViewInterface,\ArrayAccess
     public function setTwigViewPath($path)
     {
         $this->viewsFilePath = $path;
+
+        return $this;
+    }
+
+    /**
+     * @return string
+     */
+    public function getTwigViewPath()
+    {
+        return $this->viewsFilePath;
+    }
+
+    /**
+     *
+     * @param $location
+     * @return $this
+     */
+    public function setTemplateLocation($location)
+    {
+        $this->twigTemplateLocation = $location;
 
         return $this;
     }

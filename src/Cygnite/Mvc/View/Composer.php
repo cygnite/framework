@@ -11,6 +11,7 @@
 namespace Cygnite\Mvc\View;
 
 use Cygnite\Helpers\Inflector;
+use Cygnite\Mvc\View\Twig\Template;
 use Cygnite\Mvc\View\Exceptions\ViewNotFoundException;
 
 if (!defined('CF_SYSTEM')) {
@@ -38,6 +39,8 @@ class Composer
     protected $controllerView;
 
     protected $viewShared;
+
+    protected $templateEngine;
 
     /**
      * Create view and render it. This is alias of render method.
@@ -75,10 +78,9 @@ class Composer
      * });
      * </code>
      *
-     * @param          $view
-     * @param array    $data
-     * @param callable $callback
-     *
+     * @param string $view
+     * @param array $data
+     * @param callable|\Closure $callback
      * @return mixed
      */
     public function compose(string $view, array $data = [], \Closure $callback = null)
@@ -145,7 +147,7 @@ class Composer
         $this->layout = Inflector::toDirectorySeparator($this->getLayout());
 
         if ($this->layout !== '') { // render view page into the layout
-            $this->renderLayoutView($path, $this->viewsFilePath.DS, $params)->displayContent();
+            $this->renderLayoutView($path, $this->getTwigViewPath().DS, $params)->displayContent();
 
             return $this;
         }
@@ -199,18 +201,18 @@ class Composer
          | twig, then we will set twig template
          | environment
          */
-        if (is_object(static::$twigEnvironment) && is_file($path)) {
+        if (is_object(static::$twigEnvironment)/* && is_file($path)*/) {
             $this->setTwigTemplateInstance($view);
         }
-
         /*
         | We will check is twig template instance exists
         | then we will render twig template with parameters
         */
-        if (is_object(static::$twigEnvironment) && is_object($this['twig_template'])) {
+        if (is_object(static::$twigEnvironment) && is_object($this->get('twig_template'))) {
+
             return ($return) ?
-                $this['twig_template']->render($param) :
-                $this['twig_template']->display($param);
+                $this->get('twig_template')->render($param) :
+                $this->get('twig_template')->display($param);
         }
 
         return $this;
@@ -232,7 +234,8 @@ class Composer
     protected function getPath($path, $twig = false)
     {
         if ($twig) {
-            return $this->container->get('src').DS.$this->viewsFilePath.DS.$path.$this->templateExtension;
+            $viewPath = !is_null($this->getTwigViewPath()) ?: $this->getTwigViewPath().DS;
+            return $this->container->get('app.path').DS.$viewPath.$path.$this->templateExtension;
         }
 
         return $this->container->get('src').DS.$path.'.view.php';
@@ -283,7 +286,6 @@ class Composer
     private function load()
     {
         $data = [];
-
         $data = array_merge($this->params, $this->__get('parameters'));
 
         if (!file_exists($this->viewPath)) {
@@ -314,8 +316,8 @@ class Composer
         if ($this->layout == '') {
             $this->layout = strtolower($controller);
         }
-
         $this->setViewPath();
+
         if (!is_object(static::$twigEnvironment)) {
             static::$twigEnvironment = $this->template->setEnvironment();
         }
@@ -332,10 +334,10 @@ class Composer
      */
     protected function setTwigTemplateInstance($view)
     {
-        if (is_null($this['twig_template'])) {
-            $this['twig_template'] = static::$twigEnvironment->loadTemplate(
+        if (!$this->has('twig_template')) {
+            $this->set('twig_template', static::$twigEnvironment->loadTemplate(
                 str_replace('.', DS, $view).$this->getTemplateExtension()
-            );
+            ));
         }
 
         return $this;
@@ -346,11 +348,11 @@ class Composer
      */
     private function setViewPath()
     {
-        $viewPath = (strpos($this->viewsFilePath, '.') == true) ?
-            str_replace('.', DS, $this->viewsFilePath) :
-            $this->viewsFilePath;
+        $viewPath = (strpos($this->getTwigViewPath(), '.') == true) ?
+            str_replace('.', DS, $this->getTwigViewPath()) :
+            $this->getTwigViewPath();
 
-        $this->twigTemplateLocation = $this->container->get('app.path').DS.$viewPath.DS;
+        $this->setTemplateLocation($this->container->get('app.path').DS.$viewPath.DS);
     }
 
     /**

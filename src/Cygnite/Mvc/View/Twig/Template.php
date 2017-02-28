@@ -36,7 +36,7 @@ class Template
      */
     public function configure($view)
     {
-        \Twig_Autoloader::register();
+        //\Twig_Autoloader::register();
         $this->view = $view;
         /*
          | We will get all the necessary user configuration set
@@ -68,7 +68,7 @@ class Template
         $this->methods['twigLoader'] = new \Twig_Loader_Filesystem($this->view->getTemplateLocation());
 
         $this->twigEnvironment = new \Twig_Environment($this->methods['twigLoader'], [
-            'cache'       => CYGNITE_BASE.DS.'public'.DS.'storage'.DS.'temp'.DS.'twig'.DS.'tmp'.DS.'cache',
+            'cache'       => $this->view->getContainer()->get('public').DS.'storage'.DS.'temp'.DS.'twig'.DS.'tmp'.DS.'cache',
             'auto_reload' => $this->methods['getAutoReload'],
             'debug'       => $this->methods['isDebugModeOn'],
         ]);
@@ -127,7 +127,7 @@ class Template
         $this->functions[] = $this->getTwigSimpleFunctionInstance(
             'link',
             function ($link, $name = null, $attributes = []) {
-                return Asset::anchor(str_replace('.', '/', $link), $name, $attributes);
+                return (new Asset($this->view->getContainer()))->anchor(str_replace('.', '/', $link), $name, $attributes);
             }
         );
 
