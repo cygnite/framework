@@ -3,8 +3,9 @@
 use Cygnite\Hash\BCrypt;
 use Cygnite\Hash\Hash;
 use Mockery as m;
+use PHPUnit\Framework\TestCase;
 
-class HashTest extends PHPUnit_Framework_TestCase
+class HashTest extends TestCase
 {
     public function testCreateHashByCryptMockInstance()
     {
