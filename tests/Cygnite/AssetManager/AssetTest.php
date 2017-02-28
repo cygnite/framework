@@ -2,82 +2,78 @@
 
 use Cygnite\AssetManager\Asset;
 use Cygnite\AssetManager\AssetCollection;
-use Cygnite\Base\Router\Router;
 use Cygnite\Common\UrlManager\Url;
 use Cygnite\Foundation\Application;
 use Cygnite\Helpers\Config;
-use Mockery as m;
+use PHPUnit\Framework\TestCase;
 
-class AssetTest extends PHPUnit_Framework_TestCase
+class AssetTest extends TestCase
 {
+    private $container;
+
+    private $asset;
+
+    public function setUp()
+    {
+        $containerDependency = new \Cygnite\Tests\Container\ContainerDependency();
+        $this->container = new \Cygnite\Container\Container(
+            $containerDependency->getInjector(),
+            $containerDependency->getDefinitiions(),
+            $containerDependency->getControllerNamespace()
+        );
+        $this->setUpAssetConfig();
+        $this->asset = new Asset($this->container);
+    }
+
     public function testCreateAssetInstance()
     {
-        $asset = Asset::create();
-
-        $this->assertInstanceOf('Cygnite\AssetManager\Asset', $asset);
+        $this->assertInstanceOf('Cygnite\AssetManager\Asset', $this->asset);
     }
 
     private function setUpAssetConfig()
     {
-        $app = Application::instance();
-        $app['url'] = new \Cygnite\Common\UrlManager\Url();
-        $app['request'] = \Cygnite\Http\Requests\Request::createFromGlobals();
-        $app['router'] = new \Cygnite\Base\Router\Router($app['request']);
-        $app['url']->setApplication($app);
-
-        $app['request']->server->add('REQUEST_URI', '/hello/user');
-        $app['request']->server->add('HTTP_HOST', 'localhost');
+        $this->container['request'] = \Cygnite\Http\Requests\Request::createFromGlobals();
+        $this->container['router'] = $this->container->make(\Cygnite\Router\Router::class);
+        $url = new \Cygnite\Common\UrlManager\Url(new \Cygnite\Common\UrlManager\Manager($this->container));
         $configuration = [
             'global.config' => [
                 'encoding' => 'utf-8',
             ],
         ];
-
         Config::$config = $configuration;
-
-        Url::setBase('cygnite/'); //$app['router']->getBaseUrl()
+        $url->setBase('localhost/cygnite/');
     }
 
     public function testStaticCallToJsScript()
     {
-        $this->setUpAssetConfig();
-
-        $js = Asset::js('public/assets/jquery.js');
+        $js = $this->asset->js('public/assets/jquery.js');
         $this->assertEquals(trim('<script type="text/javascript" src="http://localhost/cygnite/public/assets/jquery.js" type="static"></script>'), trim($js));
     }
 
+
     public function testStaticCallToCss()
     {
-        $this->setUpAssetConfig();
-
-        $css = Asset::css('public/assets/cygnite.css');
-
-        $this->assertEquals(
-            trim('<link rel="stylesheet" type="text/css" static
-                   title= "" href="http://localhost/cygnite/public/assets/cygnite.css" />'
-            ), $css);
+        $css = $this->asset->style('public/assets/cygnite.css', 'static');
+        $this->assertEquals(trim(preg_replace('/\s+/',' ', '<link rel="stylesheet" type="text/css" static 
+                                    title= "" href="http://localhost/cygnite/public/assets/cygnite.css" />')), trim(preg_replace('/\s+/',' ', $css)));
     }
+
 
     public function testStaticCallToAnchorTag()
     {
-        $this->setUpAssetConfig();
-
-        $anchor = Asset::anchor('user/add', 'Add User');
+        $anchor = $this->asset->anchor('user/add', 'Add User');
 
         $this->assertEquals('<a href="http://localhost/cygnite/user/add" type="static">Add User</a>', $anchor);
     }
 
     public function testAssetCollectionClouserInstance()
     {
-        $this->setUpAssetConfig();
-
-        $asset = AssetCollection::make(function ($asset) {
+        $asset = AssetCollection::make($this->container, function ($collection) {
+            $asset = $collection->asset();
             $asset->where('header')
-                  ->add('style', ['path' => 'public/assets/css/bootstrap/css/bootstrap.min.css']);
-
+                  ->add('style', ['path' => 'public/assets/css/bootstrap.min.css']);
             $asset->where('footer')
                   ->add('script', ['path' => 'public/assets/js/cygnite/jquery/1.10.1/jquery.min.js']);
-
             $asset->where('sidebar')
                   ->add('link', ['path' => 'home/index', 'name' => 'Welcome to Cygnite Framework']);
 
@@ -89,15 +85,12 @@ class AssetTest extends PHPUnit_Framework_TestCase
 
     public function testAssetCollectionDump()
     {
-        $this->setUpAssetConfig();
-
-        $asset = AssetCollection::make(function ($asset) {
+        $asset = AssetCollection::make($this->container, function ($collection) {
+            $asset = $collection->asset();
             $asset->where('header')
                   ->add('style', ['path' => 'public/assets/css/bootstrap/css/bootstrap.min.css']);
-
             $asset->where('footer')
                   ->add('script', ['path' => 'public/assets/js/cygnite/jquery/1.10.1/jquery.min.js']);
-
             $asset->where('sidebar')
                   ->add('link', ['path' => 'home/index', 'name' => 'Welcome to Cygnite Framework']);
 
@@ -128,10 +121,5 @@ class AssetTest extends PHPUnit_Framework_TestCase
         ob_clean();
         // Cleanup
         ob_end_clean();
-    }
-
-    public function tearDown()
-    {
-        m::close();
     }
 }
