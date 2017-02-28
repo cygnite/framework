@@ -85,6 +85,10 @@ class Request
 
     protected static $httpMethodParameterOverride = false;
 
+    public function __construct(array $query, array $post, array $cookie, array $server, array $files, array $env, $content = null)
+    {
+        $this->initialize($query, $post, $cookie, $server, $files, $env, $content);
+    }
     /**
      * Initialize parameters for current request.
      *
@@ -152,8 +156,7 @@ class Request
             'CONTENT_TYPE'   => 'HTTP_CONTENT_TYPE',
         ]);
 
-        $static = new static();
-        return $static->initialize($query, $post, $cookie, $server, $files, $env, $content);
+        return new static($query, $post, $cookie, $server, $files, $env, $content);
     }
 
     /**
@@ -210,7 +213,7 @@ class Request
                 'SERVER_NAME'          => 'localhost',
                 'SERVER_PORT'          => 80,
                 'SERVER_PROTOCOL'      => 'HTTP/1.1',
-                'HTTP_USER_AGENT'      => 'Cygnite/2.X',
+                'HTTP_USER_AGENT'      => 'Cygnite/3.x',
                 'HTTP_ACCEPT_LANGUAGE' => 'en-us,en;q=0.5',
                 'HTTP_ACCEPT_CHARSET'  => 'ISO-8859-1,utf-8;q=0.7,*;q=0.7',
                 'REQUEST_TIME'         => time(),
