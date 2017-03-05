@@ -82,14 +82,23 @@ if (!function_exists('string_split')) {
 
 if (!function_exists('string_has')) {
     /**
+     * Determine if string exists in needles.
+     *
      * @param $haystack
-     * @param $needle
+     * @param $needles
      *
      * @return bool
+     * @see https://github.com/laravel/framework/blob/5.4/src/Illuminate/Support/Str.php#L69
      */
-    function string_has($haystack, $needle)
+    function string_has($haystack, $needles)
     {
-        return strpos($haystack, $needle) !== false;
+        foreach ((array) $needles as $needle) {
+            if ($needle != '' && mb_strpos($haystack, $needle) !== false) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }
 
