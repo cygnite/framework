@@ -48,6 +48,19 @@ class Url
     }
 
     /**
+     * @param $method
+     * @param $arguments
+     */
+    public function __call($method, $arguments)
+    {
+        if (method_exists(static::$urlManager, $method)){
+            return call_user_func_array([static::$urlManager, $method], $arguments);
+        }
+
+        throw new \BadMethodCallException("Undefined method Url::$method called.");
+    }
+
+    /**
      * Return url segment
      *
      * @param $param

@@ -11,7 +11,7 @@
 
 namespace Cygnite\Common\UrlManager;
 
-use Cygnite\Base\Router\Router;
+use Cygnite\Router\Router;
 use Cygnite\Container\ContainerAwareInterface;
 
 /**
@@ -28,6 +28,8 @@ class Manager
     protected $request;
 
     protected $container;
+
+    private $url;
 
     public function __construct(ContainerAwareInterface $container)
     {
