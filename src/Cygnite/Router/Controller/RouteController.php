@@ -42,6 +42,12 @@ class RouteController
      */
     private $namespace = '\\Controllers\\';
 
+    /**
+     * Set container object.
+     *
+     * @param $container
+     * @return $this
+     */
     public function setContainer($container)
     {
         $this->container = $container;
@@ -52,6 +58,26 @@ class RouteController
     public function getContainer()
     {
         return $this->container;
+    }
+
+    /**
+     * Set or override namespace.
+     *
+     * @param $namespace
+     */
+    public function setControllerNamespace($namespace)
+    {
+        $this->namespace = $namespace;
+    }
+
+    /**
+     * Get controller namespace.
+     *
+     * @return string
+     */
+    public function getControllerNamespace()
+    {
+        return $this->namespace;
     }
 
     /**
@@ -84,7 +110,6 @@ class RouteController
     public function callController($arguments)
     {
         $params = [];
-
         /*
         | Check if whether user trying to access module
         | If module we will setup module configuration
@@ -101,13 +126,6 @@ class RouteController
             $params = $arguments[1];
         }
 
-        $file = $this->container->get('root') . str_replace('\\', DS, '\\src' . $this->controllerWithNS) . '.php';
-
-        if (!is_readable($file)) {
-            throw new \Exception('Route class ' . $this->controllerWithNS . ' not found. ');
-        }
-
-        $args = [];
         $args = (!is_array($params)) ? [$params] : $params;
 
         /*

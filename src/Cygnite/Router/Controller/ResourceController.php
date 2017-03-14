@@ -91,7 +91,7 @@ class ResourceController
             function () use ($controller, $action) {
                 $args = [$controller . '@' . 'get' . ucfirst($action)];
 
-                return $this->callController($args);
+                return $this->router->callController($args);
             }
         );
     }
@@ -194,7 +194,7 @@ class ResourceController
                     $args = [$controller . '@' . $action, $id]; // delete, update
                 }
 
-                return $this->router()->callController($args);
+                return $this->router->callController($args);
             }
         );
     }

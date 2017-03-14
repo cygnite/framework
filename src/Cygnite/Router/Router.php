@@ -146,6 +146,16 @@ class Router implements RouterInterface
     }
 
     /**
+     * Return route controller instance.
+     *
+     * @return RouteController
+     */
+    public function getRouteControllerObject()
+    {
+        return $this->routeController;
+    }
+
+    /**
      * Call controller action.
      *
      * @param $arguments
