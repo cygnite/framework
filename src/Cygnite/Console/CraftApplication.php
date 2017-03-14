@@ -22,11 +22,14 @@ class CraftApplication
 
     protected $commands = [];
 
+    protected $app;
+
     /**
      * @param $version
      */
-    public function __construct($version)
+    public function __construct($app, $version)
     {
+        $this->app = $app;
         $this->version = $version;
     }
 
@@ -47,16 +50,16 @@ class CraftApplication
     /**
      * We will run Cygnite Console Application.
      */
-    public function run()
+    public function execute()
     {
-        $console = new ConsoleApplication(new Application(), $this->version);
+        //$console = new ConsoleApplication($this->app, $this->version);
 
         /*
          | We will also register Application Console commands
          | User can register multiple commands apart from core
          | commands and run on the fly
          */
-        $console->setCommand($this->commands)
+        $this->app->setCommand($this->commands)
             ->registerCommands()
             ->run();
     }
