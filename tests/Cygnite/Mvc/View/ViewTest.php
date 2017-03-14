@@ -49,6 +49,7 @@ class ViewTest extends TestCase
 
     public function testRenderWithTwigTemplate()
     {
+
         $view = new View(new Template(), new Output());
         $view/*->setTwigViewPath('Apps.Fistures')*//*
              ->setTemplateLocation()*/
@@ -95,7 +96,7 @@ class Paths
             "root" => realpath(__DIR__),
             "src" => realpath(__DIR__),
             "vendor" => realpath(__DIR__ . "/../vendor"),
-            "public" => realpath(__DIR__ . "/../public/"),
+            "public" => null,//realpath(__DIR__ . "/../public/"),
             "app.namespace" => "Apps",
             'app.path' => realpath(__DIR__),
             'app.config' => realpath(__DIR__.'/../src/Apps/Configs/'),

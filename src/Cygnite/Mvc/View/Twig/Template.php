@@ -67,11 +67,18 @@ class Template
     {
         $this->methods['twigLoader'] = new \Twig_Loader_Filesystem($this->view->getTemplateLocation());
 
-        $this->twigEnvironment = new \Twig_Environment($this->methods['twigLoader'], [
-            'cache'       => $this->view->getContainer()->get('public').DS.'storage'.DS.'temp'.DS.'twig'.DS.'tmp'.DS.'cache',
-            'auto_reload' => $this->methods['getAutoReload'],
-            'debug'       => $this->methods['isDebugModeOn'],
-        ]);
+        $config = [];
+        // In testing environment we don't want to generate cache files.
+        // We will pass path as null.
+        if (!is_null($this->view->getContainer()->get('public'))) {
+            $config['cache'] = $this->view->getContainer()->get('public')
+            . DS . 'storage' . DS . 'temp' . DS . 'twig' . DS . 'tmp' . DS . 'cache';
+        }
+
+        $config['auto_reload'] = $this->methods['getAutoReload'];
+        $config['debug'] = $this->methods['isDebugModeOn'];
+
+        $this->twigEnvironment = new \Twig_Environment($this->methods['twigLoader'], $config);
         $this->setDefaultFunctions();
 
         return $this->twigEnvironment;
