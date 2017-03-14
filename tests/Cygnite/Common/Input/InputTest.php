@@ -1,8 +1,9 @@
 <?php
 
+use PHPUnit\Framework\TestCase;
 use Cygnite\Common\Input\Input;
 
-class InputTest extends PHPUnit_Framework_TestCase
+class InputTest extends TestCase
 {
     protected $input;
 
@@ -64,7 +65,8 @@ class InputTest extends PHPUnit_Framework_TestCase
         $this->assertInstanceOf('Cygnite\Common\Input\CookieManager\Cookie', $this->input->cookie());
     }
 
+    /*
     public function testGetDataAsJson()
     {
-    }
+    }*/
 }
