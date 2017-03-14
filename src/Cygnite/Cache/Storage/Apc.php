@@ -45,10 +45,10 @@ class Apc implements StorageInterface
     public static function make(callable $callback = null)
     {
         if (is_callable($callback) && !is_null($callback)) {
-            return $callback(new static(new ApcWarpper()));
+            return $callback(new static(new ApcWrapper()));
         }
 
-        return new static(new ApcWarpper());
+        return new static(new ApcWrapper());
     }
 
     /**

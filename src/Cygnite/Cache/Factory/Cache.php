@@ -1,8 +1,15 @@
 <?php
-
+/*
+ * This file is part of the Cygnite package.
+ *
+ * (c) Sanjoy Dey <dey.sanjoy0@gmail.com>
+ *
+ * For the full copyright and license information, please view the LICENSE
+ * file that was distributed with this source code.
+ */
 namespace Cygnite\Cache\Factory;
 
-use Cygnite\Cache\Storage\ApcWarpper;
+use Cygnite\Cache\Storage\ApcWrapper;
 use Cygnite\Cache\Storage\MemcachedConnector;
 use Cygnite\Cache\Storage\RedisConnector;
 use Cygnite\Helpers\Config;
@@ -28,9 +35,7 @@ class Cache
      *
      * @param          $cache
      * @param callable $callback
-     *
-     * @throws RuntimeException
-     *
+     * @throws \RuntimeException
      * @return mixed
      */
     public static function make($cache, \Closure $callback)
@@ -40,7 +45,7 @@ class Cache
             return static::getCacheDriver($callback, $cache);
         }
 
-        throw new RuntimeException('Cache driver not found!');
+        throw new \RuntimeException('Cache driver not found!');
     }
 
     /**
@@ -53,7 +58,7 @@ class Cache
     {
         switch ($cache) {
             case 'apc':
-                return $callback(new static::$drivers[$cache](new ApcWarpper()));
+                return $callback(new static::$drivers[$cache](new ApcWrapper()));
                 break;
             case 'memcached':
                 $memcached = static::getMemcahcedDriver();
@@ -83,7 +88,7 @@ class Cache
         $memcached = null;
         if ($config['memcached']['autoconnnect']) {
             $uniqueId = $config['memcached']['uniqueId'];
-            $memCachedInstance = (!is_null($uniqueId)) ? new Memcached($uniqueId) : new Memcached();
+            $memCachedInstance = (!is_null($uniqueId)) ? new \Memcached($uniqueId) : new \Memcached();
 
             $memcached = (new MemcachedConnector($memCachedInstance))->create($config['memcached']['servers']);
         }
