@@ -29,9 +29,17 @@ class Bootstrapper
     /**
      * @param array $classes
      */
-    public function registerBootstrappers(array $classes)
+    public function registerBootstrappers(array $classes, $override = false)
     {
+        if ($override) {
+            $this->bootstrappers = $classes;
+
+            return $this;
+        }
+
         $this->bootstrappers = array_merge($this->bootstrappers, $classes);
+
+        return $this;
     }
 
     /**

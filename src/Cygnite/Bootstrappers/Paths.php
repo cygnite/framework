@@ -10,7 +10,8 @@ class Paths implements \ArrayAccess
 {
     private $paths = [];
 
-    /** Set all paths into object.
+    /**
+     * Set all paths into object.
      * @param array $paths
      */
     public function __construct(array $paths)
