@@ -1,7 +1,7 @@
 {
     "name": "cygnite/framework",
     "description": "Cygnite PHP Framework",
-    "keywords": ["Cygnite", "Framework"],
+    "keywords": ["Cygnite", "PHP", "Framework"],
     "homepage": "http://www.cygniteframework.com",
     "license": "MIT",
     "support": {
@@ -12,26 +12,31 @@
         {
             "name": "Sanjoy Dey",
             "email": "dey.sanjoy0@gmail.com"
+        },
+        {
+            "name": "Cygnite Contributors",
+            "homepage": "https://github.com/cygnite/framework/graphs/contributors"
         }
+
     ],
     "require": {
-         "php": ">=7.0",
-         "twig/twig": "2.1.*",
-         "symfony/console": "3.2.*",
-         "tracy/tracy": "2.4.*",
-         "ircmaxell/password-compat": "~1.0.*",
-         "swiftmailer/swiftmailer": "5.4.*",
-         "monolog/monolog": "1.*"
+        "php": ">=7.0",
+        "twig/twig": "2.1.*",
+        "symfony/console": "3.2.*",
+        "tracy/tracy": "2.4.*",
+        "ircmaxell/password-compat": "1.0.*",
+        "swiftmailer/swiftmailer": "5.4.*",
+        "monolog/monolog": "~1.22",
+		"nesbot/carbon": "~1.20",
+		"league/flysystem": "~1.0",
+		"symfony/finder": "~3.2"
    },
-    "replace": {
-        "cygnite/stripe": "self.version" 
-	},
    "require-dev": {
        "mockery/mockery": "~0.9.7",
-       "phpunit/phpunit": "~5.7.*",
-       "predis/predis": "~1.1.*"
+       "phpunit/phpunit": "~6.0",
+       "predis/predis": "1.1.*"
     },
-     "autoload": {
+    "autoload": {
      	"files": [
             "src/Cygnite/Helpers/Support.php"
         ],
@@ -39,9 +44,14 @@
             "Cygnite\\": "src/Cygnite/"
         }
     },
+	"autoload-dev": {
+        "psr-4": {
+            "Cygnite\\Tests\\": "tests/Cygnite/"
+        }
+    },
     "extra": {
         "branch-alias": {
-            "dev-master": "2.0-dev"
+            "dev-master": "3.0-dev"
         }
     },
     "minimum-stability": "dev"
