@@ -1,11 +1,11 @@
 <?php
+use PHPUnit\Framework\TestCase;
 
-
-class MemcachedCacheTest extends PHPUnit_Framework_TestCase
+class MemcachedCacheTest extends TestCase
 {
     public function testStoreData()
     {
-        $memcacheObject = $this->getMock('StdClass', ['set', 'get', 'getResultCode']);
+        $memcacheObject = $this->getMockBuilder('StdClass')->setMethods(['set', 'get', 'getResultCode'])->getMock();
 
         $memcacheObject->expects($this->once())
             ->method('set')
@@ -28,7 +28,7 @@ class MemcachedCacheTest extends PHPUnit_Framework_TestCase
 
     public function testReturnNullIfDataNotFound()
     {
-        $memcacheObject = $this->getMock('StdClass', ['get', 'getResultCode']);
+        $memcacheObject = $this->getMockBuilder('StdClass')->setMethods(['get', 'getResultCode'])->getMock();
 
         $memcacheObject->expects($this->once())
                  ->method('get')
@@ -45,7 +45,7 @@ class MemcachedCacheTest extends PHPUnit_Framework_TestCase
 
     public function testIncrementMethod()
     {
-        $memcache = $this->getMock('Memcached', ['increment']);
+        $memcache = $this->getMockBuilder('Memcached')->setMethods(['increment'])->getMock();
         $memcache->expects($this->once())
                  ->method('increment')
                  ->with($this->equalTo('foo'), $this->equalTo(3));
@@ -56,7 +56,7 @@ class MemcachedCacheTest extends PHPUnit_Framework_TestCase
 
     public function testDecrementMethod()
     {
-        $memcache = $this->getMock('Memcached', ['decrement']);
+        $memcache = $this->getMockBuilder('Memcached')->setMethods(['decrement'])->getMock();
         $memcache->expects($this->once())
                  ->method('decrement')
                  ->with($this->equalTo('foo'), $this->equalTo(15));
@@ -67,7 +67,7 @@ class MemcachedCacheTest extends PHPUnit_Framework_TestCase
 
     public function testDestroyMethod()
     {
-        $memcache = $this->getMock('Memcached', ['delete']);
+        $memcache = $this->getMockBuilder('Memcached')->setMethods(['delete'])->getMock();
         $memcache->expects($this->once())->method('delete')->with($this->equalTo('foo'));
         $m = new \Cygnite\Cache\Storage\Memcached($memcache);
         $m->destroy('foo');

@@ -9,23 +9,23 @@
  */
 namespace Cygnite\Pipeline;
 
+use Cygnite\Container\ContainerAwareInterface;
 use Cygnite\Container\Service\ServiceProvider;
-use Cygnite\Foundation\Application;
 
 /**
  * Class PipelineServiceProvider.
  */
 class PipelineServiceProvider extends ServiceProvider
 {
-    protected $app;
+    protected $container;
 
     /**
      * Register Pipeline into application container.
      *
-     * @param Application $app
+     * @param ContainerAwareInterface $container
      */
-    public function register(Application $app)
+    public function register(ContainerAwareInterface $container)
     {
-        $app['pipeline'] = new Pipeline($app);
+        $container->set('pipeline', new Pipeline($container));
     }
 }

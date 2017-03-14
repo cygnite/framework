@@ -45,10 +45,9 @@ class Pipeline implements PipelineInterface
      * Set container into pipeline for resolving objects.
      *
      * @param ContainerAwareInterface $container
-     *
-     * @return $this
+     * @return PipelineInterface
      */
-    public function setContainer(ContainerAwareInterface $container)
+    public function setContainer(ContainerAwareInterface $container) : PipelineInterface
     {
         $this->container = $container;
 
@@ -62,7 +61,7 @@ class Pipeline implements PipelineInterface
      *
      * @return $this
      */
-    public function send($request)
+    public function send($request) : PipelineInterface
     {
         $this->request = $request;
 
@@ -76,7 +75,7 @@ class Pipeline implements PipelineInterface
      *
      * @return $this
      */
-    public function then(callable $callback)
+    public function then(callable $callback) : PipelineInterface
     {
         $this->callback = $callback;
 
@@ -87,11 +86,11 @@ class Pipeline implements PipelineInterface
      * Pass request through the pipeline.
      *
      * @param array $pipes
-     * @param null  $method
+     * @param string|null  $method
      *
      * @return $this
      */
-    public function through(array $pipes, $method = null)
+    public function through(array $pipes, string $method = null) : PipelineInterface
     {
         $this->pipes = $pipes;
         $this->method = !is_null($method) ? $method : $this->defaultMethod;
@@ -135,7 +134,7 @@ class Pipeline implements PipelineInterface
      *
      * @return callable
      */
-    private function createPipelineCallback()
+    private function createPipelineCallback() : Closure
     {
         return function ($stack, $pipe) {
             return function ($request) use ($stack, $pipe) {
@@ -192,7 +191,7 @@ class Pipeline implements PipelineInterface
      *
      * @return mixed
      */
-    private function call($callback, $parameters = [])
+    private function call(callable $callback, array $parameters = [])
     {
         return call_user_func_array($callback, $parameters);
     }
@@ -201,12 +200,11 @@ class Pipeline implements PipelineInterface
      * Parse full pipe string to get name and parameters.
      *
      * @param string $pipe
-     *
      * @return array
      *
      * @link https://github.com/laravel/framework/blob/5.2/src/Illuminate/Pipeline/Pipeline.php#L160
      */
-    public function parsePipeString($pipe)
+    public function parsePipeString(string $pipe) : array
     {
         list($name, $parameters) = array_pad(explode(':', $pipe, 2), 2, []);
 

@@ -1,9 +1,9 @@
 <?php
-
+use PHPUnit\Framework\TestCase;
 use Cygnite\Http\Responses\JsonResponse;
 use Cygnite\Http\Responses\Response;
 
-class ResponseTest extends PHPUnit_Framework_TestCase
+class ResponseTest extends TestCase
 {
     public function testResponseInstance()
     {

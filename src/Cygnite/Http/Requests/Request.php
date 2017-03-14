@@ -9,8 +9,8 @@
  */
 namespace Cygnite\Http\Requests;
 
-use Cygnite\Foundation\Collection;
 use Cygnite\Http\Header;
+use Cygnite\Foundation\Collection;
 
 /**
  * Class Request.
@@ -85,22 +85,10 @@ class Request
 
     protected static $httpMethodParameterOverride = false;
 
-    /**
-     * Constructor of Request class.
-     *
-     * @param array $query
-     * @param array $post
-     * @param array $cookie
-     * @param array $server
-     * @param array $files
-     * @param array $env
-     * @param null  $content
-     */
     public function __construct(array $query, array $post, array $cookie, array $server, array $files, array $env, $content = null)
     {
         $this->initialize($query, $post, $cookie, $server, $files, $env, $content);
     }
-
     /**
      * Initialize parameters for current request.
      *
@@ -130,6 +118,8 @@ class Request
         $this->setClientIPs();
         $this->setPath();
         $this->setUnsupportedMethodsIfExists();
+
+        return $this;
     }
 
     /**
@@ -223,7 +213,7 @@ class Request
                 'SERVER_NAME'          => 'localhost',
                 'SERVER_PORT'          => 80,
                 'SERVER_PROTOCOL'      => 'HTTP/1.1',
-                'HTTP_USER_AGENT'      => 'Cygnite/2.X',
+                'HTTP_USER_AGENT'      => 'Cygnite/3.x',
                 'HTTP_ACCEPT_LANGUAGE' => 'en-us,en;q=0.5',
                 'HTTP_ACCEPT_CHARSET'  => 'ISO-8859-1,utf-8;q=0.7,*;q=0.7',
                 'REQUEST_TIME'         => time(),
@@ -320,7 +310,7 @@ class Request
      *
      * @return bool
      */
-    public function setPath($path = null)
+    public function setPath($path = null) : bool
     {
         if ($path === null) {
             $uri = $this->server->get('REQUEST_URI');
@@ -461,7 +451,7 @@ class Request
      *
      * @return $this
      */
-    public function setMethod($method)
+    public function setMethod($method) : Request
     {
         $this->method = null;
         $this->server->set('REQUEST_METHOD', $method);
@@ -499,7 +489,7 @@ class Request
     /**
      * @return Collection
      */
-    public function getCookie()
+    public function getCookie() : Collection
     {
         return $this->cookie;
     }
@@ -507,7 +497,7 @@ class Request
     /**
      * @return Collection
      */
-    public function getDelete()
+    public function getDelete() : Collection
     {
         return $this->delete;
     }
@@ -515,7 +505,7 @@ class Request
     /**
      * @return Collection
      */
-    public function getEnv()
+    public function getEnv() : Collection
     {
         return $this->env;
     }
@@ -725,7 +715,7 @@ class Request
     /**
      * @return Collection
      */
-    public function getPost()
+    public function getPost() : Collection
     {
         return $this->post;
     }
@@ -733,7 +723,7 @@ class Request
     /**
      * @return Collection
      */
-    public function getPut()
+    public function getPut() : Collection
     {
         return $this->put;
     }
@@ -741,7 +731,7 @@ class Request
     /**
      * @return Collection
      */
-    public function getQuery()
+    public function getQuery() : Collection
     {
         return $this->query;
     }
@@ -749,7 +739,7 @@ class Request
     /**
      * @return Collection
      */
-    public function getServer()
+    public function getServer() : Collection
     {
         return $this->server;
     }
@@ -807,7 +797,7 @@ class Request
     /**
      * @return null|string
      */
-    public function getMethod()
+    public function getMethod() :string
     {
         $method = $this->method;
 
@@ -863,7 +853,7 @@ class Request
      *
      * @return bool
      */
-    public function isAjax()
+    public function isAjax() : bool
     {
         return $this->header->get('X_REQUESTED_WITH') == 'XMLHttpRequest';
     }
@@ -873,7 +863,7 @@ class Request
      *
      * @return bool
      */
-    public function isJson()
+    public function isJson() : bool
     {
         return preg_match("/application\/json/i", $this->header->get('CONTENT_TYPE')) === true;
     }
@@ -920,7 +910,7 @@ class Request
      *
      * @return string
      */
-    public function getBaseUrl()
+    public function getBaseUrl() : string
     {
         // Current Request URI
         $this->currentUrl = $this->server->get('REQUEST_URI');
@@ -936,7 +926,7 @@ class Request
      *
      * @return string
      */
-    public function getCurrentUri()
+    public function getCurrentUri() : string
     {
         $basePath = $this->getBaseUrl();
         $uri = $this->currentUrl;
@@ -1014,5 +1004,16 @@ class Request
         $this->header = clone $this->header;
         $this->files = clone $this->files;
         $this->env = clone $this->env;
+    }
+
+    /**
+     * Check if POST array has input.
+     *
+     * @param $input
+     * @return bool
+     */
+    public function postArrayHas($input) : bool
+    {
+        return filter_has_var(INPUT_POST, $input);
     }
 }

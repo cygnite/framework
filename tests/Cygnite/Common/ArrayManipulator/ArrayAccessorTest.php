@@ -1,8 +1,9 @@
 <?php
 
+use PHPUnit\Framework\TestCase;
 use Cygnite\Common\ArrayManipulator\ArrayAccessor;
 
-class ArrayAccessorTest extends PHPUnit_Framework_TestCase
+class ArrayAccessorTest extends TestCase
 {
     public function testMakeInstance()
     {

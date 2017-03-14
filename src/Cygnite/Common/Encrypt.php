@@ -47,7 +47,7 @@ class Encrypt
         $this->checkMCryptExists();
 
         if (is_null($encryptKey)) {
-            $config = include_once CYGNITE_BASE.DS.APPPATH.DS.'Configs'.DS.'application'.EXT;
+            $config = include_once CYGNITE_BASE.DS.APPPATH.DS.'Configs'.DS.'application.php';
             $this->setSaltKey($config['encryption.key']);
         } else {
             $this->setSaltKey($encryptKey);

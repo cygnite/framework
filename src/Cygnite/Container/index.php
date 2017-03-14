@@ -1,6 +1,20 @@
 <?php
+$container = new \Cygnite\Container\Container(
+    new \Cygnite\Container\Injector()
+);
+$definitions = [
+    'property.definition' =>  [
+        'HomeController' => [
+            'api' => \Apps\Resources\Extensions\Api::class,
+        ],
+    ],
+    'register.alias' => [
+        'CustomInterface' => Apps\Resources\Extensions\Custom::class
+    ]
+];
+$container->setAppNamespace('\\Apps\\Controllers\\\'');
+$container->setDefinitions($definitions);
 
-$container = new \Cygnite\Container\Container();
 //$obj = new Service;
 
 $container['a'] = 'Store A';

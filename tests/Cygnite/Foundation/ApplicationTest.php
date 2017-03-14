@@ -1,77 +1,89 @@
 <?php
-
+use Cygnite\Container\Container;
 use Cygnite\Foundation\Application;
-use Mockery as m;
+use PHPUnit\Framework\TestCase;
+use Cygnite\Tests\Container\ContainerDependency;
+use Cygnite\Bootstrappers\Bootstrapper;
+use Cygnite\Bootstrappers\BootstrapperDispatcher;
+use Cygnite\Container\ContainerAwareInterface;
+use Cygnite\Bootstrappers\BootstrapperInterface;
 
-class ApplicationTest extends PHPUnit_Framework_TestCase
+class ApplicationTest extends TestCase
 {
+    protected $app;
+
+    public function setUp()
+    {
+        $paths = [];
+        $containerDependency = new ContainerDependency();
+        $this->container = new Container(
+            $containerDependency->getInjector(),
+            $containerDependency->getDefinitiions(),
+            $containerDependency->getControllerNamespace()
+        );
+
+        $bootstrapper = new Bootstrapper(new \Cygnite\Bootstrappers\Paths($paths));
+        $bootstrapper->registerBootstrappers([\FooBootstrapper::class]);
+        $this->app = new Application($this->container, new BootstrapperDispatcher($this->container, $bootstrapper));
+    }
+
     public function testApplicationInstance()
     {
-        $application = Application::instance();
+        $this->assertInstanceOf('Cygnite\Foundation\Application', $this->app);
+    }
 
-        $this->assertInstanceOf('Cygnite\Foundation\Application', $application);
+    public function testApplicationReturnsContainerInstance()
+    {
+        $this->assertSame($this->container, $this->app->getContainer());
     }
 
     public function testSetValueToContainer()
     {
-        $loader = m::mock('Cygnite\Foundation\Autoloader');
-        $app = Application::instance();
-        $app->set('greet', 'Hello Application');
+        $this->app->getContainer()->set('greet', 'Hello Application');
 
-        $this->assertEquals($app['greet'], 'Hello Application');
-    }
-
-    public function testDependencyInjection()
-    {
-        $this->app = Application::instance();
-        $this->app['url'] = new \Cygnite\Common\UrlManager\Url();
-        $this->app['request'] = \Cygnite\Http\Requests\Request::createFromGlobals();
-        $this->app['router'] = new \Cygnite\Base\Router\Router($this->app['request']);
-        $this->app['router']->setApplication($this->app);
-        $this->app['url']->setApplication($this->app);
-
-        $madeUrl = $this->app->make('\Cygnite\Common\UrlManager\Url');
-        $madeUrl->setApplication($this->app);
-
-        $this->assertEquals($this->app['url'], $madeUrl);
+        $this->assertEquals($this->app->getContainer()['greet'], 'Hello Application');
     }
 
     public function testServiceCreation()
     {
-        $app = Application::instance();
-        $app->registerServiceProvider(['FooBarServiceProvider']);
-        $app->setServiceController('bar.controller', 'BarController');
+        $this->app->registerServiceProvider(['FooBarServiceProvider']);
+        $this->app->setServiceController('bar.controller', '\BarController');
 
-        $this->assertInstanceOf('\FooBar', $app['foo.bar']());
-        $this->assertNotNull($app['foo.bar']()->greet());
-        $this->assertEquals('Hello FooBar!', $app['foo.bar']()->greet());
+        $container = $this->app->getContainer();
+        $this->assertInstanceOf('\FooBar', $container['foo.bar']());
+        $this->assertNotNull($container['foo.bar']()->greet());
+        $this->assertEquals('Hello FooBar!', $container['foo.bar']()->greet());
+        $container['greet.bar.controller'] = 'Hello BarController!';
 
-        $app['greet.bar.controller'] = 'Hello BarController!';
-        $this->assertEquals('Hello BarController!', $app['bar.controller']()->indexAction());
+        $this->assertEquals('Hello BarController!', $container['bar.controller']()->indexAction());
     }
 
     public function testComposeMethod()
     {
-        $app = Application::instance();
-        $bazBar = $app->compose('BazBar', ['greet' => 'Hello!']);
+        $bazBar = $this->app->compose('\BazBar', ['greet' => 'Hello!']);
 
-        $this->assertArrayHasKey('greet', $app);
+        $this->assertArrayHasKey('greet', $this->app->getContainer()->get('bazbar')->getArguments());
         $this->assertEquals('Hello!', $bazBar->greet());
     }
 
-    public function tearDown()
+    public function testServiceController()
     {
-        m::close();
+        $this->app->registerServiceProvider(['FooBarServiceProvider']);
+        $this->app->setServiceController('bar.controller', '\BarController');
+        $container = $this->app->getContainer();
+        $container['bar.controller']()->getServiceController();
+
+        $this->assertInstanceOf('Cygnite\Mvc\Controller\ServiceController', $container['bar.controller']()->getServiceController());
     }
 }
 
 class FooBarServiceProvider
 {
-    protected $app;
+    protected $container;
 
-    public function register(Application $app)
+    public function register(ContainerAwareInterface $container)
     {
-        $app['foo.bar'] = $app->share(function ($c) {
+        $container['foo.bar'] = $container->share(function ($c) {
             return new FooBar();
         });
     }
@@ -87,18 +99,24 @@ class FooBar
 
 class BarController
 {
-    private $app;
+    private $container;
 
     private $serviceController;
 
-    public function __construct($serviceController, \Cygnite\Foundation\ApplicationInterface $app)
+    public function __construct($serviceController, \Cygnite\Container\Container $container)
     {
-        $this->app = $app;
+        $this->serviceController = $serviceController;
+        $this->container = $container;
     }
 
     public function indexAction()
     {
-        return $this->app['greet.bar.controller'];
+        return $this->container['greet.bar.controller'];
+    }
+
+    public function getServiceController()
+    {
+        return $this->serviceController;
     }
 }
 
@@ -111,8 +129,29 @@ class BazBar
         $this->arguments = $arguments;
     }
 
+    public function getArguments(): array
+    {
+        return $this->arguments;
+    }
+
     public function greet()
     {
         return $this->arguments['greet'];
+    }
+}
+
+class FooBootstrapper implements BootstrapperInterface
+{
+    private $container;
+    protected $paths;
+
+    public function __construct(ContainerAwareInterface $container, Paths $paths)
+    {
+        $this->container = $container;
+        $this->paths = $paths;
+    }
+
+    public function run()
+    {
     }
 }

@@ -1,8 +1,9 @@
+
 namespace {%Apps%}\Form;
 
 use Cygnite\FormBuilder\Form;
-use Cygnite\Foundation\Application;
 use Cygnite\Common\UrlManager\Url;
+use Cygnite\Validation\ValidatorInterface;
 
 /**
 * Sample Form using Cygnite Form Builder
@@ -12,15 +13,17 @@ use Cygnite\Common\UrlManager\Url;
 
 class %controllerName%Form extends Form
 {
-    //set model object
-    private $model;
+    //set entity object
+    protected $entity;
 
-    public $errors;
+    protected $validator;
+
+    protected $errors = [];
 
     private $segment;
 
     // We will set action url
-    public $action = 'add';
+    protected $action = 'add';
 
     public function __construct($object = null, $segment = null)
     {
@@ -30,17 +33,67 @@ class %controllerName%Form extends Form
     }
 
     /**
-    * Set validator used for displaying validation
-    * errors below each form elements
-    *
-    * @param $validator
-    * @return $this
-    */
-    public function setValidator($validator)
+     * Set form action and request to form builder.
+     *
+     * @param $action
+     * @param $request
+     * @return $this
+     */
+    public function handleRequest($action, $request)
+    {
+        $this->action = $action;
+        $this->setRequest($request);
+
+        return $this;
+    }
+
+    /**
+     * Set validator used for displaying validation
+     * errors below each form elements
+     *
+     * @param ValidatorInterface $validator
+     * @return $this
+     */
+    public function setValidator(ValidatorInterface $validator)
     {
         $this->validator = $validator;
 
         return $this;
+    }
+
+    /**
+     * Get validator instance if set.
+     *
+     * @return mixed
+     */
+    public function getValidator()
+    {
+        return $this->validator;
+    }
+
+    /**
+     * Set validator object. If object is set you can customize the
+     * validator error messages into the form elements.
+     *
+     * @return void
+     */
+    public function setValidationErrors($errors)
+    {
+        $this->errors = $errors;
+
+        return $this;
+    }
+
+    /**
+     * Get form validation errors.
+     *
+     * @return mixed
+     */
+    public function getValidationErrors()
+    {
+        return ($this->validator instanceof ValidatorInterface && !empty($this->validator->getErrors()))
+            ? $this->validator->getErrors()
+            : $this->errors;
     }
 
     /**
@@ -52,7 +105,9 @@ class %controllerName%Form extends Form
         $id = (isset($this->model->id)) ? $this->model->id : '';
 
         // Below code is to display validation errors below the input box
-        if (is_object($this->validator)) {
+        if (is_object($this->validator) && $this->validator instanceof ValidatorInterface) {
+            //$this->displayValidationError('inline', false);
+            $this->displayValidationError('highlightElement', false);
             // Set your custom errors
             //$this->validator->setCustomError('column.error', 'Your Custom Error Message');
         }

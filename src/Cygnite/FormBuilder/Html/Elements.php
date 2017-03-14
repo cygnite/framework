@@ -10,13 +10,16 @@
 
 namespace Cygnite\FormBuilder\Html;
 
-use Cygnite\Common\Input;
-
 if (!defined('CF_SYSTEM')) {
     exit('No External script access allowed');
 }
+use Cygnite\Helpers\Inflector;
+use Cygnite\Validation\ValidatorInterface;
+
 /**
  * Class Elements.
+ *
+ * @package Cygnite\FormBuilder\Html
  */
 class Elements
 {
@@ -24,7 +27,7 @@ class Elements
 
     protected $openTagHolder;
 
-       /**
+    /**
      * Create html input element.
      *
      * @param $key
@@ -58,7 +61,7 @@ class Elements
     }
 
     /**
-     * Create a custom html element.
+     * Create a custom element.
      * <code>
      * ->addElement('custom', 'dl', ['name' => '<span style="color:red;">Custom Tag</span>',)
      * </code>.
@@ -120,6 +123,8 @@ class Elements
     }
 
     /**
+     * Create a label element form form.
+     *
      * @param $key
      * @param $val
      *
@@ -135,6 +140,8 @@ class Elements
     }
 
     /**
+     * Create a html element.
+     *
      * @param       $key
      * @param       $attributes
      * @param array $extra
@@ -146,21 +153,43 @@ class Elements
     {
         $value = (isset($extra['value'])) ? $extra['value'] : $key;
         $type = (isset($extra['type'])) ? $extra['type'] : $key;
+        list($elClass, $attributes) = $this->highlightErrorElement($key, $attributes);
 
+        $val = '';
         if ($hasCloseTag) {
+
+            if (is_object($this->entity)) {
+
+                if (method_exists($this->entity, 'get'.Inflector::camelize($key))) {
+                    $val = $this->entity->{'get'.Inflector::camelize($key)}();
+                } else if (property_exists($this->entity, $key)) {
+                    $property = (new \ReflectionClass($this->entity))->getProperty($key);
+                    if ($property->isPublic()) {
+                        $val = $property->getValue();
+                    }
+                } else {
+                    $val = $this->entity->{$key};
+                }
+            }
+
+            $val = (!isset($attributes['value'])) ? (!empty($val)) ? 'value="'.$val.'"' : ''  : '';
+
             $this->elements[static::$formHolder[static::$formName]][$key] =
-                "<$type name='".$key."' ".$this->attributes($attributes).' />'.PHP_EOL;
+                "<$type name='".$key."' $val ".$this->attributes($attributes). ' '.$elClass.' />'.PHP_EOL;
 
             return $this;
         }
 
         $this->elements[static::$formHolder[static::$formName]][$key] =
-            "<$type for='".$key."' ".$this->attributes($attributes).'>'.$value."</$type>".PHP_EOL;
+            "<$type for='".$key."' ".$this->attributes($attributes). ' '.$elClass.' >'.$value."</$type>".PHP_EOL;
+
 
         return $this;
     }
 
     /**
+     * Create textarea element.
+     *
      * @param $key
      * @param $val
      *
@@ -169,18 +198,17 @@ class Elements
     protected function textarea($key, $val)
     {
         $value = null;
-        $value = $val['value'];
+        $value = isset($val['value']) ? $val['value'] : '' ;
         unset($val['value']);
 
-        $extra = [
-            'type'  => strtolower(__FUNCTION__),
-            'value' => $value,
-        ];
+        $extra = ['type'  => 'textarea', 'value' => $value];
 
         return $this->composeElement($key, $val, $extra);
     }
 
     /**
+     * Create a select box.
+     *
      * @param $key
      * @param $params
      *
@@ -198,14 +226,16 @@ class Elements
             unset($params['selected']);
         }
 
-        $select .= '<'.strtolower(__FUNCTION__)." name='".$key."' ".$this->attributes($params).'>'.PHP_EOL;
+        list($elClass, $params) = $this->highlightErrorElement($key, $params);
+
+        $select .= '<select'." name='".$key."' ".$this->attributes($params).' '.$elClass.'>'.PHP_EOL;
 
         /*
          | Build select box options and return as string
          |
          */
         $select .= $this->getSelectOptions($options, $selected);
-        $select .= '</'.strtolower(__FUNCTION__).'>'.PHP_EOL;
+        $select .= '</select>'.PHP_EOL;
 
         $this->elements[static::$formHolder[static::$formName]][$key] = $select;
 
@@ -213,9 +243,10 @@ class Elements
     }
 
     /**
+     * Returns select box option elements.
+     *
      * @param $options
      * @param $selected
-     *
      * @return string
      */
     private function getSelectOptions($options, $selected)
@@ -231,8 +262,25 @@ class Elements
     }
 
     /**
-     * @param $attributes
+     * Create date time local box.
      *
+     * @param $key
+     * @param $attributes
+     * @return Elements
+     */
+    protected function dateTimeLocal($key, $attributes)
+    {
+        if (isset($attributes['value']) && $attributes['value'] instanceof \DateTime) {
+            $attributes['value'] = $attributes['value']->format('Y-m-d H:m:s');
+        }
+
+        return $this->composeElement($key, $attributes, ['type' => 'input'], true);
+    }
+
+    /**
+     * Returns html element attributes as string.
+     *
+     * @param $attributes
      * @return string
      */
     protected function attributes($attributes)
@@ -240,9 +288,60 @@ class Elements
         $elementStr = '';
 
         foreach ($attributes as $key => $value) {
-            $elementStr .= "{$key}='{$value}' ";
+
+             $elementStr .= ($key !== 0) ? "{$key}='{$value}' " : $value;
+
         }
 
         return $elementStr;
+    }
+
+    /**
+     * Select box options for all 12 months.
+     *
+     * @param $name
+     * @return Elements
+     */
+    public function selectMonth($name)
+    {
+        $options = [
+            "1" => "January",
+            "2" => "February",
+            "3" => "March",
+            "4" => "April",
+            "5" => "May",
+            "6" => "June",
+            "7" => "July",
+            "8" => "August",
+            "9" => "September",
+            "10" => "October",
+            "11" => "November",
+            "12" => "December",
+        ];
+
+        return $this->select($name, $options);
+    }
+
+    /**
+     * Highlight element which is failed validation.
+     *
+     * @param $key
+     * @param $attributes
+     * @return array
+     */
+    protected function highlightErrorElement($key, $attributes)
+    {
+        $elClass = '';
+        if (
+            $this->validator instanceof ValidatorInterface &&
+            $this->validator->hasError($key)
+        ) {
+
+            preg_match_all("#class='([^\s]+)'#", $this->attributes($attributes), $matches);
+            $elClass = "class='".implode(' ', array_merge([$this->errorInputClass], $matches[1]))."'";
+            unset($attributes['class']);
+        }
+
+        return [$elClass, $attributes];
     }
 }

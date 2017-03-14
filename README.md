@@ -14,12 +14,9 @@ You will find several eye catching features into Cygnite Framework.
 ##Requirements
 -----------------------
 
-The following versions of PHP are supported by this version (2.x).
+The following versions of PHP are supported by this version.
 
-- PHP 5.4
-- PHP 5.5
-- PHP 5.6
-- PHP 7.0
+- PHP 7.0 and above
 - HHVM
 
 ### Key Features -
@@ -31,7 +28,7 @@ The following versions of PHP are supported by this version (2.x).
 4. Cyrus Lightweight ORM.
 5. As Simple For Begginer As Well As For Advance Developers.
 6. RESTFul Routing, Events, Controllers Helps You To Build Powerful API.
-7. Powerful IoC Container, HTTP Requests/Responses, Middlewares, Events, Services, Tracy Exception Handler etc. 
+7. Powerful IoC Container, HTTP Requests/Responses, Middlewares, Events, Bootstrappers, Services, Tracy Exception Handler etc. 
 8. Integrated Third Party Payment Gateway, Social Authentication Libraries (Omnipay, Stripe, SocialOAuth etc.)
 9. Use Plain PHP Layout or Twig Template Engine.
 10. Use Classic Controllers, Service Controllers or HMVC Modules For Building Modular Application.
@@ -49,4 +46,4 @@ http://www.cygniteframework.com/
 ###License
 --------------
 
-The Cygnite framework is open-sourced software licensed under the [MIT license](http://opensource.org/licenses/MIT).
+The Cygnite Framework is open-sourced software licensed under the [MIT license](http://opensource.org/licenses/MIT).

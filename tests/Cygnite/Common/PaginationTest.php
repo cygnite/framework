@@ -1,28 +1,31 @@
 <?php
-
-use Cygnite\Base\Router\Router;
+use PHPUnit\Framework\TestCase;
 use Cygnite\Common\Pagination;
 use Cygnite\Common\UrlManager\Url;
-use Cygnite\Foundation\Application;
+use Cygnite\Container\Container;
+use Cygnite\Tests\Container\ContainerDependency;
 
-class PaginationTest extends PHPUnit_Framework_TestCase
+class PaginationTest extends TestCase
 {
-    private $app;
+    private $container;
 
     public function setUp()
     {
-        $this->app = Application::instance();
-        $this->app['url'] = new \Cygnite\Common\UrlManager\Url();
-        $this->app['request'] = \Cygnite\Http\Requests\Request::createFromGlobals();
-        $this->app['router'] = new \Cygnite\Base\Router\Router($this->app['request']);
-        $this->app['router']->setApplication($this->app);
-        $this->app['url']->setApplication($this->app);
+        $containerDependency = new ContainerDependency();
+        $this->container = new Container(
+            $containerDependency->getInjector(),
+            $containerDependency->getDefinitiions(),
+            $containerDependency->getControllerNamespace()
+        );
 
-        $this->app['request']->server->add('HTTP_HOST', 'localhost');
-        $this->app['request']->server->add('REQUEST_URI', '/');
-/*
-        $app = Application::instance();
-        $app['router'] = new Router;*/
+        $this->container['request'] = \Cygnite\Http\Requests\Request::createFromGlobals();
+        $this->container['router'] = $this->container->make(\Cygnite\Router\Router::class);
+        $this->container['router']->setContainer($this->container);
+        $this->container['router']->setRequest($this->container['request']);
+        $this->url = new \Cygnite\Common\UrlManager\Url(new \Cygnite\Common\UrlManager\Manager($this->container));
+
+        $this->container['request']->server->add('HTTP_HOST', 'localhost');
+        $this->container['request']->server->add('REQUEST_URI', '/');
         Url::setBase('/cygnite/index.php/user');
     }
 

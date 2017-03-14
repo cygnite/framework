@@ -1,8 +1,8 @@
 <?php
-
+use PHPUnit\Framework\TestCase;
 use Cygnite\Database\Configure;
 
-class ConnectionTest extends PHPUnit_Framework_TestCase
+class ConnectionTest extends TestCase
 {
     public function setUp()
     {
@@ -25,7 +25,7 @@ class ConnectionTest extends PHPUnit_Framework_TestCase
 
     public function testMySqlPdoConnection()
     {
-        $connector = $this->getMock('Cygnite\Database\Connections\MySql', ['create'], [Configure::$config['db']]);
+        $connector = $this->getMockBuilder('Cygnite\Database\Connections\MySql')->setConstructorArgs([Configure::$config['db']])->setMethods(['create'])->getMock();
         $connector->expects($this->once())->method('create')->will($this->returnValue('PDO'));
 
         $this->assertInstanceOf('Cygnite\Database\Connections\MySql', $connector);

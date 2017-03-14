@@ -3,18 +3,19 @@
 namespace Cygnite\Foundation;
 
 use Cygnite\Container\ContainerAwareInterface;
+use Cygnite\Http\Requests\Request;
 
 /**
  * interface ApplicationInterface.
  */
-interface ApplicationInterface extends ContainerAwareInterface
+interface ApplicationInterface
 {
     /**
      * Returns a Instance of Application either as Closure
      * or static instance.
      *
-     * @param Closure $callback
-     * @param array   $argument
+     * @param \Closure $callback
+     * @param array $argument
      *
      * @return Application
      */
@@ -24,31 +25,17 @@ interface ApplicationInterface extends ContainerAwareInterface
      * Create an instance of the class and return it.
      *
      * @param $class
-     *
+     * @param array $arguments
      * @return mixed
      */
-    public function compose($class, $arguments = []);
+    public function compose(string $class, array $arguments = []);
 
     /**
-     * Service Closure callback.
+     * Resolve namespace via container.
      *
-     * @param callable $callback
-     *
-     * @throws \Exception
-     *
-     * @return mixed
+     * return @object
      */
-    public static function service(\Closure $callback);
-
-    /**
-     * Override parent method.
-     *
-     * @param $key
-     * @param $value
-     *
-     * @return $this
-     */
-    public function set($key, $value);
+    public function resolve(string $class, array $arguments = []);
 
     /**
      * Set language to the translator.
@@ -62,9 +49,10 @@ interface ApplicationInterface extends ContainerAwareInterface
     /**
      * Set all configurations and boot application.
      *
+     * @param \Cygnite\Http\Requests\Request $request
      * @return $this
      */
-    public function bootApplication($request);
+    public function bootApplication(Request $request);
 
     /**
      * We will trigger after booting application event if it is
@@ -98,5 +86,5 @@ interface ApplicationInterface extends ContainerAwareInterface
      *
      * @return void
      */
-    public function abort($code, $message = '', array $headers = []);
+    public function abort(int $code, string $message = '', array $headers = []);
 }

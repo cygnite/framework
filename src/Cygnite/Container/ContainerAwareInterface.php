@@ -19,6 +19,15 @@ namespace Cygnite\Container;
 interface ContainerAwareInterface
 {
     /**
+     * Set value to container.
+     *
+     * @param $key
+     * @param $instance
+     * @return ContainerAwareInterface
+     */
+    public function set($key, $instance) : ContainerAwareInterface;
+    
+    /**
      * Returns an entry of the container by its name.
      *
      * @param string $name Name of the entry to look for.
@@ -43,13 +52,13 @@ interface ContainerAwareInterface
      * Resolve all dependencies of your class and return instance of
      * your class.
      *
-     * @param $class
-     *
-     * @throws \Cygnite\Container\Exceptions\ContainerException
+     * @param string $class
+     * @param array $arguments
+     * @internal param $ |string $class
      *
      * @return mixed
      */
-    public function make($class, $arguments = []);
+    public function make(string $class, array $arguments = []);
 
     /**
      * Resolve the class. We will create and return instance if already
@@ -70,7 +79,7 @@ interface ContainerAwareInterface
      *
      * @return mixed
      */
-    public function singleton($key, $callback = null);
+    public function singleton(string $name, callable $callback = null);
 
     /**
      * Reference
@@ -85,22 +94,20 @@ interface ContainerAwareInterface
     public function share(\Closure $callable);
 
     /**
-     * @param          $key
+     * @param string   $key
      * @param callable $callable
      *
      * @return mixed
      */
-    public function extend($key, \Closure $callable);
+    public function extend(string $key, \Closure $callable);
 
     /**
      * Create new instance.
      *
      * @param       $class
      * @param array $arguments
-     *
      * @throws Exceptions\ContainerException
-     *
      * @return mixed
      */
-    public function makeInstance($class, $arguments = []);
+    public function makeInstance(string $class, $arguments = []);
 }

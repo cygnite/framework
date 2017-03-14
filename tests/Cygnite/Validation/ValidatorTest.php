@@ -1,9 +1,9 @@
 <?php
-
+use PHPUnit\Framework\TestCase;
 use Cygnite\Common\Input\Input;
 use Cygnite\Validation\Validator;
 
-class ValidatorTest extends PHPUnit_Framework_TestCase
+class ValidatorTest extends TestCase
 {
     public function testValidatorInstance()
     {
@@ -22,9 +22,9 @@ class ValidatorTest extends PHPUnit_Framework_TestCase
      */
     public function testInputExceptionThrownOnIncorrectParameterPassed()
     {
-        $input = Input::make();
+        $request = \Cygnite\Http\Requests\Request::createFromGlobals();
 
-        $v = Validator::create($input->post(), function ($v) {
+        $v = Validator::create($request->post->all(), function ($v) {
             $v->addRule('foo', 'required|min:3|max:5')
               ->addRule('bar', 'required|is_int')
               ->addRule('something', 'phone|is_string')

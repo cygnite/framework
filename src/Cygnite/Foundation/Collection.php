@@ -10,11 +10,11 @@
 
 namespace Cygnite\Foundation;
 
-use ArrayAccess;
-use BadMethodCallException;
 use Countable;
-use IteratorAggregate;
+use ArrayAccess;
 use Serializable;
+use IteratorAggregate;
+use BadMethodCallException;
 
 class Collection implements Countable, IteratorAggregate, ArrayAccess, Serializable
 {
@@ -41,10 +41,9 @@ class Collection implements Countable, IteratorAggregate, ArrayAccess, Serializa
      * Create a new collection instance with data.
      *
      * @param mixed $data
-     *
      * @return static
      */
-    public static function create(array $data = [])
+    public static function create(array $data = []) : Collection
     {
         return new static($data);
     }
@@ -64,7 +63,7 @@ class Collection implements Countable, IteratorAggregate, ArrayAccess, Serializa
      *
      * @return array
      */
-    public function getData()
+    public function getData() : array
     {
         return $this->data;
     }
@@ -77,7 +76,7 @@ class Collection implements Countable, IteratorAggregate, ArrayAccess, Serializa
      *
      * @return $this
      */
-    public function add($name, $value)
+    public function add(string $name, $value)
     {
         if (is_array($name)) {
             foreach ($name as $key => $value) {
@@ -112,7 +111,7 @@ class Collection implements Countable, IteratorAggregate, ArrayAccess, Serializa
      *
      * @return array The old array
      */
-    public function exchangeArray($array)
+    public function exchangeArray(array $array) : array
     {
         $oldValues = $this->data;
         $this->data = $array;
@@ -125,7 +124,7 @@ class Collection implements Countable, IteratorAggregate, ArrayAccess, Serializa
      *
      * @return array
      */
-    public function all()
+    public function all() : array
     {
         return $this->getData();
     }
@@ -135,7 +134,7 @@ class Collection implements Countable, IteratorAggregate, ArrayAccess, Serializa
      *
      * @return array
      */
-    public function asArray()
+    public function asArray() : array
     {
         return $this->getData();
     }
@@ -155,7 +154,7 @@ class Collection implements Countable, IteratorAggregate, ArrayAccess, Serializa
      *
      * @return int
      */
-    public function count()
+    public function count() : int
     {
         return count($this->data);
     }
@@ -166,7 +165,7 @@ class Collection implements Countable, IteratorAggregate, ArrayAccess, Serializa
      *
      * @return \ArrayIterator
      */
-    public function getIterator()
+    public function getIterator() : \ArrayIterator
     {
         return new \ArrayIterator($this->data);
     }
@@ -178,7 +177,7 @@ class Collection implements Countable, IteratorAggregate, ArrayAccess, Serializa
      *
      * @return bool
      */
-    public function offsetExists($offset)
+    public function offsetExists($offset) : bool
     {
         return isset($this->data[$offset]);
     }
@@ -246,10 +245,9 @@ class Collection implements Countable, IteratorAggregate, ArrayAccess, Serializa
      * Filter over array element.
      *
      * @param \Closure|null $callback
-     *
-     * @return static
+     * @return Collection
      */
-    public function filter(\Closure $callback = null)
+    public function filter(\Closure $callback = null) : Collection
     {
         if ($callback) {
             return static::create(array_filter($this->data, $callback));
@@ -261,19 +259,20 @@ class Collection implements Countable, IteratorAggregate, ArrayAccess, Serializa
     /**
      * Flip the array elements in the collection.
      *
-     * @return static
+     * @return Collection
      */
-    public function flip()
+    public function flip() : Collection
     {
         return static::create(array_flip($this->data));
     }
 
     /**
-     * @param $key
+     * Remove the item from collection.
      *
-     * @return $this
+     * @param $key
+     * @return Collection
      */
-    public function remove($key)
+    public function remove(string $key) : Collection
     {
         $this->offsetUnset($key);
 
@@ -288,7 +287,7 @@ class Collection implements Countable, IteratorAggregate, ArrayAccess, Serializa
      *
      * @return mixed
      */
-    public function get($key, $default = null)
+    public function get(string $key, $default = null)
     {
         if ($this->has($key)) {
             return $this->data[$key];
@@ -300,13 +299,18 @@ class Collection implements Countable, IteratorAggregate, ArrayAccess, Serializa
     /**
      * Apply callback over each data element.
      *
-     * @param \Closure $callback
-     *
-     * @return $this
+     * Reference from Laravel Collection.
+     * @link https://github.com/laravel/framework/blob/5.4/src/Illuminate/Support/Collection.php
+     * @param callable $callback
+     * @return Collection
      */
-    public function each(\Closure $callback)
+    public function each(callable $callback) : Collection
     {
-        array_map($callback, $this->data);
+        foreach ($this->data as $key => $item) {
+            if ($callback($item, $key) === false) {
+                break;
+            }
+        }
 
         return $this;
     }
@@ -314,21 +318,30 @@ class Collection implements Countable, IteratorAggregate, ArrayAccess, Serializa
     /**
      * Get keys from Collection object.
      *
-     * @return static keys
+     * @return Collection keys
      */
-    public function keys()
+    public function keys() : Collection
     {
         return static::create(array_keys($this->data));
+    }
+
+    /**
+     * Return collection instance of array values.
+     *
+     * @return Collection
+     */
+    public function values() : Collection
+    {
+        return static::create(array_values($this->data));
     }
 
     /**
      * Map array elements and return as Collection object.
      *
      * @param \Closure $callback
-     *
-     * @return static
+     * @return Collection
      */
-    public function map(\Closure $callback)
+    public function map(\Closure $callback) : Collection
     {
         $keys = array_keys($this->data);
         $values = array_map($callback, $this->data, $keys);
@@ -340,36 +353,37 @@ class Collection implements Countable, IteratorAggregate, ArrayAccess, Serializa
      * Merge the collection with the given array.
      *
      * @param $data
-     *
-     * @return static
+     * @return Collection
      */
-    public function merge($data)
+    public function merge($data) : Collection
     {
         return static::create(array_merge($this->data, $this->convertToArray($data)));
     }
 
     /**
      * Removes duplicate values from an array.
-     *
-     * @return static
+     * @return Collection
      */
-    public function unique()
+    public function unique() : Collection
     {
         return static::create(array_unique($this->data));
     }
 
     /**
      * Sort each element with callback.
+     * We will sort using ussort if callback given otherwise
+     * we will sort the original collection using arsort.
      *
+     * @reference https://github.com/laravel/framework/blob/5.4/src/Illuminate/Support/Collection.php
      * @param callable $callback
-     *
-     * @return $this
+     * @return Collection
      */
-    public function sort(\Closure $callback)
+    public function sort(callable $callback = null) : Collection
     {
-        uasort($this->data, $callback);
+        $data = $this->data;
+        !is_null($callback) ? uasort($data, $callback) : asort($data);
 
-        return $this;
+        return static::create($data);
     }
 
     /**
@@ -384,13 +398,16 @@ class Collection implements Countable, IteratorAggregate, ArrayAccess, Serializa
     }
 
     /**
-     *  Prepend one or more elements to the beginning of an array Collection.
+     * Prepend one or more elements to the beginning of an array Collection.
      *
      * @param $element
+     * @return $this
      */
     public function prepend($element)
     {
         array_unshift($this->data, $element);
+
+        return $this;
     }
 
     /**
@@ -430,9 +447,9 @@ class Collection implements Countable, IteratorAggregate, ArrayAccess, Serializa
     /**
      * Reverse array elements.
      *
-     * @return static
+     * @return Collection
      */
-    public function reverse()
+    public function reverse() : Collection
     {
         return static::create(array_reverse($this->data));
     }
@@ -455,12 +472,11 @@ class Collection implements Countable, IteratorAggregate, ArrayAccess, Serializa
      * Convert Collection Object as Array.
      *
      * @param $data
-     *
-     * @return array
+     * @return mixed
      */
     public function convertToArray($data)
     {
-        if ($data instanceof self) {
+        if ($data instanceof Collection) {
             $data = $data->all();
         }
 
@@ -474,7 +490,7 @@ class Collection implements Countable, IteratorAggregate, ArrayAccess, Serializa
      *
      * @return \CachingIterator
      */
-    public function getCachingIterator($flags = \CachingIterator::CALL_TOSTRING)
+    public function getCachingIterator($flags = \CachingIterator::CALL_TOSTRING) : \CachingIterator
     {
         return new \CachingIterator($this->getIterator(), $flags);
     }
@@ -486,7 +502,7 @@ class Collection implements Countable, IteratorAggregate, ArrayAccess, Serializa
      *
      * @return bool
      */
-    public function has($key)
+    public function has(string $key) : bool
     {
         return $this->offsetExists($key);
     }

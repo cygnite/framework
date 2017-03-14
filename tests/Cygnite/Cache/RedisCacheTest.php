@@ -1,7 +1,7 @@
 <?php
+use PHPUnit\Framework\TestCase;
 
-
-class RedisCacheTest extends PHPUnit_Framework_TestCase
+class RedisCacheTest extends TestCase
 {
     public function testGetMethodReturnNull()
     {
@@ -9,8 +9,7 @@ class RedisCacheTest extends PHPUnit_Framework_TestCase
             'connection' => 'default',
         ];
 
-        $stdClass = $this->getMock('StdClass', ['get']);
-
+        $stdClass = $this->getMockBuilder('StdClass')->setMethods(['get'])->getMock();
         $redisConnnector = $this->getMockBuilder('\Cygnite\Cache\Storage\RedisConnector')
             ->setConstructorArgs([$stdClass, $config])
             ->setMethods(['get'])
@@ -28,11 +27,11 @@ class RedisCacheTest extends PHPUnit_Framework_TestCase
                         'connection' => 'default',
         ];
 
-        $stdClass = $this->getMock('StdClass', ['get']);
+        $stdClass = $this->getMockBuilder('StdClass')->setMethods(['get'])->getMock();
         $redisConnnector = $this->getMockBuilder('\Cygnite\Cache\Storage\RedisConnector')
             ->setConstructorArgs([$stdClass, $config])
             ->getMock();
-        $stub = $this->getMock('Cygnite\Cache\Storage\Redis', ['get', 'setConnection']);
+        $stub = $this->getMockBuilder('Cygnite\Cache\Storage\Redis')->setMethods(['get', 'setConnection'])->getMock();
         $stub->expects($this->any())->method('get')->will($this->returnValue('foo'));
         $this->assertEquals('foo', $stub->get('foo'));
         $this->assertNotNull($stub->get('foo'));

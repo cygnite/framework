@@ -10,6 +10,7 @@ if (defined('CF_SYSTEM') == false) {
 }
 /**
  * Class Config
+ *
  * This class used to load all configurations files in order to
  * quick access of user request.
  */
@@ -17,7 +18,7 @@ class Config extends StaticResolver
 {
     public static $config = [];
 
-    public static $paths = [];
+    public static $path = [];
 
     public $files = [
         'global.config'   => 'application',
@@ -29,14 +30,25 @@ class Config extends StaticResolver
     public $default = 'config.items';
 
     /**
+     * Set the Configuration path and customizable files array
+     *
+     * @param $path
+     * @param array $files
+     */
+    protected function init(string $path, array $files = [])
+    {
+        static::$path = $path;
+        $this->addConfigFile($files);
+        $this->load();
+    }
+
+    /**
      *  Get the configuration by index.
      *
      * @param      $key
      * @param bool $value
-     *
      * @throws \InvalidArgumentException
      * @throws \Exception
-     *
      * @return mixed|null
      */
     protected function get($key, $value = false)
@@ -46,7 +58,7 @@ class Config extends StaticResolver
         }
 
         $config = [];
-        $config = self::$config;
+        $config = static::$config;
 
         if (empty($config)) {
             throw new \Exception('Config stack is empty!');
@@ -77,27 +89,45 @@ class Config extends StaticResolver
     /**
      * Set configuration parameter.
      *
-     * @param       $key
+     * @param string $key
      * @param array $value
      */
     protected function set($key, $value = [])
     {
-        self::$config[$key] = $value;
+        static::$config[$key] = $value;
     }
 
     /**
-     * @param $paths
+     * Return all Config variables
      *
+     * @return array
+     */
+    protected function all()
+    {
+        return static::$config;
+    }
+
+    /**
+     * Set the configuration files path
+     *
+     * @param $path
      * @return $this
      */
-    protected function setPaths($paths)
+    protected function setPath(string $path) : Config
     {
-        static::$paths = $paths;
+        static::$path = $path;
 
         return $this;
     }
 
-    protected function addConfigFile($array)
+    /**
+     * Add additional files into array, Config will
+     * load additional config files at boot time
+     *
+     * @param $array
+     * @return $this
+     */
+    protected function addConfigFile(array $array) : Config
     {
         $this->files = array_merge($this->files, $array);
 
@@ -105,11 +135,13 @@ class Config extends StaticResolver
     }
 
     /**
-     * @return array
+     * Return the application configuration path
+     *
+     * @return string
      */
-    protected function getPaths()
+    protected function getPath() : string
     {
-        return isset(static::$paths) ? static::$paths : [];
+        return isset(static::$path) ? static::$path : [];
     }
 
     /*
@@ -128,24 +160,19 @@ class Config extends StaticResolver
      *
      * @return array
      */
-    private function importConfigurations()
+    protected function importConfigurations()
     {
-        $configPath = '';
-        $configPath = static::$paths['app.path'].DS.toPath(static::$paths['app.config']['directory']);
-        $files = [];
-        $files = array_merge($this->files, static::$paths['app.config']['files']);
-
-        foreach ($files as $key => $file) {
-            if (!file_exists($configPath.$file.EXT)) {
-                throw new \Exception("File doesn't exists in the path ".$configPath.$file.EXT);
+        foreach ($this->files as $key => $file) {
+            if (!file_exists(static::$path.DS.$file.'.php')) {
+                throw new \Exception("File doesn't exists in the path ".static::$path.DS.$file.'.php');
             }
 
             /*
             | We will include configuration file into array only
             | for the first time
              */
-            if (!isset(self::$config[$key])) {
-                self::set($key, include $configPath.$file.EXT);
+            if (!isset(static::$config[$key])) {
+                static::set($key, include static::$path.DS.$file.'.php');
             }
         }
     }

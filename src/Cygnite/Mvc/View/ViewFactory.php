@@ -1,62 +1,29 @@
 <?php
-
 namespace Cygnite\Mvc\View;
+
+use Cygnite\Container\Container;
 
 if (!defined('CF_SYSTEM')) {
     exit('External script access not allowed');
 }
 
-abstract class ViewFactory
+/**
+ * Class ViewFactory
+ *
+ * @package Cygnite\Mvc\View
+ */
+class ViewFactory
 {
-    public static $view;
-
-    private static $app;
-
-    public static function setApplication($app)
-    {
-        static::$app = $app;
-    }
-
-    public static function app()
-    {
-        return static::$app;
-    }
-
     /**
+     * Create view and set container object
+     *
+     * @param string $class
+     * @param Container $container
+     * @param callable $callback
      * @return mixed
      */
-    public static function make()
+    public static function make(string $class, Container $container, callable $callback)
     {
-        $app = self::app();
-        //var_dump(get_class($app));exit;
-        if (is_null(static::$view)) {
-            //static::$view = $app->resolve('cygnite.mvc.view.view');
-            static::$view = $app->resolve('cygnite.mvc.view.view');
-        }
-
-        static::$view->setContainer($app);
-
-        return static::$view;
-    }
-
-    /**
-     * Create view and render it. This is alias of render method.
-     *
-     * <code>
-     * View::create('view-name', $data);
-     * </code>
-     *
-     * @param       $view
-     * @param array $data
-     *
-     * @return mixed
-     */
-    public static function create($view = null, array $data = [])
-    {
-        if (is_null($view)) {
-            return static::make();
-        }
-
-        return static::make()->render($view, $data);
+        return $callback($container->make($class));
     }
 }

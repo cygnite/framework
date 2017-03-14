@@ -1,35 +1,46 @@
 <?php
-
 use Cygnite\Mvc\View\Widget;
+use PHPUnit\Framework\TestCase;
+use Cygnite\Mvc\View\Output;
+use Cygnite\Bootstrappers\Paths;
 use Mockery as m;
 
-class WidgetTest extends PHPUnit_Framework_TestCase
+class WidgetTest extends TestCase
 {
-    public function testWidgetInstance()
-    {
-        $widget = new Widget('foo_bar', []);
-        $widget->setModule(false);
+    private $widget;
 
-        $widgetInstance = Widget::make('foo_bar', [], function ($w) {
-            return $w;
+    public function setUp()
+    {
+        $this->widget = new Widget(new Paths([
+            "root" => realpath(__DIR__),
+            "src" => realpath(__DIR__),
+            "public" => realpath(__DIR__ . "/../public/"),
+            "app.namespace" => "Apps",
+            'app.path' => realpath(__DIR__)
+        ]), new Output());
+    }
+
+    public function testMakeMethodReturnsString()
+    {
+        $this->widget->setModule(false);
+        $content = $this->widget->make('foo_bar', [], function ($w) {
+            return 'Hello World!';
         });
 
-        $this->assertEquals($widget, $widgetInstance);
+        $this->assertEquals("Hello World!", $content);
     }
 
     public function testDataSetOnWidgetView()
     {
-        $widget = Widget::make('foo_bar', ['foo' => 'bar', 'bar' => 'baz'], function ($w) {
+        $widget = $this->widget->make('fixtures:hello', ['foo' => 'bar', 'bar' => 'baz'], function ($w) {
             return $w;
         });
 
         $this->assertEquals('bar', $widget['foo']);
         $this->assertEquals('baz', $widget['bar']);
         $this->assertEquals(['foo' => 'bar', 'bar' => 'baz'], $widget->getData());
-
-        $widget = Widget::make('foo_bar', [], function ($w) {
+        $widget = $this->widget->make('foo_bar', [], function ($w) {
             $w['var'] = 'user';
-
             return $w;
         });
 

@@ -2,6 +2,8 @@
 
 namespace Cygnite\FormBuilder;
 
+use Cygnite\Http\Requests\Request;
+
 if (!defined('CF_SYSTEM')) {
     exit('No External script access allowed');
 }
@@ -18,16 +20,21 @@ interface FormInterface
      *
      * @return mixed
      */
-    public static function make(\Closure $callback = null);
+    public static function make(\Closure $callback = null) : FormInterface;
 
     /**
-     * Alias method of make().
+     * Bind a model or entity object to Form.
      *
-     * @param Closure $callback
-     *
-     * @return mixed
+     * @param $entity
      */
-    public static function instance(\Closure $callback = null);
+    public function bind($entity) : FormInterface;
+
+    /**
+     * Set Http Request object.
+     *
+     * @param $request
+     */
+    public function setRequest(Request $request) : FormInterface;
 
     /**
      * @return mixed
@@ -41,14 +48,14 @@ interface FormInterface
      *
      * @return mixed
      */
-    public function addElement($type, $key, $values = []);
+    public function addElement(string $type, string $key, array $values = []) : FormInterface;
 
     /**
      * @param array $elements
      *
      * @return mixed
      */
-    public function addElements($elements = []);
+    public function addElements(array $elements = []) : FormInterface;
 
     /**
      * Get the html form.
@@ -60,5 +67,5 @@ interface FormInterface
     /**
      * If you wish to get only html elements.
      */
-    public function getHtmlElements();
+    public function getHtmlElements() : string;
 }

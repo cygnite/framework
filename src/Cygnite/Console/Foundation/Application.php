@@ -54,7 +54,7 @@ class Application extends SymfonyApplication implements ConsoleApplicationInterf
      */
     public function __construct($cygniteApplication, $version = '')
     {
-        parent::__construct('Cygnite Framework: Console Application', $version);
+        parent::__construct('Cygnite Framework: Craft Console Application', $version);
         $this->cygnite = $cygniteApplication;
         /*
          | Sets whether to automatically exit after a command execution or not.
@@ -101,7 +101,16 @@ class Application extends SymfonyApplication implements ConsoleApplicationInterf
             $command->setCygnite($this->cygnite);
         }
 
-        parent::add($command);
+        return $this->addCommandToParent($command);
+    }
+
+    /**
+     * @param $command
+     * @return null|SymfonyCommand|void
+     */
+    public function addCommandToParent($command)
+    {
+        return parent::add($command);
     }
 
     /**

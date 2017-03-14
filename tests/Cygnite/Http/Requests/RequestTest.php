@@ -1,9 +1,9 @@
 <?php
-
+use PHPUnit\Framework\TestCase;
 use Cygnite\Http\Requests\Request;
 use Cygnite\Http\Requests\RequestHeaderConstants;
 
-class RequestTest extends PHPUnit_Framework_TestCase
+class RequestTest extends TestCase
 {
     private $request;
 
@@ -12,7 +12,7 @@ class RequestTest extends PHPUnit_Framework_TestCase
         $this->request = new Request($_GET, $_POST, $_COOKIE, $_SERVER, $_FILES, $_ENV);
     }
 
-    public function testResponseInstance()
+    public function testRequestInstance()
     {
         $request = Request::createFromGlobals();
         $this->assertInstanceOf('\Cygnite\Http\Requests\Request', $request);
@@ -68,30 +68,37 @@ class RequestTest extends PHPUnit_Framework_TestCase
 
     public function testIfRequestVariableIsSet()
     {
+        $request = Request::createFromGlobals();
         $_GET['foo'] = 'bar';
-        $this->request->query->exchangeArray($_GET);
-        $this->assertTrue($this->request->query->has('foo'));
+        $request->query->exchangeArray($_GET);
+        $this->assertTrue($request->query->has('foo'));
 
         $_POST['foo'] = 'bar';
-        $this->request->getPost()->exchangeArray($_POST);
-        $this->assertTrue($this->request->post->has('foo'));
+        $request->getPost()->exchangeArray($_POST);
+        $this->assertTrue($request->post->has('foo'));
     }
 
     public function testIfGetVariableIsNotSet()
     {
-        //$this->assertFalse($this->request->query->has("foo"));
-        //$this->assertSame(false, $this->request->query->has("foo"));
+        $_GET = [];
+        $request = Request::createFromGlobals();
+
+        $this->assertFalse($request->query->has("foo"));
+        $this->assertSame(false, $request->query->has("foo"));
     }
 
     public function testIfPostVariableIsNotSet()
     {
-        //$this->assertFalse($this->request->post->has("foo"));
-        //$this->assertSame(false, $this->request->post->has("foo"));
+        $_POST = [];
+        $request = Request::createFromGlobals();
+        $this->assertFalse($request->post->has("foo"));
+        $this->assertSame(false, $request->post->has("foo"));
     }
 
     public function testIfPatchVariableIsNotSet()
     {
-        $this->assertFalse($this->request->patch->has('foo'));
+        $request = Request::createFromGlobals();
+        $this->assertFalse($request->patch->has('foo'));
     }
 
     public function testPathMethod()
@@ -229,6 +236,4 @@ class RequestTest extends PHPUnit_Framework_TestCase
         $delete = Request::create('/url', 'DELETE');
         $this->assertEquals('application/x-www-form-urlencoded', $delete->server->get('CONTENT_TYPE'));
     }
-
-    //public function test
 }

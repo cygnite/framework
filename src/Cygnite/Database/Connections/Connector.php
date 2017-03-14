@@ -111,7 +111,7 @@ class Connector
     {
         return $this->options;
     }
-
+    
     /**
      * Find if exception caused by lost connection.
      *
@@ -132,6 +132,7 @@ class Connector
             'Deadlock found when trying to get lock',
             'server closed the connection unexpectedly',
             'SSL connection has been closed unexpectedly',
+            'Connection lost and no reconnector available.',
         ]);
     }
 }

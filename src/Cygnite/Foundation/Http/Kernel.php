@@ -2,12 +2,15 @@
 
 namespace Cygnite\Foundation\Http;
 
-use Cygnite\Base\Router\Router;
-use Cygnite\Foundation\Application;
-use Cygnite\Http\Responses\Response;
-use Cygnite\Http\Responses\ResponseInterface;
-use Cygnite\Pipeline\Pipeline;
+use Closure;
 use Throwable;
+use Cygnite\Pipeline\Pipeline;
+use Cygnite\Base\Router\Router;
+use Cygnite\Http\Responses\Response;
+use Cygnite\Http\Requests\RequestInterface;
+use Cygnite\Foundation\ApplicationInterface;
+use Cygnite\Http\Responses\ResponseInterface;
+use Cygnite\Container\ContainerAwareInterface;
 
 /**
  * Class Kernel.
@@ -21,54 +24,59 @@ class Kernel implements KernelInterface
      */
     protected $app;
 
+    /**
+     * @var \Cygnite\Container\ContainerInterface
+     */
+    protected $container;
+
     protected $middleware = [];
 
     protected $router;
 
-    private $pipeline;
+    protected $pipeline;
 
     protected $exceptionHandler;
 
     /**
-     * @param $app
+     * Constructor to set Application instance.
+     *
+     * @param $app ApplicationInterface
      * @param null $router
      */
-    public function __construct($app, $router = null)
+    public function __construct(ApplicationInterface $app, $router = null)
     {
         $this->app = $app;
-        $this->exceptionHandler = $app['debugger'];
+        $this->container = $app->getContainer();
+        $this->exceptionHandler = $this->container['debugger'];
         if (!is_null($router)) {
             $this->router = $router;
         }
     }
 
     /**
+     * Set Router and Request instance into Container
+     *
      * @param $router
      * @param $request
      */
-    public function setRouter($router, $request)
+    public function setRouter($request)
     {
-        $this->router = $router;
-        $this->app->set('router', $router);
-        $this->app->set('request', $request);
+        $this->container->set('request', $request);
+        $this->container->make(\Cygnite\Router\Router::class);
+        $this->container->get('router')->setRequest($request);
+        $this->router = $this->container->get('router');
     }
 
     /**
      * Handle the request and dispatch to routes.
      *
      * @param $request
-     *
      * @throws Exception|\Exception
-     *
      * @return array|ResponseInterface|mixed|static
-     *
-     *
-     * @note this function is incomplete, need to enhance
-     * for better exception handling
      */
-    public function handle($request)
+    public function handle($request) : ResponseInterface
     {
-        $this->setRouter($this->app->compose('Cygnite\Base\Router\Router', $request), $request);
+        $this->setRouter($request);
 
         try {
             $response = $this->sendRequestThroughRouter($request);
@@ -79,7 +87,7 @@ class Kernel implements KernelInterface
              *
              */
             if (!$response instanceof ResponseInterface && !is_array($response)) {
-                $r = $this->app->has('response') ? $this->app->get('response') : '';
+                $r = $this->container->has('response') ? $this->container->get('response') : '';
                 $response = Response::make($r);
             }
         } catch (\Exception $e) {
@@ -105,8 +113,7 @@ class Kernel implements KernelInterface
             default:
                 $this->reportException($e);
                 break;
-
-            }
+        }
     }
 
     /**
@@ -120,8 +127,9 @@ class Kernel implements KernelInterface
     }
 
     /**
-     * @param \Exception $e
+     * Render exception.
      *
+     * @param \Exception $e
      * @return mixed
      */
     protected function renderException(\Exception $e)
@@ -133,13 +141,12 @@ class Kernel implements KernelInterface
      * Prepare pipeline requests and send through router.
      *
      * @param $request
-     *
      * @return mixed
      */
     protected function sendRequestThroughRouter($request)
     {
         $this->app->bootApplication($request);
-        $this->pipeline = new Pipeline($this->app);
+        $this->pipeline = new Pipeline($this->container);
 
         return $this->pipeline
             ->send($request)
@@ -149,21 +156,28 @@ class Kernel implements KernelInterface
     }
 
     /**
+     * Return Middleware array stack.
+     *
      * @return array
      * @note Middleware array validation needed
      * Need to be enhanced
      */
-    public function getMiddleware()
+    public function getMiddleware() : array
     {
         return $this->middleware;
     }
 
+    public function registerBootstrappers()
+    {
+    }
+
     /**
-     * @param array $middlewares
+     * Parse Middlewares to pipelines
      *
+     * @param array $middlewares
      * @return array
      */
-    protected function parseMiddlewareToPipelines(array $middlewares)
+    protected function parseMiddlewareToPipelines(array $middlewares) : array
     {
         $pipes = [];
         // check all types and store value into pipes array
@@ -173,7 +187,7 @@ class Kernel implements KernelInterface
             } elseif (string_has($middleware, ':')) {
                 $pipes[] = $middleware;
             } else {
-                $pipes[] = $this->app->make($middleware);
+                $pipes[] = $this->container->make($middleware);
             }
         }
 
@@ -185,10 +199,10 @@ class Kernel implements KernelInterface
      *
      * @return callable
      */
-    protected function dispatchToRouter()
+    protected function dispatchToRouter() : Closure
     {
         return function ($request) {
-            return $this->router->setApplication($this->app)->dispatch($request);
+            return $this->router->setContainer($this->container)->dispatch($request);
         };
     }
 
@@ -196,10 +210,9 @@ class Kernel implements KernelInterface
      * Add middlewares to HTTP application.
      *
      * @param $middleware
-     *
      * @return $this
      */
-    public function addMiddleware($middleware)
+    public function addMiddleware($middleware) : KernelInterface
     {
         if (!is_array($middleware)) {
             $middleware = [$middleware];
@@ -215,9 +228,9 @@ class Kernel implements KernelInterface
      *
      * @return Application
      */
-    public function getApplication()
+    public function getContainer() : ContainerAwareInterface
     {
-        return $this->app;
+        return $this->container;
     }
 
     /**
@@ -228,14 +241,14 @@ class Kernel implements KernelInterface
      */
     public function shutdown($request, $response)
     {
-        $routeMiddlewares = $this->router->getRouteMiddlewares();
+        $routeMiddlewares = $this->router->getMiddlewares();
 
-        $middlewares = array_merge(array_filter([$routeMiddlewares]), $this->middleware);
+        $middlewares = array_merge(array_filter([$routeMiddlewares]), $this->getMiddleware());
 
         foreach ($middlewares as $middleware) {
             list($name, $parameters) = $this->pipeline->parsePipeString($middleware);
 
-            $instance = $this->app->make($name);
+            $instance = $this->container->make($name);
 
             if (method_exists($instance, 'shutdown')) {
                 $instance->shutdown($request, $response);

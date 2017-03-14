@@ -1,9 +1,9 @@
 <?php
-
+use PHPUnit\Framework\TestCase;
 use Cygnite\Common\SessionManager\Native\Session;
 use Cygnite\Helpers\Config;
 
-class NativeSessionTest extends PHPUnit_Framework_TestCase
+class NativeSessionTest extends TestCase
 {
     protected $session;
 
@@ -58,6 +58,7 @@ class NativeSessionTest extends PHPUnit_Framework_TestCase
 
     public function testGetAllItemFromSession()
     {
+        $this->session->set('greet', 'Welcome John!');
         $this->assertArrayHasKey('greet', $this->session->all());
         $this->assertEquals($this->session->get(), $this->session->all());
     }

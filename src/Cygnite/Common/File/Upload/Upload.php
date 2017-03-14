@@ -209,6 +209,12 @@ class Upload implements FileUploadInterface
                 return false;
             }
 
+            if (!is_writable($path)) {
+                $this->error[] = "$path should exists and must be writable.";
+
+                return false;
+            }
+
             try {
                 if (move_uploaded_file($this->fileInfo['file']['tmp_name'], $path) === true) {
                     return true;

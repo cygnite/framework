@@ -1,8 +1,8 @@
 <?php
-
+use PHPUnit\Framework\TestCase;
 use Cygnite\Common\Singleton;
 
-class SingletonTest extends PHPUnit_Framework_TestCase
+class SingletonTest extends TestCase
 {
     public function testSingletonInstance()
     {
@@ -16,7 +16,6 @@ class SingletonTest extends PHPUnit_Framework_TestCase
         $this->assertEquals('SingletonTest', $foo->called_by());
     }
 }
-
 
 class Foo extends Singleton
 {

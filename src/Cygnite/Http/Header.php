@@ -54,7 +54,7 @@ class Header extends Collection
      *
      * @return $this|void
      */
-    public function add($name, $values, $shouldReplace = true)
+    public function add(string $name, $values, $shouldReplace = true)
     {
         $this->set($name, $values, $shouldReplace);
     }
@@ -69,7 +69,7 @@ class Header extends Collection
      *
      * @return mixed|null
      */
-    public function get($name, $default = null, $onlyReturnFirst = true)
+    public function get(string $name, $default = null, $onlyReturnFirst = true)
     {
         if ($this->has($name)) {
             $value = $this->data[$this->normalizeName($name)];
@@ -91,7 +91,7 @@ class Header extends Collection
      *
      * @return bool
      */
-    public function has($name)
+    public function has(string $name) : bool
     {
         return parent::has($this->normalizeName($name));
     }
@@ -101,11 +101,11 @@ class Header extends Collection
      *
      * @param $name
      *
-     * @return $this|void
+     * @return Collection
      */
-    public function remove($name)
+    public function remove(string $name) : Collection
     {
-        parent::remove($this->normalizeName($name));
+        return parent::remove($this->normalizeName($name));
     }
 
     /**
