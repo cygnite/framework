@@ -12,7 +12,6 @@ namespace Cygnite\AssetManager;
 
 use Cygnite\Common\UrlManager\Url;
 use Cygnite\Container\ContainerAwareInterface;
-use Cygnite\Proxy\StaticResolver;
 use InvalidArgumentException;
 
 if (!defined('CF_SYSTEM')) {
