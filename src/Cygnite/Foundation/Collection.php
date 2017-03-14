@@ -299,13 +299,18 @@ class Collection implements Countable, IteratorAggregate, ArrayAccess, Serializa
     /**
      * Apply callback over each data element.
      *
-     * @param \Closure $callback
-     *
+     * Reference from Laravel Collection.
+     * @link https://github.com/laravel/framework/blob/5.4/src/Illuminate/Support/Collection.php
+     * @param callable $callback
      * @return Collection
      */
-    public function each(\Closure $callback) : Collection
+    public function each(callable $callback) : Collection
     {
-        array_map($callback, $this->data);
+        foreach ($this->data as $key => $item) {
+            if ($callback($item, $key) === false) {
+                break;
+            }
+        }
 
         return $this;
     }
@@ -318,6 +323,16 @@ class Collection implements Countable, IteratorAggregate, ArrayAccess, Serializa
     public function keys() : Collection
     {
         return static::create(array_keys($this->data));
+    }
+
+    /**
+     * Return collection instance of array values.
+     *
+     * @return Collection
+     */
+    public function values() : Collection
+    {
+        return static::create(array_values($this->data));
     }
 
     /**
@@ -356,16 +371,19 @@ class Collection implements Countable, IteratorAggregate, ArrayAccess, Serializa
 
     /**
      * Sort each element with callback.
+     * We will sort using ussort if callback given otherwise
+     * we will sort the original collection using arsort.
      *
+     * @reference https://github.com/laravel/framework/blob/5.4/src/Illuminate/Support/Collection.php
      * @param callable $callback
-     *
      * @return Collection
      */
-    public function sort(\Closure $callback) : Collection
+    public function sort(callable $callback = null) : Collection
     {
-        uasort($this->data, $callback);
+        $data = $this->data;
+        !is_null($callback) ? uasort($data, $callback) : asort($data);
 
-        return $this;
+        return static::create($data);
     }
 
     /**
@@ -374,19 +392,22 @@ class Collection implements Countable, IteratorAggregate, ArrayAccess, Serializa
      *
      * @return mixed|null
      */
-    public function shift() : array
+    public function shift()
     {
         return array_shift($this->data);
     }
 
     /**
-     *  Prepend one or more elements to the beginning of an array Collection.
+     * Prepend one or more elements to the beginning of an array Collection.
      *
      * @param $element
+     * @return $this
      */
     public function prepend($element)
     {
         array_unshift($this->data, $element);
+
+        return $this;
     }
 
     /**
@@ -451,10 +472,9 @@ class Collection implements Countable, IteratorAggregate, ArrayAccess, Serializa
      * Convert Collection Object as Array.
      *
      * @param $data
-     *
-     * @return array
+     * @return mixed
      */
-    public function convertToArray($data) : Collection
+    public function convertToArray($data)
     {
         if ($data instanceof Collection) {
             $data = $data->all();
