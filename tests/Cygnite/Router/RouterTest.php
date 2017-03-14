@@ -22,10 +22,12 @@ class RouterTest extends TestCase
 
         $this->container->make(\Cygnite\Router\Router::class);
         $this->router = $this->container->get('router');
-        $this->router->setRequest($this->request = \Cygnite\Http\Requests\Request::createFromGlobals());
+        $this->request = \Cygnite\Http\Requests\Request::createFromGlobals($_GET, $_POST);
         $this->request->server->add('SCRIPT_NAME', '/index.php');
         $this->request->server->add('REQUEST_METHOD', 'GET');
         $this->request->server->add('SERVER_PROTOCOL', 'HTTP/1.1');
+        $this->router->setRequest($this->request);
+
         $this->router->setContainer($this->container);
 
     }
@@ -69,27 +71,30 @@ class RouterTest extends TestCase
 
     public function testPostRequest()
     {
-        $this->router->post('/', function () {
-            echo 'post';
+
+
+        $this->router->post('/post', function () {
+            echo 'post request';
         });
 
         // Test POST REQUEST with Param
         $this->obStart();
+        $this->requestUri('/post');
         $this->requestMethod('POST');
-
         $this->router->run();
-        $this->assertEquals('post', ob_get_contents());
+        $this->assertEquals('post request', ob_get_contents());
         $this->obBufferClean();
     }
 
     public function testPutRequest()
     {
-        $this->router->put('/', function () {
+        $this->router->put('/put', function () {
             echo 'put';
         });
 
         // Test POST REQUEST with Param
         $this->obStart();
+        $this->requestUri('/put');
         $this->requestMethod('PUT');
 
         $this->router->run();
@@ -99,12 +104,13 @@ class RouterTest extends TestCase
 
     public function testPatchRequest()
     {
-        $this->router->patch('/', function () {
+        $this->router->patch('/patch', function () {
             echo 'patch';
         });
 
         // Test POST REQUEST with Param
         $this->obStart();
+        $this->requestUri('/patch');
         $this->requestMethod('PATCH');
 
         $this->router->run();
@@ -114,12 +120,13 @@ class RouterTest extends TestCase
 
     public function testDeleteRequest()
     {
-        $this->router->delete('/', function () {
+        $this->router->delete('/delete', function () {
             echo 'delete';
         });
 
         // Test POST REQUEST with Param
         $this->obStart();
+        $this->requestUri('/delete');
         $this->requestMethod('DELETE');
 
         $this->router->run();

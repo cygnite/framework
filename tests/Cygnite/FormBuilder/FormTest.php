@@ -188,5 +188,14 @@ class FormTest extends TestCase
 
         // It works though But we cannot Test it because it generate random name for Div or Span Element
         // For Example [name='div_2_1224' or name='div_1_1331']
+
+        $this->assertEquals(preg_replace("/\r\n|\r|\n|\t/", '', trim("<form name='contact' method='post' action='http://localhost/cygnite/contact/add' role='form' style='width:500px;margin-top:35px;float:left;' >
+            <div name='div_1_1331' style='border:1px solid red;height:40px;'  />
+            <input name='I am Inside Div 1' class='col-sm-2 control-label' style='width:100%;' type='text'  />
+            </div>
+            <div name='div_2_1224' style='border:1px solid red;height:40px;'  />
+            <input name='I am Inside Div 2' class='col-sm-2 control-label' style='width:100%;' type='text'  />
+            </div>
+            </form>")), $formString);
     }
 }

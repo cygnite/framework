@@ -80,13 +80,16 @@ class RequestTest extends TestCase
 
     public function testIfGetVariableIsNotSet()
     {
+        $_GET = [];
         $request = Request::createFromGlobals();
+
         $this->assertFalse($request->query->has("foo"));
         $this->assertSame(false, $request->query->has("foo"));
     }
 
     public function testIfPostVariableIsNotSet()
     {
+        $_POST = [];
         $request = Request::createFromGlobals();
         $this->assertFalse($request->post->has("foo"));
         $this->assertSame(false, $request->post->has("foo"));

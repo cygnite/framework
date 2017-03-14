@@ -40,6 +40,8 @@ class ContainerTest extends TestCase
         $this->assertEquals('Container', $dependencies->getImplementationContainer());
     }
 
+    /*
+     tests incomplete
     public function testPropertyInjection()
     {
         /*
@@ -50,7 +52,9 @@ class ContainerTest extends TestCase
         show(call_user_func_array([$instance, 'indexAction'], [new TestMethodResolve]));
         show($instance->getApi());exit;
         $this->assertInstanceOf('TestMethodResolve', $instance->getApi());*/
-    }
+    /*
+    }*/
+
 
     public function testClouserResolutionAsObject()
     {
