@@ -164,13 +164,16 @@ abstract class Builder extends SplObjectStorage
     public function propertyInjection($classInstance, $controller)
     {
         $dependencies = $this->getPropertyDefinitionConfig($controller);
+        $controller = "\\\\";
 
         if (array_key_exists($controller, $this->definitions)) {
-            list($reflection, $reflectionClass) = $this->setReflectionClassAttributes($controller);
 
+            list($reflection, $reflectionClass) = $this->setReflectionClassAttributes($controller);
+            
             foreach ($dependencies as $classProperty => $class) {
                 $reflectionArray = [$reflectionClass, $classProperty];
                 list($object, $controllerProp) = $this->checkPropertyAndMakeObject($controller, $class, $reflectionArray);
+                
                 /*
                  | We will check is set{PropertyName}() method exists in class.
                  | If exists we will call the method to set object into it
