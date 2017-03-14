@@ -72,7 +72,7 @@ class FormTest extends TestCase
         $formString = "<form name='contact' method='post' action='http://localhost/cygnite/contact/add' role='form' >
                     <input name='user_name' value='' class='form-control' type='text'  />
                     </form>";
-        $this->assertEquals(preg_replace("/\r\n|\r|\n|\t/", '', trim(preg_replace('/\s+/',' ', $formString))), preg_replace("/\r\n|\r|\n|\t/", '', trim(preg_replace('/\s+/',' ',$form->getForm()))));
+        $this->assertEquals(preg_replace("/\r\n|\r|\n|\t/", '', trim(preg_replace('/\s+/', ' ', $formString))), preg_replace("/\r\n|\r|\n|\t/", '', trim(preg_replace('/\s+/', ' ', $form->getForm()))));
     }
 
 
@@ -116,7 +116,7 @@ class FormTest extends TestCase
                     ->close()
                     ->createForm();
 
-        $formString = preg_replace("/\r\n|\r|\n|\t/", '', trim(preg_replace('/\s+/',' ', "<form name='contact' method='post' action='http://localhost/cygnite/contact/add' role='form' style='width:500px;margin-top:35px;float:left;' >
+        $formString = preg_replace("/\r\n|\r|\n|\t/", '', trim(preg_replace('/\s+/', ' ', "<form name='contact' method='post' action='http://localhost/cygnite/contact/add' role='form' style='width:500px;margin-top:35px;float:left;' >
                         <label for='User Name' class='col-sm-2 control-label' style='width:37.667%;' >User Name</label>
                         <textarea for='description' class='form-control' ></textarea>
                         <input name='photo' value='' class='form-control' type='file'  />
@@ -124,12 +124,12 @@ class FormTest extends TestCase
                         <input name='Male' value='' class='form-control' type='radio'  />
                         </form>")));
 
-        $this->assertEquals($formString, preg_replace("/\r\n|\r|\n|\t/", '', trim(preg_replace('/\s+/',' ', $form->getForm()))));
+        $this->assertEquals($formString, preg_replace("/\r\n|\r|\n|\t/", '', trim(preg_replace('/\s+/', ' ', $form->getForm()))));
     }
 
     public function testCustomTagsByFormBuilder()
     {
-          $form = Form::make()
+        $form = Form::make()
                     ->open(
                         'contact',
                         [
@@ -147,11 +147,11 @@ class FormTest extends TestCase
                     )->createForm()
                     ->close();
 
-        $formString = preg_replace("/\r\n|\r|\n|\t/", '', trim(preg_replace('/\s+/',' ', "<form name='contact' method='post' action='http://localhost/cygnite/contact/add' role='form' style='width:500px;margin-top:35px;float:left;' >
+        $formString = preg_replace("/\r\n|\r|\n|\t/", '', trim(preg_replace('/\s+/', ' ', "<form name='contact' method='post' action='http://localhost/cygnite/contact/add' role='form' style='width:500px;margin-top:35px;float:left;' >
                     <dl for='dl' name='Custom Tag' class='col-sm-2 control-label' style='width:37.667%;' >Custom Tag</dl>
                     </form>")));
 
-        $this->assertEquals($formString, preg_replace("/\r\n|\r|\n|\t/", '', trim(preg_replace('/\s+/',' ', $form->getForm()))));
+        $this->assertEquals($formString, preg_replace("/\r\n|\r|\n|\t/", '', trim(preg_replace('/\s+/', ' ', $form->getForm()))));
     }
 
     public function testDivOrSpanElementForFormBuilder()

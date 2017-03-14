@@ -64,7 +64,7 @@ class Kernel implements KernelInterface
         $this->container->set('request', $request);
         $this->container->make(\Cygnite\Router\Router::class);
         $this->container->get('router')->setRequest($request);
-        $this->router = $this->container->get('router');        
+        $this->router = $this->container->get('router');
     }
 
     /**
@@ -169,7 +169,6 @@ class Kernel implements KernelInterface
 
     public function registerBootstrappers()
     {
-
     }
 
     /**

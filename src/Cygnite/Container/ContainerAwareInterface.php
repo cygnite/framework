@@ -18,7 +18,7 @@ namespace Cygnite\Container;
  */
 interface ContainerAwareInterface
 {
-	/**
+    /**
      * Set value to container.
      *
      * @param $key

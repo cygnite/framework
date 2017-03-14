@@ -437,7 +437,7 @@ class Application implements ApplicationInterface
      */
     public function beforeBootingApplication()
     {
-        if (!$this->activateEventMiddleWare() ) {
+        if (!$this->activateEventMiddleWare()) {
             return false;
         }
 
@@ -458,7 +458,7 @@ class Application implements ApplicationInterface
      */
     public function afterBootingApplication()
     {
-        if (!$this->activateEventMiddleWare() ) {
+        if (!$this->activateEventMiddleWare()) {
             return false;
         }
 

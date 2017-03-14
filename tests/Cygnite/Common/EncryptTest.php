@@ -12,9 +12,7 @@ class EncryptTest extends TestCase
 
     public function setUp()
     {
-
         if (version_compare(PHP_VERSION, '7.0.0') <= 0) {
-
             $this->markTestSkipped(
                 'mcrypt_create_iv() function deprecated in PHP 7.1'
             );

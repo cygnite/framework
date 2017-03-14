@@ -56,5 +56,3 @@ class AliasManagerTest extends TestCase
         $this->assertFalse($alias->has('bar'));
     }
 }
-
-

@@ -588,6 +588,5 @@ class Container extends DependencyBuilder implements ContainerAwareInterface, Ar
      */
     public function createProxy($namespace)
     {
-
     }
 }

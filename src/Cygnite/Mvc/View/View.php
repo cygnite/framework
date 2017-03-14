@@ -27,7 +27,7 @@ if (!defined('CF_SYSTEM')) {
  *
  * @author Sanjoy Dey <dey.sanjoy0@gmail.com>
  */
-class View extends Composer implements ViewInterface,\ArrayAccess
+class View extends Composer implements ViewInterface, \ArrayAccess
 {
     use ControllerViewBridgeTrait;
 
@@ -467,7 +467,6 @@ class View extends Composer implements ViewInterface,\ArrayAccess
     public function createAssetCollection($class) : Asset
     {
         $a = AssetCollection::make($this->getContainer(), function ($collection) use ($class) {
-
             (new $class($collection->asset()))->register();
 
             return $collection->asset();

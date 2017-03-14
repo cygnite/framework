@@ -167,7 +167,6 @@ abstract class Builder extends SplObjectStorage
         $controller = "\\\\";
 
         if (array_key_exists($controller, $this->definitions)) {
-
             list($reflection, $reflectionClass) = $this->setReflectionClassAttributes($controller);
             
             foreach ($dependencies as $classProperty => $class) {

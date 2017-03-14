@@ -42,6 +42,3 @@ class ConsoleApplication extends Application
         $this->commandsStack = [];
     }
 }
-
-
-

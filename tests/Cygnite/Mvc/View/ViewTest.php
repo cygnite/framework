@@ -49,7 +49,6 @@ class ViewTest extends TestCase
 
     public function testRenderWithTwigTemplate()
     {
-
         $view = new View(new Template(), new Output());
         $view/*->setTwigViewPath('Apps.Fistures')*//*
              ->setTemplateLocation()*/

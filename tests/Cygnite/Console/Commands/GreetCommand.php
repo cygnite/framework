@@ -54,8 +54,4 @@ class GreetCommand extends Command
 
         $this->info("Hello $name!!".PHP_EOL);
     }
-
 }
-
-
-

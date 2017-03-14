@@ -54,8 +54,8 @@ class AssetTest extends TestCase
     public function testStaticCallToCss()
     {
         $css = $this->asset->style('public/assets/cygnite.css', 'static');
-        $this->assertEquals(trim(preg_replace('/\s+/',' ', '<link rel="stylesheet" type="text/css" static 
-                                    title= "" href="http://localhost/cygnite/public/assets/cygnite.css" />')), trim(preg_replace('/\s+/',' ', $css)));
+        $this->assertEquals(trim(preg_replace('/\s+/', ' ', '<link rel="stylesheet" type="text/css" static 
+                                    title= "" href="http://localhost/cygnite/public/assets/cygnite.css" />')), trim(preg_replace('/\s+/', ' ', $css)));
     }
 
 

@@ -20,7 +20,6 @@ class BootstrapperDispatcherTest extends TestCase
 
     public function testPathInstance()
     {
-
         $bootDispatcher = $this->getMockBuilder('Cygnite\Bootstrappers\BootstrapperDispatcher')->setConstructorArgs([$this->container, new Paths([])])->getMock();
         $this->assertInstanceOf('Cygnite\Bootstrappers\BootstrapperDispatcher', $bootDispatcher);
     }
@@ -49,5 +48,3 @@ class BootstrapperDispatcherTest extends TestCase
         $this->assertInstanceOf('\Cygnite\Bootstrappers\Bootstrapper', $dispatcher->getBootstrapper());
     }
 }
-
-

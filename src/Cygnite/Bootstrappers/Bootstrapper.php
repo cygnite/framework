@@ -21,7 +21,7 @@ class Bootstrapper
      * Constructor
      * @param Paths $paths The paths to various folders
      */
-    public final function __construct(Paths $paths)
+    final public function __construct(Paths $paths)
     {
         $this->paths = $paths;
     }
