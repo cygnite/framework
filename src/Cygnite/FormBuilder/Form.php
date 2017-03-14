@@ -144,7 +144,7 @@ class Form extends Elements implements FormInterface
 
         if ($type == 'openTag') {
             $key = $key.'_'.mt_rand(1, 2000);
-        } else if ($type == 'closeTag') {
+        } elseif ($type == 'closeTag') {
             $key = $key.'_'.mt_rand(2000, 4000);
         }
 
@@ -174,18 +174,17 @@ class Form extends Elements implements FormInterface
     public function createForm() : FormInterface
     {
         foreach ($this->value as $key => $val) {
-
             if (in_array($val['type'], $this->validMethods)) {
                 $method = $val['type'];
                 unset($val['type']);
                 (!method_exists($this, $method)) ?: $this->{$method}($key, $val);
             } else {
-                  $this->input($key, $val);
+                $this->input($key, $val);
             }
 
             if (isset($val['type']) && in_array($val['type'], $this->validArray)) {
                 $this->setValidationError($key, $val);
-            } else if (!isset($val['type']) && in_array($method, $this->validArray)) {
+            } elseif (!isset($val['type']) && in_array($method, $this->validArray)) {
                 $this->setValidationError($key, $val);
             }
         }

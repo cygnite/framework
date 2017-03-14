@@ -135,7 +135,8 @@ class Widget implements \ArrayAccess
         if (string_has($this->getWidgetName(), ':')) {
             $exp = [];
             $exp = explode(':', $this->getWidgetName());
-            $moduleName = $exp[0]; $view = $exp[1];
+            $moduleName = $exp[0];
+            $view = $exp[1];
             $path = $this->getWidgetPath($view, $moduleName, true);
             $this->setWidgetName(null);
             $this->setModule(false);

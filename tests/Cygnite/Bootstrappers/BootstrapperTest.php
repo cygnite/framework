@@ -34,5 +34,3 @@ class BootstrapperTest extends TestCase
         $this->assertInstanceof(\Cygnite\Bootstrappers\Paths::class, $bootstrapper->getPaths());
     }
 }
-
-

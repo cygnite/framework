@@ -32,8 +32,4 @@ class PathTest extends TestCase
             "baz" => 'baz bar'
         ], $p->all());
     }
-
-
 }
-
-

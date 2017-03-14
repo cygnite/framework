@@ -14,7 +14,9 @@ use Cygnite\Helpers\Config;
 use Cygnite\Pipeline\Pipeline;
 use Cygnite\Http\Requests\Request;
 use Cygnite\Container\ContainerAwareInterface;
-use Cygnite\Router\Controller\{ControllerController, RouteController, ResourceController};
+use Cygnite\Router\Controller\ControllerController;
+use Cygnite\Router\Controller\RouteController;
+use Cygnite\Router\Controller\ResourceController;
 
 /*
  * Cygnite Router
@@ -72,7 +74,8 @@ class Router implements RouterInterface
     private $afterRouter;
     private $routeBasePath = '';
     private $after = [];
-    protected $resourceController, $routeController;
+    protected $resourceController;
+    protected $routeController;
     protected $middleware;
 
     /**
@@ -792,7 +795,6 @@ class Router implements RouterInterface
             $this->getCurrentUri() == '/' . self::$indexPage
         ) {
             if ($defaultController != '') {
-
                 $this->getRouteControllerInstance();
 
                 list($controller, $action) = $this->getControllerAndAction(

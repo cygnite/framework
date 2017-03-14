@@ -28,7 +28,6 @@ class ServiceController extends AbstractBaseController implements ServiceControl
 
     public function __construct()
     {
-
     }
 
 

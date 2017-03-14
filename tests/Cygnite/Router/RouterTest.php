@@ -29,7 +29,6 @@ class RouterTest extends TestCase
         $this->router->setRequest($this->request);
 
         $this->router->setContainer($this->container);
-
     }
 
     private function requestUri($uri)
@@ -71,8 +70,6 @@ class RouterTest extends TestCase
 
     public function testPostRequest()
     {
-
-
         $this->router->post('/post', function () {
             echo 'post request';
         });

@@ -209,7 +209,6 @@ class Composer
         | then we will render twig template with parameters
         */
         if (is_object(static::$twigEnvironment) && is_object($this->get('twig_template'))) {
-
             return ($return) ?
                 $this->get('twig_template')->render($param) :
                 $this->get('twig_template')->display($param);

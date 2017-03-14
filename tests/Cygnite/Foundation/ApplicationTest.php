@@ -153,7 +153,5 @@ class FooBootstrapper implements BootstrapperInterface
 
     public function run()
     {
-
     }
 }
-

@@ -61,7 +61,6 @@ class CollectionTest extends TestCase
         $collection = new Collection($original = [5, 7, 'foo' => 'bar']);
         $result = [];
         $collection->each(function ($value, $key) use (&$result) {
-
             if (!is_string($key)) {
                 $result[$key] = $value;
                 return true;

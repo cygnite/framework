@@ -40,7 +40,7 @@ class Url
      */
     public static function __callStatic($method, $arguments = [])
     {
-        if (method_exists(static::$urlManager, $method)){
+        if (method_exists(static::$urlManager, $method)) {
             return call_user_func_array([static::$urlManager, $method], $arguments);
         }
 
@@ -53,7 +53,7 @@ class Url
      */
     public function __call($method, $arguments)
     {
-        if (method_exists(static::$urlManager, $method)){
+        if (method_exists(static::$urlManager, $method)) {
             return call_user_func_array([static::$urlManager, $method], $arguments);
         }
 
