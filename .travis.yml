@@ -4,6 +4,13 @@ php:
   - 7.0
   - 7.1
   - hhvm
+  - nightly
+
+matrix:
+  fast_finish: true
+  allow_failures:
+      - php: hhvm
+      - php: nightly # Allow all tests to fail for nightly
 
 sudo: false
 
