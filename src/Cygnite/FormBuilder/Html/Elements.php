@@ -157,10 +157,12 @@ class Elements
 
         $val = '';
         if ($hasCloseTag) {
+
             if (is_object($this->entity)) {
+
                 if (method_exists($this->entity, 'get'.Inflector::camelize($key))) {
                     $val = $this->entity->{'get'.Inflector::camelize($key)}();
-                } elseif (property_exists($this->entity, $key)) {
+                } else if (property_exists($this->entity, $key)) {
                     $property = (new \ReflectionClass($this->entity))->getProperty($key);
                     if ($property->isPublic()) {
                         $val = $property->getValue();
@@ -286,7 +288,9 @@ class Elements
         $elementStr = '';
 
         foreach ($attributes as $key => $value) {
-            $elementStr .= ($key !== 0) ? "{$key}='{$value}' " : $value;
+
+             $elementStr .= ($key !== 0) ? "{$key}='{$value}' " : $value;
+
         }
 
         return $elementStr;
@@ -332,6 +336,7 @@ class Elements
             $this->validator instanceof ValidatorInterface &&
             $this->validator->hasError($key)
         ) {
+
             preg_match_all("#class='([^\s]+)'#", $this->attributes($attributes), $matches);
             $elClass = "class='".implode(' ', array_merge([$this->errorInputClass], $matches[1]))."'";
             unset($attributes['class']);

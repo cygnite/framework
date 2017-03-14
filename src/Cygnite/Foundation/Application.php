@@ -392,6 +392,14 @@ class Application implements ApplicationInterface
 
         return $this;
     }
+    
+    /**
+    * Check if Event middleware activated
+    */
+    public function isEventMiddlewareEnabled()
+    {
+        return Config::get('global.config', 'activate.event.middleware');
+    }
 
     /**
      * We will activate middle ware events if set as true in
@@ -401,7 +409,7 @@ class Application implements ApplicationInterface
      */
     public function activateEventMiddleWare()
     {
-        $isEventActive = Config::get('global.config', 'activate.event.middleware');
+        $isEventActive = $this->isEventMiddlewareEnabled();
         $eventClass = Config::get('global.config', 'app.event.class');
 
         if ($isEventActive && !$this->container->has('event')) {

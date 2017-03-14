@@ -202,6 +202,12 @@ class Upload implements FileUploadInterface
                 DS,
                 $this->getRootDir().DS.$this->fileInfo['params']['destination'].DS.$this->getFileName($options)
             );
+            
+            if (!is_writable($path)) {
+                $this->error[] = "$path should exists and must be writable.";
+
+                return false;
+            }
 
             if (!is_writable($path)) {
                 $this->error[] = "$path should exists and must be writable.";

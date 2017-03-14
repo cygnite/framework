@@ -10,11 +10,11 @@
 namespace Cygnite\Mvc\View;
 
 use Cygnite\AssetManager\Asset;
-use Cygnite\AssetManager\AssetCollection;
 use Cygnite\Container\Container;
-use Cygnite\Container\ContainerAwareInterface;
 use Cygnite\Mvc\View\Twig\Template;
+use Cygnite\AssetManager\AssetCollection;
 use Cygnite\Mvc\ControllerViewBridgeTrait;
+use Cygnite\Container\ContainerAwareInterface;
 use Cygnite\Mvc\View\Exceptions\ViewNotFoundException;
 
 if (!defined('CF_SYSTEM')) {
@@ -27,7 +27,7 @@ if (!defined('CF_SYSTEM')) {
  *
  * @author Sanjoy Dey <dey.sanjoy0@gmail.com>
  */
-class View extends Composer implements ViewInterface, \ArrayAccess
+class View extends Composer implements ViewInterface,\ArrayAccess
 {
     use ControllerViewBridgeTrait;
 
