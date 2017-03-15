@@ -27,9 +27,9 @@
         "ircmaxell/password-compat": "1.0.*",
         "swiftmailer/swiftmailer": "5.4.*",
         "monolog/monolog": "~1.22",
-		"nesbot/carbon": "~1.20",
-		"league/flysystem": "~1.0",
-		"symfony/finder": "~3.2"
+	"nesbot/carbon": "~1.20",
+	"league/flysystem": "~1.0",
+	"symfony/finder": "~3.2"
    },
    "require-dev": {
        "mockery/mockery": "~0.9.7",
