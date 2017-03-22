@@ -1,6 +1,7 @@
 {
     "name": "cygnite/framework",
     "description": "Cygnite PHP Framework",
+    "type": "library",
     "keywords": ["Cygnite", "PHP", "Framework"],
     "homepage": "http://www.cygniteframework.com",
     "license": "MIT",
@@ -8,17 +9,13 @@
         "issues": "https://github.com/cygnite/framework/issues",
         "source": "https://github.com/cygnite/framework"
     },
-    "authors": [
-        {
-            "name": "Sanjoy Dey",
-            "email": "dey.sanjoy0@gmail.com"
-        },
-        {
-            "name": "Cygnite Contributors",
-            "homepage": "https://github.com/cygnite/framework/graphs/contributors"
-        }
-
-    ],
+    "authors": [{
+        "name": "Sanjoy Dey",
+        "email": "dey.sanjoy0@gmail.com"
+    }, {
+        "name": "Cygnite Contributors",
+        "homepage": "https://github.com/cygnite/framework/graphs/contributors"
+    }],
     "require": {
         "php": ">=7.0",
         "twig/twig": "2.1.*",
@@ -27,26 +24,25 @@
         "ircmaxell/password-compat": "1.0.*",
         "swiftmailer/swiftmailer": "5.4.*",
         "monolog/monolog": "~1.22",
-	"nesbot/carbon": "~1.20",
-	"league/flysystem": "~1.0",
-	"symfony/finder": "~3.2"
-   },
-   "require-dev": {
-       "mockery/mockery": "~0.9.7",
-       "phpunit/phpunit": "~6.0",
-       "predis/predis": "1.1.*"
+        "nesbot/carbon": "~1.20",
+        "league/flysystem": "~1.0",
+        "symfony/finder": "~3.2"
+    },
+    "require-dev": {
+        "mockery/mockery": "~0.9.7",
+        "phpunit/phpunit": "~6.0",
+        "predis/predis": "1.1.*",
+        "squizlabs/php_codesniffer": "^2.8"
     },
     "autoload": {
-     	"files": [
-            "src/Cygnite/Helpers/Support.php"
-        ],
+        "files": ["src/Cygnite/Helpers/Support.php"],
         "psr-4": {
-            "Cygnite\\": "src/Cygnite/"
+            "Cygnite\\": "src/Cygnite"
         }
     },
-	"autoload-dev": {
+    "autoload-dev": {
         "psr-4": {
-            "Cygnite\\Tests\\": "tests/Cygnite/"
+            "Cygnite\\Tests\\": "tests/Cygnite"
         }
     },
     "extra": {
@@ -54,5 +50,9 @@
             "dev-master": "3.0-dev"
         }
     },
-    "minimum-stability": "dev"
+    "config": {
+        "sort-packages": true
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
 }
