@@ -1,0 +1,8 @@
+<?xml version="1.0"?>
+<ruleset name="Cygnite Coding Standard">
+    <description>Coding standard for cygnite.</description>
+    <arg value="np"/>
+    <arg name="colors"/>
+    <rule ref="PSR2"/>
+    <file>./src/Cygnite</file>
+</ruleset>
