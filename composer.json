@@ -17,7 +17,7 @@
         "homepage": "https://github.com/cygnite/framework/graphs/contributors"
     }],
     "require": {
-        "php": ">=7.0",
+        "php": ">=5.6.4",
         "twig/twig": "2.1.*",
         "symfony/console": "3.2.*",
         "tracy/tracy": "2.4.*",
