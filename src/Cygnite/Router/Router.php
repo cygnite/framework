@@ -777,7 +777,8 @@ class Router implements RouterInterface
     }
 
     /**
-     * Dispatch the request.
+     * 
+     the request.
      *
      * @param $request
      *
@@ -797,12 +798,12 @@ class Router implements RouterInterface
             if ($defaultController != '') {
                 $this->getRouteControllerInstance();
 
-                list($controller, $action) = $this->getControllerAndAction(
+                list($controller, $action) = $this->routeController->getControllerAndAction(
                     $defaultController,
                     $defaultAction
                 );
 
-                return $this->handleControllerDependencies($controller, $action);
+                return $this->routeController->handleControllerDependencies($controller, $action);
             }
         }
 
