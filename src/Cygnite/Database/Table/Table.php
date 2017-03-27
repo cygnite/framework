@@ -180,9 +180,9 @@ class Table
             'migrations'
         );
 
-        $sql = "INSERT INTO migrations (`migration`,  `created_at`)
+        $sql = "INSERT INTO migrations (`migration`,  `version`)
                 VALUES('".$migrationName."',
-                          '".$date->format('Y-m-d H:i:s')."'
+                          '".$migration->getVersion()."'
                       )";
 
         return $this->_connection->prepare($sql)->execute();
