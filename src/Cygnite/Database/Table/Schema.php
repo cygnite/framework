@@ -255,7 +255,7 @@ class Schema
                     break;
                 case 'enum':
                     $length = implode('","', $value['length']);
-                    $type = strtoupper($value['type']).'("'.$length.'")';
+                    $type = strtoupper($value['type']).'("'.$length.'")'.(isset($value['default']) ?  " DEFAULT '".$value['default']."'" : '');
                     break;
                 case 'date':
                     $type = 'date';
