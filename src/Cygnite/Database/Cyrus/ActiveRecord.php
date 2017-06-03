@@ -18,6 +18,7 @@ use Cygnite\Common\Pagination;
 use Cygnite\Database\Query\Builder as QueryBuilder;
 use Cygnite\Foundation\Collection;
 use Cygnite\Helpers\Inflector;
+use Cygnite\Database\Exceptions\DatabaseException;
 
 abstract class ActiveRecord implements ActiveRecordInterface
 {
