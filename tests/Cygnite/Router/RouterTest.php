@@ -320,7 +320,7 @@ class RouterTest extends TestCase
     public function testResourceController()
     {
         $this->router->getRouteControllerObject()->setControllerNamespace("Cygnite\\Tests\\Router\\");
-        $this->router->resource('person', 'user');
+        $this->router->resource('person', 'User');
         $this->obStart();
         $this->requestUri('/person');
         $this->router->run();
