@@ -196,7 +196,7 @@ class RouteController
      */
     private function setControllerConfig($args, $param, $module = false)
     {
-        $this->controller = Inflector::classify($param[0]) . 'Controller';
+        $this->controller = (string_has($param[0], ['_', '-'])) ? Inflector::classify($param[0]) : $param[0] . 'Controller';
 
         if ($module) {
             $this->namespace = '\\' . $this->getModuleDir() . '\\' . $args[0] . '\\Controllers\\';
