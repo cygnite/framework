@@ -167,7 +167,7 @@ class Validator implements ValidatorInterface
                 // Executes rule for min and max validation.
                 if (string_has($rule, ':') && strstr($rule, 'max') || strstr($rule, 'min')) {
                     $isValid = $this->doValidateMinMax($rule, $key, $isValid);
-                } else if (string_has($rule, ':') && (!strstr($rule, 'max') && !strstr($rule, 'min'))) {
+                } elseif (string_has($rule, ':') && (!strstr($rule, 'max') && !strstr($rule, 'min'))) {
                     // Executes rule for other than min, max validation with ":" keyword in rule.
                     $isValid = $this->validateRulesHasPlaceHolder($key, $rule, $isValid);
                 } else {
@@ -287,7 +287,7 @@ class Validator implements ValidatorInterface
                 ucfirst($this->convertToFieldName($key)).' is required';
 
             return false;
-        } else if (is_array($val) && count($val) < 1) {
+        } elseif (is_array($val) && count($val) < 1) {
             $this->errors[$key.self::ERROR] =
                 ucfirst($this->convertToFieldName($key)).' is required';
 
@@ -777,7 +777,7 @@ class Validator implements ValidatorInterface
         if ((!is_string($value) && !is_numeric($value)) || strtotime($value) === false) {
             $this->errors[$key.self::ERROR] = $this->convertToFieldName($key).' must be a valid date.';
             return false;
-        } else if (checkdate($date['month'], $date['day'], $date['year'])) {
+        } elseif (checkdate($date['month'], $date['day'], $date['year'])) {
             return true;
         }
 
