@@ -27,7 +27,7 @@ if (!defined('CF_SYSTEM')) {
  *
  * @author Sanjoy Dey <dey.sanjoy0@gmail.com>
  */
-class View extends Composer implements ViewInterface,\ArrayAccess
+class View extends Composer implements ViewInterface, \ArrayAccess
 {
     use ControllerViewBridgeTrait;
 

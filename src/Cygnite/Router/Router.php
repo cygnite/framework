@@ -777,7 +777,7 @@ class Router implements RouterInterface
     }
 
     /**
-     * 
+     *
      the request.
      *
      * @param $request
